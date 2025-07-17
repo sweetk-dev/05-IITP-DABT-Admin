@@ -1,136 +1,82 @@
-# 05-IITP-DABT-Admin
-5.장애인 자립 생활 지원 플랫폼 운영관리 SW
+# IITP-DABT-Admin
 
-## 프로젝트 개요
-
-이 프로젝트는 장애인 자립 생활 지원 플랫폼 API 센터의 Open API 및 사용자/관리자 관리를 위한 실용적이고 간단한 CMS입니다.
-
-- **프론트엔드(React + Vite + Material UI)**
-- **백엔드(Node.js + Express + PostgreSQL)**
-- **Monorepo 구조(fe, be 폴더 분리, 루트에서 통합 관리)**
-- **JWT 기반 인증(일반/관리자/어드민 권한 분리)**
-- **운영/개발 모두 1개 포트로 서비스 가능(Express가 FE 빌드 파일과 API를 모두 서비스)**
+## 소개
+IITP-DABT-Admin 프로젝트는 React + Material UI 기반의 프론트엔드와 Express + PostgreSQL 백엔드로 구성된 관리 시스템입니다.
 
 ---
 
-## 주요 요구사항 및 기능
-
-### 1. 홈 화면
-- 상단: 로고, 로그인/회원가입 버튼
-- 서비스 소개, FAQ/문서 바로가기, 최근 공지사항 미리보기
-
-### 2. 로그인/회원가입
-- 일반 사용자: 홈에서 로그인/가입
-- 관리자/어드민: 별도 링크로 로그인
-
-### 3. 일반 유저 메뉴(로그인 후)
-- 대시보드(내 API 키, 사용 현황)
-- API 관리(신청/삭제)
-- 개인정보 관리(정보/비번 변경, 탈퇴)
-- FAQ, QnA
-
-### 4. 관리자 메뉴
-- 일반 사용자/어드민 관리(목록, 상세, 수정, 삭제, 계정 생성, 키 발급 이력)
-- API Client 관리(신청 승인/반려/삭제, 사용 현황)
-- 이력(키 발급, 관리자 작업)
-
-### 5. FAQ, QnA, 공지사항
-- 홈에 미리보기, 전체 페이지 별도 제공
-
-### 6. 인증/보안
-- JWT 기반 로그인/토큰 관리
-- 권한별 접근 제어
-
----
-
-## 현재 프로젝트 구조
+## 폴더 구조
 
 ```
-IITP-DABT-Admin/
-├── fe/           # 프론트엔드(React + Vite + Material UI)
-│   ├── src/
-│   ├── public/
-│   ├── ...
-├── be/           # 백엔드(Node.js + Express + PostgreSQL)
-│   ├── src/
-│   ├── ...
-├── .gitignore
+├── fe/   # 프론트엔드 (React + Material UI)
+├── be/   # 백엔드 (Express + PostgreSQL)
 ├── README.md
-└── ...
+├── .gitignore
 ```
 
 ---
 
-## 개발/운영 환경
+## 개발 환경 및 주요 라이브러리
 
-- **Node.js 18+**
-- **npm 9+**
-- **PostgreSQL** (DB 테이블은 이미 구성되어 있음)
-- **IntelliJ, WebStorm, VSCode 등 주요 IDE 지원**
+### 프론트엔드 (fe)
+- [React](https://react.dev/)
+- [Material UI (MUI)](https://mui.com/)
+  - 설치:
+    ```sh
+    npm install @mui/material @emotion/react @emotion/styled
+    ```
+  - 아이콘 사용 시:
+    ```sh
+    npm install @mui/icons-material
+    ```
+- [TypeScript](https://www.typescriptlang.org/) (선택적)
+
+### 백엔드 (be)
+- [Express](https://expressjs.com/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Sequelize](https://sequelize.org/) (ORM, 선택적)
 
 ---
 
-## 설치 및 실행 방법
+## 개발/운영 방법
 
-### 1. 프로젝트 클론 및 의존성 설치
-
-```bash
-# 루트에서
-npm install --prefix fe
-npm install --prefix be
-```
-
-### 2. 프론트엔드 빌드
-
-```bash
+### 1. 프론트엔드(fe) 세팅 및 실행
+```sh
 cd fe
-npm run build
-# 빌드 결과물(dist)을 be/public 또는 be에서 서비스할 위치로 복사
-cp -r dist ../be/public
+npm install           # 의존성 설치
+npm run dev           # 개발 서버 실행 (기본: http://localhost:3000)
 ```
 
-### 3. 백엔드 서버 실행
-
-```bash
-cd ../be
-# .env 파일(DB 접속 정보 등) 설정
-npm start
-# 또는
-node src/server.js
+### 2. 백엔드(be) 세팅 및 실행
+```sh
+cd be
+npm install           # 의존성 설치
+npm run dev           # 개발 서버 실행 (기본: http://localhost:40000)
 ```
 
-- 서버 기동 후 http://localhost:3000 (또는 지정 포트)에서 FE+BE 통합 서비스
-- FE에서 BE API는 /api/~~~ 경로로 호출
-
-### 4. 운영/배포
-- 운영 환경에서도 위와 동일하게 FE 빌드 → BE에서 정적 파일+API 통합 서비스
-- 필요시 pm2, systemd 등으로 백엔드 서버 데몬화
-- Docker는 추후 도입 가능
+### 3. 전체 통합 운영
+- Express 서버에서 React 빌드 파일과 API를 모두 40000 포트에서 서비스하도록 설정할 수 있습니다.
+- 환경 변수(.env) 파일이 필요할 수 있습니다.
 
 ---
 
-## 앞으로 세팅/구현해야 할 것
-
-- [ ] FE/BE 연동(실제 API, DB 연동)
-- [ ] JWT 인증/인가 미들웨어 구현
-- [ ] 관리자/어드민/유저 권한별 라우팅/화면 분리
-- [ ] FAQ, QnA, 공지사항 DB/화면/관리 기능
-- [ ] API 신청/승인/이력 관리 기능
-- [ ] 이메일 인증, 비밀번호 찾기 등 부가 기능(선택)
-- [ ] 접근성/반응형/디자인 고도화
-- [ ] 테스트/배포 자동화(CI/CD)
+## .gitignore 관리
+- 루트, fe, be 폴더 각각에 .gitignore 파일을 두어 불필요한 파일(node_modules, build, .env 등)을 관리합니다.
 
 ---
 
-## 참고/기타
+## 기타 참고 사항
+- 권장 Node.js 버전: **v18.x 또는 v20.x (LTS)**
+- 최신 Node.js(v22.x)에서는 일부 패키지 호환성 문제가 발생할 수 있습니다.
+- IDE: VSCode, WebStorm, IntelliJ 등 모두 사용 가능 (VSCode 추천)
 
-- **DB 테이블/ERD**: 별도 문서 참고(이미 구성됨)
-- **Open API 문서**: 별도 문서 서버에서 제공(링크 필요)
-- **로고/이미지**: public/에 추가, 디자인 가이드에 따라 교체 가능
-- **문의/이슈**: 관리자/개발자에게 문의
+---
+
+## 앞으로의 세팅 계획
+- Tailwind CSS, ESLint/Prettier, 테스트 환경 등 추가 세팅 예정
+- 상세한 개발 가이드 및 문서화 예정
 
 ---
 
 ## 문의
-- 담당자: (이름/이메일)
-- 개발/운영 문의: (이메일/슬랙 등) 
+- 추가 문의사항은 이슈 또는 메일로 연락 바랍니다. 

@@ -1,0 +1,33 @@
+# dependencies
+/node_modules
+/fe/node_modules
+/be/node_modules
+
+# production
+/dist
+/fe/dist
+/be/dist
+
+# misc
+.DS_Store
+.env
+.env.*
+*.local
+
+# log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+Thumbs.db 

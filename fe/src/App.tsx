@@ -55,11 +55,10 @@ function Home() {
   const openApiDocUrl = 'https://your-openapi-doc-url.com';
   return (
     <Box sx={{
-      minHeight: `calc(100vh - ${APPBAR_HEIGHT + FOOTER_HEIGHT}px)`,
       background: bgMain,
-      py: 6,
-      pt: { xs: `${APPBAR_HEIGHT + 16}px`, md: `${APPBAR_HEIGHT + 32}px` },
-      pb: { xs: `${FOOTER_HEIGHT + 16}px`, md: `${FOOTER_HEIGHT + 32}px` },
+      py: { xs: 4, md: 8 },
+      pt: { xs: `${APPBAR_HEIGHT + 24}px`, md: `${APPBAR_HEIGHT + 48}px` },
+      pb: { xs: 20, md: 40 },
     }}>
       {/* 컨텐츠 래퍼: 소개+3구역 */}
       <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
@@ -82,7 +81,7 @@ function Home() {
               background: section2,
               borderRadius: 3,
               boxShadow: 1,
-              minHeight: 340,
+              minHeight: { xs: 600, md: 700 },
               width: '100%',
               justifyContent: 'center',
               alignItems: 'stretch',
@@ -205,8 +204,13 @@ function Home() {
 
 function NoticeList() {
   return (
-    <Box sx={{ minHeight: 'calc(100vh - 120px)', background: bgMain, py: 6, pt: { xs: `${APPBAR_HEIGHT + 16}px`, md: `${APPBAR_HEIGHT + 32}px` }, pb: { xs: `${FOOTER_HEIGHT + 16}px`, md: `${FOOTER_HEIGHT + 32}px` } }}>
-      <Container maxWidth="md">
+    <Box sx={{ 
+      background: bgMain, 
+      py: { xs: 4, md: 8 }, 
+      pt: { xs: `${APPBAR_HEIGHT + 24}px`, md: `${APPBAR_HEIGHT + 48}px` }, 
+      pb: { xs: 20, md: 40 } 
+    }}>
+      <Container maxWidth="lg">
         <Typography variant="h4" fontWeight="bold" mb={4}>
           공지사항 전체
         </Typography>
@@ -272,16 +276,21 @@ function Layout({ children }: { children: React.ReactNode }) {
             boxShadow: 'none',
           }}
         >
-          <Toolbar sx={{ minHeight: `${APPBAR_HEIGHT}px !important` }}>
+          <Toolbar sx={{ 
+            minHeight: `${APPBAR_HEIGHT}px !important`,
+            px: { xs: '10%', md: '10%' },
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
             {/* IITP 텍스트 + 로고 */}
-            <Box display="flex" alignItems="center" flexGrow={1}>
+            <Box display="flex" alignItems="center">
               <Typography variant="h6" color="inherit" noWrap sx={{ mr: 1, color: '#7B3F00', fontWeight: 700 }}>
                 IITP
               </Typography>
               <img src="/iitp_cms_logo_img_1.png" alt="IITP Logo" style={{ height: 40, marginRight: 12 }} />
             </Box>
             {/* 우측 끝 버튼 */}
-            <Box>
+            <Box display="flex" alignItems="center">
               <Button color="primary" variant="outlined" style={{ marginRight: 8 }}>로그인</Button>
               <Button color="primary" variant="contained">회원가입</Button>
             </Box>

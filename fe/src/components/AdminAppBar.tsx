@@ -8,8 +8,18 @@ export default function AdminAppBar() {
   const adminName = '관리자'; // TODO: 실제 관리자명 연동
 
   return (
-    <AppBar position="fixed" color="default" elevation={1} sx={{ background: '#fff', boxShadow: 'none', zIndex: 1200 }}>
-      <Toolbar sx={{ minHeight: '64px !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+    <AppBar
+      position="fixed"
+      color="default"
+      elevation={1}
+      sx={{
+        background: '#fff',
+        boxShadow: 'none',
+        zIndex: 1200,
+        minHeight: 'var(--appbar-height)',
+      }}
+    >
+      <Toolbar sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
         <Logo serviceName="장애인 자립 생활 지원 플랫폼 API 센터 - Admin" />
         <Box display="flex" alignItems="center">
           <HomeIconButton to="/admin/dashboard" />

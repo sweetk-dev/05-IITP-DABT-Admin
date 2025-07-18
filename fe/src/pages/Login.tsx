@@ -20,7 +20,18 @@ export default function Login() {
 
   return (
     <Box id="login-page" minHeight="80vh" display="flex" alignItems="center" justifyContent="center" bgcolor="#f5f5f5">
-      <Box id="login-form-box" maxWidth={360} width="100%" mx="auto" p={4} boxShadow={3} borderRadius={2} bgcolor="#fff" border="1px solid #eee">
+      <Box
+        id="login-form-box"
+        maxWidth={360}
+        width="100%"
+        mx="auto"
+        p={4}
+        boxShadow={0}
+        borderRadius={2}
+        bgcolor="#fff"
+        border="1.5px solid #d0d0d0"
+        sx={{ boxShadow: '2px 4px 12px 0 rgba(0,0,0,0.07)' }}
+      >
         <Typography variant="h5" mb={2} align="center">로그인</Typography>
         <TextField
           id="login-email-input"

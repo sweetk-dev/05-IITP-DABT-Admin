@@ -1,0 +1,65 @@
+import { Box, TextField, Button, Typography, IconButton, InputAdornment } from '@mui/material';
+import { useState } from 'react';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [pw, setPw] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = () => {
+    if (email === 'test@example.com' && pw === '1234') {
+      localStorage.setItem('token', 'dummy-token');
+      window.location.href = '/dashbd';
+    } else {
+      setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+    }
+  };
+
+  return (
+    <Box id="login-page" minHeight="80vh" display="flex" alignItems="center" justifyContent="center" bgcolor="#f5f5f5">
+      <Box id="login-form-box" maxWidth={360} width="100%" mx="auto" p={4} boxShadow={3} borderRadius={2} bgcolor="#fff" border="1px solid #eee">
+        <Typography variant="h5" mb={2} align="center">로그인</Typography>
+        <TextField
+          id="login-email-input"
+          label="이메일"
+          fullWidth
+          margin="normal"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <TextField
+          id="login-password-input"
+          label="비밀번호"
+          type={showPw ? 'text' : 'password'}
+          fullWidth
+          margin="normal"
+          value={pw}
+          onChange={e => setPw(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="비밀번호 보기/숨기기"
+                  onClick={() => setShowPw(v => !v)}
+                  edge="end"
+                >
+                  {showPw ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        {error && <Typography color="error" mt={1}>{error}</Typography>}
+        <Button id="login-submit-btn" variant="contained" color="primary" fullWidth sx={{ mt: 2, fontWeight: 'bold', fontSize: '1.1rem', py: 1.2 }} onClick={handleLogin}>
+          로그인
+        </Button>
+        <Button id="login-register-btn" variant="text" color="primary" fullWidth sx={{ mt: 1, fontSize: '0.95rem', opacity: 0.7 }} onClick={() => window.location.href = '/register'}>
+          회원가입
+        </Button>
+      </Box>
+    </Box>
+  );
+} 

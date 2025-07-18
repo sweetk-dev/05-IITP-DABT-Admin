@@ -21,6 +21,9 @@ export default function Register() {
   const [emailCheckMsg, setEmailCheckMsg] = useState('');
   const [emailCheckColor, setEmailCheckColor] = useState<'success' | 'error' | ''>('');
 
+  // 패스워드 패턴: 영문, 숫자, 특수문자 포함 10자리 이상
+  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;
+
   const handleEmailCheck = () => {
     if (!isValidEmail(email)) {
       setEmailCheckMsg('이메일 형식으로 입력해 주세요.');
@@ -54,8 +57,8 @@ export default function Register() {
     if (!pw) {
       setPwError('비밀번호를 입력해 주세요.');
       hasError = true;
-    } else if (pw.length < 6) {
-      setPwError('비밀번호는 6자 이상이어야 합니다.');
+    } else if (!passwordPattern.test(pw)) {
+      setPwError('비밀번호는 영문, 숫자, 특수문자 포함 10자리 이상이어야 합니다.\n(사용가능 특수문자: !@#$%^&*()_+-=[]{};\':\"\\|,.<>/?)');
       hasError = true;
     } else {
       setPwError('');
@@ -126,7 +129,8 @@ export default function Register() {
           value={pw}
           onChange={e => setPw(e.target.value)}
           error={!!pwError}
-          helperText={pwError}
+          placeholder="영문, 숫자, 특수문자 포함 10자리 이상"
+          helperText={pwError || '영문, 숫자, 특수문자 포함 10자리 이상'}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

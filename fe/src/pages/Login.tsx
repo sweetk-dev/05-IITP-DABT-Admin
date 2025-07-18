@@ -4,13 +4,34 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from '../components/AppBarCommon';
 
+function isValidEmail(email: string) {
+  // 간단한 이메일 정규식
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [pwError, setPwError] = useState('');
 
   const handleLogin = () => {
+    let hasError = false;
+    if (!isValidEmail(email)) {
+      setEmailError('이메일 형식으로 입력해 주세요.');
+      hasError = true;
+    } else {
+      setEmailError('');
+    }
+    if (!pw) {
+      setPwError('비밀번호를 입력해 주세요.');
+      hasError = true;
+    } else {
+      setPwError('');
+    }
+    if (hasError) return;
     if (email === 'test@example.com' && pw === '1234') {
       localStorage.setItem('token', 'dummy-token');
       window.location.href = '/dashbd';
@@ -21,18 +42,7 @@ export default function Login() {
 
   return (
     <Box id="login-page" minHeight="80vh" display="flex" alignItems="center" justifyContent="center" bgcolor="#f5f5f5">
-      <Box
-        id="login-form-box"
-        maxWidth={360}
-        width="100%"
-        mx="auto"
-        p={4}
-        boxShadow={0}
-        borderRadius={2}
-        bgcolor="#fff"
-        border="1.5px solid #d0d0d0"
-        sx={{ boxShadow: '2px 4px 12px 0 rgba(0,0,0,0.07)' }}
-      >
+      <Box id="login-form-box" maxWidth={360} width="100%" mx="auto" p={4} boxShadow={0} borderRadius={2} bgcolor="#fff" border="1.5px solid #d0d0d0" sx={{ boxShadow: '2px 4px 12px 0 rgba(0,0,0,0.07)' }}>
         <Typography variant="h5" mb={2} align="center">로그인</Typography>
         <TextField
           id="login-email-input"
@@ -41,6 +51,8 @@ export default function Login() {
           margin="normal"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          error={!!emailError}
+          helperText={emailError}
         />
         <TextField
           id="login-password-input"
@@ -50,6 +62,8 @@ export default function Login() {
           margin="normal"
           value={pw}
           onChange={e => setPw(e.target.value)}
+          error={!!pwError}
+          helperText={pwError}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

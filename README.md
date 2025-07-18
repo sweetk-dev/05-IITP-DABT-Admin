@@ -62,6 +62,7 @@ IITP-DABT-Admin 프로젝트는 React + Material UI 기반의 프론트엔드와
 ## 개발 환경 및 주요 라이브러리
 
 ### 프론트엔드 (fe)
+- cd fe
 - [React](https://react.dev/)
 - [Material UI (MUI)](https://mui.com/)
   - 설치:
@@ -72,7 +73,11 @@ IITP-DABT-Admin 프로젝트는 React + Material UI 기반의 프론트엔드와
     ```sh
     npm install @mui/icons-material
     ```
-- [TypeScript](https://www.typescriptlang.org/) (선택적)
+- [TypeScript](https://www.typescriptlang.org/)
+  - 설치:
+    ```sh
+    npm install -D typescript @types/react @types/react-dom
+    ```
 
 ### 백엔드 (be)
 - [Express](https://expressjs.com/)

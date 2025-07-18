@@ -109,3 +109,40 @@ export default tseslint.config([
 - 생성/수정은 `/create`, `/edit` 등 액션 명시
 - 관리자/사용자/공개 URL 명확히 분리(`/admin/` prefix)
 - 404는 모든 미정의 경로를 홈으로 리다이렉트
+
+## 로컬 개발 서버 접속 안내
+
+- 로컬 개발 시: [http://localhost:5173/](http://localhost:5173/) (기본 포트)
+- dev, prod 환경에서는 [http://localhost:40000/](http://localhost:40000/) 으로 동작하도록 설정되어 있습니다.
+- 포트는 vite.config.ts와 .env 파일로 환경별로 쉽게 변경할 수 있습니다.
+
+### 포트 변경 방법
+
+1. **vite.config.ts**에서 아래처럼 설정:
+
+```ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: Number(process.env.VITE_PORT) || 5173,
+  },
+});
+```
+
+2. **.env 파일**을 환경별로 생성:
+
+- `.env.development`
+  ```
+  VITE_PORT=5173
+  ```
+- `.env.production` 및 `.env.dev`
+  ```
+  VITE_PORT=40000
+  ```
+
+3. **실행 시 자동 적용**
+- 개발: `npm run dev` (5173)
+- 배포: `npm run build` 후 서버에서 40000 포트로 서비스

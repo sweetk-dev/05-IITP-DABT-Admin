@@ -58,7 +58,7 @@ export default function Home() {
       {/* 컨텐츠 래퍼: 소개+3구역 */}
       <Box id="home-main-section" sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
         {/* 서비스 소개 */}
-        <Box id="home-intro-section" sx={{ background: '#90CAF9', borderRadius: 3, p: 4, mb: 4, boxShadow: 1, width: { xs: '100%', md: '80%' }, mx: 'auto' }}>
+        <Box id="home-intro-section" sx={{ mt: { xs: 3, md: 4 }, background: '#90CAF9', borderRadius: 3, p: 4, mb: 4, boxShadow: 1, width: { xs: '100%', md: '80%' }, mx: 'auto' }}>
           <Typography variant="h4" fontWeight="bold" align="center" gutterBottom sx={{ color: '#2D3142' }}>
             장애인 자립 생활 지원 플랫폼 API 센터
           </Typography>

@@ -1,9 +1,12 @@
-#root {
+/* App.css - Material UI와 충돌하는 스타일 제거 */
+
+/* 기존 #root 스타일 제거 - Material UI가 레이아웃을 담당 */
+/* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-}
+} */
 
 .logo {
   height: 6em;

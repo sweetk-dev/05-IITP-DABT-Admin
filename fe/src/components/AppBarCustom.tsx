@@ -1,31 +1,22 @@
-import { AppBar, Toolbar, Typography, Button, Box, IconButton } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
+import { AppBar, Toolbar, Button, Box } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { HomeIconButton, Logo } from './AppBarCommon';
 
 export default function AppBarCustom() {
   const location = useLocation();
   const navigate = useNavigate();
   const isLoggedIn = Boolean(localStorage.getItem('token'));
   const userName = '홍길동'; // TODO: 실제 사용자명 연동
-
-  // 로고(왼쪽 상단, 항상 고정)
-  const Logo = (
-    <Box id="appbar-logo" display="flex" alignItems="center" sx={{ cursor: 'pointer' }} onClick={() => navigate('/') }>
-      <Typography variant="h6" color="inherit" noWrap sx={{ mr: 1, color: '#7B3F00', fontWeight: 700 }}>
-        IITP
-      </Typography>
-      <img src="/iitp_cms_logo_img_1.png" alt="IITP Logo" style={{ height: 40, marginRight: 12 }} />
-    </Box>
-  );
+  const SERVICE_NAME = "장애인 자립 생활 지원 플랫폼 API 센터";
 
   // 로그인 페이지
   if (location.pathname === '/login') {
     return (
       <AppBar position="fixed" color="default" elevation={1} sx={{ background: '#fff', boxShadow: 'none', zIndex: 1200 }}>
         <Toolbar sx={{ minHeight: '64px !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
-          {Logo}
-          <IconButton color="primary" onClick={() => navigate('/')}> <HomeIcon /> </IconButton>
+          <Logo serviceName={SERVICE_NAME} />
+          <HomeIconButton />
         </Toolbar>
       </AppBar>
     );
@@ -39,7 +30,7 @@ export default function AppBarCustom() {
     return (
       <AppBar position="fixed" color="default" elevation={1} sx={{ background: '#fff', boxShadow: 'none', zIndex: 1200 }}>
         <Toolbar sx={{ minHeight: '64px !important', px: { xs: '10%', md: '10%' }, justifyContent: 'flex-start' }}>
-          {Logo}
+          <Logo serviceName={SERVICE_NAME} />
           <Button color="primary" variant="outlined" style={{ marginLeft: 'auto', marginRight: 8 }} onClick={() => navigate('/login')}>로그인</Button>
           <Button color="primary" variant="contained" onClick={() => navigate('/register')}>회원가입</Button>
         </Toolbar>
@@ -52,9 +43,9 @@ export default function AppBarCustom() {
     return (
       <AppBar position="fixed" color="default" elevation={1} sx={{ background: '#fff', boxShadow: 'none', zIndex: 1200 }}>
         <Toolbar sx={{ minHeight: '64px !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
-          {Logo}
+          <Logo serviceName={SERVICE_NAME} />
           <Box display="flex" alignItems="center">
-            <IconButton color="primary" onClick={() => navigate('/')}> <HomeIcon /> </IconButton>
+            <HomeIconButton to="/" />
             <Button color="primary" startIcon={<AccountCircle />} sx={{ ml: 2 }} onClick={() => navigate('/profile')}>
               {userName}
             </Button>

@@ -1,5 +1,6 @@
 import { Box, Typography, Button, Card, CardContent, Stack, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { FloatingLogo } from '../components/AppBarCommon';
 
 const dummyNotices = [
   {
@@ -51,8 +52,8 @@ export default function Home() {
     <Box id="home-page" sx={{
       background: bgMain,
       py: { xs: 4, md: 8 },
-      pt: { xs: `${APPBAR_HEIGHT + 24}px`, md: `${APPBAR_HEIGHT + 48}px` },
-      pb: { xs: 20, md: 40 },
+      pt: { xs: 'calc(var(--appbar-height, 64px) + 24px)', md: 'calc(var(--appbar-height, 64px) + 48px)' },
+      pb: { xs: 'calc(var(--footer-height, 56px) + 20px)', md: 'calc(var(--footer-height, 56px) + 40px)' },
     }}>
       {/* 컨텐츠 래퍼: 소개+3구역 */}
       <Box id="home-main-section" sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
@@ -196,6 +197,7 @@ export default function Home() {
           </Stack>
         </Box>
       </Box>
+      <FloatingLogo id="home-logo2-floating" width={280} />
     </Box>
   );
 } 

@@ -2,6 +2,7 @@ import { Box, TextField, Button, Typography, IconButton, InputAdornment } from '
 import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { FloatingLogo } from '../components/AppBarCommon';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -71,6 +72,7 @@ export default function Login() {
           회원가입
         </Button>
       </Box>
+      <FloatingLogo id="login-logo2-floating" width={240} />
     </Box>
   );
 } 

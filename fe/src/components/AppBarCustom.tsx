@@ -13,8 +13,18 @@ export default function AppBarCustom() {
   // 로그인 페이지
   if (location.pathname === '/login') {
     return (
-      <AppBar position="fixed" color="default" elevation={1} sx={{ background: '#fff', boxShadow: 'none', zIndex: 1200 }}>
-        <Toolbar sx={{ minHeight: '64px !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+      <AppBar
+        position="fixed"
+        color="default"
+        elevation={1}
+        sx={{
+          background: '#fff',
+          boxShadow: 'none',
+          zIndex: 1200,
+          minHeight: 'var(--appbar-height)',
+        }}
+      >
+        <Toolbar sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
           <Logo serviceName={SERVICE_NAME} />
           <HomeIconButton />
         </Toolbar>
@@ -28,8 +38,18 @@ export default function AppBarCustom() {
 
   if (!isLoggedIn && isPublic) {
     return (
-      <AppBar position="fixed" color="default" elevation={1} sx={{ background: '#fff', boxShadow: 'none', zIndex: 1200 }}>
-        <Toolbar sx={{ minHeight: '64px !important', px: { xs: '10%', md: '10%' }, justifyContent: 'flex-start' }}>
+      <AppBar
+        position="fixed"
+        color="default"
+        elevation={1}
+        sx={{
+          background: '#fff',
+          boxShadow: 'none',
+          zIndex: 1200,
+          minHeight: 'var(--appbar-height)',
+        }}
+      >
+        <Toolbar sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'flex-start' }}>
           <Logo serviceName={SERVICE_NAME} />
           <Button color="primary" variant="outlined" style={{ marginLeft: 'auto', marginRight: 8 }} onClick={() => navigate('/login')}>로그인</Button>
           <Button color="primary" variant="contained" onClick={() => navigate('/register')}>회원가입</Button>
@@ -41,8 +61,18 @@ export default function AppBarCustom() {
   // 로그인한 일반 유저 페이지(대시보드 등)
   if (isLoggedIn) {
     return (
-      <AppBar position="fixed" color="default" elevation={1} sx={{ background: '#fff', boxShadow: 'none', zIndex: 1200 }}>
-        <Toolbar sx={{ minHeight: '64px !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+      <AppBar
+        position="fixed"
+        color="default"
+        elevation={1}
+        sx={{
+          background: '#fff',
+          boxShadow: 'none',
+          zIndex: 1200,
+          minHeight: 'var(--appbar-height)',
+        }}
+      >
+        <Toolbar sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
           <Logo serviceName={SERVICE_NAME} />
           <Box display="flex" alignItems="center">
             <HomeIconButton to="/" />

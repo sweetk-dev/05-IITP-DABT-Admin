@@ -7,6 +7,20 @@
 /dist
 /fe/dist
 /be/dist
+/be/build/
+/be/.env
+/be/.env.*
+/be/.DS_Store
+/be/coverage/
+/be/logs/
+/be/*.log
+/be/npm-debug.log*
+/be/yarn-debug.log*
+/be/yarn-error.log*
+/be/pids/
+/be/tmp/
+/be/.vscode/
+/be/.idea/ 
 
 # misc
 .DS_Store

@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button, Box, Card, CardContent, Stack, Container, Divider } from '@mui/material';
+import { Toolbar, Typography, Button, Box, Card, CardContent, Stack, Container, Divider } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import AppBarCustom from './components/AppBarCustom';
+import AppBar from './components/AppBar';
+import Register from './pages/Register';
+import AdminLogin from './pages/AdminLogin';
 
 const dummyNotices = [
   {
@@ -106,10 +108,36 @@ function Footer() {
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
+  const location = useLocation();
+  const isLoggedIn = Boolean(localStorage.getItem('token'));
+  let appBarType: 'user' | 'public' | 'auth' | 'admin-login' | 'admin' = 'user';
+
+  // 어드민 로그인 화면
+  if (location.pathname === '/admin/login') {
+    appBarType = 'admin-login';
+  }
+  // 어드민 로그인 후 (모든 /admin/* 경로, 단 /admin/login 제외)
+  else if (location.pathname.startsWith('/admin')) {
+    appBarType = 'admin';
+  }
+  // 로그인/회원가입 화면
+  else if (location.pathname === '/login' || location.pathname === '/register') {
+    appBarType = 'auth';
+  }
+  // 공개페이지(공지, FAQ, QnA 등) - 로그인 전
+  else if (
+    ['/','/notice','/faq','/qna'].some(p => location.pathname === p || location.pathname.startsWith(p + '/')) && !isLoggedIn
+  ) {
+    appBarType = 'public';
+  }
+  // 공개페이지(공지, FAQ, QnA 등) - 로그인 후, 또는 일반 유저 페이지
+  else {
+    appBarType = 'user';
+  }
+
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: bgMain }}>
-      <AppBarCustom />
+      <AppBar type={appBarType} />
       <Box sx={{ flex: 1 }}>{children}</Box>
       <Footer />
     </Box>
@@ -128,7 +156,6 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 // 임시 컴포넌트 정의
 const Faq = () => <div>Faq</div>;
-const Register = () => <div>Register</div>;
 const UserDashboard = () => <div>UserDashboard</div>;
 const OpenApiManagement = () => <div>OpenApiManagement</div>;
 const UserProfile = () => <div>UserProfile</div>;
@@ -157,7 +184,6 @@ const QnaList = () => <div>QnaList</div>;
 const QnaDetail = () => <div>QnaDetail</div>;
 const ApiRequestManagement = () => <div>ApiRequestManagement</div>;
 const ApiRequestDetail = () => <div>ApiRequestDetail</div>;
-const AdminLogin = () => <div>AdminLogin</div>;
 
 function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   const isLoggedIn = Boolean(localStorage.getItem('token'));
@@ -173,59 +199,71 @@ function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          {/* 공개 페이지 */}
-          <Route path="/" element={<Home />} />
-          <Route path="/notice" element={<NoticeList />} />
-          <Route path="/notice/:id" element={<NoticeDetail />} />
-          <Route path="/faq" element={<FaqList />} />
-          <Route path="/faq/:id" element={<FaqDetail />} />
-          <Route path="/qna" element={<QnaList />} />
-          <Route path="/qna/:id" element={<QnaDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <>
+      <style>{`
+        :root {
+          --appbar-top-margin: 2vh;
+        }
+        @media (min-width: 900px) {
+          :root {
+            --appbar-top-margin: 2.5vh;
+          }
+        }
+      `}</style>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            {/* 공개 페이지 */}
+            <Route path="/" element={<Home />} />
+            <Route path="/notice" element={<NoticeList />} />
+            <Route path="/notice/:id" element={<NoticeDetail />} />
+            <Route path="/faq" element={<FaqList />} />
+            <Route path="/faq/:id" element={<FaqDetail />} />
+            <Route path="/qna" element={<QnaList />} />
+            <Route path="/qna/:id" element={<QnaDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* 일반 사용자 페이지 (로그인 필요) */}
-          <Route path="/dashbd" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
-          <Route path="/mng/openapi" element={<PrivateRoute><OpenApiManagement /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            {/* 일반 사용자 페이지 (로그인 필요) */}
+            <Route path="/dashbd" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
+            <Route path="/mng/openapi" element={<PrivateRoute><OpenApiManagement /></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
 
-          {/* 관리자 로그인 */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          {/* /admin 또는 /admin/로 접근 시 /admin/login으로 리다이렉트 */}
-          <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-          <Route path="/admin/" element={<Navigate to="/admin/login" replace />} />
-          {/* /admin/* 경로는 보호 */}
-          <Route path="/admin/*" element={<AdminProtectedRoute>{/* 기존 관리자 라우트들 */}
-            <Routes>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users" element={<UserManagement />} />
-              <Route path="users/:id" element={<UserDetail />} />
-              <Route path="openapi/clients" element={<ApiClientManagement />} />
-              <Route path="openapi/clients/:id" element={<ApiClientDetail />} />
-              <Route path="openapi/requests" element={<ApiRequestManagement />} />
-              <Route path="openapi/requests/:id" element={<ApiRequestDetail />} />
-              <Route path="notices" element={<AdminNoticeList />} />
-              <Route path="notices/create" element={<AdminNoticeCreate />} />
-              <Route path="notices/:id" element={<AdminNoticeDetail />} />
-              <Route path="notices/:id/edit" element={<AdminNoticeEdit />} />
-              <Route path="faqs" element={<AdminFaqList />} />
-              <Route path="faqs/create" element={<AdminFaqCreate />} />
-              <Route path="faqs/:id" element={<AdminFaqDetail />} />
-              <Route path="faqs/:id/edit" element={<AdminFaqEdit />} />
-              <Route path="qnas" element={<AdminQnaList />} />
-              <Route path="qnas/:id" element={<AdminQnaDetail />} />
-              <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
-            </Routes>
-          </AdminProtectedRoute>} />
+            {/* 관리자 로그인 */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            {/* /admin 또는 /admin/로 접근 시 /admin/login으로 리다이렉트 */}
+            <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+            <Route path="/admin/" element={<Navigate to="/admin/login" replace />} />
+            {/* /admin/* 경로는 보호 */}
+            <Route path="/admin/*" element={<AdminProtectedRoute>{/* 기존 관리자 라우트들 */}
+              <Routes>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="users/:id" element={<UserDetail />} />
+                <Route path="openapi/clients" element={<ApiClientManagement />} />
+                <Route path="openapi/clients/:id" element={<ApiClientDetail />} />
+                <Route path="openapi/requests" element={<ApiRequestManagement />} />
+                <Route path="openapi/requests/:id" element={<ApiRequestDetail />} />
+                <Route path="notices" element={<AdminNoticeList />} />
+                <Route path="notices/create" element={<AdminNoticeCreate />} />
+                <Route path="notices/:id" element={<AdminNoticeDetail />} />
+                <Route path="notices/:id/edit" element={<AdminNoticeEdit />} />
+                <Route path="faqs" element={<AdminFaqList />} />
+                <Route path="faqs/create" element={<AdminFaqCreate />} />
+                <Route path="faqs/:id" element={<AdminFaqDetail />} />
+                <Route path="faqs/:id/edit" element={<AdminFaqEdit />} />
+                <Route path="qnas" element={<AdminQnaList />} />
+                <Route path="qnas/:id" element={<AdminQnaDetail />} />
+                <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
+              </Routes>
+            </AdminProtectedRoute>} />
 
-          {/* 404 */}
-          <Route path="*" element={<Navigate to='/' replace />} />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+            {/* 404 */}
+            <Route path="*" element={<Navigate to='/' replace />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </>
   );
 }
 

@@ -4,8 +4,12 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from '../components/AppBarCommon';
 import { isValidEmail, isValidPassword } from '../../../packages/common/validation';
+import { useTheme } from '@mui/material/styles';
+import { checkEmail, registerUser } from '../api/user';
+import CommonDialog from '../components/CommonDialog';
 
 export default function Register() {
+  const theme = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
@@ -20,27 +24,32 @@ export default function Register() {
   const [success, setSuccess] = useState(false);
   const [emailCheckMsg, setEmailCheckMsg] = useState('');
   const [emailCheckColor, setEmailCheckColor] = useState<'success' | 'error' | ''>('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMsg, setDialogMsg] = useState('');
+  const [dialogOnConfirm, setDialogOnConfirm] = useState<(() => void) | undefined>(undefined);
 
   // 패스워드 패턴: 영문, 숫자, 특수문자 포함 10자리 이상
   const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;
 
-  const handleEmailCheck = () => {
+  const handleEmailCheck = async () => {
     if (!isValidEmail(email)) {
-      setEmailCheckMsg('이메일 형식으로 입력해 주세요.');
-      setEmailCheckColor('error');
+      setDialogMsg('이메일 형식으로 입력해 주세요.');
+      setDialogOpen(true);
       return;
     }
-    // 임시: test@example.com만 중복, 나머지는 사용 가능
-    if (email === 'test@example.com') {
-      setEmailCheckMsg('이미 사용 중인 이메일입니다.');
-      setEmailCheckColor('error');
-    } else {
+    const res = await checkEmail(email);
+    if (res.result === 'ok') {
       setEmailCheckMsg('사용 가능한 이메일입니다.');
       setEmailCheckColor('success');
+    } else {
+      setDialogMsg(res.message || '이미 사용 중인 이메일입니다.');
+      setDialogOpen(true);
+      setEmailCheckMsg(res.message || '이미 사용 중인 이메일입니다.');
+      setEmailCheckColor('error');
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     let hasError = false;
     if (!name) {
       setNameError('이름을 입력해 주세요.');
@@ -73,11 +82,21 @@ export default function Register() {
       setPw2Error('');
     }
     if (hasError) return;
-    // TODO: 실제 회원가입 API 연동
-    setSuccess(true);
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 1500);
+    // 실제 회원가입 API 연동
+    const res = await registerUser({ email, password: pw, name, affiliation });
+    if (res.result === 'ok') {
+      setSuccess(true);
+      setDialogMsg('회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.');
+      setDialogOnConfirm(() => () => {
+        setDialogOpen(false);
+        window.location.href = '/login';
+      });
+      setDialogOpen(true);
+    } else {
+      setDialogMsg(res.message || '회원가입에 실패했습니다.');
+      setDialogOnConfirm(undefined);
+      setDialogOpen(true);
+    }
   };
 
   return (
@@ -97,7 +116,7 @@ export default function Register() {
         <Box display="flex" alignItems="center" gap={1}>
           <TextField
             id="register-email-input"
-            label="이메일 *"
+            label={<span>이메일 <span style={{color: theme.palette.error.main}}>*</span></span>}
             fullWidth
             margin="normal"
             value={email}
@@ -122,7 +141,7 @@ export default function Register() {
         )}
         <TextField
           id="register-password-input"
-          label="비밀번호 *"
+          label={<span>비밀번호 <span style={{color: theme.palette.error.main}}>*</span></span>}
           type={showPw ? 'text' : 'password'}
           fullWidth
           margin="normal"
@@ -147,7 +166,7 @@ export default function Register() {
         />
         <TextField
           id="register-password2-input"
-          label="비밀번호 확인 *"
+          label={<span>비밀번호 확인 <span style={{color: theme.palette.error.main}}>*</span></span>}
           type={showPw2 ? 'text' : 'password'}
           fullWidth
           margin="normal"
@@ -187,6 +206,12 @@ export default function Register() {
         </Button>
       </Box>
       <FloatingLogo id="register-logo2-floating" width={240} />
+      <CommonDialog
+        open={dialogOpen}
+        message={dialogMsg}
+        onClose={() => setDialogOpen(false)}
+        onConfirm={dialogOnConfirm}
+      />
     </Box>
   );
 } 

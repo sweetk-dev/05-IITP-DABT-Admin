@@ -1,0 +1,17 @@
+{
+  "name": "iitp-dabt-admin",
+  "version": "1.0.0",
+  "description": "장애인 자립 생활 지원 플랫폼 운영관리 SW",
+  "scripts": {
+    "build:clean": "npm run build:common && npm run build:be && npm run build:fe",
+    "build:be": "cd be && npm run build:clean",
+    "build:fe": "cd fe && npm run build:clean",
+    "build:common": "cd packages/common && npm run build:clean"
+  },
+  "keywords": ["iitp", "dabt", "admin", "monorepo"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "rimraf": "^5.0.5"
+  }
+} 

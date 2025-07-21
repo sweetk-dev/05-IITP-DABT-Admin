@@ -13,8 +13,10 @@
      ```
    - 운영(프로덕션) 환경:
      ```sh
+     export ENC_SECRET=복호화키
      ./scripts/start-prod.sh
      ```
+     > 운영 환경에서는 .env 파일에 ENC_SECRET을 두지 말고, 반드시 export로만 주입하세요.
 
 > setup.sh는 최초 1회(또는 패키지/환경 변경 시)만 실행하면 됩니다.
 > 서버 실행은 start-dev.sh/start-prod.sh로 환경에 맞게 실행하세요.

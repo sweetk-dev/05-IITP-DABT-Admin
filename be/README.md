@@ -1,5 +1,68 @@
 # BE (Backend) - 장애인 자립 생활 지원 플랫폼 API 센터
 
+## 로그 라이브러리 설치 안내
+
+- 아래 명령어를 반드시 be 폴더에서 실행하세요:
+  ```sh
+  cd be
+  npm install winston winston-daily-rotate-file morgan
+  ```
+
+## 로그 관리 정책
+
+- 모든 로그는 logs/ 폴더에 일자별(app-YYYY-MM-DD.log, access-YYYY-MM-DD.log)로 저장됩니다.
+- Application Log(app-YYYY-MM-DD.log): 비즈니스/에러/시스템 로그 (appLogger)
+- Access Log(access-YYYY-MM-DD.log): HTTP 요청/응답 로그 (accessLogger, morgan)
+- 로그는 30일간 보관되며, 이후 자동 삭제됩니다.
+- 로그 레벨은 환경변수 LOG_LEVEL로 제어합니다. (예: info, error, warn, debug)
+- 로그 포맷 예시:
+  ```
+  [2024-07-22T13:45:30.123Z] [INFO] [userService.ts:register] 회원가입 성공: userId=123
+  [2024-07-22T13:45:31.456Z] [ERROR] [userController.ts:checkEmail] 이메일 중복 에러: ...
+  [2024-07-22T13:45:32.789Z] GET /api/user/email/check 200 - 12ms
+  ```
+- 로그에 파일명:함수명을 포함하려면 appLogger 사용 시 메시지에 명시하세요.
+- logger 유틸: src/utils/logger.ts
+
+## 환경 구분(NODE_ENV) 및 .env 예시
+
+- .env 파일에 NODE_ENV를 반드시 명시하세요.
+- 예시:
+  ```env
+  NODE_ENV=development   # 또는 production
+  DB_HOST=localhost
+  DB_USER=...
+  DB_PASSWORD=ENC(...)
+  ENC_SECRET=...
+  ```
+- 코드에서는 `process.env.NODE_ENV`로 환경(운영/개발/테스트 등)을 구분할 수 있습니다.
+
+## ENC_SECRET 관리 권장 사항
+
+- **개발/테스트 환경:** .env 파일에 ENC_SECRET 저장 가능
+- **운영/프로덕션 환경:** .env 파일에 저장하지 말고, 환경 변수(서버/배포 환경에서만 주입)로만 관리하세요
+  - 예: export ENC_SECRET=... (리눅스)
+  - Docker/K8s secret 등 보안 환경 변수로 주입
+
+## 환경 변수 암호화(ENC) 사용 안내
+
+- .env 파일에 DB 비밀번호 등 민감 정보는 `ENC(암호화된문자열)` 형태로 저장할 수 있습니다.
+- 복호화 키는 `ENC_SECRET` 환경 변수에 저장해야 하며, 서버 실행 시 자동 복호화됩니다.
+- 암호화된 문자열을 만들려면 아래 스크립트를 사용하세요:
+  ```sh
+  npm install prompt-sync   # ← 반드시 최초 1회 설치
+  export ENC_SECRET=복호화키
+  node scripts/encrypt-env.js
+  ```
+  (또는, 실행 중 프롬프트에서 복호화 키를 입력할 수도 있습니다)
+  프롬프트에 따라 암호화할 값과 복호화 키를 입력하면 `ENC(암호화된문자열)`이 출력됩니다.
+- 예시:
+  ```env
+  DB_PASSWORD=ENC(암호화된문자열)
+  ENC_SECRET=복호화키
+  ```
+- 복호화 로직은 `src/utils/decrypt.ts`에 구현되어 있습니다.
+
 ## 공통 코드(유틸) 사용 안내
 
 - 이메일/비밀번호 패턴 검증 등은 `packages/common/validation`에서 import해서 사용하세요.

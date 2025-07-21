@@ -1,5 +1,24 @@
 # BE (Backend) - 장애인 자립 생활 지원 플랫폼 API 센터
 
+## 서버 설치 및 실행 순서
+
+1. 최초 환경 세팅(의존성 설치, logs 디렉토리 등)
+   ```sh
+   ./scripts/setup.sh
+   ```
+2. 서버 실행
+   - 개발 환경: 
+     ```sh
+     ./scripts/start-dev.sh
+     ```
+   - 운영(프로덕션) 환경:
+     ```sh
+     ./scripts/start-prod.sh
+     ```
+
+> setup.sh는 최초 1회(또는 패키지/환경 변경 시)만 실행하면 됩니다.
+> 서버 실행은 start-dev.sh/start-prod.sh로 환경에 맞게 실행하세요.
+
 ## 로그 라이브러리 설치 안내
 
 - 아래 명령어를 반드시 be 폴더에서 실행하세요:

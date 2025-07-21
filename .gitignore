@@ -38,6 +38,13 @@
 /be/.vscode/
 /be/.idea/ 
 
+# packages
+/packages/*/dist
+/packages/*/.DS_Store
+/packages/*/coverage/
+/packages/*/logs/
+/packages/*/*.log
+
 # misc
 .DS_Store
 .env

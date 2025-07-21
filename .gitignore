@@ -4,8 +4,24 @@
 /be/node_modules
 
 # production
+# fe
 /dist
 /fe/dist
+/fe/.env
+/fe/.env.*
+/fe/.DS_Store
+/fe/coverage/
+/fe/logs/
+/fe/*.log
+/fe/npm-debug.log*
+/fe/yarn-debug.log*
+/fe/yarn-error.log*
+/fe/pids/
+/fe/tmp/
+/fe/.vscode/
+/fe/.idea/ 
+
+# be
 /be/dist
 /be/build/
 /be/.env

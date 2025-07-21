@@ -97,7 +97,7 @@ export default function Register() {
         <Box display="flex" alignItems="center" gap={1}>
           <TextField
             id="register-email-input"
-            label="이메일"
+            label="이메일 *"
             fullWidth
             margin="normal"
             value={email}
@@ -122,7 +122,7 @@ export default function Register() {
         )}
         <TextField
           id="register-password-input"
-          label="비밀번호"
+          label="비밀번호 *"
           type={showPw ? 'text' : 'password'}
           fullWidth
           margin="normal"
@@ -147,7 +147,7 @@ export default function Register() {
         />
         <TextField
           id="register-password2-input"
-          label="비밀번호 확인"
+          label="비밀번호 확인 *"
           type={showPw2 ? 'text' : 'password'}
           fullWidth
           margin="normal"

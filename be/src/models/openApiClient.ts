@@ -2,10 +2,11 @@ import { DataTypes, Model, Optional } from 'sequelize';
 import type { Sequelize } from 'sequelize';
 
 export interface OpenApiClientAttributes {
-  apiCliId: number;
+  apiCliId?: number;
   clientId: string;
   password: string;
   clientName: string;
+  affiliation?: string;
   status: string;
   delYn: string;
   latestKeyCreatedAt?: Date;
@@ -20,13 +21,25 @@ export interface OpenApiClientAttributes {
   deletedBy?: string;
 }
 
-export type OpenApiClientCreationAttributes = Optional<OpenApiClientAttributes, 'apiCliId' | 'latestKeyCreatedAt' | 'latestLoginAt' | 'description' | 'note' | 'updatedAt' | 'deletedAt' | 'updatedBy' | 'deletedBy'>;
+export type OpenApiClientCreationAttributes = Optional<OpenApiClientAttributes, 
+  'latestKeyCreatedAt' | 
+  'latestLoginAt' | 
+  'affiliation' |
+  'description' | 
+  'note' | 
+  'createdAt' |
+  'updatedAt' | 
+  'deletedAt' | 
+  'updatedBy' | 
+  'deletedBy'
+>;
 
 export class OpenApiClient extends Model<OpenApiClientAttributes, OpenApiClientCreationAttributes> implements OpenApiClientAttributes {
   public apiCliId!: number;
   public clientId!: string;
   public password!: string;
   public clientName!: string;
+  public affiliation?: string;
   public status!: string;
   public delYn!: string;
   public latestKeyCreatedAt?: Date;
@@ -71,6 +84,11 @@ export function initOpenApiClient(sequelize: Sequelize) {
         allowNull: false,
         field: 'client_name',
         comment: 'client name',
+      },
+      affiliation: {
+        type: DataTypes.STRING(200),
+        field: 'affiliation',
+        comment: '소속',
       },
       status: {
         type: DataTypes.CHAR(1),

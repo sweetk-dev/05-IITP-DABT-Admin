@@ -1,9 +1,67 @@
 import { Request, Response } from 'express';
+import { UserRegisterRequest, UserRegisterResult, UserCheckEmailRequest, UserCheckEmailResult } from '../../types/user';
+import { ErrorCode } from '../../types/errorCodes';
+import * as userService from '../../services/userService';
+import { sendError } from '../../utils/response';
+import { ApiResponse } from '../../types/common';
+import { isValidEmail, isValidPassword } from 'packages/common/validation';
+
+// 이메일 중복 체크
+export const checkEmail = async (req: Request, res: Response) => {
+  const { email } = req.body as UserCheckEmailRequest;
+  if (!email) {
+    return sendError(res, ErrorCode.USER_EMAIL_REQUIRED);
+  }
+  if (!isValidEmail(email)) {
+    return sendError(res, ErrorCode.INVALID_REQUEST, '이메일 형식이 올바르지 않습니다.');
+  }
+  try {
+    const result: UserCheckEmailResult = await userService.checkEmail({ email });
+    const response: ApiResponse<UserCheckEmailResult> = {
+      success: true,
+      data: result,
+      errorCode: ErrorCode.SUCCESS,
+    };
+    res.status(200).json(response);
+  } catch (err: any) {
+    sendError(res, ErrorCode.UNKNOWN_ERROR, err.message);
+  }
+};
 
 // 회원가입 처리
 export const register = async (req: Request, res: Response) => {
-  // TODO: 회원가입 로직 구현
-  res.status(501).json({ message: '회원가입 기능 준비 중' });
+  const { email, password, name, affiliation } = req.body as UserRegisterRequest;
+
+  if (!email) {
+    return sendError(res, ErrorCode.USER_EMAIL_REQUIRED);
+  }
+  if (!isValidEmail(email)) {
+    return sendError(res, ErrorCode.INVALID_REQUEST, '이메일 형식이 올바르지 않습니다.');
+  }
+  if (!password) {
+    return sendError(res, ErrorCode.USER_PASSWORD_REQUIRED);
+  }
+  if (!isValidPassword(password)) {
+    return sendError(res, ErrorCode.INVALID_REQUEST, '비밀번호 패턴이 올바르지 않습니다.');
+  }
+  if (!name) {
+    return sendError(res, ErrorCode.USER_NAME_REQUIRED);
+  }
+
+  try {
+    const result: UserRegisterResult = await userService.register({ email, password, name, affiliation });
+    const response: ApiResponse<UserRegisterResult> = {
+      success: true,
+      data: result,
+      errorCode: ErrorCode.SUCCESS,
+    };
+    res.status(201).json(response);
+  } catch (err: any) {
+    if (err.code === ErrorCode.USER_EMAIL_DUPLICATE) {
+      return sendError(res, ErrorCode.USER_EMAIL_DUPLICATE);
+    }
+    sendError(res, ErrorCode.UNKNOWN_ERROR, err.message);
+  }
 };
 
 // 로그인 처리
@@ -11,6 +69,15 @@ export const login = async (req: Request, res: Response) => {
   // TODO: 로그인 로직 구현
   res.status(501).json({ message: '로그인 기능 준비 중' });
 };
+
+
+// 공지사항 조회
+export const getNotice = async (req: Request, res: Response) => {
+  // TODO: 공지사항 조회 로직 구현
+  res.status(501).json({ message: '공지사항 조회 기능 준비 중' });
+};
+
+
 
 // 프로필 조회 (로그인 필요)
 export const profile = async (req: Request, res: Response) => {

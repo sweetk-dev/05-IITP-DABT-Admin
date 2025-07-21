@@ -1,9 +1,10 @@
 import { Router } from 'express';
+import { version, health } from '../controllers/common/commController';
 
 
 const router = Router();
 
-// 예시: 공통 코드 조회
-// router.get('/codes', getCommonCodesController);
+router.get('/version', version);
+router.get('/health', health);
 
 export default router; 

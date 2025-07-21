@@ -1,5 +1,16 @@
 # BE (Backend) - 장애인 자립 생활 지원 플랫폼 API 센터
 
+## 로그 레벨 지정 방법
+
+- 운영/개발 모두 .env 파일에 LOG_LEVEL을 추가하세요.
+  예시:
+  ```env
+  LOG_LEVEL=info      # 개발
+  LOG_LEVEL=warn      # 운영
+  ```
+- 서버 실행 스크립트(start-dev.sh, start-prod.sh)는 .env 파일을 자동으로 로드합니다.
+- 지원 레벨: error, warn, info, debug 등
+
 ## 서버 설치 및 실행 순서
 
 1. 최초 환경 세팅(의존성 설치, logs 디렉토리 등)

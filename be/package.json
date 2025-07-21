@@ -20,12 +20,16 @@
     "morgan": "^1.10.1",
     "pg": "^8.16.3",
     "prompt-sync": "^4.2.0",
+    "sequelize": "^6.37.7",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.14",
+    "@types/sequelize": "^4.28.20",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

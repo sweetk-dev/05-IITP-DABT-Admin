@@ -1,34 +1,42 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import type { ReactNode } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 
-interface CommonDialogProps {
+export interface CommonDialogProps {
   open: boolean;
-  onClose: () => void;
   title?: string;
-  children: ReactNode;
-  actions?: ReactNode;
-  id?: string;
+  message: string;
+  onClose: () => void;
+  onConfirm?: () => void;
+  showCancel?: boolean;
+  confirmText?: string;
+  cancelText?: string;
 }
 
-export default function CommonDialog({ open, onClose, title, children, actions, id }: CommonDialogProps) {
+export default function CommonDialog({
+  open,
+  title,
+  message,
+  onClose,
+  onConfirm,
+  showCancel = false,
+  confirmText = '확인',
+  cancelText = '취소',
+}: CommonDialogProps) {
   return (
-    <Dialog id={id || 'common-dialog'} open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      {title && (
-        <DialogTitle id="common-dialog-title">
-          {title}
-          <IconButton
-            id="common-dialog-close-btn"
-            aria-label="close"
-            onClick={onClose}
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-      )}
-      <DialogContent id="common-dialog-content">{children}</DialogContent>
-      {actions && <DialogActions id="common-dialog-actions">{actions}</DialogActions>}
+    <Dialog open={open} onClose={onClose}>
+      {title && <DialogTitle>{title}</DialogTitle>}
+      <DialogContent>
+        <Typography>{message}</Typography>
+      </DialogContent>
+      <DialogActions>
+        {showCancel && (
+          <Button onClick={onClose} color="inherit">
+            {cancelText}
+          </Button>
+        )}
+        <Button onClick={onConfirm || onClose} color="primary" autoFocus>
+          {confirmText}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 } 

@@ -7,4 +7,7 @@ export default defineConfig({
   server: {
     port: Number(process.env.VITE_PORT) || 5173,
   },
+  build: {
+    outDir: 'dist',
+  },
 })

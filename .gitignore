@@ -23,7 +23,7 @@
 
 # be
 /be/dist
-/be/build/
+/be/build-info.json
 /be/.env
 /be/.env.*
 /be/.DS_Store

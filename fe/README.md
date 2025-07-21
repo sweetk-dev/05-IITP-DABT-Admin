@@ -1,5 +1,21 @@
 # React + TypeScript + Vite
 
+## 빌드 스크립트 안내
+
+### FE 빌드
+```sh
+./scripts/build.sh
+```
+- FE 소스 빌드 (자동으로 common도 빌드)
+- 매번 clean build 수행 (dist 폴더 삭제 후 빌드)
+
+### 전체 빌드 (common, be, fe)
+```sh
+../be/scripts/build-all.sh
+```
+- common, be, fe를 순서대로 빌드
+- 매번 clean build 수행
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
@@ -148,6 +164,27 @@ export default defineConfig({
 - 배포: `npm run build` 후 서버에서 40000 포트로 서비스
 
 # FE (Frontend)
+
+## TypeScript 프로젝트 빌드 안내 (모노레포)
+
+- tsc가 인식되지 않는 경우, 아래처럼 npx로 실행하세요:
+  ```sh
+  npx tsc --build
+  ```
+- 공통 패키지(packages/common)만 별도 빌드:
+  ```sh
+  cd ../packages/common
+  npx tsc --build
+  ```
+- FE만 빌드해도 TypeScript가 자동으로 공통 패키지를 먼저 빌드합니다:
+  ```sh
+  npx tsc --build
+  ```
+- 루트에 tsconfig.json이 있으면 전체를 한 번에 빌드할 수 있습니다:
+  ```sh
+  cd ..
+  npx tsc --build
+  ```
 
 ## FE(프론트엔드) 기동 스크립트
 

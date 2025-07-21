@@ -5,6 +5,12 @@
 > 
 > **ℹ️ 자세한 프론트엔드 운영/설정은 [fe/README.md](fe/README.md) 파일을 참고하세요.**
 
+## 공통 코드(유틸) 사용 안내
+
+- FE/BE 모두 `packages/common/` 하위의 유틸리티/타입을 import해서 사용할 수 있습니다.
+- 예시: `import { isValidEmail } from 'packages/common/validation'`
+- FE/BE의 tsconfig.json에 paths가 설정되어 있어야 하며, 모노레포 구조에서만 동작합니다.
+
 ## 1. 프로젝트 개요
 
 이 프로젝트는 장애인 자립 생활 지원 플랫폼 API 센터의 Open API 및 사용자/관리자 관리를 위한 실용적이고 간단한 CMS입니다.

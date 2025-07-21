@@ -5,6 +5,8 @@
   "scripts": {
     "prebuild": "node scripts/build-info.js",
     "build": "tsc",
+    "build:clean": "rimraf dist && tsc --build",
+    "build:all": "bash ./scripts/build-all.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -31,6 +33,7 @@
     "@types/node": "^24.0.14",
     "@types/sequelize": "^4.28.20",
     "nodemon": "^3.1.10",
+    "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

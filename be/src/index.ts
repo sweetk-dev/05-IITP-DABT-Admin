@@ -9,7 +9,7 @@ import morgan from 'morgan';
 const app = express();
 app.use(express.json());
 
-app.use(morgan('combined', { stream: { write: msg => accessLogger.info(msg.trim()) } }));
+app.use(morgan('combined', { stream: { write: (msg: string) => accessLogger.info(msg.trim()) } }));
 
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);

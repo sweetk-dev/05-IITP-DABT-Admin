@@ -5,6 +5,53 @@
 > 
 > **ℹ️ 자세한 프론트엔드 운영/설정은 [fe/README.md](fe/README.md) 파일을 참고하세요.**
 
+## 빌드 스크립트 안내
+
+### 전체 빌드 (common, be, fe)
+```sh
+./be/scripts/build-all.sh
+```
+- common, be, fe를 순서대로 빌드
+- 매번 clean build 수행 (dist 폴더 삭제 후 빌드)
+
+### 개별 빌드
+```sh
+# common 패키지만 빌드
+./packages/common/build.sh
+
+# BE만 빌드
+./be/scripts/build.sh
+
+# FE만 빌드
+./fe/scripts/build.sh
+```
+- 각 빌드 스크립트는 항상 clean build 수행
+- BE/FE 빌드 시 자동으로 common도 빌드
+
+## TypeScript 프로젝트 빌드 안내 (모노레포)
+
+- tsc가 인식되지 않는 경우, 아래처럼 npx로 실행하세요:
+  ```sh
+  npx tsc --build
+  ```
+- 공통 패키지(packages/common)만 별도 빌드:
+  ```sh
+  cd packages/common
+  npx tsc --build
+  ```
+- BE/FE만 빌드해도 TypeScript가 자동으로 공통 패키지를 먼저 빌드합니다:
+  ```sh
+  cd be
+  npx tsc --build
+  # 또는
+  cd fe
+  npx tsc --build
+  ```
+- 루트에 tsconfig.json이 있으면 전체를 한 번에 빌드할 수 있습니다:
+  ```sh
+  npx tsc --build
+  ```
+
 ## 공통 코드(유틸) 사용 안내
 
 - FE/BE 모두 `packages/common/` 하위의 유틸리티/타입을 import해서 사용할 수 있습니다.

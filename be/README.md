@@ -1,5 +1,42 @@
 # BE (Backend) - 장애인 자립 생활 지원 플랫폼 API 센터
 
+## 빌드 스크립트 안내
+
+### BE 빌드
+```sh
+./scripts/build.sh
+```
+- BE 소스 빌드 (자동으로 common도 빌드)
+- 매번 clean build 수행 (dist 폴더 삭제 후 빌드)
+
+### 전체 빌드 (common, be, fe)
+```sh
+./scripts/build-all.sh
+```
+- common, be, fe를 순서대로 빌드
+- 매번 clean build 수행
+
+## TypeScript 프로젝트 빌드 안내
+
+- tsc가 인식되지 않는 경우, 아래처럼 npx로 실행하세요:
+  ```sh
+  npx tsc --build
+  ```
+- 공통 패키지(packages/common)만 별도 빌드:
+  ```sh
+  cd ../../packages/common
+  npx tsc --build
+  ```
+- BE만 빌드해도 TypeScript가 자동으로 공통 패키지를 먼저 빌드합니다:
+  ```sh
+  npx tsc --build
+  ```
+- 루트에 tsconfig.json이 있으면 전체를 한 번에 빌드할 수 있습니다:
+  ```sh
+  cd ../..
+  npx tsc --build
+  ```
+
 ## 로그 레벨 지정 방법
 
 - 운영/개발 모두 .env 파일에 LOG_LEVEL을 추가하세요.
@@ -13,10 +50,12 @@
 
 ## 서버 설치 및 실행 순서
 
-1. 최초 환경 세팅(의존성 설치, logs 디렉토리 등)
+1. 최초 환경 세팅(모든 의존성 설치, logs 디렉토리 생성 등)
    ```sh
    ./scripts/setup.sh
    ```
+   > `setup.sh` 스크립트는 `package.json` 의존성 외에 `sequelize`, `winston`, `morgan`, `prompt-sync` 등 모든 필수 패키지를 자동으로 설치합니다.
+
 2. 서버 실행
    - 개발 환경: 
      ```sh
@@ -31,14 +70,6 @@
 
 > setup.sh는 최초 1회(또는 패키지/환경 변경 시)만 실행하면 됩니다.
 > 서버 실행은 start-dev.sh/start-prod.sh로 환경에 맞게 실행하세요.
-
-## 로그 라이브러리 설치 안내
-
-- 아래 명령어를 반드시 be 폴더에서 실행하세요:
-  ```sh
-  cd be
-  npm install winston winston-daily-rotate-file morgan
-  ```
 
 ## 로그 관리 정책
 

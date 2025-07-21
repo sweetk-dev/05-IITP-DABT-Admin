@@ -2,7 +2,7 @@ import { DataTypes, Model, Optional } from 'sequelize';
 import type { Sequelize } from 'sequelize';
 
 export interface OpenApiClientKeyAttributes {
-  id: number;
+  id?: number;
   apiCliId: number;
   apiKey: string;
   activeYn: string;
@@ -17,7 +17,7 @@ export interface OpenApiClientKeyAttributes {
   deletedBy?: string;
 }
 
-export type OpenApiClientKeyCreationAttributes = Optional<OpenApiClientKeyAttributes, 'id' | 'keyActiveAt' | 'latestAccAt' | 'updatedAt' | 'deletedAt' | 'updatedBy' | 'deletedBy'>;
+export type OpenApiClientKeyCreationAttributes = Optional<OpenApiClientKeyAttributes, 'keyActiveAt' | 'latestAccAt' | 'updatedAt' | 'deletedAt' | 'updatedBy' | 'deletedBy'>;
 
 export class OpenApiClientKey extends Model<OpenApiClientKeyAttributes, OpenApiClientKeyCreationAttributes> implements OpenApiClientKeyAttributes {
   public id!: number;

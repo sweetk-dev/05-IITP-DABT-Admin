@@ -14,8 +14,8 @@ npm install
 mkdir -p logs
 
 # 필수 패키지 설치 (README.md 기준)
-npm install winston winston-daily-rotate-file morgan prompt-sync express cors dotenv jsonwebtoken bcryptjs pg
-npm install --save-dev typescript @types/node @types/express ts-node nodemon
+npm install sequelize winston winston-daily-rotate-file morgan prompt-sync express cors dotenv jsonwebtoken bcryptjs pg
+npm install --save-dev @types/morgan @types/jsonwebtoken @types/sequelize typescript @types/node @types/express ts-node nodemon
 
 # 안내
 cat <<EOF

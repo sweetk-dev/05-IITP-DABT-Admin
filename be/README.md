@@ -1,5 +1,10 @@
 # BE (Backend) - 장애인 자립 생활 지원 플랫폼 API 센터
 
+## 공통 코드(유틸) 사용 안내
+
+- 이메일/비밀번호 패턴 검증 등은 `packages/common/validation`에서 import해서 사용하세요.
+- TypeScript paths가 설정되어 있어야 정상 동작합니다.
+
 ## 1. 개요
 Express + PostgreSQL 기반의 API 서버입니다. JWT 인증, 사용자/관리자 관리, Open API 제공 등 주요 기능을 담당합니다.
 

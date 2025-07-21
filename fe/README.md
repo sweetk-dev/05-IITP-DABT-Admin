@@ -146,3 +146,10 @@ export default defineConfig({
 3. **실행 시 자동 적용**
 - 개발: `npm run dev` (5173)
 - 배포: `npm run build` 후 서버에서 40000 포트로 서비스
+
+## FE (Frontend)
+
+## 공통 코드(유틸) 사용 안내
+
+- 이메일/비밀번호 패턴 검증 등은 `packages/common/validation`에서 import해서 사용하세요.
+- TypeScript paths가 설정되어 있어야 정상 동작합니다.

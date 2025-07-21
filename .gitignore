@@ -2,6 +2,7 @@
 /node_modules
 /fe/node_modules
 /be/node_modules
+/packages/common/node_modules
 
 # production
 # fe

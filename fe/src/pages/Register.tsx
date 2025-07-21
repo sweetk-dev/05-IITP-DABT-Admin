@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from '../components/AppBarCommon';
-import { isValidEmail } from '../utils/validation';
+import { isValidEmail, isValidPassword } from '../../../packages/common/validation';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -57,8 +57,8 @@ export default function Register() {
     if (!pw) {
       setPwError('비밀번호를 입력해 주세요.');
       hasError = true;
-    } else if (!passwordPattern.test(pw)) {
-      setPwError('비밀번호는 영문, 숫자, 특수문자 포함 10자리 이상이어야 합니다.\n(사용가능 특수문자: !@#$%^&*()_+-=[]{};\':\"\\|,.<>/?)');
+    } else if (!isValidPassword(pw)) {
+      setPwError('비밀번호는 영문, 숫자, 특수문자 포함 8자리 이상이어야 합니다.');
       hasError = true;
     } else {
       setPwError('');

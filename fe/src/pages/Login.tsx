@@ -3,7 +3,6 @@ import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from '../components/AppBarCommon';
-import { isValidEmail } from '../utils/validation';
 import LoginForm from '../components/LoginForm';
 
 export default function Login() {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from './AppBarCommon';
-import { isValidEmail } from '../../../packages/common/validation';
+import { isValidEmail } from 'packages/common/validation';
 
 export default function LoginForm({ showRegisterButton = true }: { showRegisterButton?: boolean }) {
   const [email, setEmail] = useState('');

@@ -1,0 +1,18 @@
+{
+  "name": "@iitp/common",
+  "version": "1.0.0",
+  "description": "공통 유틸리티 및 타입 정의",
+  "main": "./dist/validation.js",
+  "module": "./dist/validation.js",
+  "types": "./dist/validation.d.ts",
+  "scripts": {
+    "build:clean": "rimraf dist && tsc --build"
+  },
+  "keywords": ["iitp", "common", "utils", "validation"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "rimraf": "^5.0.5",
+    "typescript": "^5.8.3"
+  }
+} 

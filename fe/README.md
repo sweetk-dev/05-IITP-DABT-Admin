@@ -147,7 +147,13 @@ export default defineConfig({
 - 개발: `npm run dev` (5173)
 - 배포: `npm run build` 후 서버에서 40000 포트로 서비스
 
-## FE (Frontend)
+# FE (Frontend)
+
+## FE(프론트엔드) 기동 스크립트
+
+- 개발 서버 실행: `npm run dev`
+- 프로덕션 빌드: `npm run build`
+- 빌드 결과물 실행(프리뷰): `npm run preview`
 
 ## 공통 코드(유틸) 사용 안내
 

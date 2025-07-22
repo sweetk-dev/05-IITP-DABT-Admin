@@ -5,7 +5,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from '../components/AppBarCommon';
 import { isValidEmail } from 'packages/common/validation';
 import { loginUser } from '../api/user';
-import { saveTokens } from '../auth';
+import { saveTokens } from '../store/auth';
 
 export default function Login() {
   return (

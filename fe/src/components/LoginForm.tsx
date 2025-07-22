@@ -5,7 +5,14 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from './AppBarCommon';
 import { isValidEmail } from 'packages/common/validation';
 
-export default function LoginForm({ showRegisterButton = true }: { showRegisterButton?: boolean }) {
+
+type LoginFormProps = {
+  onSubmit: (email: string, password: string) => void;
+  showRegisterButton?: boolean;
+};
+
+
+export default function LoginForm({ onSubmit, showRegisterButton = true }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -28,12 +35,7 @@ export default function LoginForm({ showRegisterButton = true }: { showRegisterB
       setPwError('');
     }
     if (hasError) return;
-    if (email === 'test@example.com' && pw === '1234') {
-      localStorage.setItem('token', 'dummy-token');
-      window.location.href = '/dashbd';
-    } else {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다.');
-    }
+    onSubmit(email, pw);
   };
 
   return (

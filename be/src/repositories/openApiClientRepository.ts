@@ -5,6 +5,10 @@ export async function isEmailExists(email: string): Promise<boolean> {
   return !!client;
 }
 
+export async function findClientByEmail(email: string): Promise<OpenApiClient | null> {
+  return OpenApiClient.findOne({ where: { clientId: email } });
+}
+
 export async function createClient({ email, password, name, affiliation }: { email: string; password: string; name: string; affiliation?: string; }): Promise<{ id: number }> {
   const client = await OpenApiClient.create({
     clientId: email,

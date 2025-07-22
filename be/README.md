@@ -1,5 +1,15 @@
 # BE (Backend) - 장애인 자립 생활 지원 플랫폼 API 센터
 
+## JWT/토큰 환경변수 예시
+
+- .env 파일에 아래 항목을 추가/설정하세요:
+  ```env
+  JWT_SECRET=your_jwt_secret
+  ACCESS_TOKEN_EXPIRES_IN=15m   # access token 유효기간 (예: 15m, 1h, 1d)
+  REFRESH_TOKEN_EXPIRES_IN=7d   # refresh token 유효기간 (예: 7d, 30d)
+  ```
+- 단위: m(분), h(시간), d(일) 등 [jsonwebtoken expiresIn 옵션](https://github.com/auth0/node-jsonwebtoken#usage) 참고
+
 ## 빌드 스크립트 안내
 
 ### BE 빌드

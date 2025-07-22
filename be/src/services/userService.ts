@@ -1,5 +1,5 @@
 import { UserRegisterRequest, UserRegisterResult, UserCheckEmailRequest, UserCheckEmailResult } from '../types/user';
-import { isEmailExists, createClient } from '../repositories/openApiClientRepository';
+import { isEmailExists, createClient, findClientByEmail } from '../repositories/openApiClientRepository';
 import bcrypt from 'bcryptjs';
 import { ErrorCode } from '../types/errorCodes';
 
@@ -28,4 +28,28 @@ export const register = async (dto: UserRegisterRequest): Promise<UserRegisterRe
 export const checkEmail = async (dto: UserCheckEmailRequest): Promise<UserCheckEmailResult> => {
   const exists = await isEmailExists(dto.email);
   return { exists };
-}; 
+};
+
+export async function loginUser(email: string, password: string) {
+  const user = await findClientByEmail(email);
+  if (!user) {
+    const err: any = new Error('존재하지 않는 계정입니다.');
+    err.code = ErrorCode.USER_NOT_FOUND;
+    throw err;
+  }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    const err: any = new Error('비밀번호가 일치하지 않습니다.');
+    err.code = ErrorCode.USER_PASSWORD_INVALID;
+    throw err;
+  }
+  // 로그인 성공: 필요한 정보만 반환
+  return {
+    id: user.apiCliId,
+    userId: user.clientId,
+    name: user.clientName,
+    role: 'user', // 추후 확장 가능
+    affiliation: user.affiliation,
+    status: user.status,
+  };
+} 

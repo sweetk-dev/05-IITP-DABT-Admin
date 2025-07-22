@@ -1,5 +1,14 @@
 import { apiFetch } from './api';
 
+
+export async function loginUser(params:{email: string; password: string}) {
+  return apiFetch('/user/login', {
+    method:'POST',
+    body: JSON.stringify({ params }),
+  });
+}
+
+
 export async function checkEmail(email: string) {
   return apiFetch('/user/email/check', {
     method: 'POST',

@@ -17,7 +17,7 @@ export async function createClient({ email, password, name, affiliation }: { ema
     affiliation,
     status: 'A',
     delYn: 'N',
-    createdBy: 'SYSTEM'
+    createdBy: 'BY-USER'
   });
   return { id: client.apiCliId };
 } 

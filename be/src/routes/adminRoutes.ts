@@ -1,8 +1,9 @@
 import { Router } from 'express';
+import { login, refresh } from '../controllers/admin/adminController';
 
 const router = Router();
 
-// 예시: 관리자 로그인
-// router.post('/login', adminLoginController);
+router.post('/login', login);
+router.post('/refresh', refresh);
 
 export default router; 

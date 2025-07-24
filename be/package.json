@@ -7,7 +7,8 @@
     "build": "tsc",
     "build:clean": "rimraf dist && tsc --build",
     "build:all": "bash ./scripts/build-all.sh",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "hash-password": "node scripts/test-password-hash.js"
   },
   "keywords": [],
   "author": "",

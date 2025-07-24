@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Box, TextField, Button, Typography, Stack } from '@mui/material';
-import CommonDialog from '../components/CommonDialog';
+import { Box, TextField, Button, Typography, Stack, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+
 
 export default function UserProfile() {
   // Dummy user data (in real app, fetch from API)
@@ -112,47 +112,43 @@ export default function UserProfile() {
           <Typography id="user-profile-success-msg" color="success.main" align="center">{successMsg}</Typography>
         )}
       </Stack>
-      <CommonDialog
-        open={pwDialogOpen}
-        onClose={handlePwDialogClose}
-        title="비밀번호 변경"
-        id="user-profile-password-dialog"
-        actions={
-          <>
-            <Button id="pw-dialog-cancel-btn" onClick={handlePwDialogClose}>취소</Button>
-            <Button id="pw-dialog-confirm-btn" variant="contained" onClick={handlePwChange}>확인</Button>
-          </>
-        }
-      >
-        <Stack spacing={2} mt={1}>
-          <TextField
-            id="pw-dialog-current"
-            label="현재 비밀번호"
-            type="password"
-            value={currentPw}
-            onChange={e => setCurrentPw(e.target.value)}
-            fullWidth
-            autoFocus
-          />
-          <TextField
-            id="pw-dialog-new"
-            label="새 비밀번호"
-            type="password"
-            value={newPw}
-            onChange={e => setNewPw(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            id="pw-dialog-new2"
-            label="새 비밀번호 확인"
-            type="password"
-            value={newPw2}
-            onChange={e => setNewPw2(e.target.value)}
-            fullWidth
-          />
-          {pwError && <Typography id="pw-dialog-error" color="error" fontSize={14}>{pwError}</Typography>}
-        </Stack>
-      </CommonDialog>
+      <Dialog open={pwDialogOpen} onClose={handlePwDialogClose}>
+        <DialogTitle>비밀번호 변경</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+            <TextField
+              id="pw-dialog-current"
+              label="현재 비밀번호"
+              type="password"
+              value={currentPw}
+              onChange={e => setCurrentPw(e.target.value)}
+              fullWidth
+              autoFocus
+            />
+            <TextField
+              id="pw-dialog-new"
+              label="새 비밀번호"
+              type="password"
+              value={newPw}
+              onChange={e => setNewPw(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              id="pw-dialog-new2"
+              label="새 비밀번호 확인"
+              type="password"
+              value={newPw2}
+              onChange={e => setNewPw2(e.target.value)}
+              fullWidth
+            />
+            {pwError && <Typography id="pw-dialog-error" color="error" fontSize={14}>{pwError}</Typography>}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button id="pw-dialog-cancel-btn" onClick={handlePwDialogClose}>취소</Button>
+          <Button id="pw-dialog-confirm-btn" variant="contained" onClick={handlePwChange}>확인</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 } 

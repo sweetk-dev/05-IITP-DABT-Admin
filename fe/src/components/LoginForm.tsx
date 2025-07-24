@@ -2,8 +2,7 @@ import { Box, TextField, Button, Typography, IconButton, InputAdornment } from '
 import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { FloatingLogo } from './AppBarCommon';
-import { isValidEmail } from 'packages/common/validation';
+import { isValidEmail } from '@iitp/common';
 
 
 type LoginFormProps = {
@@ -16,7 +15,6 @@ export default function LoginForm({ onSubmit, showRegisterButton = true }: Login
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [showPw, setShowPw] = useState(false);
-  const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [pwError, setPwError] = useState('');
 
@@ -75,7 +73,6 @@ export default function LoginForm({ onSubmit, showRegisterButton = true }: Login
           ),
         }}
       />
-      {error && <Typography color="error" mt={1}>{error}</Typography>}
       <Button id="login-submit-btn" variant="contained" color="primary" fullWidth sx={{ mt: 2, fontWeight: 'bold', fontSize: '1.1rem', py: 1.2 }} onClick={handleLogin}>
         로그인
       </Button>

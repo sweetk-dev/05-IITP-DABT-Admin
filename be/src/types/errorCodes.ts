@@ -12,6 +12,8 @@ export enum ErrorCode {
   USER_EMAIL_DUPLICATE = 1002,
   USER_PASSWORD_REQUIRED = 1003,
   USER_NAME_REQUIRED = 1004,
+  USER_NOT_FOUND = 1005,
+  USER_PASSWORD_INVALID = 1006,
 
   // Admin (2000~2999)
   ADMIN_ID_REQUIRED = 2001,
@@ -29,6 +31,8 @@ export const ErrorMessage: Record<ErrorCode, string> = {
   [ErrorCode.USER_EMAIL_DUPLICATE]: '이미 가입된 이메일입니다.',
   [ErrorCode.USER_PASSWORD_REQUIRED]: '비밀번호가 필요합니다.',
   [ErrorCode.USER_NAME_REQUIRED]: '이름이 필요합니다.',
+  [ErrorCode.USER_NOT_FOUND]: '존재하지 않는 계정입니다.',
+  [ErrorCode.USER_PASSWORD_INVALID]: '비밀번호가 일치하지 않습니다.',
   [ErrorCode.ADMIN_ID_REQUIRED]: '관리자 ID가 필요합니다.',
   [ErrorCode.ADMIN_NOT_FOUND]: '관리자를 찾을 수 없습니다.',
 };
@@ -49,6 +53,8 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
   [ErrorCode.USER_EMAIL_DUPLICATE]: { statusCode: 409, message: '이미 가입된 이메일입니다.' },
   [ErrorCode.USER_PASSWORD_REQUIRED]: { statusCode: 400, message: '비밀번호가 필요합니다.' },
   [ErrorCode.USER_NAME_REQUIRED]: { statusCode: 400, message: '이름이 필요합니다.' },
+  [ErrorCode.USER_NOT_FOUND]: { statusCode: 404, message: '존재하지 않는 계정입니다.' },
+  [ErrorCode.USER_PASSWORD_INVALID]: { statusCode: 401, message: '비밀번호가 일치하지 않습니다.' },
   [ErrorCode.ADMIN_ID_REQUIRED]: { statusCode: 400, message: '관리자 ID가 필요합니다.' },
   [ErrorCode.ADMIN_NOT_FOUND]: { statusCode: 404, message: '관리자를 찾을 수 없습니다.' },
 }; 

@@ -180,6 +180,82 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
    cd fe && bash scripts/build.sh
    ```
 
+### 배포
+
+#### 1. 전체 배포 (권장)
+```bash
+npm run deploy
+```
+
+> **🖥️ OS 자동 감지**: Windows, Linux, macOS 환경에서 자동으로 적절한 배포 스크립트를 실행합니다.
+
+#### 2. 개별 배포
+```bash
+# Common 패키지만 배포
+npm run deploy:common
+
+# Backend만 배포
+npm run deploy:be
+
+# Frontend만 배포
+npm run deploy:fe
+```
+
+#### 3. 배포 전 환경 변수 설정
+
+**전체 배포용:**
+```bash
+# Backend 서버 설정
+export BE_HOST=your-backend-server.com
+export BE_USER=your-username
+export BE_PATH=/var/www/iitp-dabt-backend
+
+# Frontend 서버 설정
+export FE_HOST=your-frontend-server.com
+export FE_USER=your-username
+export FE_PATH=/var/www/iitp-dabt-frontend
+```
+
+**개별 배포용:**
+```bash
+# Common 패키지 배포용
+export COMMON_HOST=your-common-server.com
+export COMMON_USER=your-username
+export COMMON_PATH=/var/www/iitp-dabt-common
+
+# Backend 개별 배포용
+export BE_HOST=your-backend-server.com
+export BE_USER=your-username
+export BE_PATH=/var/www/iitp-dabt-backend
+
+# Frontend 개별 배포용
+export FE_HOST=your-frontend-server.com
+export FE_USER=your-username
+export FE_PATH=/var/www/iitp-dabt-frontend
+```
+
+#### 4. 배포 과정
+
+**전체 배포:**
+- Common 패키지 배포 (개별 스크립트 호출)
+- Backend 배포 (개별 스크립트 호출)
+- Frontend 배포 (개별 스크립트 호출)
+
+**개별 배포:**
+- **Common**: packages/common 빌드 및 배포
+- **Backend**: packages/common 의존성 확인 → Backend 빌드 → 배포 → 서버 재시작
+- **Frontend**: packages/common 의존성 확인 → Frontend 빌드 → 배포
+
+#### 5. 유지보수성
+
+> **🔧 모듈화된 배포 시스템**: 통합 배포는 개별 배포 스크립트들을 호출하여 구성됩니다.
+> 
+> **장점:**
+> - 배포 로직 변경 시 한 곳만 수정하면 모든 곳에 적용
+> - 개별 배포와 통합 배포가 동일한 로직 사용
+> - 코드 중복 최소화
+> - 유지보수성 향상
+
 ### 테스트
 
 ```bash

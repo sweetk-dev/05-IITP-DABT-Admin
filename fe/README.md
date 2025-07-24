@@ -28,6 +28,15 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스로, 사용자 
 
 ### 2. 설치 및 설정
 
+#### 방법 1: 스크립트 사용 (권장)
+```bash
+# 자동으로 packages/common 의존성까지 처리
+bash scripts/setup.sh
+```
+
+> **🖥️ OS 자동 감지**: Windows, Linux, macOS 환경에서 자동으로 적절한 스크립트를 실행합니다.
+
+#### 방법 2: 수동 설정
 ```bash
 # 1. 의존성 설치
 npm install
@@ -132,6 +141,9 @@ npm run preview
 
 # 린트 검사
 npm run lint
+
+# 스크립트를 사용한 빌드 (packages/common 의존성 자동 처리)
+bash scripts/build.sh
 
 # 클린 빌드
 npm run build:clean

@@ -26,8 +26,8 @@ async function testPasswordHash() {
     // 1. 비밀번호 해싱
     console.log('1. 비밀번호 해싱 중...');
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(`   평문 비밀번호: ${password}`);
-    console.log(`   해싱된 비밀번호: ${hashedPassword}`);
+    console.log(`   평문 비밀번호: ${password} (길이: ${password.length})`);
+    console.log(`   해싱된 비밀번호: ${hashedPassword} (길이: ${hashedPassword.length})`);
     console.log(`   Salt Rounds: 10\n`);
 
     // 2. SQL INSERT 문 생성

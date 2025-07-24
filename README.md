@@ -33,29 +33,40 @@ git clone <repository-url>
 cd 05-IITP-DABT-Admin
 ```
 
-### 3. 공통 패키지 빌드
+### 3. 전체 프로젝트 설정 (권장)
 
 ```bash
-cd packages/common
-npm install
-npm run build
+# 전체 프로젝트 한 번에 설정 (OS 자동 감지)
+npm run setup
 ```
 
-### 4. Backend 설정 및 실행
+> **🖥️ OS 자동 감지**: Windows, Linux, macOS 환경에서 자동으로 적절한 스크립트를 실행합니다.
+
+또는 개별 설정:
 
 ```bash
-cd ../../be
-npm install
-# 환경 변수 설정 (아래 Backend 섹션 참조)
-npm run dev
+# 공통 패키지 설정
+cd packages/common && npm install && npm run build
+
+# Backend 설정
+cd ../../be && bash scripts/setup.sh
+
+# Frontend 설정  
+cd ../fe && bash scripts/setup.sh
 ```
 
-### 5. Frontend 설정 및 실행
+### 4. 개발 서버 실행
 
 ```bash
-cd ../fe
-npm install
-npm run dev
+# Backend 개발 서버
+npm run dev:be
+# 또는
+cd be && npm run dev
+
+# Frontend 개발 서버
+npm run dev:fe
+# 또는
+cd fe && npm run dev
 ```
 
 ## 📁 프로젝트 구조
@@ -150,21 +161,24 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
 
 ### 빌드
 
-1. **전체 빌드**
+1. **전체 빌드 (권장)**
+   ```bash
+   npm run build
+   ```
+   
+   > **🖥️ OS 자동 감지**: Windows, Linux, macOS 환경에서 자동으로 적절한 스크립트를 실행합니다.
+
+2. **개별 빌드**
    ```bash
    # 공통 패키지
    cd packages/common && npm run build
    
    # Backend
-   cd ../../be && npm run build
+   cd be && bash scripts/build.sh
    
    # Frontend
-   cd ../fe && npm run build
+   cd fe && bash scripts/build.sh
    ```
-
-2. **개별 빌드**
-   - Backend: `cd be && npm run build`
-   - Frontend: `cd fe && npm run build`
 
 ### 테스트
 
@@ -224,10 +238,10 @@ cd fe && npm test
 ### 프로덕션 빌드
 
 ```bash
-# 전체 프로덕션 빌드
-cd packages/common && npm run build
-cd ../../be && npm run build
-cd ../fe && npm run build
+# 전체 프로덕션 빌드 (권장)
+npm run build
+# 또는
+bash script/build-all.sh
 ```
 
 ### 환경 변수

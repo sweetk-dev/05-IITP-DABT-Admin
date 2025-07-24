@@ -7,6 +7,19 @@ if [ -f .env.example ] && [ ! -f .env ]; then
   echo ".env.example을 .env로 복사했습니다."
 fi
 
+# packages/common 의존성 확인 및 설치
+echo "📦 packages/common 의존성 확인 중..."
+if [ ! -f "../packages/common/package.json" ]; then
+  echo "❌ packages/common이 없습니다."
+  exit 1
+fi
+
+# packages/common 설치 및 빌드
+cd ../packages/common
+npm install
+npm run build
+cd ../../be
+
 # node_modules 설치
 npm install
 

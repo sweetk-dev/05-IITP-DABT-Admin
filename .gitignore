@@ -1,71 +1,198 @@
-# dependencies
-/node_modules
-/fe/node_modules
-/be/node_modules
-/packages/common/node_modules
+# ========================================
+# IITP DABT Admin - Monorepo .gitignore
+# ========================================
 
-# production
-# fe
-/dist
-/fe/dist
-/fe/.env
-/fe/.env.*
-/fe/.DS_Store
-/fe/coverage/
-/fe/logs/
-/fe/*.log
-/fe/npm-debug.log*
-/fe/yarn-debug.log*
-/fe/yarn-error.log*
-/fe/pids/
-/fe/tmp/
-/fe/.vscode/
-/fe/.idea/ 
+# ========================================
+# Dependencies
+# ========================================
+node_modules/
+.pnp
+.pnp.js
 
-# be
-/be/dist
-/be/build-info.json
-/be/.env
-/be/.env.*
-/be/.DS_Store
-/be/coverage/
-/be/logs/
-/be/*.log
-/be/npm-debug.log*
-/be/yarn-debug.log*
-/be/yarn-error.log*
-/be/pids/
-/be/tmp/
-/be/.vscode/
-/be/.idea/ 
-
-# packages
-/packages/*/dist
-/packages/*/.DS_Store
-/packages/*/coverage/
-/packages/*/logs/
-/packages/*/*.log
-
-# misc
-.DS_Store
-.env
-.env.*
-*.local
-
-# log files
+# ========================================
+# Logs
+# ========================================
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 pnpm-debug.log*
 
-# editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# ========================================
+# Production Builds
+# ========================================
+# Root level
+build/
+dist/
 
-# OS files
-Thumbs.db 
+# Frontend
+fe/dist/
+fe/build/
+
+# Backend
+be/dist/
+be/build-info.json
+
+# Common package
+packages/common/dist/
+
+# ========================================
+# Environment Variables
+# ========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Frontend specific
+fe/.env
+fe/.env.*
+
+# Backend specific
+be/.env
+be/.env.*
+
+# ========================================
+# Testing
+# ========================================
+coverage/
+*.lcov
+
+# Frontend specific
+fe/coverage/
+
+# Backend specific
+be/coverage/
+
+# ========================================
+# IDE & Editor
+# ========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Frontend specific
+fe/.vscode/
+fe/.idea/
+
+# Backend specific
+be/.vscode/
+be/.idea/
+
+# ========================================
+# OS Generated Files
+# ========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Frontend specific
+fe/.DS_Store
+
+# Backend specific
+be/.DS_Store
+
+# Common package specific
+packages/common/.DS_Store
+
+# ========================================
+# Temporary Files
+# ========================================
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Frontend specific
+fe/tmp/
+fe/temp/
+
+# Backend specific
+be/tmp/
+be/temp/
+
+# ========================================
+# Process Management
+# ========================================
+# PM2
+pids/
+*.pid
+
+# Frontend specific
+fe/pids/
+fe/*.pid
+
+# Backend specific
+be/pids/
+be/*.pid
+
+# ========================================
+# Local Development
+# ========================================
+# Local deployment config (임시 로컬 배포 설정 파일)
+script/deploy-config.json
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# ========================================
+# Package Manager
+# ========================================
+# npm
+.npm
+.npmrc
+
+# yarn
+.yarn-integrity
+.yarnrc
+
+# pnpm
+.pnpm-store/
+
+# ========================================
+# TypeScript
+# ========================================
+*.tsbuildinfo
+
+# ========================================
+# Security
+# ========================================
+# Private keys
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ========================================
+# Backup Files
+# ========================================
+*.bak
+*.backup
+*~
+
+# ========================================
+# Archive Files
+# ========================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ========================================
+# Documentation Build
+# ========================================
+docs/build/
+docs/_build/ 

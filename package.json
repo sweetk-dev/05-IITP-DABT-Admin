@@ -5,6 +5,10 @@
   "scripts": {
     "setup": "node script/setup.js",
     "build": "node script/build.js",
+    "deploy": "node script/deploy.js",
+    "deploy:common": "node script/deploy-common.js",
+    "deploy:be": "node script/deploy-be.js",
+    "deploy:fe": "node script/deploy-fe.js",
     "build:clean": "npm run build:common && npm run build:be && npm run build:fe",
     "build:be": "cd be && npm run build:clean",
     "build:fe": "cd fe && npm run build:clean",

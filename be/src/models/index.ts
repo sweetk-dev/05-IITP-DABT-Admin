@@ -1,6 +1,7 @@
 import { appLogger } from '../utils/logger';
 import { Sequelize } from 'sequelize';
-import { initOpenApiClient } from './openApiClient';
+import { initOpenApiUser } from './openApiUser';
+import { initOpenApiAuthKey } from './openApiAuthKey';
 import { getDecryptedEnv } from '../utils/decrypt';
 
 const env = process.env.NODE_ENV || 'development';
@@ -20,6 +21,21 @@ const sequelize = new Sequelize(
   }
 );
 
-initOpenApiClient(sequelize);
+initOpenApiUser(sequelize);
+initOpenApiAuthKey(sequelize);
+
+// 모델 간 관계 설정
+import { OpenApiUser } from './openApiUser';
+import { OpenApiAuthKey } from './openApiAuthKey';
+
+OpenApiUser.hasMany(OpenApiAuthKey, {
+  foreignKey: 'userId',
+  as: 'authKeys'
+});
+
+OpenApiAuthKey.belongsTo(OpenApiUser, {
+  foreignKey: 'userId',
+  as: 'user'
+});
 
 export { sequelize }; 

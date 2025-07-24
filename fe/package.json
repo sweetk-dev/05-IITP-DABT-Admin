@@ -1,39 +1,26 @@
 {
   "name": "fe",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "IITP DABT Admin Frontend",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "rimraf dist && tsc -b && vite build",
     "build:clean": "rimraf dist && tsc --build",
-    "build:all": "bash ../be/scripts/build-all.sh",
-    "lint": "eslint .",
+    "dev": "vite",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.2.0",
-    "@mui/material": "^7.2.0",
-    "@iitp/common": "file:../packages/common",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.7.0",
-    "jwt-decode": "^4.0.0"
+    "@iitp-dabt/common": "file:../packages/common",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.30.1",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "eslint": "^9.30.1",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.3.0",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
     "rimraf": "^5.0.5",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.35.1",
-    "vite": "^7.0.4"
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8"
   }
 }

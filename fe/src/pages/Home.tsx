@@ -42,8 +42,7 @@ const dummyFaqs = [
 
 const bgMain = '#FFF7ED';
 const section2 = '#E3F2FD';
-const APPBAR_HEIGHT = 64;
-const FOOTER_HEIGHT = 56;
+
 
 export default function Home() {
   const navigate = useNavigate();

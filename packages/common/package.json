@@ -1,18 +1,38 @@
 {
   "name": "@iitp/common",
   "version": "1.0.0",
-  "description": "공통 유틸리티 및 타입 정의",
-  "main": "./dist/validation.js",
-  "module": "./dist/validation.js",
-  "types": "./dist/validation.d.ts",
+  "description": "IITP DABT Admin 공통 유틸리티 및 타입 정의",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build:clean": "rimraf dist && tsc --build"
+    "build": "tsc",
+    "build:clean": "rimraf dist && tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build:clean"
   },
-  "keywords": ["iitp", "common", "utils", "validation"],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "iitp", 
+    "dabt", 
+    "admin", 
+    "common", 
+    "utils", 
+    "validation",
+    "typescript"
+  ],
+  "author": "IITP DABT Team",
+  "license": "MIT",
   "devDependencies": {
     "rimraf": "^5.0.5",
     "typescript": "^5.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iitp/dabt-admin.git",
+    "directory": "packages/common"
   }
 } 

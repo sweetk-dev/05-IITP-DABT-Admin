@@ -4,7 +4,7 @@ import { ErrorCode } from '../../types/errorCodes';
 import * as userService from '../../services/userService';
 import { sendError } from '../../utils/response';
 import { ApiResponse } from '../../types/common';
-import { isValidEmail, isValidPassword } from 'packages/common/validation';
+import { isValidEmail, isValidPassword } from '@iitp/common';
 import { generateAccessToken, generateRefreshToken, verifyToken } from '../../utils/jwt';
 
 // 이메일 중복 체크

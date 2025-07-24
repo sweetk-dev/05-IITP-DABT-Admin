@@ -1,5 +1,5 @@
 import { UserRegisterRequest, UserRegisterResult, UserCheckEmailRequest, UserCheckEmailResult } from '../types/user';
-import { isEmailExists, createClient, findClientByEmail } from '../repositories/openApiClientRepository';
+import { isEmailExists, createUser, findUserByEmail } from '../repositories/openApiUserRepository';
 import bcrypt from 'bcryptjs';
 import { ErrorCode } from '../types/errorCodes';
 
@@ -15,14 +15,15 @@ export const register = async (dto: UserRegisterRequest): Promise<UserRegisterRe
   // 2. 비밀번호 해시
   const hashedPassword = await bcrypt.hash(dto.password, 10);
   // 3. DB 저장
-  const { id } = await createClient({
-    email: dto.email,
+  const { userId } = await createUser({
+    loginId: dto.email,
     password: hashedPassword,
-    name: dto.name,
+    userName: dto.name,
     affiliation: dto.affiliation,
+    createdBy: 'BY-USER'
   });
   // 4. 결과 반환
-  return { userId: id };
+  return { userId };
 };
 
 export const checkEmail = async (dto: UserCheckEmailRequest): Promise<UserCheckEmailResult> => {
@@ -31,7 +32,7 @@ export const checkEmail = async (dto: UserCheckEmailRequest): Promise<UserCheckE
 };
 
 export async function loginUser(email: string, password: string) {
-  const user = await findClientByEmail(email);
+  const user = await findUserByEmail(email);
   if (!user) {
     const err: any = new Error('존재하지 않는 계정입니다.');
     err.code = ErrorCode.USER_NOT_FOUND;
@@ -45,9 +46,9 @@ export async function loginUser(email: string, password: string) {
   }
   // 로그인 성공: 필요한 정보만 반환
   return {
-    id: user.apiCliId,
-    userId: user.clientId,
-    name: user.clientName,
+    id: user.userId,
+    userId: user.loginId,
+    name: user.userName,
     role: 'user', // 추후 확장 가능
     affiliation: user.affiliation,
     status: user.status,

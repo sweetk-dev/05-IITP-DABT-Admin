@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { FloatingLogo } from '../components/AppBarCommon';
-import { isValidEmail, isValidPassword } from '../../../packages/common/validation';
+import { isValidEmail, isValidPassword } from '@iitp/common';
 import { useTheme } from '@mui/material/styles';
 import { checkEmail, registerUser } from '../api/user';
 import CommonDialog from '../components/CommonDialog';
@@ -28,8 +28,7 @@ export default function Register() {
   const [dialogMsg, setDialogMsg] = useState('');
   const [dialogOnConfirm, setDialogOnConfirm] = useState<(() => void) | undefined>(undefined);
 
-  // 패스워드 패턴: 영문, 숫자, 특수문자 포함 10자리 이상
-  const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;
+
 
   const handleEmailCheck = async () => {
     if (!isValidEmail(email)) {

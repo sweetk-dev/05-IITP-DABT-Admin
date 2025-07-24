@@ -1,6 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Toolbar, Typography, Button, Box, Card, CardContent, Stack, Container, Divider } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Typography, Box, Card, CardContent, Stack, Container } from '@mui/material';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import AppBar from './components/AppBar';
@@ -30,30 +29,12 @@ const dummyNotices = [
   }
 ];
 
-const dummyFaqs = [
-  {
-    question: 'API 신청은 어떻게 하나요?',
-    answer: '로그인 후 [API 관리] 메뉴에서 신청할 수 있습니다.'
-  },
-  {
-    question: '키 발급은 얼마나 걸리나요?',
-    answer: '관리자의 승인 후 즉시 발급됩니다.'
-  },
-  {
-    question: '비밀번호를 잊어버렸어요?',
-    answer: '로그인 화면에서 비밀번호 찾기를 이용해 주세요.'
-  }
-];
-
 // 따뜻한 색상 팔레트
 const bgMain = '#FFF7ED'; // 연한 베이지
-const section1 = '#FFE5D0'; // 연한 오렌지
-const section2 = '#E3F2FD'; // 연한 블루
 const footerBg = '#2D3142'; // 네이비에 가까운 보라
 const footerText = '#fff';
 
 const APPBAR_HEIGHT = 64;
-const FOOTER_HEIGHT = 56;
 
 function NoticeList() {
   return (
@@ -155,17 +136,24 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 // 임시 컴포넌트 정의
-const Faq = () => <div>Faq</div>;
+// TODO: 실제 컴포넌트들로 교체 예정
 const UserDashboard = () => <div>UserDashboard</div>;
-const OpenApiManagement = () => <div>OpenApiManagement</div>;
 const UserProfile = () => <div>UserProfile</div>;
 const AdminDashboard = () => <div>AdminDashboard</div>;
+
+// 임시 컴포넌트들 (라우팅용)
+const NoticeDetail = () => <div>NoticeDetail</div>;
+const FaqList = () => <div>FaqList</div>;
+const FaqDetail = () => <div>FaqDetail</div>;
+const QnaList = () => <div>QnaList</div>;
+const QnaDetail = () => <div>QnaDetail</div>;
+const OpenApiManagement = () => <div>OpenApiManagement</div>;
 const UserManagement = () => <div>UserManagement</div>;
 const UserDetail = () => <div>UserDetail</div>;
 const ApiClientManagement = () => <div>ApiClientManagement</div>;
 const ApiClientDetail = () => <div>ApiClientDetail</div>;
-const ApiApplicationManagement = () => <div>ApiApplicationManagement</div>;
-const ApiApplicationDetail = () => <div>ApiApplicationDetail</div>;
+const ApiRequestManagement = () => <div>ApiRequestManagement</div>;
+const ApiRequestDetail = () => <div>ApiRequestDetail</div>;
 const AdminNoticeList = () => <div>AdminNoticeList</div>;
 const AdminNoticeCreate = () => <div>AdminNoticeCreate</div>;
 const AdminNoticeDetail = () => <div>AdminNoticeDetail</div>;
@@ -177,13 +165,6 @@ const AdminFaqEdit = () => <div>AdminFaqEdit</div>;
 const AdminQnaList = () => <div>AdminQnaList</div>;
 const AdminQnaDetail = () => <div>AdminQnaDetail</div>;
 const AdminQnaEdit = () => <div>AdminQnaEdit</div>;
-const NoticeDetail = () => <div>NoticeDetail</div>;
-const FaqList = () => <div>FaqList</div>;
-const FaqDetail = () => <div>FaqDetail</div>;
-const QnaList = () => <div>QnaList</div>;
-const QnaDetail = () => <div>QnaDetail</div>;
-const ApiRequestManagement = () => <div>ApiRequestManagement</div>;
-const ApiRequestDetail = () => <div>ApiRequestDetail</div>;
 
 function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   const isLoggedIn = Boolean(localStorage.getItem('token'));

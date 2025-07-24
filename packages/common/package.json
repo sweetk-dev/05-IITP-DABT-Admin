@@ -1,5 +1,5 @@
 {
-  "name": "@iitp/common",
+  "name": "@iitp-dabt/common",
   "version": "1.0.0",
   "description": "IITP DABT Admin 공통 유틸리티 및 타입 정의",
   "main": "./dist/index.js",
@@ -10,7 +10,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "build:clean": "rimraf dist && tsc",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build:clean"

@@ -2,7 +2,7 @@ import { DataTypes, Model, Optional } from 'sequelize';
 import type { Sequelize } from 'sequelize';
 
 export interface OpenApiAuthKeyAttributes {
-  id?: number;
+  keyId?: number;
   userId: number;
   authKey: string;
   activeYn: string;
@@ -20,7 +20,7 @@ export interface OpenApiAuthKeyAttributes {
 }
 
 export type OpenApiAuthKeyCreationAttributes = Optional<OpenApiAuthKeyAttributes, 
-  'id' |
+  'keyId' |
   'activeAt' | 
   'latestAccAt' | 
   'createdAt' |
@@ -31,7 +31,7 @@ export type OpenApiAuthKeyCreationAttributes = Optional<OpenApiAuthKeyAttributes
 >;
 
 export class OpenApiAuthKey extends Model<OpenApiAuthKeyAttributes, OpenApiAuthKeyCreationAttributes> implements OpenApiAuthKeyAttributes {
-  public id!: number;
+  public keyId!: number;
   public userId!: number;
   public authKey!: string;
   public activeYn!: string;
@@ -59,7 +59,7 @@ export class OpenApiAuthKey extends Model<OpenApiAuthKeyAttributes, OpenApiAuthK
 export function initOpenApiAuthKey(sequelize: Sequelize) {
   OpenApiAuthKey.init(
     {
-      id: {
+      keyId: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,

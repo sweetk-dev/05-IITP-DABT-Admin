@@ -1,0 +1,20 @@
+{
+  "common": {
+    "host": "your-common-server.com",
+    "user": "your-username",
+    "path": "/var/www/iitp-dabt-common",
+    "port": "22"
+  },
+  "backend": {
+    "host": "your-backend-server.com",
+    "user": "your-username",
+    "path": "/var/www/iitp-dabt-backend",
+    "port": "22"
+  },
+  "frontend": {
+    "host": "your-frontend-server.com",
+    "user": "your-username",
+    "path": "/var/www/iitp-dabt-frontend",
+    "port": "22"
+  }
+} 

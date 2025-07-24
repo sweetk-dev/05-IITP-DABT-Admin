@@ -6,15 +6,10 @@
     "outDir": "dist",                                   /* 빌드 결과를 dist/ 폴더에 생성 */
     "rootDir": "src",                                   /* 소스는 src/ 폴더 기준 */
     "baseUrl": ".",
-    "paths": {
-      "packages/common/*": ["../packages/common/*"]
-    },
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
     "strict": true,                                      /* Enable all strict type-checking options. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "references": [
-    { "path": "../packages/common" }
-  ]
+
 }

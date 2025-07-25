@@ -22,7 +22,7 @@ import type {
 /**
  * 사용자 QnA 목록 조회
  */
-export async function getUserQnaList(params: UserQnaListReq): Promise<ApiResponse<UserQnaListRes>> {
+export async function getUserQnaList(_params: UserQnaListReq): Promise<ApiResponse<UserQnaListRes>> {
   return publicApiFetch<UserQnaListRes>(FULL_API_URLS.USER.QNA_LIST, {
     method: 'GET',
     // TODO: 쿼리 파라미터 처리
@@ -54,7 +54,7 @@ export async function createUserQna(params: UserQnaCreateReq): Promise<ApiRespon
 /**
  * 관리자 QnA 목록 조회
  */
-export async function getAdminQnaList(params: AdminQnaListReq): Promise<ApiResponse<AdminQnaListRes>> {
+export async function getAdminQnaList(_params: AdminQnaListReq): Promise<ApiResponse<AdminQnaListRes>> {
   return apiFetch<AdminQnaListRes>(FULL_API_URLS.ADMIN.QNA_LIST, {
     method: 'GET',
     // TODO: 쿼리 파라미터 처리

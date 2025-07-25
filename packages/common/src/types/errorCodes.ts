@@ -27,6 +27,7 @@ export enum ErrorCode {
   USER_PASSWORD_TOO_WEAK = 3006,
   USER_EMAIL_DUPLICATE = 3007,
   USER_PASSWORD_INVALID = 3008,
+  USER_INACTIVE = 3009,
   
   // FAQ 관련
   FAQ_NOT_FOUND = 4000,
@@ -166,6 +167,10 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
   [ErrorCode.USER_PASSWORD_INVALID]: {
     message: '비밀번호가 올바르지 않습니다.',
     statusCode: 400
+  },
+  [ErrorCode.USER_INACTIVE]: {
+    message: '사용자가 비활성화되었습니다.',
+    statusCode: 403
   },
   
   // FAQ 관련

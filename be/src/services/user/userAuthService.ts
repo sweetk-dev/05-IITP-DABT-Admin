@@ -64,6 +64,21 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
       throw new Error('USER_PASSWORD_INVALID');
     }
 
+    // 계정 상태 확인
+    if (user.status !== 'A') {
+      // 로그인 실패 로그 기록
+      await createLog({
+        userId: user.userId,
+        userType: 'U',
+        logType: 'LOGIN',
+        actResult: 'F',
+        errMsg: '비활성화된 계정',
+        ipAddr,
+        userAgent
+      });
+      throw new Error('USER_INACTIVE');
+    }
+
     // JWT 토큰 생성
     const jwtSecret = getDecryptedEnv('JWT_SECRET');
     if (!jwtSecret) {
@@ -110,6 +125,8 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
           throw new Error(ErrorCode.USER_NOT_FOUND.toString());
         case 'USER_PASSWORD_INVALID':
           throw new Error(ErrorCode.USER_PASSWORD_INVALID.toString());
+        case 'USER_INACTIVE':
+          throw new Error(ErrorCode.USER_INACTIVE.toString());
         case 'JWT_SECRET_NOT_CONFIGURED':
           throw new Error(ErrorCode.UNKNOWN_ERROR.toString());
       }

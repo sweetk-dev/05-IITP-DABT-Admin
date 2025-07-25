@@ -2,12 +2,12 @@ import { ErrorCode } from '@iitp-dabt/common';
 import { findAdminByLoginId, updateLatestLoginAt } from '../../repositories/sysAdmAccountRepository';
 import { createLog } from '../../repositories/sysLogUserAccessRepository';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { getDecryptedEnv } from '../../utils/decrypt';
 import { appLogger } from '../../utils/logger';
+import { generateAccessToken, generateRefreshToken, verifyToken } from '../../utils/jwt';
 
 export interface LoginResult {
   token: string;
+  refreshToken: string;
   userId: number;
   userType: 'U' | 'A';
   loginId?: string;
@@ -18,6 +18,13 @@ export interface LoginResult {
 export interface LogoutResult {
   success: boolean;
   message: string;
+}
+
+export interface RefreshResult {
+  token: string;
+  refreshToken: string;
+  userId: number;
+  userType: 'U' | 'A';
 }
 
 // 관리자 로그인
@@ -70,22 +77,15 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
       throw new Error('ADMIN_INACTIVE');
     }
 
-    // JWT 토큰 생성
-    const jwtSecret = getDecryptedEnv('JWT_SECRET');
-    if (!jwtSecret) {
-      appLogger.error('JWT_SECRET is not configured');
-      throw new Error('JWT_SECRET_NOT_CONFIGURED');
-    }
+    // Access Token과 Refresh Token 생성
+    const tokenPayload = {
+      userId: admin.admId,
+      userType: 'A' as const,
+      loginId: admin.loginId
+    };
 
-    const token = jwt.sign(
-      {
-        userId: admin.admId,
-        userType: 'A',
-        loginId: admin.loginId
-      },
-      jwtSecret,
-      { expiresIn: '24h' }
-    );
+    const token = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
 
     // 최근 로그인 시간 업데이트
     await updateLatestLoginAt(admin.admId);
@@ -103,6 +103,7 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
 
     return {
       token,
+      refreshToken,
       userId: admin.admId,
       userType: 'A',
       loginId: admin.loginId,
@@ -112,9 +113,9 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
     if (error instanceof Error) {
       switch (error.message) {
         case 'ADMIN_NOT_FOUND':
-          throw new Error(ErrorCode.ADMIN_NOT_FOUND.toString());
+          throw new Error(ErrorCode.USER_NOT_FOUND.toString());
         case 'ADMIN_PASSWORD_INVALID':
-          throw new Error(ErrorCode.ADMIN_PASSWORD_INVALID.toString());
+          throw new Error(ErrorCode.USER_PASSWORD_INVALID.toString());
         case 'ADMIN_INACTIVE':
           throw new Error(ErrorCode.ADMIN_INACTIVE.toString());
         case 'JWT_SECRET_NOT_CONFIGURED':
@@ -122,6 +123,65 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
       }
     }
     throw error;
+  }
+};
+
+// 관리자 토큰 갱신
+export const refreshAdminToken = async (refreshToken: string, ipAddr?: string, userAgent?: string): Promise<RefreshResult> => {
+  try {
+    // Refresh Token 검증
+    const payload = verifyToken(refreshToken);
+    if (!payload || payload.userType !== 'A') {
+      throw new Error('INVALID_REFRESH_TOKEN');
+    }
+
+    // 관리자 계정 조회
+    if (!payload.loginId) {
+      throw new Error('INVALID_REFRESH_TOKEN');
+    }
+    const admin = await findAdminByLoginId(payload.loginId);
+    if (!admin) {
+      throw new Error('ADMIN_NOT_FOUND');
+    }
+
+    // 새로운 토큰 생성
+    const tokenPayload = {
+      userId: admin.admId,
+      userType: 'A' as const,
+      loginId: admin.loginId
+    };
+
+    const newToken = generateAccessToken(tokenPayload);
+    const newRefreshToken = generateRefreshToken(tokenPayload);
+
+    // 토큰 갱신 로그 기록
+    await createLog({
+      userId: admin.admId,
+      userType: 'A',
+      logType: 'TOKEN_REFRESH',
+      actResult: 'S',
+      errMsg: '토큰 갱신 성공',
+      ipAddr,
+      userAgent
+    });
+
+    return {
+      token: newToken,
+      refreshToken: newRefreshToken,
+      userId: admin.admId,
+      userType: 'A'
+    };
+  } catch (error) {
+    appLogger.error('Admin token refresh error:', error);
+    if (error instanceof Error) {
+      switch (error.message) {
+        case 'INVALID_REFRESH_TOKEN':
+          throw new Error(ErrorCode.INVALID_TOKEN.toString());
+        case 'ADMIN_NOT_FOUND':
+          throw new Error(ErrorCode.USER_NOT_FOUND.toString());
+      }
+    }
+    throw new Error(ErrorCode.UNKNOWN_ERROR.toString());
   }
 };
 

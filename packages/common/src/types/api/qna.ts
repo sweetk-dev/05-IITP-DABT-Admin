@@ -1,5 +1,5 @@
 // QnA 관련 DTO 정의
-import { PaginationReq, PaginationRes } from './api';
+import { PaginationQuery, PaginationRes } from './api';
 
 // QnA 엔티티
 export interface Qna {
@@ -22,7 +22,7 @@ export interface QnaDetail extends Qna {
 }
 
 // QnA 목록 조회 (사용자용)
-export interface UserQnaListReq extends PaginationReq {
+export interface UserQnaListReq extends PaginationQuery {
   qnaType?: string;
   search?: string;
 }
@@ -54,7 +54,7 @@ export interface UserQnaCreateRes {
 }
 
 // QnA 목록 조회 (관리자용)
-export interface AdminQnaListReq extends PaginationReq {
+export interface AdminQnaListReq extends PaginationQuery {
   search?: string;
 }
 

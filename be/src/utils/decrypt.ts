@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { appLogger } from './logger';
 
 export function decryptAes256(encBase64: string, secret: string): string {
   const encBuffer = Buffer.from(encBase64, 'base64');
@@ -11,8 +12,15 @@ export function decryptAes256(encBase64: string, secret: string): string {
   return decrypted;
 }
 
-export function getDecryptedEnv(varName: string, secret: string): string | undefined {
+export function getDecryptedEnv(varName: string): string | undefined {
   const value = process.env[varName];
+  const secret = process.env.ENCRYPTION_SECRET;
+  
+  if (!secret) {
+    appLogger.warn('ENCRYPTION_SECRET environment variable is not set');
+    return value;
+  }
+  
   if (value && value.startsWith('ENC(') && value.endsWith(')')) {
     const encStr = value.slice(4, -1);
     return decryptAes256(encStr, secret);

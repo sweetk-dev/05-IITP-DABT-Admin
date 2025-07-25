@@ -21,7 +21,7 @@ import type {
 /**
  * 사용자 FAQ 목록 조회
  */
-export async function getUserFaqList(params: UserFaqListReq): Promise<ApiResponse<UserFaqListRes>> {
+export async function getUserFaqList(_params: UserFaqListReq): Promise<ApiResponse<UserFaqListRes>> {
   return publicApiFetch<UserFaqListRes>(FULL_API_URLS.USER.FAQ_LIST, {
     method: 'GET',
     // TODO: 쿼리 파라미터 처리
@@ -43,7 +43,7 @@ export async function getUserFaqDetail(faqId: number): Promise<ApiResponse<UserF
 /**
  * 관리자 FAQ 목록 조회
  */
-export async function getAdminFaqList(params: AdminFaqListReq): Promise<ApiResponse<AdminFaqListRes>> {
+export async function getAdminFaqList(_params: AdminFaqListReq): Promise<ApiResponse<AdminFaqListRes>> {
   return apiFetch<AdminFaqListRes>(FULL_API_URLS.ADMIN.FAQ_LIST, {
     method: 'GET',
     // TODO: 쿼리 파라미터 처리

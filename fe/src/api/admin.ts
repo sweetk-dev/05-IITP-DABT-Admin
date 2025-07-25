@@ -4,10 +4,9 @@ import { FULL_API_URLS } from '@iitp-dabt/common';
 import type { 
   AdminLoginReq, 
   AdminLoginRes,
-  AdminLogoutReq, 
-  AdminLogoutRes,
   AdminRefreshTokenReq,
   AdminRefreshTokenRes,
+  AdminLogoutRes,
   ApiResponse
 } from '@iitp-dabt/common';
 
@@ -32,9 +31,10 @@ export async function loginAdmin(params: AdminLoginReq): Promise<ApiResponse<Adm
  * 관리자 토큰 갱신
  */
 export async function refreshAdminToken(refreshToken: string): Promise<ApiResponse<AdminRefreshTokenRes>> {
+  const requestData: AdminRefreshTokenReq = { refreshToken };
   const response = await publicApiFetch<AdminRefreshTokenRes>(FULL_API_URLS.AUTH.ADMIN_REFRESH, {
     method: 'POST',
-    body: JSON.stringify({ refreshToken }),
+    body: JSON.stringify(requestData),
   });
 
   // 갱신 성공 시 토큰 저장

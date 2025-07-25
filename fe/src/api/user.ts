@@ -1,12 +1,15 @@
 import { apiFetch, publicApiFetch } from './api';
 import { saveTokens, removeTokens } from '../store/auth';
 import { FULL_API_URLS } from '@iitp-dabt/common';
-import type { 
-  UserLoginReq, 
-  UserRegisterReq, 
-  UserRegisterRes, 
-  UserCheckEmailReq, 
+import type {
+  UserLoginReq,
+  UserLoginRes,
+  UserRegisterReq,
+  UserRegisterRes,
+  UserCheckEmailReq,
   UserCheckEmailRes,
+  UserRefreshTokenReq,
+  UserRefreshTokenRes,
   UserProfileRes,
   ApiResponse
 } from '@iitp-dabt/common';
@@ -14,37 +17,15 @@ import type {
 /**
  * 사용자 로그인
  */
-export async function loginUser(params: UserLoginReq): Promise<ApiResponse<{
-  accessToken: string;
-  refreshToken: string;
-  user: {
-    id: number;
-    userId: string;
-    name: string;
-    role: string;
-    affiliation?: string;
-    status: string;
-  };
-}>> {
-  const response = await publicApiFetch<{
-    accessToken: string;
-    refreshToken: string;
-    user: {
-      id: number;
-      userId: string;
-      name: string;
-      role: string;
-      affiliation?: string;
-      status: string;
-    };
-  }>(FULL_API_URLS.AUTH.USER_LOGIN, {
+export async function loginUser(params: UserLoginReq): Promise<ApiResponse<UserLoginRes>> {
+  const response = await publicApiFetch<UserLoginRes>(FULL_API_URLS.AUTH.USER_LOGIN, {
     method: 'POST',
     body: JSON.stringify(params),
   });
 
   // 로그인 성공 시 토큰 저장
-  if (response.success && response.data?.accessToken && response.data?.refreshToken) {
-    saveTokens(response.data.accessToken, response.data.refreshToken);
+  if (response.success && response.data?.token && response.data?.refreshToken) {
+    saveTokens(response.data.token, response.data.refreshToken);
   }
 
   return response;
@@ -74,21 +55,16 @@ export async function registerUser(params: UserRegisterReq): Promise<ApiResponse
 /**
  * 토큰 갱신
  */
-export async function refreshToken(refreshToken: string): Promise<ApiResponse<{
-  accessToken: string;
-  refreshToken: string;
-}>> {
-  const response = await publicApiFetch<{
-    accessToken: string;
-    refreshToken: string;
-  }>(FULL_API_URLS.AUTH.USER_REFRESH, {
+export async function refreshToken(refreshToken: string): Promise<ApiResponse<UserRefreshTokenRes>> {
+  const requestData: UserRefreshTokenReq = { refreshToken };
+  const response = await publicApiFetch<UserRefreshTokenRes>(FULL_API_URLS.AUTH.USER_REFRESH, {
     method: 'POST',
-    body: JSON.stringify({ refreshToken }),
+    body: JSON.stringify(requestData),
   });
 
   // 갱신 성공 시 토큰 저장
-  if (response.success && response.data?.accessToken) {
-    saveTokens(response.data.accessToken, refreshToken);
+  if (response.success && response.data?.token) {
+    saveTokens(response.data.token, refreshToken);
   }
 
   return response;

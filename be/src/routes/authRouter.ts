@@ -1,5 +1,5 @@
 import express from 'express';
-import { adminLogin, adminLogout } from '../controllers/admin/adminAuthController';
+import { adminLogin, adminLogout, adminRefreshToken } from '../controllers/admin/adminAuthController';
 import { userLogin, userLogout, userRefreshToken } from '../controllers/user/userAuthController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { API_URLS } from '@iitp-dabt/common';
@@ -8,6 +8,7 @@ const router = express.Router();
 
 // Admin 인증
 router.post(API_URLS.AUTH.ADMIN.LOGIN, adminLogin);
+router.post(API_URLS.AUTH.ADMIN.REFRESH, adminRefreshToken);
 router.post(API_URLS.AUTH.ADMIN.LOGOUT, authMiddleware, adminLogout);
 
 // User 인증

@@ -18,6 +18,16 @@ export interface AdminLoginRes {
   };
 }
 
+// Admin 토큰 갱신
+export interface AdminRefreshTokenReq {
+  refreshToken: string;
+}
+
+export interface AdminRefreshTokenRes {
+  token: string;
+  refreshToken: string;
+}
+
 // Admin 로그아웃
 export interface AdminLogoutReq {
   // 현재는 파라미터 없음 (토큰으로 인증)

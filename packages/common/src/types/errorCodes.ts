@@ -13,6 +13,9 @@ export enum ErrorCode {
   TOKEN_EXPIRED = 2003,
   INVALID_TOKEN = 2004,
   ACCESS_DENIED = 2005,
+  TOKEN_REQUIRED = 2006,
+  TOKEN_INVALID = 2007,
+  FORBIDDEN = 2008,
   
   // 사용자 관련
   USER_NOT_FOUND = 3000,
@@ -20,6 +23,10 @@ export enum ErrorCode {
   INVALID_EMAIL = 3002,
   INVALID_PASSWORD = 3003,
   EMAIL_ALREADY_EXISTS = 3004,
+  USER_EMAIL_INVALID_FORMAT = 3005,
+  USER_PASSWORD_TOO_WEAK = 3006,
+  USER_EMAIL_DUPLICATE = 3007,
+  USER_PASSWORD_INVALID = 3008,
   
   // FAQ 관련
   FAQ_NOT_FOUND = 4000,
@@ -44,6 +51,8 @@ export enum ErrorCode {
   ADMIN_DELETE_FAILED = 6004,
   ADMIN_PASSWORD_CHANGE_FAILED = 6005,
   ADMIN_STATUS_CHANGE_FAILED = 6006,
+  ADMIN_PASSWORD_INVALID = 6007,
+  ADMIN_INACTIVE = 6008,
   
   // 요청 관련
   INVALID_REQUEST = 7000,
@@ -107,6 +116,18 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
     message: '접근 권한이 없습니다.',
     statusCode: 403
   },
+  [ErrorCode.TOKEN_REQUIRED]: {
+    message: '토큰이 필요합니다.',
+    statusCode: 401
+  },
+  [ErrorCode.TOKEN_INVALID]: {
+    message: '유효하지 않은 토큰입니다.',
+    statusCode: 401
+  },
+  [ErrorCode.FORBIDDEN]: {
+    message: '접근이 거부되었습니다.',
+    statusCode: 403
+  },
   
   // 사용자 관련
   [ErrorCode.USER_NOT_FOUND]: {
@@ -128,6 +149,22 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
   [ErrorCode.EMAIL_ALREADY_EXISTS]: {
     message: '이미 사용 중인 이메일입니다.',
     statusCode: 409
+  },
+  [ErrorCode.USER_EMAIL_INVALID_FORMAT]: {
+    message: '이메일 형식이 올바르지 않습니다.',
+    statusCode: 400
+  },
+  [ErrorCode.USER_PASSWORD_TOO_WEAK]: {
+    message: '비밀번호가 너무 약합니다.',
+    statusCode: 400
+  },
+  [ErrorCode.USER_EMAIL_DUPLICATE]: {
+    message: '이미 사용 중인 이메일입니다.',
+    statusCode: 409
+  },
+  [ErrorCode.USER_PASSWORD_INVALID]: {
+    message: '비밀번호가 올바르지 않습니다.',
+    statusCode: 400
   },
   
   // FAQ 관련
@@ -206,6 +243,14 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
   [ErrorCode.ADMIN_STATUS_CHANGE_FAILED]: {
     message: '상태 변경에 실패했습니다.',
     statusCode: 500
+  },
+  [ErrorCode.ADMIN_PASSWORD_INVALID]: {
+    message: '비밀번호가 올바르지 않습니다.',
+    statusCode: 400
+  },
+  [ErrorCode.ADMIN_INACTIVE]: {
+    message: '관리자가 비활성화되었습니다.',
+    statusCode: 403
   },
   
   // 요청 관련

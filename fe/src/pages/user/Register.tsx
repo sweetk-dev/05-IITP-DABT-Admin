@@ -8,6 +8,7 @@ import type { UserRegisterReq } from '@iitp-dabt/common';
 import { useTheme } from '@mui/material/styles';
 import { checkEmail, registerUser } from '../../api/user';
 import CommonDialog from '../../components/CommonDialog';
+import { ROUTES } from '../../routes';
 
 export default function Register() {
   const theme = useTheme();
@@ -95,7 +96,7 @@ export default function Register() {
       setDialogMsg('회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.');
       setDialogOnConfirm(() => () => {
         setDialogOpen(false);
-        window.location.href = '/login';
+        window.location.href = ROUTES.PUBLIC.LOGIN;
       });
       setDialogOpen(true);
     } else {
@@ -207,7 +208,7 @@ export default function Register() {
         <Button id="register-submit-btn" variant="contained" color="primary" fullWidth sx={{ mt: 2, fontWeight: 'bold', fontSize: '1.1rem', py: 1.2 }} onClick={handleRegister}>
           회원가입
         </Button>
-        <Button id="register-login-btn" variant="text" color="primary" fullWidth sx={{ mt: 1, fontSize: '0.95rem', opacity: 0.7 }} onClick={() => window.location.href = '/login'}>
+        <Button id="register-login-btn" variant="text" color="primary" fullWidth sx={{ mt: 1, fontSize: '0.95rem', opacity: 0.7 }} onClick={() => window.location.href = ROUTES.PUBLIC.LOGIN}>
           로그인 화면으로
         </Button>
       </Box>

@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
+import { ErrorCode } from '@iitp-dabt/common';
+import { sendError } from '../../utils/errorHandler';
+import { appLogger } from '../../utils/logger';
 
-// 헬스체크
+// 헬스 체크
 export const healthCheck = async (req: Request, res: Response) => {
   try {
     res.json({
@@ -12,10 +15,7 @@ export const healthCheck = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Health check error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Health check failed'
-    });
+    appLogger.error('Health check error:', error);
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 }; 

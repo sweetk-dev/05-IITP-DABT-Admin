@@ -2,21 +2,25 @@ import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError } from '../../utils/errorHandler';
 import { findActiveFaqs, findFaqById, incrementHitCount } from '../../repositories/sysFaqRepository';
+import { appLogger } from '../../utils/logger';
 
 // FAQ 목록 조회 (사용자용)
 export const getFaqList = async (req: Request, res: Response) => {
   try {
-    const { faqType } = req.query;
-    const faqs = await findActiveFaqs(faqType as string);
+    const { page, limit, faqType, search } = req.query;
+    const result = await findActiveFaqs({
+      page: page ? parseInt(page as string) : undefined,
+      limit: limit ? parseInt(limit as string) : undefined,
+      faqType: faqType as string,
+      search: search as string
+    });
     
     res.json({
       success: true,
-      data: {
-        faqs
-      }
+      data: result
     });
   } catch (error) {
-    console.error('User FAQ list error:', error);
+    appLogger.error('User FAQ list error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -31,12 +35,8 @@ export const getFaqDetail = async (req: Request, res: Response) => {
       return sendError(res, ErrorCode.NOT_FOUND);
     }
 
-    if (faq.useYn !== 'Y') {
-      return sendError(res, ErrorCode.NOT_FOUND);
-    }
-
     // 조회수 증가
-    await incrementHitCount(faq.faqId);
+    await incrementHitCount(parseInt(faqId));
 
     res.json({
       success: true,
@@ -45,7 +45,7 @@ export const getFaqDetail = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('User FAQ detail error:', error);
+    appLogger.error('User FAQ detail error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 }; 

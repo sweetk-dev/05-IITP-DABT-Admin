@@ -1,56 +1,26 @@
-import { appLogger } from '../utils/logger';
 import { Sequelize } from 'sequelize';
-import { initOpenApiUser } from './openApiUser';
-import { initOpenApiAuthKey } from './openApiAuthKey';
-import { initSysAdmAccount } from './sysAdmAccount';
-import { initSysFaq } from './sysFaq';
-import { initSysQna } from './sysQna';
-import { initSysLogUserAccess } from './sysLogUserAccess';
-import { initSysLogChangeHis } from './sysLogChangeHis';
 import { getDecryptedEnv } from '../utils/decrypt';
+import { appLogger } from '../utils/logger';
 
-const env = process.env.NODE_ENV || 'development';
-appLogger.info('현재 NODE_ENV:', env);
+// 환경 변수에서 데이터베이스 설정 가져오기
+const dbHost = process.env.DB_HOST || 'localhost';
+const dbPort = parseInt(process.env.DB_PORT || '5432');
+const dbName = process.env.DB_NAME || 'iitp_dabt';
+const dbUser = process.env.DB_USER || 'postgres';
+const dbPassword = getDecryptedEnv('DB_PASSWORD') || '';
 
-const dbPassword = getDecryptedEnv('DB_PASSWORD', process.env.ENC_SECRET || '');
-
-const sequelize = new Sequelize(
-  process.env.DB_NAME || '',
-  process.env.DB_USER || '',
-  dbPassword || '',
-  {
-    host: process.env.DB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT) || 5432,
-    dialect: 'postgres',
-    logging: false,
+// Sequelize 인스턴스 생성
+const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
+  host: dbHost,
+  port: dbPort,
+  dialect: 'postgres',
+  logging: process.env.NODE_ENV === 'development' ? (sql) => appLogger.info(sql) : false,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
   }
-);
-
-initOpenApiUser(sequelize);
-initOpenApiAuthKey(sequelize);
-initSysAdmAccount(sequelize);
-initSysFaq(sequelize);
-initSysQna(sequelize);
-initSysLogUserAccess(sequelize);
-initSysLogChangeHis(sequelize);
-
-// 모델 간 관계 설정
-import { OpenApiUser } from './openApiUser';
-import { OpenApiAuthKey } from './openApiAuthKey';
-import { SysAdmAccount } from './sysAdmAccount';
-import { SysFaq } from './sysFaq';
-import { SysQna } from './sysQna';
-import { SysLogUserAccess } from './sysLogUserAccess';
-import { SysLogChangeHis } from './sysLogChangeHis';
-
-OpenApiUser.hasMany(OpenApiAuthKey, {
-  foreignKey: 'userId',
-  as: 'authKeys'
 });
 
-OpenApiAuthKey.belongsTo(OpenApiUser, {
-  foreignKey: 'userId',
-  as: 'user'
-});
-
-export { sequelize }; 
+export default sequelize; 

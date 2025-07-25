@@ -47,10 +47,7 @@ export const sendError = (
     success: false,
     errorCode,
     errorMessage: customMessage || errorMeta.message,
-    ...(details && { details }),
-    ...(errorMeta.showPopup && { showPopup: true }),
-    ...(errorMeta.redirectTo && { redirectTo: errorMeta.redirectTo }),
-    ...(errorMeta.autoLogout && { autoLogout: true })
+    ...(details && { details })
   });
 };
 

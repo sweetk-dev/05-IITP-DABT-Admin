@@ -6,13 +6,15 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "build:clean": "rimraf dist && tsc --build",
-    "dev": "tsc --watch",
+    "dev": "tsc && node dist/index.js",
+    "dev:watch": "tsc --watch & nodemon dist/index.js",
     "start": "node dist/index.js",
     "prebuild": "node scripts/build-info.js"
   },
   "dependencies": {
     "@iitp-dabt/common": "file:../packages/common",
     "bcrypt": "^5.1.1",
+    "dotenv": "^17.2.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
@@ -26,6 +28,7 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.10.5",
     "@types/pg": "^8.10.9",
-    "@types/uuid": "^10.0.0"
+    "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.10"
   }
 }

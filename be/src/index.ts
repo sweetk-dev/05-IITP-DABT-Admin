@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import './models';
 import express from 'express';
 import userRouter from './routes/userRouter';

@@ -1,5 +1,5 @@
 // QnA 관련 DTO 정의
-import { PaginationQuery, PaginationRes } from './api';
+import { PaginationReq, PaginationRes } from './api';
 
 // QnA 엔티티
 export interface Qna {

@@ -14,10 +14,10 @@ export function decryptAes256(encBase64: string, secret: string): string {
 
 export function getDecryptedEnv(varName: string): string | undefined {
   const value = process.env[varName];
-  const secret = process.env.ENCRYPTION_SECRET;
+  const secret = process.env.ENC_SECRET;
   
   if (!secret) {
-    appLogger.warn('ENCRYPTION_SECRET environment variable is not set');
+    appLogger.warn('ENC_SECRET environment variable is not set');
     return value;
   }
   

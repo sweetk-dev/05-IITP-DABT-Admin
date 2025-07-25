@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
-import { loginUser, logout } from '../../services/user/userAuthService';
+import { loginUser, logout, refreshUserToken } from '../../services/user/userAuthService';
 import { 
   UserLoginReq, 
   UserLoginRes, 
   UserLogoutReq, 
-  UserLogoutRes 
+  UserLogoutRes,
+  UserRefreshTokenReq,
+  UserRefreshTokenRes
 } from '@iitp-dabt/common';
 
 // 사용자 로그인
@@ -20,7 +22,7 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
 
     const response: UserLoginRes = {
       token: result.token,
-      refreshToken: '', // TODO: refreshToken 구현 필요
+      refreshToken: result.refreshToken,
       user: {
         userId: result.userId,
         email: result.email || '',
@@ -32,6 +34,35 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
     sendSuccess(res, response, undefined, 'USER_LOGIN', { userId: result.userId, email });
   } catch (error) {
     sendError(res, ErrorCode.LOGIN_FAILED);
+  }
+};
+
+// 사용자 토큰 갱신
+export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+    const ipAddr = req.ip || req.connection.remoteAddress || '';
+    const userAgent = req.headers['user-agent'] as string;
+
+    const result = await refreshUserToken(refreshToken, ipAddr, userAgent);
+
+    const response: UserRefreshTokenRes = {
+      token: result.token,
+      refreshToken: result.refreshToken
+    };
+
+    sendSuccess(res, response, undefined, 'USER_TOKEN_REFRESH', { userId: result.userId });
+  } catch (error) {
+    if (error instanceof Error) {
+      const errorCode = parseInt(error.message);
+      if (!isNaN(errorCode)) {
+        sendError(res, errorCode);
+      } else {
+        sendError(res, ErrorCode.INVALID_TOKEN);
+      }
+    } else {
+      sendError(res, ErrorCode.INVALID_TOKEN);
+    }
   }
 };
 

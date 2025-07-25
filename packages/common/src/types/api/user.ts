@@ -22,6 +22,7 @@ export interface UserRegisterRes {
   userId: number;
   email: string;
   name: string;
+  affiliation?: string;
 }
 
 // 사용자 프로필 조회
@@ -29,5 +30,6 @@ export interface UserProfileRes {
   userId: number;
   email: string;
   name: string;
+  affiliation?: string;
   createdAt: string;
 } 

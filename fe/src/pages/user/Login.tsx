@@ -1,16 +1,16 @@
 import { Box } from '@mui/material';
-import { FloatingLogo } from '../components/AppBarCommon';
-import LoginForm from '../components/LoginForm';
-import { loginUser } from '../api/user';
+import { FloatingLogo } from '../../components/AppBarCommon';
+import LoginForm from '../../components/LoginForm';
+import { loginUser } from '../../api';
 
 export default function Login() {
   // 🔽 로그인 처리 콜백
   const handleLogin = async (email: string, password: string) => {
     const res = await loginUser({ email, password });
-    if (res.result === 'ok') {
+    if (res.success) {
       window.location.href = '/dashbd';
     } else {
-      alert(res.message || '로그인에 실패했습니다.');
+      alert(res.errorMessage || '로그인에 실패했습니다.');
     }
   };
 

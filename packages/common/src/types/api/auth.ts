@@ -45,6 +45,16 @@ export interface UserLoginRes {
   };
 }
 
+// User 토큰 갱신
+export interface UserRefreshTokenReq {
+  refreshToken: string;
+}
+
+export interface UserRefreshTokenRes {
+  token: string;
+  refreshToken: string;
+}
+
 // User 로그아웃
 export interface UserLogoutReq {
   // 현재는 파라미터 없음 (토큰으로 인증)

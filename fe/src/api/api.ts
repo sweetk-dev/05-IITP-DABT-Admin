@@ -7,14 +7,9 @@ import {
   shouldRefreshAccessToken,
   validateAndCleanTokens
 } from '../store/auth';
-
-export interface ApiResponse<T = any> {
-  result: 'ok' | 'fail';
-  data?: T;
-  message?: string;
-  errorCode?: number;
-  accessToken?: string;
-}
+import { getUserFriendlyMessage } from '../types/errorCodes';
+import { ErrorCode } from '@iitp-dabt/common';
+import type { ApiResponse } from '@iitp-dabt/common';
 
 // 토큰 갱신 상태 관리
 let isRefreshing = false;
@@ -55,11 +50,11 @@ async function refreshAccessToken(): Promise<string | null> {
     }
 
     const data = await response.json();
-    if (data.result === 'ok' && data.accessToken) {
-      saveTokens(data.accessToken, refreshToken);
-      return data.accessToken;
+    if (data.success && data.data?.accessToken) {
+      saveTokens(data.data.accessToken, refreshToken);
+      return data.data.accessToken;
     } else {
-      throw new Error(data.message || 'Token refresh failed');
+      throw new Error(data.errorMessage || 'Token refresh failed');
     }
   } catch (error) {
     console.error('Token refresh error:', error);
@@ -111,6 +106,16 @@ async function ensureValidToken(): Promise<string | null> {
 }
 
 /**
+ * 사용자 친화적인 에러 메시지 생성
+ */
+function createUserFriendlyMessage(data: any): string {
+  if (data?.errorCode && typeof data.errorCode === 'number') {
+    return getUserFriendlyMessage(data.errorCode as ErrorCode, data.errorMessage);
+  }
+  return data?.errorMessage || '알 수 없는 오류가 발생했습니다.';
+}
+
+/**
  * API 요청 함수
  */
 export async function apiFetch<T = any>(
@@ -145,12 +150,16 @@ export async function apiFetch<T = any>(
         // 401 에러 시 토큰 제거하고 로그인 페이지로 리다이렉트
         removeTokens();
         window.location.href = '/login';
-        return { result: 'fail', message: '인증이 만료되었습니다. 다시 로그인해주세요.' };
+        return { 
+          success: false, 
+          errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',
+          errorCode: ErrorCode.UNAUTHORIZED
+        };
       }
       
       return { 
-        result: 'fail', 
-        message: data?.message || '알 수 없는 오류가 발생했습니다.', 
+        success: false, 
+        errorMessage: createUserFriendlyMessage(data), 
         errorCode: data?.errorCode 
       };
     }
@@ -160,17 +169,29 @@ export async function apiFetch<T = any>(
     clearTimeout(id);
     
     if (e.name === 'AbortError') {
-      return { result: 'fail', message: '요청 시간이 초과되었습니다.' };
+      return { 
+        success: false, 
+        errorMessage: '요청 시간이 초과되었습니다.',
+        errorCode: ErrorCode.REQUEST_TIMEOUT
+      };
     }
     
     // 토큰 갱신 실패 시 로그인 페이지로 리다이렉트
     if (e.message === 'Token refresh failed' || e.message === 'No refresh token available') {
       removeTokens();
       window.location.href = '/login';
-      return { result: 'fail', message: '인증이 만료되었습니다. 다시 로그인해주세요.' };
+      return { 
+        success: false, 
+        errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',
+        errorCode: ErrorCode.UNAUTHORIZED
+      };
     }
     
-    return { result: 'fail', message: '네트워크 오류가 발생했습니다.' };
+    return { 
+      success: false, 
+      errorMessage: '네트워크 오류가 발생했습니다.',
+      errorCode: ErrorCode.NETWORK_ERROR
+    };
   }
 }
 
@@ -202,8 +223,8 @@ export async function publicApiFetch<T = any>(
     
     if (!res.ok) {
       return { 
-        result: 'fail', 
-        message: data?.message || '알 수 없는 오류가 발생했습니다.', 
+        success: false, 
+        errorMessage: createUserFriendlyMessage(data), 
         errorCode: data?.errorCode 
       };
     }
@@ -213,9 +234,17 @@ export async function publicApiFetch<T = any>(
     clearTimeout(id);
     
     if (e.name === 'AbortError') {
-      return { result: 'fail', message: '요청 시간이 초과되었습니다.' };
+      return { 
+        success: false, 
+        errorMessage: '요청 시간이 초과되었습니다.',
+        errorCode: ErrorCode.REQUEST_TIMEOUT
+      };
     }
     
-    return { result: 'fail', message: '네트워크 오류가 발생했습니다.' };
+    return { 
+      success: false, 
+      errorMessage: '네트워크 오류가 발생했습니다.',
+      errorCode: ErrorCode.NETWORK_ERROR
+    };
   }
 } 

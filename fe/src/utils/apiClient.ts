@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import { ErrorCode } from '@iitp-dabt/common';
 
 // API 응답 타입

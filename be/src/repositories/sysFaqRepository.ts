@@ -16,15 +16,18 @@ export async function createFaq(faqData: {
   question: string;
   answer: string;
   sortOrder?: number;
+  hitCnt?: number;
+  useYn?: string;
   createdBy?: string;
 }): Promise<{ faqId: number }> {
+  // createdAt은 Sequelize에서 자동으로 설정됨 (defaultValue: DataTypes.NOW)
   const faq = await SysFaq.create({
     faqType: faqData.faqType,
     question: faqData.question,
     answer: faqData.answer,
     sortOrder: faqData.sortOrder || 0,
-    hitCnt: 0,
-    useYn: 'Y',
+    hitCnt: faqData.hitCnt || 0,
+    useYn: faqData.useYn || 'Y',
     createdBy: faqData.createdBy
   });
   return { faqId: faq.faqId };
@@ -58,13 +61,15 @@ export async function updateFaq(faqId: number, updateData: {
  * FAQ 조회수 증가
  */
 export async function incrementHitCount(faqId: number): Promise<boolean> {
-  const [affectedRows] = await SysFaq.increment('hitCnt', {
+  const result = await SysFaq.increment('hitCnt', {
     where: { 
       faqId,
       useYn: 'Y'
     }
   });
-  return affectedRows > 0;
+  // Sequelize increment는 업데이트된 행의 수를 반환하지 않음
+  // 대신 업데이트된 모델 인스턴스를 반환
+  return result[0].hitCnt > 0;
 }
 
 /**
@@ -79,6 +84,8 @@ export async function findFaqs(options: {
 }): Promise<{
   faqs: SysFaq[];
   total: number;
+  page: number;
+  limit: number;
 }> {
   const page = options.page || 1;
   const limit = options.limit || 10;
@@ -110,36 +117,113 @@ export async function findFaqs(options: {
 
   return {
     faqs: rows,
-    total: count
+    total: count,
+    page,
+    limit
   };
 }
 
 /**
  * 사용 가능한 FAQ 목록 조회 (공개용)
  */
-export async function findActiveFaqs(faqType?: string): Promise<SysFaq[]> {
+export async function findActiveFaqs(options: {
+  page?: number;
+  limit?: number;
+  faqType?: string;
+  search?: string;
+}): Promise<{
+  faqs: SysFaq[];
+  total: number;
+  page: number;
+  limit: number;
+}> {
+  const page = options.page || 1;
+  const limit = options.limit || 10;
+  const offset = (page - 1) * limit;
+
   const whereClause: any = {
     useYn: 'Y'
   };
 
-  if (faqType) {
-    whereClause.faqType = faqType;
+  if (options.faqType) {
+    whereClause.faqType = options.faqType;
   }
 
-  return SysFaq.findAll({
+  if (options.search) {
+    whereClause[Op.or] = [
+      { question: { [Op.iLike]: `%${options.search}%` } },
+      { answer: { [Op.iLike]: `%${options.search}%` } }
+    ];
+  }
+
+  const { count, rows } = await SysFaq.findAndCountAll({
     where: whereClause,
+    limit,
+    offset,
     order: [['sortOrder', 'ASC'], ['faqId', 'DESC']]
   });
+
+  return {
+    faqs: rows,
+    total: count,
+    page,
+    limit
+  };
 }
 
 /**
  * FAQ 삭제
  */
-export async function deleteFaq(faqId: number): Promise<boolean> {
-  const [affectedRows] = await SysFaq.destroy({
+export async function deleteFaq(faqId: number, deletedBy?: string): Promise<boolean> {
+  const affectedRows = await SysFaq.destroy({
     where: { faqId }
   });
   return affectedRows > 0;
+}
+
+/**
+ * FAQ 통계 조회
+ */
+export async function getFaqStats(): Promise<{
+  totalFaqs: number;
+  activeFaqs: number;
+  totalHits: number;
+  topFaqs: Array<{ faqId: number; question: string; hitCnt: number }>;
+}> {
+  // 전체 FAQ 개수
+  const totalFaqs = await SysFaq.count();
+  
+  // 활성 FAQ 개수
+  const activeFaqs = await SysFaq.count({
+    where: { useYn: 'Y' }
+  });
+  
+  // 전체 조회수
+  const totalHitsResult = await SysFaq.findOne({
+    attributes: [
+      [SysFaq.sequelize!.fn('SUM', SysFaq.sequelize!.col('hit_cnt')), 'totalHits']
+    ]
+  });
+  const totalHits = parseInt(totalHitsResult?.get('totalHits') as string) || 0;
+  
+  // 인기 FAQ (조회수 기준 상위 5개)
+  const topFaqs = await SysFaq.findAll({
+    attributes: ['faqId', 'question', 'hitCnt'],
+    where: { useYn: 'Y' },
+    order: [['hitCnt', 'DESC']],
+    limit: 5
+  });
+
+  return {
+    totalFaqs,
+    activeFaqs,
+    totalHits,
+    topFaqs: topFaqs.map(faq => ({
+      faqId: faq.faqId,
+      question: faq.question,
+      hitCnt: faq.hitCnt
+    }))
+  };
 }
 
 /**

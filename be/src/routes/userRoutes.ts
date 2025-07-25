@@ -1,16 +1,22 @@
 import express from 'express';
-import { checkEmail, register, getProfile } from '../controllers/user/userController';
+import { userLogin, userLogout } from '../controllers/user/userAuthController';
+import { getFaqListForUser, getFaqDetailForUser } from '../controllers/user/userFaqController';
+import { getQnaListForUser, getQnaDetailForUser, createQnaForUser } from '../controllers/user/userQnaController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-// 이메일 중복 체크
-router.post('/email/check', checkEmail);
+// 인증 관련
+router.post('/auth/user/login', userLogin);
+router.post('/auth/user/logout', authMiddleware, userLogout);
 
-// 사용자 회원가입
-router.post('/register', register);
+// FAQ 관련
+router.get('/user/faq', getFaqListForUser);
+router.get('/user/faq/:faqId', getFaqDetailForUser);
 
-// 사용자 프로필 조회 (인증 필요)
-router.get('/profile', authMiddleware, getProfile);
+// QnA 관련
+router.get('/user/qna', authMiddleware, getQnaListForUser);
+router.get('/user/qna/:qnaId', authMiddleware, getQnaDetailForUser);
+router.post('/user/qna', authMiddleware, createQnaForUser);
 
 export default router; 

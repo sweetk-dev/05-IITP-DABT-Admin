@@ -10,8 +10,8 @@ import adminFaqRoutes from './routes/adminFaqRoutes';
 import userQnaRoutes from './routes/userQnaRoutes';
 import adminQnaRoutes from './routes/adminQnaRoutes';
 import { authMiddleware } from './middleware/authMiddleware';
-import { appLogger, accessLogger } from './utils/logger';
-import morgan from 'morgan';
+import { accessLogMiddleware } from './middleware/accessLogMiddleware';
+import { appLogger } from './utils/logger';
 
 const app = express();
 
@@ -19,8 +19,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 로깅 미들웨어
-app.use(morgan('combined', { stream: { write: (message) => accessLogger.info(message.trim()) } }));
+// 자동화된 Access Log 미들웨어 (Morgan 대신 사용)
+app.use(accessLogMiddleware);
 
 // 라우터 설정
 app.use('/api/user', userRoutes);

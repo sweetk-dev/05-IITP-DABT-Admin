@@ -4,6 +4,7 @@ import path from 'path';
 
 const logDir = path.join(process.cwd(), 'logs');
 
+// App Log (비즈니스 로직, 에러, 이벤트)
 const appLogTransport = new winston.transports.DailyRotateFile({
   dirname: logDir,
   filename: 'app-%DATE%.log',
@@ -13,6 +14,7 @@ const appLogTransport = new winston.transports.DailyRotateFile({
   level: process.env.LOG_LEVEL || 'info',
 });
 
+// Access Log (API 접근)
 const accessLogTransport = new winston.transports.DailyRotateFile({
   dirname: logDir,
   filename: 'access-%DATE%.log',
@@ -22,18 +24,35 @@ const accessLogTransport = new winston.transports.DailyRotateFile({
   level: 'info',
 });
 
+// Error Log (에러만 별도)
+const errorLogTransport = new winston.transports.DailyRotateFile({
+  dirname: logDir,
+  filename: 'error-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  maxFiles: '30d',
+  zippedArchive: false,
+  level: 'error',
+});
+
 const appLogger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
-    winston.format.printf(({ timestamp, level, message, stack }) =>
-      `[${timestamp}] [${level.toUpperCase()}] ${message}${stack ? `\n${stack}` : ''}`
-    )
+    winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
+      const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+      return `[${timestamp}] [${level.toUpperCase()}] ${message}${metaStr}${stack ? `\n${stack}` : ''}`;
+    })
   ),
   transports: [
-    new winston.transports.Console(),
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    }),
     appLogTransport,
+    errorLogTransport, // 에러 레벨 로그는 error 파일에도 저장
   ],
 });
 
@@ -41,9 +60,7 @@ const accessLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, message }) =>
-      `[${timestamp}] ${message}`
-    )
+    winston.format.json()
   ),
   transports: [
     accessLogTransport,
@@ -53,6 +70,6 @@ const accessLogger = winston.createLogger({
 // 사용 예시:
 // appLogger.info(`[userService.ts:register] 회원가입 성공: userId=123`);
 // appLogger.error(`[userController.ts:checkEmail] 에러 발생`, err);
-// accessLogger는 morgan에서만 사용
+// accessLogger는 accessLogMiddleware에서 자동으로 사용
 
 export { appLogger, accessLogger }; 

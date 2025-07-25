@@ -20,10 +20,14 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
 
     const response: AdminLoginRes = {
       token: result.token,
-      userId: result.userId,
-      userType: result.userType as 'A',
-      loginId: result.loginId || '',
-      name: result.name || ''
+      refreshToken: '', // TODO: refreshToken 구현 필요
+      admin: {
+        adminId: result.userId,
+        loginId: result.loginId || '',
+        name: result.name || '',
+        email: result.email || '',
+        role: 'ADMIN' // 기본값
+      }
     };
 
     sendSuccess(res, response, undefined, 'ADMIN_LOGIN', { userId: result.userId, loginId });
@@ -35,7 +39,8 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
 // 관리자 로그아웃
 export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Response) => {
   try {
-    const { userId, userType } = req.body;
+    const userId = (req as any).user?.userId;
+    const userType = (req as any).user?.userType;
     const ipAddr = req.ip || req.connection.remoteAddress || '';
     const userAgent = req.headers['user-agent'] as string;
 

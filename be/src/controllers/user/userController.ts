@@ -4,15 +4,15 @@ import { sendError, sendValidationError, sendDatabaseError, sendSuccess } from '
 import { isEmailExists, createUser, findUserById } from '../../repositories/openApiUserRepository';
 import bcrypt from 'bcrypt';
 import { 
-  UserCheckEmailRequest, 
-  UserCheckEmailResponse,
-  UserRegisterRequest, 
-  UserRegisterResponse,
-  UserProfileResponse 
-} from '../../types/user';
+  UserCheckEmailReq, 
+  UserCheckEmailRes,
+  UserRegisterReq, 
+  UserRegisterRes,
+  UserProfileRes 
+} from '@iitp-dabt/common';
 
 // 이메일 중복 체크
-export const checkEmail = async (req: Request<{}, {}, UserCheckEmailRequest>, res: Response) => {
+export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: Response) => {
   try {
     const { email } = req.body;
 
@@ -27,7 +27,7 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailRequest>, re
 
     const exists = await isEmailExists(email);
     
-    const response: UserCheckEmailResponse = {
+    const response: UserCheckEmailRes = {
       isAvailable: !exists
     };
     
@@ -38,7 +38,7 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailRequest>, re
 };
 
 // 사용자 회원가입
-export const register = async (req: Request<{}, {}, UserRegisterRequest>, res: Response) => {
+export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Response) => {
   try {
     const { email, password, name, affiliation } = req.body;
 
@@ -80,7 +80,7 @@ export const register = async (req: Request<{}, {}, UserRegisterRequest>, res: R
       createdBy: 'BY-USER'
     });
 
-    const response: UserRegisterResponse = {
+    const response: UserRegisterRes = {
       userId: newUser.userId,
       email: email,
       name: name
@@ -110,7 +110,7 @@ export const getProfile = async (req: Request, res: Response) => {
       return sendError(res, ErrorCode.USER_NOT_FOUND);
     }
 
-    const response: UserProfileResponse = {
+    const response: UserProfileRes = {
       userId: user.userId,
       email: user.loginId,
       name: user.userName,

@@ -20,10 +20,13 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
 
     const response: UserLoginRes = {
       token: result.token,
-      userId: result.userId,
-      userType: result.userType as 'U',
-      email: result.email || '',
-      name: result.name || ''
+      refreshToken: '', // TODO: refreshToken 구현 필요
+      user: {
+        userId: result.userId,
+        email: result.email || '',
+        name: result.name || '',
+        phone: undefined // TODO: phone 정보 추가 필요
+      }
     };
 
     sendSuccess(res, response, undefined, 'USER_LOGIN', { userId: result.userId, email });
@@ -35,7 +38,8 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
 // 사용자 로그아웃
 export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Response) => {
   try {
-    const { userId, userType } = req.body;
+    const userId = (req as any).user?.userId;
+    const userType = (req as any).user?.userType;
     const ipAddr = req.ip || req.connection.remoteAddress || '';
     const userAgent = req.headers['user-agent'] as string;
 

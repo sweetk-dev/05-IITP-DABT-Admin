@@ -1,6 +1,5 @@
 import { Response } from 'express';
-import { ErrorCode, ErrorMetaMap } from '../types/errorCodes';
-import { ApiResponse } from '../types/common';
+import { ErrorCode, ErrorMetaMap, ApiResponse } from '@iitp-dabt/common';
 
 export function sendError(res: Response, errorCode: ErrorCode, detail?: string) {
   const meta = ErrorMetaMap[errorCode] || ErrorMetaMap[ErrorCode.UNKNOWN_ERROR];

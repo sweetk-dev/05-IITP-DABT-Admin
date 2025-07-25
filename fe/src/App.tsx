@@ -6,7 +6,9 @@ import Home from './pages/Home';
 import AppBar from './components/AppBar';
 import Register from './pages/user/Register';
 import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import { isAuthenticated, validateAndCleanTokens } from './store/auth';
+import { ROUTES } from './routes';
 
 // 따뜻한 색상 팔레트
 const bgMain = '#FFF7ED'; // 연한 베이지
@@ -14,7 +16,15 @@ const footerBg = '#2D3142'; // 네이비에 가까운 보라
 const footerText = '#fff';
 
 // 공개 페이지 목록 (로그인 없이 접근 가능)
-const PUBLIC_PAGES = ['/', '/notice', '/faq', '/qna', '/login', '/register', '/admin/login'];
+const PUBLIC_PAGES = [
+  ROUTES.PUBLIC.HOME, 
+  '/notice', 
+  ROUTES.PUBLIC.FAQ, 
+  ROUTES.PUBLIC.QNA, 
+  ROUTES.PUBLIC.LOGIN, 
+  ROUTES.PUBLIC.REGISTER, 
+  ROUTES.ADMIN.LOGIN
+];
 
 function Footer() {
   return (
@@ -52,15 +62,15 @@ function Layout({ children }: { children: React.ReactNode }) {
   let appBarType: 'user' | 'public' | 'auth' | 'admin-login' | 'admin' = 'user';
 
   // 어드민 로그인 화면
-  if (location.pathname === '/admin/login') {
+  if (location.pathname === ROUTES.ADMIN.LOGIN) {
     appBarType = 'admin-login';
   }
   // 어드민 로그인 후 (모든 /admin/* 경로, 단 /admin/login 제외)
-  else if (location.pathname.startsWith('/admin') && location.pathname !== '/admin/login') {
+  else if (location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN) {
     appBarType = 'admin';
   }
   // 로그인/회원가입 화면
-  else if (location.pathname === '/login' || location.pathname === '/register') {
+  else if (location.pathname === ROUTES.PUBLIC.LOGIN || location.pathname === ROUTES.PUBLIC.REGISTER) {
     appBarType = 'auth';
   }
   // 공개페이지(공지, FAQ, QnA 등) - 로그인 전
@@ -92,7 +102,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!isLoggedIn) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={ROUTES.PUBLIC.LOGIN} state={{ from: location }} replace />;
   }
   return <>{children}</>;
 }
@@ -112,7 +122,6 @@ const QnaDetail = () => <div>QnaDetail</div>;
 const OpenApiManagement = () => <div>OpenApiManagement</div>;
 
 // 관리자 컴포넌트들
-const AdminDashboard = () => <div>AdminDashboard</div>;
 const UserManagement = () => <div>UserManagement</div>;
 const UserDetail = () => <div>UserDetail</div>;
 const ApiClientManagement = () => <div>ApiClientManagement</div>;
@@ -141,11 +150,11 @@ function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
     validateAndCleanTokens();
   }, []);
 
-  if (location.pathname === '/admin/login') {
+  if (location.pathname === ROUTES.ADMIN.LOGIN) {
     return <>{children}</>;
   }
   if (!isLoggedIn) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    return <Navigate to={ROUTES.ADMIN.LOGIN} state={{ from: location }} replace />;
   }
   return <>{children}</>;
 }
@@ -167,31 +176,31 @@ function App() {
         <Layout>
           <Routes>
             {/* 공개 페이지 (로그인 불필요) */}
-            <Route path="/" element={<Home />} />
+            <Route path={ROUTES.PUBLIC.HOME} element={<Home />} />
             <Route path="/notice" element={<NoticeList />} />
             <Route path="/notice/:id" element={<NoticeDetail />} />
-            <Route path="/faq" element={<FaqList />} />
+            <Route path={ROUTES.PUBLIC.FAQ} element={<FaqList />} />
             <Route path="/faq/:id" element={<FaqDetail />} />
-            <Route path="/qna" element={<QnaList />} />
+            <Route path={ROUTES.PUBLIC.QNA} element={<QnaList />} />
             <Route path="/qna/:id" element={<QnaDetail />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path={ROUTES.PUBLIC.LOGIN} element={<Login />} />
+            <Route path={ROUTES.PUBLIC.REGISTER} element={<Register />} />
 
             {/* 일반 사용자 페이지 (로그인 필요) */}
-            <Route path="/dashbd" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
+            <Route path={ROUTES.USER.DASHBOARD} element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
             <Route path="/mng/openapi" element={<PrivateRoute><OpenApiManagement /></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            <Route path={ROUTES.USER.PROFILE} element={<PrivateRoute><UserProfile /></PrivateRoute>} />
 
             {/* 관리자 로그인 */}
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path={ROUTES.ADMIN.LOGIN} element={<AdminLogin />} />
             {/* /admin 또는 /admin/로 접근 시 /admin/login으로 리다이렉트 */}
-            <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-            <Route path="/admin/" element={<Navigate to="/admin/login" replace />} />
+            <Route path="/admin" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
+            <Route path="/admin/" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
             {/* /admin/* 경로는 보호 */}
             <Route path="/admin/*" element={
               <AdminProtectedRoute>
                 <Routes>
-                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="dashbd" element={<AdminDashboard />} />
                   <Route path="users" element={<UserManagement />} />
                   <Route path="users/:id" element={<UserDetail />} />
                   <Route path="openapi/clients" element={<ApiClientManagement />} />
@@ -214,7 +223,7 @@ function App() {
             } />
 
             {/* 404 */}
-            <Route path="*" element={<Navigate to='/' replace />} />
+            <Route path="*" element={<Navigate to={ROUTES.PUBLIC.HOME} replace />} />
           </Routes>
         </Layout>
       </BrowserRouter>

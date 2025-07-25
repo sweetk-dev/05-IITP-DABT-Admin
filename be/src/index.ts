@@ -1,17 +1,13 @@
 import './models';
 import express from 'express';
-import userRoutes from './routes/userRoutes';
-import adminRoutes from './routes/adminRoutes';
-import commonRoutes from './routes/commonRoutes';
-import userAuthRoutes from './routes/userAuthRoutes';
-import adminAuthRoutes from './routes/adminAuthRoutes';
-import userFaqRoutes from './routes/userFaqRoutes';
-import adminFaqRoutes from './routes/adminFaqRoutes';
-import userQnaRoutes from './routes/userQnaRoutes';
-import adminQnaRoutes from './routes/adminQnaRoutes';
+import userRouter from './routes/userRouter';
+import adminRouter from './routes/adminRouter';
+import commonRouter from './routes/commonRouter';
+import authRouter from './routes/authRouter';
 import { authMiddleware } from './middleware/authMiddleware';
 import { accessLogMiddleware } from './middleware/accessLogMiddleware';
 import { appLogger } from './utils/logger';
+import { API_URLS } from '@iitp-dabt/common';
 
 const app = express();
 
@@ -22,16 +18,11 @@ app.use(express.urlencoded({ extended: true }));
 // 자동화된 Access Log 미들웨어 (Morgan 대신 사용)
 app.use(accessLogMiddleware);
 
-// 라우터 설정
-app.use('/api/user', userRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/common', commonRoutes);
-app.use('/api/auth/user', userAuthRoutes);
-app.use('/api/auth/admin', adminAuthRoutes);
-app.use('/api/user/faq', userFaqRoutes);
-app.use('/api/admin/faq', adminFaqRoutes);
-app.use('/api/user/qna', userQnaRoutes);
-app.use('/api/admin/qna', adminQnaRoutes);
+// 라우터 설정 - API_URLS BASE 경로 사용
+app.use(API_URLS.AUTH.BASE, authRouter);      // '/api/auth'
+app.use(API_URLS.USER.BASE, userRouter);      // '/api/user'
+app.use(API_URLS.ADMIN.BASE, adminRouter);    // '/api/admin'
+app.use(API_URLS.COMMON.BASE, commonRouter);  // '/api/common'
 
 app.listen(30000, () => appLogger.info('Server started'));
 

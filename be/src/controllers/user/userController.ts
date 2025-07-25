@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError } from '../../utils/errorHandler';
-import { isEmailExists, createUser, findUserByEmail } from '../../repositories/openApiUserRepository';
+import { isEmailExists, createUser, findUserById } from '../../repositories/openApiUserRepository';
 import bcrypt from 'bcrypt';
+import { appLogger } from '../../utils/logger';
 
 // 이메일 중복 체크
 export const checkEmail = async (req: Request, res: Response) => {
@@ -22,7 +23,7 @@ export const checkEmail = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Email check error:', error);
+    appLogger.error('Email check error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -64,12 +65,12 @@ export const register = async (req: Request, res: Response) => {
       success: true,
       data: {
         userId: newUser.userId,
-        email: newUser.loginId,
-        name: newUser.userName
+        email: email,
+        name: name
       }
     });
   } catch (error) {
-    console.error('User registration error:', error);
+    appLogger.error('User registration error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -83,7 +84,7 @@ export const getProfile = async (req: Request, res: Response) => {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    const user = await findUserByEmail(userId.toString());
+    const user = await findUserById(userId);
     if (!user) {
       return sendError(res, ErrorCode.USER_NOT_FOUND);
     }
@@ -98,7 +99,7 @@ export const getProfile = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    appLogger.error('Get profile error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 }; 

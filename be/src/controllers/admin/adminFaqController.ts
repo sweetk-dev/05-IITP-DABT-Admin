@@ -1,25 +1,18 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError } from '../../utils/errorHandler';
-import { 
-  findFaqs, 
-  findFaqById, 
-  createFaq, 
-  updateFaq, 
-  deleteFaq,
-  getFaqCountByType 
-} from '../../repositories/sysFaqRepository';
+import { findFaqs, findFaqById, createFaq, updateFaq, deleteFaq, getFaqStats } from '../../repositories/sysFaqRepository';
+import { appLogger } from '../../utils/logger';
 
 // FAQ 목록 조회 (관리자용)
 export const getFaqList = async (req: Request, res: Response) => {
   try {
-    const { page, limit, faqType, search, useYn } = req.query;
+    const { page, limit, faqType, search } = req.query;
     const result = await findFaqs({
       page: page ? parseInt(page as string) : undefined,
       limit: limit ? parseInt(limit as string) : undefined,
       faqType: faqType as string,
-      search: search as string,
-      useYn: useYn as string
+      search: search as string
     });
     
     res.json({
@@ -27,7 +20,7 @@ export const getFaqList = async (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    console.error('Admin FAQ list error:', error);
+    appLogger.error('Admin FAQ list error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -49,15 +42,16 @@ export const getFaqDetail = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin FAQ detail error:', error);
+    appLogger.error('Admin FAQ detail error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
-// FAQ 생성
+// FAQ 생성 (관리자용)
 export const createFaqItem = async (req: Request, res: Response) => {
   try {
-    const { faqType, question, answer, sortOrder, createdBy } = req.body;
+    const { faqType, question, answer, sortOrder, useYn } = req.body;
+    const createdBy = req.user?.userId;
 
     if (!faqType || !question || !answer) {
       return sendError(res, ErrorCode.INVALID_REQUEST);
@@ -67,28 +61,31 @@ export const createFaqItem = async (req: Request, res: Response) => {
       faqType,
       question,
       answer,
-      sortOrder,
-      createdBy
+      sortOrder: sortOrder || 0,
+      hitCnt: 0,
+      useYn: useYn || 'Y',
+      createdBy: createdBy?.toString()
     });
 
     res.json({
       success: true,
       data: {
-        message: 'FAQ가 생성되었습니다.',
-        faqId: result.faqId
+        faqId: result.faqId,
+        message: 'FAQ가 등록되었습니다.'
       }
     });
   } catch (error) {
-    console.error('Admin FAQ create error:', error);
+    appLogger.error('Admin FAQ create error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
-// FAQ 수정
+// FAQ 수정 (관리자용)
 export const updateFaqItem = async (req: Request, res: Response) => {
   try {
     const { faqId } = req.params;
-    const { faqType, question, answer, sortOrder, useYn, updatedBy } = req.body;
+    const { faqType, question, answer, sortOrder, useYn } = req.body;
+    const updatedBy = req.user?.userId;
 
     const success = await updateFaq(parseInt(faqId), {
       faqType,
@@ -96,7 +93,7 @@ export const updateFaqItem = async (req: Request, res: Response) => {
       answer,
       sortOrder,
       useYn,
-      updatedBy
+      updatedBy: updatedBy?.toString()
     });
 
     if (!success) {
@@ -110,16 +107,18 @@ export const updateFaqItem = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin FAQ update error:', error);
+    appLogger.error('Admin FAQ update error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
-// FAQ 삭제
+// FAQ 삭제 (관리자용)
 export const deleteFaqItem = async (req: Request, res: Response) => {
   try {
     const { faqId } = req.params;
-    const success = await deleteFaq(parseInt(faqId));
+    const deletedBy = req.user?.userId;
+
+    const success = await deleteFaq(parseInt(faqId), deletedBy?.toString());
 
     if (!success) {
       return sendError(res, ErrorCode.NOT_FOUND);
@@ -132,15 +131,16 @@ export const deleteFaqItem = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin FAQ delete error:', error);
+    appLogger.error('Admin FAQ delete error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
-// FAQ 타입별 통계
+// FAQ 통계 (관리자용)
 export const getFaqStats = async (req: Request, res: Response) => {
   try {
-    const stats = await getFaqCountByType();
+    const stats = await getFaqStats();
+
     res.json({
       success: true,
       data: {
@@ -148,7 +148,7 @@ export const getFaqStats = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin FAQ stats error:', error);
+    appLogger.error('Admin FAQ stats error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 }; 

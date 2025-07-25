@@ -4,6 +4,7 @@ import { createLog } from '../../repositories/sysLogUserAccessRepository';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getDecryptedEnv } from '../../utils/decrypt';
+import { appLogger } from '../../utils/logger';
 
 export interface LoginResult {
   token: string;
@@ -71,6 +72,11 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
 
     // JWT 토큰 생성
     const jwtSecret = getDecryptedEnv('JWT_SECRET');
+    if (!jwtSecret) {
+      appLogger.error('JWT_SECRET is not configured');
+      throw new Error('JWT_SECRET_NOT_CONFIGURED');
+    }
+
     const token = jwt.sign(
       {
         userId: admin.admId,
@@ -111,13 +117,15 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
           throw new Error(ErrorCode.ADMIN_PASSWORD_INVALID.toString());
         case 'ADMIN_INACTIVE':
           throw new Error(ErrorCode.ADMIN_INACTIVE.toString());
+        case 'JWT_SECRET_NOT_CONFIGURED':
+          throw new Error(ErrorCode.UNKNOWN_ERROR.toString());
       }
     }
     throw error;
   }
 };
 
-// 로그아웃
+// 로그아웃 (공통)
 export const logout = async (userId: number, userType: 'U' | 'A', reason: string = '사용자 로그아웃', ipAddr?: string, userAgent?: string): Promise<LogoutResult> => {
   try {
     // 토큰 만료인지 확인하여 로그 타입 결정
@@ -139,7 +147,7 @@ export const logout = async (userId: number, userType: 'U' | 'A', reason: string
       message: '로그아웃 성공'
     };
   } catch (error) {
-    console.error('Logout error:', error);
+    appLogger.error('Logout error:', error);
     throw new Error(ErrorCode.LOGOUT_FAILED.toString());
   }
 }; 

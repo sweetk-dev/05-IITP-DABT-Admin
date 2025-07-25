@@ -1,23 +1,23 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError } from '../../utils/errorHandler';
-import { 
-  findQnas, 
-  findQnaById, 
-  updateQna, 
+import {
+  findQnas,
+  findQnaById,
+  updateQna,
   deleteQna,
-  answerQna 
+  answerQna
 } from '../../repositories/sysQnaRepository';
+import { appLogger } from '../../utils/logger';
 
 // QnA 목록 조회 (관리자용)
 export const getQnaList = async (req: Request, res: Response) => {
   try {
-    const { page, limit, search, status } = req.query;
+    const { page, limit, search } = req.query;
     const result = await findQnas({
       page: page ? parseInt(page as string) : undefined,
       limit: limit ? parseInt(limit as string) : undefined,
-      search: search as string,
-      status: status as string
+      search: search as string
     });
     
     res.json({
@@ -25,7 +25,7 @@ export const getQnaList = async (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    console.error('Admin QnA list error:', error);
+    appLogger.error('Admin QnA list error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -47,7 +47,7 @@ export const getQnaDetail = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin QnA detail error:', error);
+    appLogger.error('Admin QnA detail error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -63,7 +63,7 @@ export const answerQnaItem = async (req: Request, res: Response) => {
     }
 
     const success = await answerQna(parseInt(qnaId), {
-      answer,
+      answerContent: answer,
       answeredBy: answeredBy || req.user?.userId
     });
 
@@ -78,7 +78,7 @@ export const answerQnaItem = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin QnA answer error:', error);
+    appLogger.error('Admin QnA answer error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -87,12 +87,11 @@ export const answerQnaItem = async (req: Request, res: Response) => {
 export const updateQnaItem = async (req: Request, res: Response) => {
   try {
     const { qnaId } = req.params;
-    const { title, content, status, updatedBy } = req.body;
+    const { title, content, updatedBy } = req.body;
 
     const success = await updateQna(parseInt(qnaId), {
       title,
       content,
-      status,
       updatedBy: updatedBy || req.user?.userId
     });
 
@@ -107,7 +106,7 @@ export const updateQnaItem = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin QnA update error:', error);
+    appLogger.error('Admin QnA update error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -116,7 +115,9 @@ export const updateQnaItem = async (req: Request, res: Response) => {
 export const deleteQnaItem = async (req: Request, res: Response) => {
   try {
     const { qnaId } = req.params;
-    const success = await deleteQna(parseInt(qnaId));
+    const deletedBy = req.user?.userId ? req.user.userId.toString() : 'admin';
+
+    const success = await deleteQna(parseInt(qnaId), deletedBy);
 
     if (!success) {
       return sendError(res, ErrorCode.NOT_FOUND);
@@ -129,7 +130,7 @@ export const deleteQnaItem = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Admin QnA delete error:', error);
+    appLogger.error('Admin QnA delete error:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 }; 

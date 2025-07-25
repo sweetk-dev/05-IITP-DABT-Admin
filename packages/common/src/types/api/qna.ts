@@ -22,7 +22,7 @@ export interface QnaDetail extends Qna {
 }
 
 // QnA 목록 조회 (사용자용)
-export interface UserQnaListReq extends PaginationQuery {
+export interface UserQnaListReq extends PaginationReq {
   qnaType?: string;
   search?: string;
 }
@@ -54,7 +54,7 @@ export interface UserQnaCreateRes {
 }
 
 // QnA 목록 조회 (관리자용)
-export interface AdminQnaListReq extends PaginationQuery {
+export interface AdminQnaListReq extends PaginationReq {
   search?: string;
 }
 

@@ -1,32 +1,41 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
-import { sendError, sendSuccess, sendDatabaseError } from '../../utils/errorHandler';
-import { findFaqs, findFaqById, createFaq, updateFaq, deleteFaq, getFaqStats } from '../../repositories/sysFaqRepository';
+import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { 
-  AdminFaqListQuery, 
-  AdminFaqListResponse, 
-  AdminFaqDetailParams, 
-  AdminFaqDetailResponse,
-  AdminFaqCreateRequest,
-  AdminFaqCreateResponse,
-  AdminFaqUpdateRequest,
-  AdminFaqUpdateResponse,
-  AdminFaqDeleteResponse,
-  AdminFaqStatsResponse
-} from '../../types/admin';
+  getFaqList, 
+  getFaqDetail, 
+  createFaq, 
+  updateFaq, 
+  deleteFaq, 
+  getFaqStats 
+} from '../../services/admin/adminFaqService';
+import { 
+  AdminFaqListReq, 
+  AdminFaqListRes, 
+  AdminFaqDetailReq, 
+  AdminFaqDetailRes,
+  AdminFaqCreateReq,
+  AdminFaqCreateRes,
+  AdminFaqUpdateReq,
+  AdminFaqUpdateRes,
+  AdminFaqDeleteRes,
+  AdminFaqStatsRes
+} from '@iitp-dabt/common';
 
 // FAQ 목록 조회 (관리자용)
-export const getFaqList = async (req: Request<{}, {}, {}, AdminFaqListQuery>, res: Response) => {
+export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListReq>, res: Response) => {
   try {
-    const { page, limit, faqType, search } = req.query;
-    const result = await findFaqs({
-      page: page ? parseInt(page as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined,
-      faqType: faqType as string,
-      search: search as string
-    });
+    const { page = 1, limit = 10, faqType, search, useYn } = req.query;
     
-    const response: AdminFaqListResponse = {
+    const result = await getFaqList({
+      page: parseInt(page as string),
+      limit: parseInt(limit as string),
+      faqType,
+      search,
+      useYn
+    });
+
+    const response: AdminFaqListRes = {
       faqs: result.faqs.map(faq => ({
         faqId: faq.faqId,
         faqType: faq.faqType,
@@ -36,30 +45,32 @@ export const getFaqList = async (req: Request<{}, {}, {}, AdminFaqListQuery>, re
         sortOrder: faq.sortOrder,
         useYn: faq.useYn,
         createdAt: faq.createdAt.toISOString(),
-        updatedAt: faq.updatedAt?.toISOString() || ''
+        updatedAt: faq.updatedAt?.toISOString()
       })),
       total: result.total,
       page: result.page,
-      limit: result.limit
+      limit: result.limit,
+      totalPages: Math.ceil(result.total / result.limit),
+      items: result.faqs
     };
-    
-    sendSuccess(res, response, undefined, 'ADMIN_FAQ_LIST', { page, limit, faqType, search });
+
+    sendSuccess(res, response);
   } catch (error) {
-    sendDatabaseError(res, '조회', 'FAQ 목록');
+    sendError(res, ErrorCode.FAQ_NOT_FOUND);
   }
 };
 
 // FAQ 상세 조회 (관리자용)
-export const getFaqDetail = async (req: Request<AdminFaqDetailParams>, res: Response) => {
+export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailReq>, res: Response) => {
   try {
     const { faqId } = req.params;
-    const faq = await findFaqById(parseInt(faqId));
     
+    const faq = await getFaqDetail(parseInt(faqId));
     if (!faq) {
       return sendError(res, ErrorCode.FAQ_NOT_FOUND);
     }
 
-    const response: AdminFaqDetailResponse = {
+    const response: AdminFaqDetailRes = {
       faq: {
         faqId: faq.faqId,
         faqType: faq.faqType,
@@ -69,119 +80,91 @@ export const getFaqDetail = async (req: Request<AdminFaqDetailParams>, res: Resp
         sortOrder: faq.sortOrder,
         useYn: faq.useYn,
         createdAt: faq.createdAt.toISOString(),
-        updatedAt: faq.updatedAt?.toISOString() || ''
+        updatedAt: faq.updatedAt?.toISOString()
       }
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_FAQ_DETAIL', { faqId });
+    sendSuccess(res, response);
   } catch (error) {
-    sendDatabaseError(res, '조회', 'FAQ 상세');
+    sendError(res, ErrorCode.FAQ_NOT_FOUND);
   }
 };
 
 // FAQ 생성 (관리자용)
-export const createFaqItem = async (req: Request<{}, {}, AdminFaqCreateRequest>, res: Response) => {
+export const createFaqForAdmin = async (req: Request<{}, {}, AdminFaqCreateReq>, res: Response) => {
   try {
     const { faqType, question, answer, sortOrder, useYn } = req.body;
-    const createdBy = req.user?.userId;
-
-    if (!faqType || !question || !answer) {
-      return sendError(res, ErrorCode.INVALID_REQUEST);
-    }
-
+    
     const result = await createFaq({
       faqType,
       question,
       answer,
-      sortOrder: sortOrder || 0,
-      hitCnt: 0,
-      useYn: useYn || 'Y',
-      createdBy: createdBy?.toString()
+      sortOrder,
+      useYn
     });
 
-    const response: AdminFaqCreateResponse = {
+    const response: AdminFaqCreateRes = {
       faqId: result.faqId,
-      message: 'FAQ가 등록되었습니다.'
+      message: 'FAQ가 생성되었습니다.'
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_FAQ_CREATE', { faqId: result.faqId, faqType });
+    sendSuccess(res, response);
   } catch (error) {
-    sendDatabaseError(res, '생성', 'FAQ');
+    sendError(res, ErrorCode.FAQ_CREATE_FAILED);
   }
 };
 
 // FAQ 수정 (관리자용)
-export const updateFaqItem = async (req: Request<AdminFaqDetailParams, {}, AdminFaqUpdateRequest>, res: Response) => {
+export const updateFaqForAdmin = async (req: Request<{ faqId: string }, {}, AdminFaqUpdateReq>, res: Response) => {
   try {
     const { faqId } = req.params;
-    const { faqType, question, answer, sortOrder, useYn } = req.body;
-    const updatedBy = req.user?.userId;
+    const updateData = req.body;
+    
+    const result = await updateFaq(parseInt(faqId), updateData);
 
-    const success = await updateFaq(parseInt(faqId), {
-      faqType,
-      question,
-      answer,
-      sortOrder,
-      useYn,
-      updatedBy: updatedBy?.toString()
-    });
-
-    if (!success) {
-      return sendError(res, ErrorCode.FAQ_NOT_FOUND);
-    }
-
-    const response: AdminFaqUpdateResponse = {
-      success: true,
+    const response: AdminFaqUpdateRes = {
+      success: result,
       message: 'FAQ가 수정되었습니다.'
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_FAQ_UPDATE', { faqId, faqType });
+    sendSuccess(res, response);
   } catch (error) {
-    sendDatabaseError(res, '수정', 'FAQ');
+    sendError(res, ErrorCode.FAQ_UPDATE_FAILED);
   }
 };
 
 // FAQ 삭제 (관리자용)
-export const deleteFaqItem = async (req: Request<AdminFaqDetailParams>, res: Response) => {
+export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Response) => {
   try {
     const { faqId } = req.params;
-    const deletedBy = req.user?.userId;
+    
+    const result = await deleteFaq(parseInt(faqId));
 
-    const success = await deleteFaq(parseInt(faqId), deletedBy?.toString());
-
-    if (!success) {
-      return sendError(res, ErrorCode.FAQ_NOT_FOUND);
-    }
-
-    const response: AdminFaqDeleteResponse = {
-      success: true,
+    const response: AdminFaqDeleteRes = {
+      success: result,
       message: 'FAQ가 삭제되었습니다.'
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_FAQ_DELETE', { faqId });
+    sendSuccess(res, response);
   } catch (error) {
-    sendDatabaseError(res, '삭제', 'FAQ');
+    sendError(res, ErrorCode.FAQ_DELETE_FAILED);
   }
 };
 
 // FAQ 통계 (관리자용)
-export const getFaqStats = async (req: Request, res: Response) => {
+export const getFaqStatsForAdmin = async (req: Request, res: Response) => {
   try {
     const stats = await getFaqStats();
 
-    const response: AdminFaqStatsResponse = {
+    const response: AdminFaqStatsRes = {
       totalFaqs: stats.totalFaqs,
       activeFaqs: stats.activeFaqs,
       totalHits: stats.totalHits,
-      topFaqs: stats.topFaqs.map(faq => ({
-        faqId: faq.faqId,
-        question: faq.question,
-        hitCnt: faq.hitCnt
-      }))
+      topFaqs: stats.topFaqs
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_FAQ_STATS');
+    sendSuccess(res, response);
   } catch (error) {
-    sendDatabaseError(res, '조회', 'FAQ 통계');
+    sendError(res, ErrorCode.FAQ_STATS_FAILED);
   }
 }; 

@@ -2,25 +2,23 @@ import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginAdmin, logout } from '../../services/admin/adminAuthService';
-import { AdminLoginRequest, AdminLoginResponse, AdminLogoutRequest, AdminLogoutResponse } from '../../types/admin';
+import { 
+  AdminLoginReq, 
+  AdminLoginRes, 
+  AdminLogoutReq, 
+  AdminLogoutRes 
+} from '@iitp-dabt/common';
 
 // 관리자 로그인
-export const adminLogin = async (req: Request<{}, {}, AdminLoginRequest>, res: Response) => {
+export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Response) => {
   try {
     const { loginId, password } = req.body;
-    const ipAddr = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers['user-agent'];
-
-    if (!loginId) {
-      return sendError(res, ErrorCode.ADMIN_ID_REQUIRED);
-    }
-    if (!password) {
-      return sendError(res, ErrorCode.ADMIN_PASSWORD_REQUIRED);
-    }
+    const ipAddr = req.ip || req.connection.remoteAddress || '';
+    const userAgent = req.headers['user-agent'] as string;
 
     const result = await loginAdmin(loginId, password, ipAddr, userAgent);
 
-    const response: AdminLoginResponse = {
+    const response: AdminLoginRes = {
       token: result.token,
       userId: result.userId,
       userType: result.userType as 'A',
@@ -35,15 +33,15 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginRequest>, res: R
 };
 
 // 관리자 로그아웃
-export const adminLogout = async (req: Request<{}, {}, AdminLogoutRequest>, res: Response) => {
+export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Response) => {
   try {
     const { userId, userType } = req.body;
-    const ipAddr = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers['user-agent'];
+    const ipAddr = req.ip || req.connection.remoteAddress || '';
+    const userAgent = req.headers['user-agent'] as string;
 
     const result = await logout(userId, userType, '관리자 로그아웃', ipAddr, userAgent);
 
-    const response: AdminLogoutResponse = {
+    const response: AdminLogoutRes = {
       success: result.success,
       message: result.message
     };

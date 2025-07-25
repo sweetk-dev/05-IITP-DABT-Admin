@@ -2,25 +2,23 @@ import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginUser, logout } from '../../services/user/userAuthService';
-import { UserLoginRequest, UserLoginResponse, UserLogoutRequest, UserLogoutResponse } from '../../types/user';
+import { 
+  UserLoginReq, 
+  UserLoginRes, 
+  UserLogoutReq, 
+  UserLogoutRes 
+} from '@iitp-dabt/common';
 
 // 사용자 로그인
-export const userLogin = async (req: Request<{}, {}, UserLoginRequest>, res: Response) => {
+export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Response) => {
   try {
     const { email, password } = req.body;
-    const ipAddr = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers['user-agent'];
-
-    if (!email) {
-      return sendError(res, ErrorCode.USER_EMAIL_REQUIRED);
-    }
-    if (!password) {
-      return sendError(res, ErrorCode.USER_PASSWORD_REQUIRED);
-    }
+    const ipAddr = req.ip || req.connection.remoteAddress || '';
+    const userAgent = req.headers['user-agent'] as string;
 
     const result = await loginUser(email, password, ipAddr, userAgent);
 
-    const response: UserLoginResponse = {
+    const response: UserLoginRes = {
       token: result.token,
       userId: result.userId,
       userType: result.userType as 'U',
@@ -35,15 +33,15 @@ export const userLogin = async (req: Request<{}, {}, UserLoginRequest>, res: Res
 };
 
 // 사용자 로그아웃
-export const userLogout = async (req: Request<{}, {}, UserLogoutRequest>, res: Response) => {
+export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Response) => {
   try {
     const { userId, userType } = req.body;
-    const ipAddr = req.ip || req.connection.remoteAddress;
-    const userAgent = req.headers['user-agent'];
+    const ipAddr = req.ip || req.connection.remoteAddress || '';
+    const userAgent = req.headers['user-agent'] as string;
 
     const result = await logout(userId, userType, '사용자 로그아웃', ipAddr, userAgent);
 
-    const response: UserLogoutResponse = {
+    const response: UserLogoutRes = {
       success: result.success,
       message: result.message
     };

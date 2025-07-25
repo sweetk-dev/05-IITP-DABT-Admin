@@ -20,6 +20,7 @@ export async function createQna(qnaData: {
   writerName?: string;
   createdBy?: string;
 }): Promise<{ qnaId: number }> {
+  // createdAt은 Sequelize에서 자동으로 설정됨 (defaultValue: DataTypes.NOW)
   const qna = await SysQna.create({
     userId: qnaData.userId,
     qnaType: qnaData.qnaType,
@@ -95,6 +96,8 @@ export async function findQnas(options: {
 }): Promise<{
   qnas: SysQna[];
   total: number;
+  page: number;
+  limit: number;
 }> {
   const page = options.page || 1;
   const limit = options.limit || 10;
@@ -138,7 +141,9 @@ export async function findQnas(options: {
 
   return {
     qnas: rows,
-    total: count
+    total: count,
+    page,
+    limit
   };
 }
 
@@ -152,6 +157,8 @@ export async function findQnasByUser(userId: number, options: {
 }): Promise<{
   qnas: SysQna[];
   total: number;
+  page: number;
+  limit: number;
 }> {
   const page = options.page || 1;
   const limit = options.limit || 10;
@@ -174,14 +181,17 @@ export async function findQnasByUser(userId: number, options: {
 
   return {
     qnas: rows,
-    total: count
+    total: count,
+    page,
+    limit
   };
 }
 
 /**
- * QnA 논리 삭제
+ * QnA 삭제 (논리 삭제 - paranoid: true 설정으로 인해)
  */
-export async function deleteQna(qnaId: number, deletedBy: string): Promise<boolean> {
+export async function deleteQna(qnaId: number, deletedBy?: string): Promise<boolean> {
+  // 논리 삭제를 위해 update 사용
   const [affectedRows] = await SysQna.update({
     deletedBy
   }, {
@@ -196,7 +206,7 @@ export async function deleteQna(qnaId: number, deletedBy: string): Promise<boole
 export async function getPendingAnswerCount(): Promise<number> {
   return SysQna.count({
     where: {
-      answerContent: null
+      answerContent: { [Op.is]: null }
     }
   });
 }

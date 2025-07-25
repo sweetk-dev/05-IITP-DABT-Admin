@@ -1,4 +1,5 @@
 // Admin 계정 관리 관련 DTO 정의
+import { PaginationReq, PaginationRes } from './api';
 
 // Admin 계정 엔티티
 export interface Admin {
@@ -121,18 +122,4 @@ export interface AdminStatsRes {
     role: string;
     count: number;
   }>;
-}
-
-// 공통 타입
-export interface PaginationReq {
-  page?: number;
-  limit?: number;
-}
-
-export interface PaginationRes<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 } 

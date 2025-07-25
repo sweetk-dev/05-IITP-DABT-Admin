@@ -1,30 +1,6 @@
-// 인증 관련 DTO 정의
+// Auth API Request/Response 타입 정의
 
-// 사용자 로그인
-export interface UserLoginReq {
-  email: string;
-  password: string;
-}
-
-export interface UserLoginRes {
-  token: string;
-  userId: number;
-  userType: 'U';
-  email: string;
-  name: string;
-}
-
-export interface UserLogoutReq {
-  userId: number;
-  userType: 'U';
-}
-
-export interface UserLogoutRes {
-  success: boolean;
-  message: string;
-}
-
-// 관리자 로그인
+// Admin 로그인
 export interface AdminLoginReq {
   loginId: string;
   password: string;
@@ -32,18 +8,49 @@ export interface AdminLoginReq {
 
 export interface AdminLoginRes {
   token: string;
-  userId: number;
-  userType: 'A';
-  loginId: string;
-  name: string;
+  refreshToken: string;
+  admin: {
+    adminId: number;
+    loginId: string;
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 
+// Admin 로그아웃
 export interface AdminLogoutReq {
-  userId: number;
-  userType: 'A';
+  // 현재는 파라미터 없음 (토큰으로 인증)
 }
 
 export interface AdminLogoutRes {
+  success: boolean;
+  message: string;
+}
+
+// User 로그인
+export interface UserLoginReq {
+  email: string;
+  password: string;
+}
+
+export interface UserLoginRes {
+  token: string;
+  refreshToken: string;
+  user: {
+    userId: number;
+    email: string;
+    name: string;
+    phone?: string;
+  };
+}
+
+// User 로그아웃
+export interface UserLogoutReq {
+  // 현재는 파라미터 없음 (토큰으로 인증)
+}
+
+export interface UserLogoutRes {
   success: boolean;
   message: string;
 }

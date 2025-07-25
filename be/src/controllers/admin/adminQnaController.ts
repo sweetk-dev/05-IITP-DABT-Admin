@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
-import { sendError } from '../../utils/errorHandler';
+import { sendError, sendSuccess, sendDatabaseError } from '../../utils/errorHandler';
 import {
   findQnas,
   findQnaById,
@@ -8,10 +8,20 @@ import {
   deleteQna,
   answerQna
 } from '../../repositories/sysQnaRepository';
-import { appLogger } from '../../utils/logger';
+import { 
+  AdminQnaListQuery, 
+  AdminQnaListResponse, 
+  AdminQnaDetailParams, 
+  AdminQnaDetailResponse,
+  AdminQnaAnswerRequest,
+  AdminQnaAnswerResponse,
+  AdminQnaUpdateRequest,
+  AdminQnaUpdateResponse,
+  AdminQnaDeleteResponse
+} from '../../types/admin';
 
 // QnA 목록 조회 (관리자용)
-export const getQnaList = async (req: Request, res: Response) => {
+export const getQnaList = async (req: Request<{}, {}, {}, AdminQnaListQuery>, res: Response) => {
   try {
     const { page, limit, search } = req.query;
     const result = await findQnas({
@@ -20,40 +30,66 @@ export const getQnaList = async (req: Request, res: Response) => {
       search: search as string
     });
     
-    res.json({
-      success: true,
-      data: result
-    });
+    const response: AdminQnaListResponse = {
+      qnas: result.qnas.map(qna => ({
+        qnaId: qna.qnaId,
+        userId: qna.userId,
+        qnaType: qna.qnaType,
+        title: qna.title,
+        content: qna.content,
+        secretYn: qna.secretYn,
+        status: qna.status,
+        writerName: qna.writerName,
+        createdAt: qna.createdAt.toISOString(),
+        answeredAt: qna.answeredAt?.toISOString(),
+        answeredBy: qna.answeredBy
+      })),
+      total: result.total,
+      page: result.page,
+      limit: result.limit
+    };
+    
+    sendSuccess(res, response, undefined, 'ADMIN_QNA_LIST', { page, limit, search });
   } catch (error) {
-    appLogger.error('Admin QnA list error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '조회', 'QnA 목록');
   }
 };
 
 // QnA 상세 조회 (관리자용)
-export const getQnaDetail = async (req: Request, res: Response) => {
+export const getQnaDetail = async (req: Request<AdminQnaDetailParams>, res: Response) => {
   try {
     const { qnaId } = req.params;
     const qna = await findQnaById(parseInt(qnaId));
     
     if (!qna) {
-      return sendError(res, ErrorCode.NOT_FOUND);
+      return sendError(res, ErrorCode.QNA_NOT_FOUND);
     }
 
-    res.json({
-      success: true,
-      data: {
-        qna
+    const response: AdminQnaDetailResponse = {
+      qna: {
+        qnaId: qna.qnaId,
+        userId: qna.userId,
+        qnaType: qna.qnaType,
+        title: qna.title,
+        content: qna.content,
+        secretYn: qna.secretYn,
+        status: qna.status,
+        writerName: qna.writerName,
+        createdAt: qna.createdAt.toISOString(),
+        answerContent: qna.answerContent,
+        answeredAt: qna.answeredAt?.toISOString(),
+        answeredBy: qna.answeredBy
       }
-    });
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_QNA_DETAIL', { qnaId });
   } catch (error) {
-    appLogger.error('Admin QnA detail error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '조회', 'QnA 상세');
   }
 };
 
 // QnA 답변 (관리자용)
-export const answerQnaItem = async (req: Request, res: Response) => {
+export const answerQnaItem = async (req: Request<AdminQnaDetailParams, {}, AdminQnaAnswerRequest>, res: Response) => {
   try {
     const { qnaId } = req.params;
     const { answer, answeredBy } = req.body;
@@ -68,23 +104,22 @@ export const answerQnaItem = async (req: Request, res: Response) => {
     });
 
     if (!success) {
-      return sendError(res, ErrorCode.NOT_FOUND);
+      return sendError(res, ErrorCode.QNA_NOT_FOUND);
     }
 
-    res.json({
+    const response: AdminQnaAnswerResponse = {
       success: true,
-      data: {
-        message: 'QnA 답변이 등록되었습니다.'
-      }
-    });
+      message: 'QnA 답변이 등록되었습니다.'
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_QNA_ANSWER', { qnaId });
   } catch (error) {
-    appLogger.error('Admin QnA answer error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '답변', 'QnA');
   }
 };
 
 // QnA 수정 (관리자용)
-export const updateQnaItem = async (req: Request, res: Response) => {
+export const updateQnaItem = async (req: Request<AdminQnaDetailParams, {}, AdminQnaUpdateRequest>, res: Response) => {
   try {
     const { qnaId } = req.params;
     const { title, content, updatedBy } = req.body;
@@ -96,41 +131,39 @@ export const updateQnaItem = async (req: Request, res: Response) => {
     });
 
     if (!success) {
-      return sendError(res, ErrorCode.NOT_FOUND);
+      return sendError(res, ErrorCode.QNA_NOT_FOUND);
     }
 
-    res.json({
+    const response: AdminQnaUpdateResponse = {
       success: true,
-      data: {
-        message: 'QnA가 수정되었습니다.'
-      }
-    });
+      message: 'QnA가 수정되었습니다.'
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_QNA_UPDATE', { qnaId });
   } catch (error) {
-    appLogger.error('Admin QnA update error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '수정', 'QnA');
   }
 };
 
 // QnA 삭제 (관리자용)
-export const deleteQnaItem = async (req: Request, res: Response) => {
+export const deleteQnaItem = async (req: Request<AdminQnaDetailParams>, res: Response) => {
   try {
     const { qnaId } = req.params;
-    const deletedBy = req.user?.userId ? req.user.userId.toString() : 'admin';
+    const deletedBy = req.user?.userId;
 
-    const success = await deleteQna(parseInt(qnaId), deletedBy);
+    const success = await deleteQna(parseInt(qnaId), deletedBy?.toString());
 
     if (!success) {
-      return sendError(res, ErrorCode.NOT_FOUND);
+      return sendError(res, ErrorCode.QNA_NOT_FOUND);
     }
 
-    res.json({
+    const response: AdminQnaDeleteResponse = {
       success: true,
-      data: {
-        message: 'QnA가 삭제되었습니다.'
-      }
-    });
+      message: 'QnA가 삭제되었습니다.'
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_QNA_DELETE', { qnaId });
   } catch (error) {
-    appLogger.error('Admin QnA delete error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '삭제', 'QnA');
   }
 }; 

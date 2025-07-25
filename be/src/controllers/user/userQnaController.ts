@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
-import { sendError } from '../../utils/errorHandler';
+import { sendError, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { findQnasByUser, findQnaById, createQna } from '../../repositories/sysQnaRepository';
-import { appLogger } from '../../utils/logger';
 
 // QnA 목록 조회 (사용자용)
 export const getQnaList = async (req: Request, res: Response) => {
@@ -24,8 +23,7 @@ export const getQnaList = async (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    appLogger.error('User QnA list error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '조회', 'QnA 목록');
   }
 };
 
@@ -41,12 +39,12 @@ export const getQnaDetail = async (req: Request, res: Response) => {
     const qna = await findQnaById(parseInt(qnaId));
     
     if (!qna) {
-      return sendError(res, ErrorCode.NOT_FOUND);
+      return sendError(res, ErrorCode.QNA_NOT_FOUND);
     }
 
     // 본인이 작성한 QnA만 조회 가능
     if (qna.userId !== userId) {
-      return sendError(res, ErrorCode.FORBIDDEN);
+      return sendError(res, ErrorCode.QNA_ACCESS_DENIED);
     }
 
     res.json({
@@ -56,8 +54,7 @@ export const getQnaDetail = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    appLogger.error('User QnA detail error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '조회', 'QnA 상세');
   }
 };
 
@@ -71,8 +68,15 @@ export const createQnaItem = async (req: Request, res: Response) => {
 
     const { qnaType, title, content, secretYn } = req.body;
 
-    if (!qnaType || !title || !content) {
-      return sendError(res, ErrorCode.INVALID_REQUEST);
+    // 필수 필드 검증
+    if (!qnaType) {
+      return sendValidationError(res, 'qnaType', 'QnA 유형이 필요합니다.');
+    }
+    if (!title) {
+      return sendValidationError(res, 'title', '제목이 필요합니다.');
+    }
+    if (!content) {
+      return sendValidationError(res, 'content', '내용이 필요합니다.');
     }
 
     const result = await createQna({
@@ -81,7 +85,7 @@ export const createQnaItem = async (req: Request, res: Response) => {
       title,
       content,
       secretYn: secretYn || 'N',
-      writerName: req.user?.name,
+      writerName: `User_${userId}`,
       createdBy: userId.toString()
     });
 
@@ -93,7 +97,6 @@ export const createQnaItem = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    appLogger.error('User QnA create error:', error);
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
+    sendDatabaseError(res, '생성', 'QnA');
   }
 }; 

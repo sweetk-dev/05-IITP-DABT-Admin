@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
-import { sendError } from '../../utils/errorHandler';
+import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginUser, logout } from '../../services/user/userAuthService';
-import { appLogger } from '../../utils/logger';
+import { UserLoginRequest, UserLoginResponse, UserLogoutRequest, UserLogoutResponse } from '../../types/user';
 
 // 사용자 로그인
-export const userLogin = async (req: Request, res: Response) => {
+export const userLogin = async (req: Request<{}, {}, UserLoginRequest>, res: Response) => {
   try {
     const { email, password } = req.body;
     const ipAddr = req.ip || req.connection.remoteAddress;
@@ -20,18 +20,22 @@ export const userLogin = async (req: Request, res: Response) => {
 
     const result = await loginUser(email, password, ipAddr, userAgent);
 
-    res.json({
-      success: true,
-      data: result
-    });
+    const response: UserLoginResponse = {
+      token: result.token,
+      userId: result.userId,
+      userType: result.userType as 'U',
+      email: result.email || '',
+      name: result.name || ''
+    };
+
+    sendSuccess(res, response, undefined, 'USER_LOGIN', { userId: result.userId, email });
   } catch (error) {
-    appLogger.error('User login error:', error);
     sendError(res, ErrorCode.LOGIN_FAILED);
   }
 };
 
 // 사용자 로그아웃
-export const userLogout = async (req: Request, res: Response) => {
+export const userLogout = async (req: Request<{}, {}, UserLogoutRequest>, res: Response) => {
   try {
     const { userId, userType } = req.body;
     const ipAddr = req.ip || req.connection.remoteAddress;
@@ -39,12 +43,13 @@ export const userLogout = async (req: Request, res: Response) => {
 
     const result = await logout(userId, userType, '사용자 로그아웃', ipAddr, userAgent);
 
-    res.json({
-      success: true,
-      data: result
-    });
+    const response: UserLogoutResponse = {
+      success: result.success,
+      message: result.message
+    };
+
+    sendSuccess(res, response, undefined, 'USER_LOGOUT', { userId, userType });
   } catch (error) {
-    appLogger.error('User logout error:', error);
     sendError(res, ErrorCode.LOGOUT_FAILED);
   }
 }; 

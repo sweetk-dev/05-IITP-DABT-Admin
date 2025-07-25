@@ -6,10 +6,12 @@ export const API_URLS = {
     USER: {
       LOGIN: '/user/login',
       LOGOUT: '/user/logout',
+      REFRESH: '/user/refresh',
     },
     ADMIN: {
       LOGIN: '/admin/login',
       LOGOUT: '/admin/logout',
+      REFRESH: '/admin/refresh',
     }
   },
   
@@ -18,7 +20,7 @@ export const API_URLS = {
     BASE: '/api/user',
     PROFILE: '/profile',
     REGISTER: '/register',
-    CHECK_EMAIL: '/check-email',
+    CHECK_EMAIL: '/email/check',
     FAQ: {
       LIST: '/faq',
       DETAIL: '/faq/:faqId',
@@ -89,8 +91,10 @@ export const FULL_API_URLS = {
   AUTH: {
     USER_LOGIN: getAuthUrl(API_URLS.AUTH.USER.LOGIN),
     USER_LOGOUT: getAuthUrl(API_URLS.AUTH.USER.LOGOUT),
+    USER_REFRESH: getAuthUrl(API_URLS.AUTH.USER.REFRESH),
     ADMIN_LOGIN: getAuthUrl(API_URLS.AUTH.ADMIN.LOGIN),
     ADMIN_LOGOUT: getAuthUrl(API_URLS.AUTH.ADMIN.LOGOUT),
+    ADMIN_REFRESH: getAuthUrl(API_URLS.AUTH.ADMIN.REFRESH),
   },
   USER: {
     PROFILE: getUserUrl(API_URLS.USER.PROFILE),

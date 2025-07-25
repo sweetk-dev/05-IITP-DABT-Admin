@@ -8,9 +8,10 @@ const ISSUER = process.env.JWT_ISSUER || 'iitp-dabt-api';
 
 // JWT 토큰 페이로드 인터페이스
 export interface TokenPayload {
-  id: number;         // DB system id
-  userId: string;     // 로그인 ID
-  role: string;       // 계정 role
+  userId: number;     // 사용자 ID
+  userType: 'U' | 'A'; // 사용자 타입 (User/Admin)
+  email?: string;     // 이메일 (User용)
+  loginId?: string;   // 로그인 ID (Admin용)
   exp?: number;       // 만료 시간 (FE에서 접근 가능)
   iat?: number;       // 발급 시간 (FE에서 접근 가능)
 }

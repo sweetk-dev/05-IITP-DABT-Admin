@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import LoginForm from '../components/LoginForm';
-import { FloatingLogo } from '../components/AppBarCommon';
+import LoginForm from '../../components/LoginForm';
+import { FloatingLogo } from '../../components/AppBarCommon';
 
 export default function AdminLogin() {
   const handleAdminLogin = (email: string, password: string) => {

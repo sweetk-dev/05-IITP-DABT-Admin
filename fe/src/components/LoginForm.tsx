@@ -2,7 +2,7 @@ import { Box, TextField, Button, Typography, IconButton, InputAdornment } from '
 import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { isValidEmail } from '@iitp/common';
+import { isValidEmail } from '@iitp-dabt/common';
 
 
 type LoginFormProps = {

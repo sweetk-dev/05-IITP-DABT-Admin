@@ -2,11 +2,12 @@ import { Box, TextField, Button, Typography, IconButton, InputAdornment } from '
 import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { FloatingLogo } from '../components/AppBarCommon';
-import { isValidEmail, isValidPassword } from '@iitp/common';
+import { FloatingLogo } from '../../components/AppBarCommon';
+import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
+import type { UserRegisterReq } from '@iitp-dabt/common';
 import { useTheme } from '@mui/material/styles';
-import { checkEmail, registerUser } from '../api/user';
-import CommonDialog from '../components/CommonDialog';
+import { checkEmail, registerUser } from '../../api/user';
+import CommonDialog from '../../components/CommonDialog';
 
 export default function Register() {
   const theme = useTheme();
@@ -28,22 +29,21 @@ export default function Register() {
   const [dialogMsg, setDialogMsg] = useState('');
   const [dialogOnConfirm, setDialogOnConfirm] = useState<(() => void) | undefined>(undefined);
 
-
-
   const handleEmailCheck = async () => {
-    if (!isValidEmail(email)) {
-      setDialogMsg('이메일 형식으로 입력해 주세요.');
+    if (!email) {
+      setEmailError('이메일을 입력해 주세요.');
+      setDialogMsg('이메일을 입력해 주세요.');
       setDialogOpen(true);
       return;
     }
     const res = await checkEmail(email);
-    if (res.result === 'ok') {
+    if (res.success && res.data?.isAvailable) {
       setEmailCheckMsg('사용 가능한 이메일입니다.');
       setEmailCheckColor('success');
     } else {
-      setDialogMsg(res.message || '이미 사용 중인 이메일입니다.');
+      setDialogMsg(res.errorMessage || '이미 사용 중인 이메일입니다.');
       setDialogOpen(true);
-      setEmailCheckMsg(res.message || '이미 사용 중인 이메일입니다.');
+      setEmailCheckMsg(res.errorMessage || '이미 사용 중인 이메일입니다.');
       setEmailCheckColor('error');
     }
   };
@@ -81,9 +81,16 @@ export default function Register() {
       setPw2Error('');
     }
     if (hasError) return;
+    
     // 실제 회원가입 API 연동
-    const res = await registerUser({ email, password: pw, name, affiliation });
-    if (res.result === 'ok') {
+    const registerData: UserRegisterReq = { 
+      email, 
+      password: pw, 
+      name, 
+      affiliation 
+    };
+    const res = await registerUser(registerData);
+    if (res.success) {
       setSuccess(true);
       setDialogMsg('회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.');
       setDialogOnConfirm(() => () => {
@@ -92,7 +99,7 @@ export default function Register() {
       });
       setDialogOpen(true);
     } else {
-      setDialogMsg(res.message || '회원가입에 실패했습니다.');
+      setDialogMsg(res.errorMessage || '회원가입에 실패했습니다.');
       setDialogOnConfirm(undefined);
       setDialogOpen(true);
     }
@@ -147,8 +154,8 @@ export default function Register() {
           value={pw}
           onChange={e => setPw(e.target.value)}
           error={!!pwError}
-          placeholder="영문, 숫자, 특수문자 포함 10자리 이상"
-          helperText={pwError || '영문, 숫자, 특수문자 포함 10자리 이상'}
+          placeholder="영문, 숫자, 특수문자 포함 8자리 이상"
+          helperText={pwError || '영문, 숫자, 특수문자 포함 8자리 이상'}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

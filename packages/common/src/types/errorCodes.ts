@@ -58,6 +58,7 @@ export enum ErrorCode {
   INVALID_REQUEST = 7000,
   MISSING_REQUIRED_FIELD = 7001,
   INVALID_PARAMETER = 7002,
+  REQUEST_TIMEOUT = 7003,
   
   // 서버 관련
   INTERNAL_SERVER_ERROR = 8000,
@@ -265,6 +266,10 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
   [ErrorCode.INVALID_PARAMETER]: {
     message: '잘못된 파라미터입니다.',
     statusCode: 400
+  },
+  [ErrorCode.REQUEST_TIMEOUT]: {
+    message: '요청 시간이 초과되었습니다.',
+    statusCode: 408
   },
   
   // 서버 관련

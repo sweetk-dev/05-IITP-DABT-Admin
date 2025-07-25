@@ -5,9 +5,11 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getDecryptedEnv } from '../../utils/decrypt';
 import { appLogger } from '../../utils/logger';
+import { generateAccessToken, generateRefreshToken, verifyToken } from '../../utils/jwt';
 
 export interface LoginResult {
   token: string;
+  refreshToken: string;
   userId: number;
   userType: 'U' | 'A';
   loginId?: string;
@@ -18,6 +20,13 @@ export interface LoginResult {
 export interface LogoutResult {
   success: boolean;
   message: string;
+}
+
+export interface RefreshResult {
+  token: string;
+  refreshToken: string;
+  userId: number;
+  userType: 'U' | 'A';
 }
 
 // 사용자 로그인
@@ -62,15 +71,15 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
       throw new Error('JWT_SECRET_NOT_CONFIGURED');
     }
 
-    const token = jwt.sign(
-      {
-        userId: user.userId,
-        userType: 'U',
-        email: user.loginId
-      },
-      jwtSecret,
-      { expiresIn: '24h' }
-    );
+    // Access Token과 Refresh Token 생성
+    const tokenPayload = {
+      userId: user.userId,
+      userType: 'U' as const,
+      email: user.loginId
+    };
+
+    const token = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
 
     // 최근 로그인 시간 업데이트
     await updateLatestLoginAt(user.userId);
@@ -88,6 +97,7 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
 
     return {
       token,
+      refreshToken,
       userId: user.userId,
       userType: 'U',
       email: user.loginId,
@@ -105,6 +115,65 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
       }
     }
     throw error;
+  }
+};
+
+// 토큰 갱신
+export const refreshUserToken = async (refreshToken: string, ipAddr?: string, userAgent?: string): Promise<RefreshResult> => {
+  try {
+    // Refresh Token 검증
+    const payload = verifyToken(refreshToken);
+    if (!payload || payload.userType !== 'U') {
+      throw new Error('INVALID_REFRESH_TOKEN');
+    }
+
+    // 사용자 계정 조회
+    if (!payload.email) {
+      throw new Error('INVALID_REFRESH_TOKEN');
+    }
+    const user = await findUserByEmail(payload.email);
+    if (!user) {
+      throw new Error('USER_NOT_FOUND');
+    }
+
+    // 새로운 토큰 생성
+    const tokenPayload = {
+      userId: user.userId,
+      userType: 'U' as const,
+      email: user.loginId
+    };
+
+    const newToken = generateAccessToken(tokenPayload);
+    const newRefreshToken = generateRefreshToken(tokenPayload);
+
+    // 토큰 갱신 로그 기록
+    await createLog({
+      userId: user.userId,
+      userType: 'U',
+      logType: 'TOKEN_REFRESH',
+      actResult: 'S',
+      errMsg: '토큰 갱신 성공',
+      ipAddr,
+      userAgent
+    });
+
+    return {
+      token: newToken,
+      refreshToken: newRefreshToken,
+      userId: user.userId,
+      userType: 'U'
+    };
+  } catch (error) {
+    appLogger.error('Token refresh error:', error);
+    if (error instanceof Error) {
+      switch (error.message) {
+        case 'INVALID_REFRESH_TOKEN':
+          throw new Error(ErrorCode.INVALID_TOKEN.toString());
+        case 'USER_NOT_FOUND':
+          throw new Error(ErrorCode.USER_NOT_FOUND.toString());
+      }
+    }
+    throw new Error(ErrorCode.UNKNOWN_ERROR.toString());
   }
 };
 

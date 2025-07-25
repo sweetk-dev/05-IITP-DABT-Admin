@@ -72,6 +72,16 @@ export async function updateAnswer(qnaId: number, answerData: {
 }
 
 /**
+ * QnA 답변 등록/수정 (answerQna 별칭)
+ */
+export async function answerQna(qnaId: number, answerData: {
+  answerContent: string;
+  answeredBy: string;
+}): Promise<boolean> {
+  return updateAnswer(qnaId, answerData);
+}
+
+/**
  * QnA 목록 조회 (페이징)
  */
 export async function findQnas(options: {

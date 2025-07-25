@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
-import { sendError } from '../../utils/errorHandler';
+import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginAdmin, logout } from '../../services/admin/adminAuthService';
-import { appLogger } from '../../utils/logger';
+import { AdminLoginRequest, AdminLoginResponse, AdminLogoutRequest, AdminLogoutResponse } from '../../types/admin';
 
 // 관리자 로그인
-export const adminLogin = async (req: Request, res: Response) => {
+export const adminLogin = async (req: Request<{}, {}, AdminLoginRequest>, res: Response) => {
   try {
     const { loginId, password } = req.body;
     const ipAddr = req.ip || req.connection.remoteAddress;
@@ -20,18 +20,22 @@ export const adminLogin = async (req: Request, res: Response) => {
 
     const result = await loginAdmin(loginId, password, ipAddr, userAgent);
 
-    res.json({
-      success: true,
-      data: result
-    });
+    const response: AdminLoginResponse = {
+      token: result.token,
+      userId: result.userId,
+      userType: result.userType as 'A',
+      loginId: result.loginId || '',
+      name: result.name || ''
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_LOGIN', { userId: result.userId, loginId });
   } catch (error) {
-    appLogger.error('Admin login error:', error);
     sendError(res, ErrorCode.LOGIN_FAILED);
   }
 };
 
 // 관리자 로그아웃
-export const adminLogout = async (req: Request, res: Response) => {
+export const adminLogout = async (req: Request<{}, {}, AdminLogoutRequest>, res: Response) => {
   try {
     const { userId, userType } = req.body;
     const ipAddr = req.ip || req.connection.remoteAddress;
@@ -39,12 +43,13 @@ export const adminLogout = async (req: Request, res: Response) => {
 
     const result = await logout(userId, userType, '관리자 로그아웃', ipAddr, userAgent);
 
-    res.json({
-      success: true,
-      data: result
-    });
+    const response: AdminLogoutResponse = {
+      success: result.success,
+      message: result.message
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_LOGOUT', { userId, userType });
   } catch (error) {
-    appLogger.error('Admin logout error:', error);
     sendError(res, ErrorCode.LOGOUT_FAILED);
   }
 }; 

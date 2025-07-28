@@ -11,8 +11,8 @@ export interface LoginResult {
   userId: number;
   userType: 'U' | 'A';
   loginId?: string;
-  email?: string;
   name?: string;
+  roleCode?: string;
 }
 
 export interface LogoutResult {
@@ -107,7 +107,8 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
       userId: admin.admId,
       userType: 'A',
       loginId: admin.loginId,
-      name: admin.name
+      name: admin.name,
+      roleCode: admin.roles
     };
   } catch (error) {
     if (error instanceof Error) {

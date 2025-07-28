@@ -11,9 +11,7 @@ export interface AdminLoginRes {
   refreshToken: string;
   admin: {
     adminId: number;
-    loginId: string;
     name: string;
-    email: string;
     role: string;
   };
 }
@@ -49,7 +47,6 @@ export interface UserLoginRes {
   refreshToken: string;
   user: {
     userId: number;
-    email: string;
     name: string;
     phone?: string;
   };

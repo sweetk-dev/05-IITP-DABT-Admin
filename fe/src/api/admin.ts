@@ -1,13 +1,13 @@
 import { apiFetch, publicApiFetch } from './api';
-import { saveTokens, removeTokens } from '../store/auth';
-import { saveLoginInfo, clearLoginInfo } from '../store/user';
+import { saveLoginInfo } from '../store/user';
 import { FULL_API_URLS } from '@iitp-dabt/common';
-import type { 
-  AdminLoginReq, 
+import type {
+  AdminLoginReq,
   AdminLoginRes,
+  AdminLogoutReq,
+  AdminLogoutRes,
   AdminRefreshTokenReq,
   AdminRefreshTokenRes,
-  AdminLogoutRes,
   ApiResponse
 } from '@iitp-dabt/common';
 
@@ -24,48 +24,34 @@ export async function loginAdmin(params: AdminLoginReq): Promise<ApiResponse<Adm
   if (response.success && response.data?.token && response.data?.refreshToken) {
     const userInfo = {
       userId: response.data.admin.adminId,
-      email: response.data.admin.email,
+      email: '', // email 정보는 더 이상 제공되지 않음
       name: response.data.admin.name,
       userType: 'A' as const,
       role: response.data.admin.role,
     };
     saveLoginInfo(userInfo, response.data.token, response.data.refreshToken);
   }
-
-  return response;
-}
-
-/**
- * 관리자 토큰 갱신
- */
-export async function refreshAdminToken(refreshToken: string): Promise<ApiResponse<AdminRefreshTokenRes>> {
-  const requestData: AdminRefreshTokenReq = { refreshToken };
-  const response = await publicApiFetch<AdminRefreshTokenRes>(FULL_API_URLS.AUTH.ADMIN_REFRESH, {
-    method: 'POST',
-    body: JSON.stringify(requestData),
-  });
-
-  // 갱신 성공 시 토큰 저장
-  if (response.success && response.data?.token) {
-    saveTokens(response.data.token, refreshToken);
-  }
-
   return response;
 }
 
 /**
  * 관리자 로그아웃
  */
-export async function logoutAdmin() {
-  // 서버에 로그아웃 요청
-  try {
-    await apiFetch<AdminLogoutRes>(FULL_API_URLS.AUTH.ADMIN_LOGOUT, { method: 'POST' });
-  } catch (error) {
-    console.warn('Admin logout request failed:', error);
-  }
-  
-  // 클라이언트에서 토큰과 사용자 정보 제거
-  clearLoginInfo();
+export async function logoutAdmin(params: AdminLogoutReq): Promise<ApiResponse<AdminLogoutRes>> {
+  return apiFetch<AdminLogoutRes>(FULL_API_URLS.AUTH.ADMIN_LOGOUT, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+}
+
+/**
+ * 관리자 토큰 갱신
+ */
+export async function refreshAdminToken(params: AdminRefreshTokenReq): Promise<ApiResponse<AdminRefreshTokenRes>> {
+  return apiFetch<AdminRefreshTokenRes>(FULL_API_URLS.AUTH.ADMIN_REFRESH, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
 }
 
 // TODO: Admin FAQ, QnA, Account 관리 API 함수들 추가 예정

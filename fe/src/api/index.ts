@@ -1,22 +1,35 @@
 // Core API utilities
 export { apiFetch, publicApiFetch } from './api';
 
-// User authentication & management
+// User authentication
 export {
   loginUser,
-  checkEmail,
-  registerUser,
-  refreshToken,
-  getUserProfile,
-  logoutUser
+  logoutUser,
+  refreshUserToken,
 } from './user';
 
-// Admin authentication & management
+// Admin authentication
 export {
   loginAdmin,
+  logoutAdmin,
   refreshAdminToken,
-  logoutAdmin
 } from './admin';
+
+// Common code management
+export {
+  getCommonCodesByGroupId,
+  getCommonCodesByGroupIdDetail,
+  getCommonCodeById,
+  getCommonCodeByIdDetail,
+  getCommonCodesByType,
+  getCommonCodesByTypeDetail,
+  getCommonCodesByParent,
+  getCommonCodesByParentDetail,
+  getCommonCodeStats,
+  createCommonCode,
+  updateCommonCode,
+  deleteCommonCode
+} from './commonCode';
 
 // FAQ management
 export {

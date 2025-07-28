@@ -7,6 +7,8 @@ import AppBar from './components/AppBar';
 import Register from './pages/user/Register';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import UserProfile from './pages/user/UserProfile';
+import AdminProfile from './pages/admin/AdminProfile';
 import { isAuthenticated, validateAndCleanTokens } from './store/auth';
 import { ROUTES } from './routes';
 
@@ -107,12 +109,8 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// 임시 컴포넌트 정의
-// TODO: 실제 컴포넌트들로 교체 예정
+// 임시 컴포넌트들 (나중에 실제 컴포넌트로 교체)
 const UserDashboard = () => <div>UserDashboard</div>;
-const UserProfile = () => <div>UserProfile</div>;
-
-// 임시 컴포넌트들 (라우팅용)
 const NoticeList = () => <div>NoticeList</div>;
 const NoticeDetail = () => <div>NoticeDetail</div>;
 const FaqList = () => <div>FaqList</div>;
@@ -121,7 +119,7 @@ const QnaList = () => <div>QnaList</div>;
 const QnaDetail = () => <div>QnaDetail</div>;
 const OpenApiManagement = () => <div>OpenApiManagement</div>;
 
-// 관리자 컴포넌트들
+// 관리자 페이지 임시 컴포넌트들
 const UserManagement = () => <div>UserManagement</div>;
 const UserDetail = () => <div>UserDetail</div>;
 const ApiClientManagement = () => <div>ApiClientManagement</div>;
@@ -201,6 +199,7 @@ function App() {
               <AdminProtectedRoute>
                 <Routes>
                   <Route path="dashbd" element={<AdminDashboard />} />
+                  <Route path="profile" element={<AdminProfile />} />
                   <Route path="users" element={<UserManagement />} />
                   <Route path="users/:id" element={<UserDetail />} />
                   <Route path="openapi/clients" element={<ApiClientManagement />} />

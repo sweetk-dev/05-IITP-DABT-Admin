@@ -10,6 +10,7 @@ import { initSysFaq } from './sysFaq';
 import { initSysQna } from './sysQna';
 import { initSysLogUserAccess } from './sysLogUserAccess';
 import { initSysLogChangeHis } from './sysLogChangeHis';
+import { initSysCommonCode } from './sysCommonCode';
 
 // 환경 변수에서 데이터베이스 설정 가져오기
 const dbHost = process.env.DB_HOST || 'localhost';
@@ -40,5 +41,6 @@ initSysFaq(sequelize);
 initSysQna(sequelize);
 initSysLogUserAccess(sequelize);
 initSysLogChangeHis(sequelize);
+initSysCommonCode(sequelize);
 
 export default sequelize; 

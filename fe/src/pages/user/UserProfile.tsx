@@ -1,154 +1,89 @@
-import { useState } from 'react';
-import { Box, TextField, Button, Typography, Stack, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-
+import { Box, Typography, Paper, Grid, Avatar, Button } from '@mui/material';
+import { AccountCircle, Edit } from '@mui/icons-material';
+import { getUserName, getUserEmail } from '../../store/user';
 
 export default function UserProfile() {
-  // Dummy user data (in real app, fetch from API)
-  const [email] = useState('user@example.com');
-  const [name, setName] = useState('홍길동');
-  const [affiliation, setAffiliation] = useState('IITP');
-  const [nameEdit, setNameEdit] = useState('홍길동');
-  const [affiliationEdit, setAffiliationEdit] = useState('IITP');
-  const [editMode, setEditMode] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
-
-  // Password change dialog state
-  const [pwDialogOpen, setPwDialogOpen] = useState(false);
-  const [currentPw, setCurrentPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [newPw2, setNewPw2] = useState('');
-  const [pwError, setPwError] = useState('');
-
-  const handleSave = () => {
-    setName(nameEdit);
-    setAffiliation(affiliationEdit);
-    setEditMode(false);
-    setSuccessMsg('프로필 정보가 저장되었습니다.');
-    setTimeout(() => setSuccessMsg(''), 2000);
-  };
-
-  const handlePwDialogClose = () => {
-    setPwDialogOpen(false);
-    setCurrentPw('');
-    setNewPw('');
-    setNewPw2('');
-    setPwError('');
-  };
-
-  const handlePwChange = () => {
-    // TODO: 실제 비밀번호 변경 로직
-    if (!currentPw || !newPw || !newPw2) {
-      setPwError('모든 항목을 입력해 주세요.');
-      return;
-    }
-    if (newPw !== newPw2) {
-      setPwError('새 비밀번호가 일치하지 않습니다.');
-      return;
-    }
-    setPwError('');
-    setPwDialogOpen(false);
-    setSuccessMsg('비밀번호가 변경되었습니다.');
-    setTimeout(() => setSuccessMsg(''), 2000);
-  };
+  const userName = getUserName();
+  const userEmail = getUserEmail();
 
   return (
-    <Box id="user-profile-page" maxWidth={420} mx="auto" mt={6} p={4} bgcolor="#fff" borderRadius={3} boxShadow={2}>
-      <Typography id="user-profile-title" variant="h5" fontWeight="bold" mb={3} align="center">
-        내 프로필
+    <Box id="user-profile-page" sx={{ p: 3 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        프로필
       </Typography>
-      <Stack spacing={3}>
-        <TextField
-          id="user-profile-email"
-          label="이메일"
-          value={email}
-          InputProps={{ readOnly: true }}
-          fullWidth
-          margin="normal"
-          helperText="이메일은 변경할 수 없습니다."
-        />
-        <TextField
-          id="user-profile-name"
-          label="이름"
-          value={editMode ? nameEdit : name}
-          onChange={e => setNameEdit(e.target.value)}
-          fullWidth
-          margin="normal"
-          InputProps={{ readOnly: !editMode }}
-        />
-        <TextField
-          id="user-profile-affiliation"
-          label="소속"
-          value={editMode ? affiliationEdit : affiliation}
-          onChange={e => setAffiliationEdit(e.target.value)}
-          fullWidth
-          margin="normal"
-          InputProps={{ readOnly: !editMode }}
-        />
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
-          {!editMode ? (
-            <Button id="user-profile-edit-btn" variant="outlined" onClick={() => { setEditMode(true); setNameEdit(name); setAffiliationEdit(affiliation); }}>
-              정보 수정
-            </Button>
-          ) : (
-            <>
-              <Button id="user-profile-cancel-btn" variant="text" color="secondary" onClick={() => setEditMode(false)}>
-                취소
+      
+      <Paper id="user-profile-container" sx={{ p: 3, mt: 2 }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={3}>
+            <Box id="user-profile-avatar-section" sx={{ textAlign: 'center' }}>
+              <Avatar 
+                id="user-profile-avatar"
+                sx={{ 
+                  width: 120, 
+                  height: 120, 
+                  mx: 'auto', 
+                  mb: 2,
+                  bgcolor: 'primary.main',
+                  fontSize: '3rem'
+                }}
+              >
+                <AccountCircle sx={{ fontSize: 'inherit' }} />
+              </Avatar>
+              <Button 
+                id="user-profile-edit-btn"
+                variant="outlined" 
+                startIcon={<Edit />}
+                size="small"
+              >
+                프로필 수정
               </Button>
-              <Button id="user-profile-save-btn" variant="contained" color="primary" onClick={handleSave}>
-                저장
-              </Button>
-            </>
-          )}
-        </Stack>
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button id="user-profile-change-password-btn" variant="contained" color="primary" onClick={() => setPwDialogOpen(true)}>
-            비밀번호 변경
-          </Button>
-          <Button id="user-profile-change-email-btn" variant="outlined" color="primary" disabled>
-            이메일 변경(불가)
-          </Button>
-        </Stack>
-        {successMsg && (
-          <Typography id="user-profile-success-msg" color="success.main" align="center">{successMsg}</Typography>
-        )}
-      </Stack>
-      <Dialog open={pwDialogOpen} onClose={handlePwDialogClose}>
-        <DialogTitle>비밀번호 변경</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} mt={1}>
-            <TextField
-              id="pw-dialog-current"
-              label="현재 비밀번호"
-              type="password"
-              value={currentPw}
-              onChange={e => setCurrentPw(e.target.value)}
-              fullWidth
-              autoFocus
-            />
-            <TextField
-              id="pw-dialog-new"
-              label="새 비밀번호"
-              type="password"
-              value={newPw}
-              onChange={e => setNewPw(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              id="pw-dialog-new2"
-              label="새 비밀번호 확인"
-              type="password"
-              value={newPw2}
-              onChange={e => setNewPw2(e.target.value)}
-              fullWidth
-            />
-            {pwError && <Typography id="pw-dialog-error" color="error" fontSize={14}>{pwError}</Typography>}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button id="pw-dialog-cancel-btn" onClick={handlePwDialogClose}>취소</Button>
-          <Button id="pw-dialog-confirm-btn" variant="contained" onClick={handlePwChange}>확인</Button>
-        </DialogActions>
-      </Dialog>
+            </Box>
+          </Grid>
+          
+          <Grid item xs={12} md={9}>
+            <Box id="user-profile-info-section">
+              <Typography variant="h6" gutterBottom>
+                기본 정보
+              </Typography>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Box id="user-profile-name-field">
+                    <Typography variant="body2" color="text.secondary">
+                      이름
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {userName}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Box id="user-profile-email-field">
+                    <Typography variant="body2" color="text.secondary">
+                      이메일
+                    </Typography>
+                    <Typography variant="body1">
+                      {userEmail}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Box id="user-profile-role-field">
+                    <Typography variant="body2" color="text.secondary">
+                      사용자 유형
+                    </Typography>
+                    <Typography variant="body1">
+                      일반 사용자
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
     </Box>
   );
 } 

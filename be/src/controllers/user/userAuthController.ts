@@ -26,7 +26,6 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
       refreshToken: result.refreshToken,
       user: {
         userId: result.userId,
-        email: result.email || '',
         name: result.name || '',
         phone: undefined // TODO: phone 정보 추가 필요
       }

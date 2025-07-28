@@ -13,7 +13,6 @@ export interface LoginResult {
   userId: number;
   userType: 'U' | 'A';
   loginId?: string;
-  email?: string;
   name?: string;
 }
 
@@ -115,7 +114,7 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
       refreshToken,
       userId: user.userId,
       userType: 'U',
-      email: user.loginId,
+      loginId: user.loginId,
       name: user.userName
     };
   } catch (error) {

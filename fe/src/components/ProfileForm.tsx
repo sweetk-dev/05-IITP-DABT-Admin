@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -75,15 +75,28 @@ export default function ProfileForm({
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // 비밀번호 확인 검증
+  const passwordConfirmError = passwordData.newPassword && passwordData.confirmPassword && 
+    passwordData.newPassword !== passwordData.confirmPassword ? '새 비밀번호가 일치하지 않습니다.' : null;
+
   // 프로필 데이터가 변경되면 편집 데이터 초기화
-  // useEffect(() => {
-  //   if (profileData) {
-  //     setEditData({
-  //       name: profileData.name || '',
-  //       affiliation: profileData.affiliation || ''
-  //     });
-  //   }
-  // }, [profileData]);
+  useEffect(() => {
+    if (profileData) {
+      setEditData({
+        name: profileData.name || '',
+        affiliation: profileData.affiliation || ''
+      });
+    }
+  }, [profileData]);
+
+  // 편집 모드 시작
+  const handleStartEdit = () => {
+    setEditData({
+      name: profileData?.name || '',
+      affiliation: profileData?.affiliation || ''
+    });
+    setIsEditing(true);
+  };
 
   // 정보 변경 저장
   const handleSaveProfile = async () => {
@@ -228,7 +241,7 @@ export default function ProfileForm({
                     theme={theme}
                     variant="primary"
                     startIcon={<EditIcon />}
-                    onClick={() => setIsEditing(true)}
+                    onClick={handleStartEdit}
                     id="edit-profile-btn"
                     fullWidth
                   >
@@ -352,10 +365,10 @@ export default function ProfileForm({
               {showLoginId && (
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                    로그인 ID
+                    이메일(로그인 ID)
                   </Typography>
                   <Typography variant="body1" sx={{ py: 1 }}>
-                    {(displayData as any)?.loginId || '-'}
+                    {(displayData as any)?.loginId || (displayData as any)?.email || '-'}
                   </Typography>
                 </Grid>
               )}
@@ -371,14 +384,16 @@ export default function ProfileForm({
                 </Grid>
               )}
 
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                  이메일
-                </Typography>
-                <Typography variant="body1" sx={{ py: 1 }}>
-                  {(displayData as any)?.email || '-'}
-                </Typography>
-              </Grid>
+              {!showLoginId && (
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                    이메일
+                  </Typography>
+                  <Typography variant="body1" sx={{ py: 1 }}>
+                    {(displayData as any)?.email || '-'}
+                  </Typography>
+                </Grid>
+              )}
 
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
@@ -437,6 +452,8 @@ export default function ProfileForm({
               label="새 비밀번호 확인"
               value={passwordData.confirmPassword}
               onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              error={!!passwordConfirmError}
+              helperText={passwordConfirmError}
             />
           </Box>
         </DialogContent>
@@ -453,7 +470,7 @@ export default function ProfileForm({
             theme={theme}
             variant="primary"
             onClick={handleChangePassword} 
-            disabled={changingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+            disabled={changingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword || !!passwordConfirmError}
           >
             {changingPassword ? <CircularProgress size={20} sx={{ color: 'white' }} /> : '변경'}
           </ThemedButton>

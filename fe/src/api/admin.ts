@@ -9,6 +9,10 @@ import type {
   AdminRefreshTokenReq,
   AdminRefreshTokenRes,
   AdminProfileRes,
+  AdminProfileUpdateReq,
+  AdminProfileUpdateRes,
+  AdminPasswordChangeReq,
+  AdminPasswordChangeRes,
   ApiResponse
 } from '@iitp-dabt/common';
 
@@ -60,6 +64,26 @@ export async function refreshAdminToken(params: AdminRefreshTokenReq): Promise<A
  */
 export async function getAdminProfile(): Promise<ApiResponse<AdminProfileRes>> {
   return apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE);
+}
+
+/**
+ * 관리자 프로필 업데이트
+ */
+export async function updateAdminProfile(params: AdminProfileUpdateReq): Promise<ApiResponse<AdminProfileUpdateRes>> {
+  return apiFetch<AdminProfileUpdateRes>(FULL_API_URLS.ADMIN.PROFILE.POST, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+}
+
+/**
+ * 관리자 비밀번호 변경
+ */
+export async function changeAdminPassword(params: AdminPasswordChangeReq): Promise<ApiResponse<AdminPasswordChangeRes>> {
+  return apiFetch<AdminPasswordChangeRes>(FULL_API_URLS.ADMIN.PASSWORD.POST, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
 }
 
 // TODO: Admin FAQ, QnA, Account 관리 API 함수들 추가 예정

@@ -40,78 +40,78 @@ export async function findAdminById(admId: number): Promise<SysAdmAccount | null
   });
 }
 
-// /**
-//  * 관리자 생성
-//  */
-// export async function createAdmin(adminData: {
-//   loginId: string;
-//   password: string;
-//   name: string;
-//   roles: string;
-//   affiliation?: string;
-//   description?: string;
-//   note?: string;
-//   createdBy: string;
-// }): Promise<{ admId: number }> {
-//   const admin = await SysAdmAccount.create({
-//     loginId: adminData.loginId,
-//     password: adminData.password,
-//     name: adminData.name,
-//     roles: adminData.roles,
-//     affiliation: adminData.affiliation,
-//     description: adminData.description,
-//     note: adminData.note,
-//     status: 'A',
-//     delYn: 'N',
-//     createdBy: adminData.createdBy
-//   });
-//   return { admId: admin.admId };
-// }
+/**
+ * 관리자 생성
+ */
+export async function createAdmin(adminData: {
+  loginId: string;
+  password: string;
+  name: string;
+  roles: string;
+  affiliation?: string;
+  description?: string;
+  note?: string;
+  createdBy: string;
+}): Promise<{ admId: number }> {
+  const admin = await SysAdmAccount.create({
+    loginId: adminData.loginId,
+    password: adminData.password,
+    name: adminData.name,
+    roles: adminData.roles,
+    affiliation: adminData.affiliation,
+    description: adminData.description,
+    note: adminData.note,
+    status: 'A',
+    delYn: 'N',
+    createdBy: adminData.createdBy
+  });
+  return { admId: admin.admId };
+}
 
-// /**
-//  * 관리자 정보 업데이트
-//  */
-// export async function updateAdmin(admId: number, updateData: {
-//   name?: string;
-//   roles?: string;
-//   status?: string;
-//   affiliation?: string;
-//   description?: string;
-//   note?: string;
-//   updatedBy: string;
-// }): Promise<boolean> {
-//   const [affectedRows] = await SysAdmAccount.update({
-//     name: updateData.name,
-//     roles: updateData.roles,
-//     status: updateData.status,
-//     affiliation: updateData.affiliation,
-//     description: updateData.description,
-//     note: updateData.note,
-//     updatedBy: updateData.updatedBy
-//   }, {
-//     where: { 
-//       admId,
-//       delYn: 'N'
-//     }
-//   });
-//   return affectedRows > 0;
-// }
+/**
+ * 관리자 정보 업데이트
+ */
+export async function updateAdmin(admId: number, updateData: {
+  name?: string;
+  roles?: string;
+  status?: string;
+  affiliation?: string;
+  description?: string;
+  note?: string;
+  updatedBy: string;
+}): Promise<boolean> {
+  const [affectedRows] = await SysAdmAccount.update({
+    name: updateData.name,
+    roles: updateData.roles,
+    status: updateData.status,
+    affiliation: updateData.affiliation,
+    description: updateData.description,
+    note: updateData.note,
+    updatedBy: updateData.updatedBy
+  }, {
+    where: { 
+      admId,
+      delYn: 'N'
+    }
+  });
+  return affectedRows > 0;
+}
 
-// /**
-//  * 비밀번호 업데이트
-//  */
-// export async function updatePassword(admId: number, password: string, updatedBy: string): Promise<boolean> {
-//   const [affectedRows] = await SysAdmAccount.update({
-//     password,
-//     updatedBy
-//   }, {
-//     where: { 
-//       admId,
-//       delYn: 'N'
-//     }
-//   });
-//   return affectedRows > 0;
-// }
+/**
+ * 관리자 비밀번호 변경
+ */
+export async function updateAdminPassword(admId: number, newPassword: string, updatedBy: string): Promise<boolean> {
+  const [affectedRows] = await SysAdmAccount.update({
+    password: newPassword,
+    updatedBy
+  }, {
+    where: { 
+      admId,
+      delYn: 'N'
+    }
+  });
+  return affectedRows > 0;
+}
 
 // /**
 //  * 관리자 목록 조회 (페이징)

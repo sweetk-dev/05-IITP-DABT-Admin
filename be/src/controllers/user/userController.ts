@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ErrorCode, isValidEmail, isValidPassword } from '@iitp-dabt/common';
 import { sendError, sendValidationError, sendDatabaseError, sendSuccess } from '../../utils/errorHandler';
-import { isEmailExists, createUser, findUserById } from '../../repositories/openApiUserRepository';
+import { isEmailExists, createUser, findUserById, updateUser, updateUserPassword } from '../../repositories/openApiUserRepository';
 import { appLogger } from '../../utils/logger';
 import bcrypt from 'bcrypt';
 import { 
@@ -9,7 +9,11 @@ import {
   UserCheckEmailRes,
   UserRegisterReq, 
   UserRegisterRes,
-  UserProfileRes 
+  UserProfileRes,
+  UserProfileUpdateReq,
+  UserProfileUpdateRes,
+  UserPasswordChangeReq,
+  UserPasswordChangeRes
 } from '@iitp-dabt/common';
 
 // 이메일 중복 체크
@@ -146,5 +150,114 @@ export const getProfile = async (req: Request, res: Response) => {
   } catch (error) {
     appLogger.error('사용자 프로필 조회 중 오류 발생', { error, userId: req.user?.userId });
     sendDatabaseError(res, '조회', '사용자 프로필');
+  }
+};
+
+// 사용자 프로필 변경
+export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    const { name, affiliation } = req.body;
+
+    // 필수 필드 검증
+    if (!name) {
+      return sendValidationError(res, 'name', '이름이 필요합니다.');
+    }
+
+    const user = await findUserById(userId);
+    if (!user) {
+      return sendError(res, ErrorCode.USER_NOT_FOUND);
+    }
+
+    // 프로필 업데이트
+    await updateUser(userId, {
+      userName: name,
+      affiliation: affiliation,
+      updatedBy: 'BY-USER'
+    });
+
+    const response: UserProfileUpdateRes = {
+      success: true,
+      message: '프로필이 성공적으로 업데이트되었습니다.'
+    };
+
+    appLogger.info('사용자 프로필 업데이트 성공', {
+      userId: userId,
+      name: name,
+      affiliation: affiliation
+    });
+
+    sendSuccess(res, response, '프로필이 성공적으로 업데이트되었습니다.', 'USER_PROFILE_UPDATE', {
+      userId: userId,
+      name: name,
+      affiliation: affiliation
+    });
+  } catch (error) {
+    appLogger.error('사용자 프로필 업데이트 중 오류 발생', { error, userId: req.user?.userId });
+    sendDatabaseError(res, '업데이트', '사용자 프로필');
+  }
+};
+
+// 사용자 비밀번호 변경
+export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    // 필수 필드 검증
+    if (!currentPassword) {
+      return sendValidationError(res, 'currentPassword', '현재 비밀번호가 필요합니다.');
+    }
+    if (!newPassword) {
+      return sendValidationError(res, 'newPassword', '새 비밀번호가 필요합니다.');
+    }
+
+    // common 패키지의 비밀번호 강도 검증 사용
+    if (!isValidPassword(newPassword)) {
+      return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);
+    }
+
+    const user = await findUserById(userId);
+    if (!user) {
+      return sendError(res, ErrorCode.USER_NOT_FOUND);
+    }
+
+    // 현재 비밀번호 확인
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      return sendError(res, ErrorCode.USER_PASSWORD_INCORRECT);
+    }
+
+    // 새 비밀번호 해시화
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // 비밀번호 업데이트
+    await updateUserPassword(userId, hashedNewPassword, 'BY-USER');
+
+    const response: UserPasswordChangeRes = {
+      success: true,
+      message: '비밀번호가 성공적으로 변경되었습니다.'
+    };
+
+    appLogger.info('사용자 비밀번호 변경 성공', {
+      userId: userId
+    });
+
+    sendSuccess(res, response, '비밀번호가 성공적으로 변경되었습니다.', 'USER_PASSWORD_CHANGE', {
+      userId: userId
+    });
+  } catch (error) {
+    appLogger.error('사용자 비밀번호 변경 중 오류 발생', { error, userId: req.user?.userId });
+    sendDatabaseError(res, '변경', '사용자 비밀번호');
   }
 }; 

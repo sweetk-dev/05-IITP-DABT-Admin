@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkEmail, register, getProfile } from '../controllers/user/userController';
+import { checkEmail, register, getProfile, updateProfile, changePassword } from '../controllers/user/userController';
 import { getFaqListForUser, getFaqDetailForUser } from '../controllers/user/userFaqController';
 import { getQnaListForUser, getQnaDetailForUser, createQnaForUser } from '../controllers/user/userQnaController';
 import { authMiddleware } from '../middleware/authMiddleware';
@@ -11,6 +11,8 @@ const router = express.Router();
 router.post(API_URLS.USER.CHECK_EMAIL, checkEmail);
 router.post(API_URLS.USER.REGISTER, register);
 router.get(API_URLS.USER.PROFILE, authMiddleware, getProfile);
+router.post(API_URLS.USER.PROFILE_UPDATE, authMiddleware, updateProfile);
+router.post(API_URLS.USER.PASSWORD_CHANGE, authMiddleware, changePassword);
 
 // FAQ 관련
 router.get(API_URLS.USER.FAQ.LIST, getFaqListForUser);

@@ -5,6 +5,7 @@ import { Logo, HomeIconButton } from './AppBarCommon';
 import { logoutAdmin, logoutUser } from '../api';
 import { getUserName, getUserType, getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
+import { getThemeColors } from '../theme';
 
 const SERVICE_NAME = 'IITP DABT';
 
@@ -34,6 +35,10 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
   const userName = getUserName();
   const userType = getUserType();
   const adminRole = getAdminRole();
+
+  // 테마 결정
+  const theme = type === 'admin' || type === 'admin-login' ? 'admin' : 'user';
+  const colors = getThemeColors(theme);
 
   const handleAdminLogout = async () => {
     try {
@@ -67,9 +72,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         id="appbar-auth"
         position="fixed"
         color="default"
-        elevation={1}
+        elevation={0}
         sx={{
-          background: '#fff',
+          background: 'transparent',
           boxShadow: 'none',
           zIndex: 1200,
           minHeight: 'var(--appbar-height)',
@@ -77,8 +82,8 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       >
         <Toolbar id="appbar-auth-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
           <AppBarRow
-            left={<Logo serviceName={SERVICE_NAME} />}
-            right={<HomeIconButton />}
+            left={<Logo serviceName={SERVICE_NAME} theme={theme} />}
+            right={<HomeIconButton theme={theme} />}
           />
         </Toolbar>
       </MuiAppBar>
@@ -91,9 +96,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         id="appbar-admin-login"
         position="fixed"
         color="default"
-        elevation={1}
+        elevation={0}
         sx={{
-          background: '#fff',
+          background: 'transparent',
           boxShadow: 'none',
           zIndex: 1200,
           minHeight: 'var(--appbar-height)',
@@ -101,7 +106,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       >
         <Toolbar id="appbar-admin-login-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
           <AppBarRow
-            left={<Logo serviceName={SERVICE_NAME + ' - Admin'} />}
+            left={<Logo serviceName={SERVICE_NAME + ' - Admin'} theme={theme} />}
           />
         </Toolbar>
       </MuiAppBar>
@@ -114,9 +119,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         id="appbar-admin"
         position="fixed"
         color="default"
-        elevation={1}
+        elevation={0}
         sx={{
-          background: '#fff',
+          background: 'transparent',
           boxShadow: 'none',
           zIndex: 1200,
           minHeight: 'var(--appbar-height)',
@@ -130,32 +135,44 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                 onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)} 
                 sx={{ cursor: 'pointer' }}
               >
-                <Logo serviceName={SERVICE_NAME + ' - Admin'} />
+                <Logo serviceName={SERVICE_NAME + ' - Admin'} theme={theme} />
               </Box>
             }
             right={
               <>
-                <HomeIconButton to={ROUTES.ADMIN.DASHBOARD} />
+                <HomeIconButton to={ROUTES.ADMIN.DASHBOARD} theme={theme} />
                 <Button 
                   id="appbar-admin-profile-btn"
-                  color="primary" 
                   startIcon={<AccountCircle />} 
-                  sx={{ ml: 2 }}
+                  sx={{ 
+                    ml: 2,
+                    color: colors.primary,
+                    '&:hover': {
+                      bgcolor: `${colors.primary}10`,
+                      color: colors.primary,
+                    }
+                  }}
                   onClick={handleProfileClick}
                 >
                   <Box id="appbar-admin-user-info">
-                    <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                    <Typography variant="caption" component="span" sx={{ fontWeight: 'bold', color: colors.primary }}>
                       {userName}
                     </Typography>
-                    <Typography variant="caption" component="div" sx={{ color: 'text.secondary' }}>
+                    <Typography variant="caption" component="div" sx={{ color: colors.primary, opacity: 0.7 }}>
                       {adminRole}
                     </Typography>
                   </Box>
                 </Button>
                 <Button 
                   id="appbar-admin-logout-btn"
-                  color="secondary" 
-                  sx={{ ml: 2 }} 
+                  sx={{ 
+                    ml: 2,
+                    color: colors.primary,
+                    '&:hover': {
+                      bgcolor: `${colors.primary}10`,
+                      color: colors.primary,
+                    }
+                  }} 
                   onClick={handleAdminLogout}
                 >
                   로그아웃
@@ -174,9 +191,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         id="appbar-public"
         position="fixed"
         color="default"
-        elevation={1}
+        elevation={0}
         sx={{
-          background: '#fff',
+          background: 'transparent',
           boxShadow: 'none',
           zIndex: 1200,
           minHeight: 'var(--appbar-height)',
@@ -184,7 +201,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       >
         <Toolbar id="appbar-public-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
           <AppBarRow
-            left={<Logo serviceName={SERVICE_NAME} />}
+            left={<Logo serviceName={SERVICE_NAME} theme={theme} />}
             right={
               <>
                 <Button
@@ -192,15 +209,18 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                   variant="contained"
                   sx={{
                     ml: 1,
-                    backgroundColor: '#1976D2',
-                    color: '#fff',
+                    backgroundColor: colors.primary,
+                    color: colors.text,
                     fontWeight: 'bold',
                     fontSize: '1rem',
                     borderRadius: 2,
                     px: 2.5,
                     py: 0.75,
                     boxShadow: 'none',
-                    '&:hover': { backgroundColor: '#1565c0' },
+                    '&:hover': { 
+                      backgroundColor: colors.primary,
+                      opacity: 0.9
+                    },
                   }}
                   onClick={() => navigate('/login')}
                 >
@@ -211,9 +231,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                   variant="outlined"
                   sx={{
                     ml: 1,
-                    borderColor: '#90CAF9',
-                    color: '#1976D2',
-                    backgroundColor: '#E3F2FD',
+                    borderColor: colors.primary,
+                    color: colors.primary,
+                    backgroundColor: 'transparent',
                     fontWeight: 'bold',
                     fontSize: '1rem',
                     borderRadius: 2,
@@ -221,9 +241,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                     py: 0.75,
                     boxShadow: 'none',
                     '&:hover': {
-                      backgroundColor: '#1976D2',
-                      color: '#fff',
-                      borderColor: '#1976D2',
+                      backgroundColor: colors.primary,
+                      color: colors.text,
+                      borderColor: colors.primary,
                     },
                   }}
                   onClick={() => navigate('/register')}
@@ -244,9 +264,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       id="appbar-user"
       position="fixed"
       color="default"
-      elevation={1}
+      elevation={0}
       sx={{
-        background: '#fff',
+        background: 'transparent',
         boxShadow: 'none',
         zIndex: 1200,
         minHeight: 'var(--appbar-height)',
@@ -254,27 +274,39 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
     >
       <Toolbar id="appbar-user-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
         <AppBarRow
-          left={<Logo serviceName={SERVICE_NAME} />}
+          left={<Logo serviceName={SERVICE_NAME} theme={theme} />}
           right={
             <>
-              <HomeIconButton to="/" />
+              <HomeIconButton to="/" theme={theme} />
               <Button 
                 id="appbar-user-profile-btn"
-                color="primary" 
                 startIcon={<AccountCircle />} 
-                sx={{ ml: 2 }} 
+                sx={{ 
+                  ml: 2,
+                  color: colors.primary,
+                  '&:hover': {
+                    bgcolor: `${colors.primary}10`,
+                    color: colors.primary,
+                  }
+                }} 
                 onClick={handleProfileClick}
               >
                 <Box id="appbar-user-info">
-                  <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="caption" component="span" sx={{ fontWeight: 'bold', color: colors.primary }}>
                     {userName}
                   </Typography>
                 </Box>
               </Button>
               <Button 
                 id="appbar-user-logout-btn"
-                color="secondary" 
-                sx={{ ml: 2 }} 
+                sx={{ 
+                  ml: 2,
+                  color: colors.primary,
+                  '&:hover': {
+                    bgcolor: `${colors.primary}10`,
+                    color: colors.primary,
+                  }
+                }} 
                 onClick={handleUserLogout}
               >
                 로그아웃

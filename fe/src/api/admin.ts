@@ -8,6 +8,7 @@ import type {
   AdminLogoutRes,
   AdminRefreshTokenReq,
   AdminRefreshTokenRes,
+  AdminProfileRes,
   ApiResponse
 } from '@iitp-dabt/common';
 
@@ -52,6 +53,13 @@ export async function refreshAdminToken(params: AdminRefreshTokenReq): Promise<A
     method: 'POST',
     body: JSON.stringify(params),
   });
+}
+
+/**
+ * 관리자 프로필 조회
+ */
+export async function getAdminProfile(): Promise<ApiResponse<AdminProfileRes>> {
+  return apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE);
 }
 
 // TODO: Admin FAQ, QnA, Account 관리 API 함수들 추가 예정

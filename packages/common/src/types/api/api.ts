@@ -35,6 +35,7 @@ export const API_URLS = {
   // 관리자 관련
   ADMIN: {
     BASE: '/api/admin',
+    PROFILE: '/profile',
     // FAQ 관리
     FAQ: {
       LIST: '/faq',
@@ -123,6 +124,7 @@ export const FULL_API_URLS = {
     QNA_CREATE: getUserUrl(API_URLS.USER.QNA.CREATE),
   },
   ADMIN: {
+    PROFILE: getAdminUrl(API_URLS.ADMIN.PROFILE),
     FAQ_LIST: getAdminUrl(API_URLS.ADMIN.FAQ.LIST),
     FAQ_DETAIL: getAdminUrl(API_URLS.ADMIN.FAQ.DETAIL),
     FAQ_CREATE: getAdminUrl(API_URLS.ADMIN.FAQ.CREATE),

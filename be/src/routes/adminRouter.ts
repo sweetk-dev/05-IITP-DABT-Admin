@@ -14,10 +14,14 @@ import {
   updateQnaForAdmin,
   deleteQnaForAdmin
 } from '../controllers/admin/adminQnaController';
+import { getAdminProfile } from '../controllers/admin/adminController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { API_URLS } from '@iitp-dabt/common';
 
 const router = express.Router();
+
+// 관리자 프로필
+router.get(API_URLS.ADMIN.PROFILE, authMiddleware, getAdminProfile);
 
 // FAQ 관리
 router.get(API_URLS.ADMIN.FAQ.LIST, authMiddleware, getFaqListForAdmin);

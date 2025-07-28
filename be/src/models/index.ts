@@ -24,13 +24,7 @@ const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   host: dbHost,
   port: dbPort,
   dialect: 'postgres',
-  logging: process.env.NODE_ENV === 'development' ? (sql) => appLogger.info(sql) : false,
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  }
+  logging: process.env.NODE_ENV === 'development' ? (sql) => appLogger.info(sql) : false
 });
 
 // 모델들 초기화

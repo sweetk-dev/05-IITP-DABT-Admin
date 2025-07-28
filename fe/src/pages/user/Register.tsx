@@ -9,9 +9,12 @@ import { useTheme } from '@mui/material/styles';
 import { checkEmail, registerUser } from '../../api/user';
 import CommonDialog from '../../components/CommonDialog';
 import { ROUTES } from '../../routes';
+import { getThemeColors } from '../../theme';
 
 export default function Register() {
   const theme = useTheme();
+  const userTheme = 'user' as const;
+  const colors = getThemeColors(userTheme);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
@@ -107,9 +110,26 @@ export default function Register() {
   };
 
   return (
-    <Box id="register-page" minHeight="80vh" display="flex" alignItems="center" justifyContent="center" bgcolor="#f5f5f5">
-      <Box id="register-form-box" maxWidth={400} width="100%" mx="auto" p={4} boxShadow={0} borderRadius={2} bgcolor="#fff" border="1.5px solid #d0d0d0" sx={{ boxShadow: '2px 4px 12px 0 rgba(0,0,0,0.07)' }}>
-        <Typography variant="h5" mb={2} align="center">회원가입</Typography>
+    <Box id="register-page" sx={{
+      minHeight: '80vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      bgcolor: colors.background
+    }}>
+      <Box id="register-form-box" sx={{
+        maxWidth: 400,
+        width: '100%',
+        mx: 'auto',
+        p: 4,
+        borderRadius: 3,
+        bgcolor: colors.paper,
+        border: `1px solid ${colors.border}`,
+        boxShadow: `0 4px 12px ${colors.primary}15`
+      }}>
+        <Typography variant="h5" mb={2} align="center" sx={{ color: colors.primary, fontWeight: 600 }}>
+          회원가입
+        </Typography>
         <TextField
           id="register-name-input"
           label="이름"

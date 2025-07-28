@@ -17,6 +17,19 @@ export interface Admin {
   lastLoginAt?: string;
 }
 
+// Admin Profile 조회
+export interface AdminProfileRes {
+  adminId: number;
+  loginId: string;
+  name: string;
+  role: string;
+  affiliation?: string;
+  description?: string;
+  status: string;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
 // Admin 계정 목록 조회
 export interface AdminListReq extends PaginationReq {
   search?: string;

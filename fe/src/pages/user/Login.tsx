@@ -6,27 +6,13 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { loginUser } from '../../api';
 import { ROUTES } from '../../routes';
-
-// 공통 스타일 정의
-const LOGIN_PAGE_STYLES = {
-  container: {
-    minHeight: '80vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    bgcolor: '#f5f5f5',
-    position: 'relative',
-  },
-  formContainer: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 400,
-  },
-} as const;
+import { getThemeColors } from '../../theme';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const theme = 'user' as const;
+  const colors = getThemeColors(theme);
 
   // 🔽 로그인 처리 콜백
   const handleLogin = async (email: string, password: string) => {
@@ -52,8 +38,19 @@ export default function Login() {
   };
 
   return (
-    <Box id="login-page" sx={LOGIN_PAGE_STYLES.container}>
-      <Box sx={LOGIN_PAGE_STYLES.formContainer}>
+    <Box id="login-page" sx={{
+      minHeight: '80vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      bgcolor: colors.background,
+      position: 'relative',
+    }}>
+      <Box sx={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: 400,
+      }}>
         <ErrorAlert 
           error={error}
           onClose={() => setError(null)}

@@ -100,8 +100,17 @@ export function isAuthenticated(): boolean {
   const accessToken = getAccessToken();
   const refreshToken = getRefreshToken();
   
-  // 두 토큰 모두 있어야 하고, access token이 만료되지 않았거나 refresh token이 유효해야 함
-  return !!(accessToken && refreshToken && (!isTokenExpired(accessToken) || !isTokenExpired(refreshToken)));
+  // Access Token이 유효하면 인증됨
+  if (accessToken && !isTokenExpired(accessToken)) {
+    return true;
+  }
+  
+  // Access Token이 만료되었지만 Refresh Token이 유효하면 인증됨
+  if (refreshToken && !isTokenExpired(refreshToken)) {
+    return true;
+  }
+  
+  return false;
 }
 
 /**
@@ -130,4 +139,43 @@ export function validateAndCleanTokens(): void {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     clearLoginInfo(); // 사용자 정보도 함께 제거
   }
+}
+
+/**
+ * 토큰 상태 확인 및 갱신 (API 요청 전 호출)
+ */
+export async function ensureValidToken(): Promise<string | null> {
+  // 토큰 유효성 검사 및 정리
+  validateAndCleanTokens();
+  
+  const accessToken = getAccessToken();
+  
+  // 토큰이 없으면 null 반환
+  if (!accessToken) {
+    return null;
+  }
+  
+  // Access Token이 유효하면 반환
+  if (!isTokenExpired(accessToken)) {
+    return accessToken;
+  }
+  
+  // Access Token이 만료되었지만 Refresh Token이 유효하면 갱신 시도
+  const refreshToken = getRefreshToken();
+  if (refreshToken && !isTokenExpired(refreshToken)) {
+    try {
+      // TODO: 토큰 갱신 API 호출 구현
+      // const response = await refreshTokenAPI(refreshToken);
+      // if (response.success) {
+      //   saveTokens(response.data.accessToken, response.data.refreshToken);
+      //   return response.data.accessToken;
+      // }
+      console.warn('Token refresh not implemented yet');
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+    }
+  }
+  
+  // 갱신 실패 시 null 반환
+  return null;
 } 

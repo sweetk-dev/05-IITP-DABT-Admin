@@ -1,6 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
+// 환경 변수 로드 (가장 먼저 실행)
+dotenv.config();
+
 import { API_URLS } from '@iitp-dabt/common';
 import authRouter from './routes/authRouter';
 import adminRouter from './routes/adminRouter';
@@ -29,14 +33,7 @@ if (process.env.CORS_ORIGINS) {
   corsOrigins.push(...envOrigins);
 }
 
-appLogger.info('CORS Origins:', corsOrigins);
-
-app.use(cors({
-  origin: corsOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+app.use(cors({ origin: corsOrigins, credentials: true, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'] }));
 
 // 미들웨어 설정
 app.use(express.json());
@@ -58,14 +55,6 @@ async function startServer() {
     // 데이터베이스 연결 테스트
     await sequelize.authenticate();
     appLogger.info('Database connection established successfully');
-    
-    // 연결 풀 정보 로깅 (타입 안전하게)
-    const pool = (sequelize.connectionManager as any).pool;
-    if (pool) {
-      appLogger.info(`Database pool - Max: ${pool.size}, Using: ${pool.using}, Pending: ${pool.pending}, Idle: ${pool.idle}, Available: ${pool.size - pool.using}`);
-    } else {
-      appLogger.info('Database connection established successfully');
-    }
     
     // 서버 시작
     app.listen(30000, () => appLogger.info('Server started'));

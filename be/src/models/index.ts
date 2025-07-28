@@ -2,6 +2,15 @@ import { Sequelize } from 'sequelize';
 import { getDecryptedEnv } from '../utils/decrypt';
 import { appLogger } from '../utils/logger';
 
+// 모델들 import
+import { initOpenApiUser } from './openApiUser';
+import { initOpenApiAuthKey } from './openApiAuthKey';
+import { initSysAdmAccount } from './sysAdmAccount';
+import { initSysFaq } from './sysFaq';
+import { initSysQna } from './sysQna';
+import { initSysLogUserAccess } from './sysLogUserAccess';
+import { initSysLogChangeHis } from './sysLogChangeHis';
+
 // 환경 변수에서 데이터베이스 설정 가져오기
 const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = parseInt(process.env.DB_PORT || '5432');
@@ -22,5 +31,14 @@ const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
     idle: 10000
   }
 });
+
+// 모델들 초기화
+initOpenApiUser(sequelize);
+initOpenApiAuthKey(sequelize);
+initSysAdmAccount(sequelize);
+initSysFaq(sequelize);
+initSysQna(sequelize);
+initSysLogUserAccess(sequelize);
+initSysLogChangeHis(sequelize);
 
 export default sequelize; 

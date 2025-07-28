@@ -23,22 +23,8 @@ export const accessLogMiddleware = (req: RequestWithUser, res: Response, next: N
     const endTime = Date.now();
     const responseTime = endTime - startTime;
     
-    // REQ-RES를 하나의 로그로 통합
-    const accessLogData = {
-      requestId,
-      timestamp: new Date().toISOString(),
-      method: req.method,
-      url: req.originalUrl,
-      ip: req.ip || req.connection.remoteAddress,
-      userId: req.user?.userId || 'anonymous',
-      userType: req.user?.userType || 'anonymous',
-      statusCode: res.statusCode,
-      responseTime: `${responseTime}ms`,
-      success: res.statusCode < 400
-    };
-
-    // 통합된 Access Log 기록 (1줄)
-    accessLogger.info('API_ACCESS', accessLogData);
+    // 성능 최적화: 불필요한 객체 생성 제거, 직접 로그 메시지 생성
+    accessLogger.info(`${req.method} - ${req.originalUrl} , ${res.statusCode}, ${res.statusCode < 400}, ${requestId}, ${responseTime}ms`);
 
     // 원래 send 함수 호출
     return originalSend.call(this, data);

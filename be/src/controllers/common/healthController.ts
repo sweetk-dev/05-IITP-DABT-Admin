@@ -10,7 +10,6 @@ export const healthCheck = async (req: Request, res: Response) => {
       success: true,
       data: {
         status: 'OK',
-        timestamp: new Date().toISOString(),
         uptime: process.uptime()
       }
     });

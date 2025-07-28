@@ -334,6 +334,7 @@ DB_USER=your-db-user
 DB_PASSWORD=your-db-password
 JWT_SECRET=your-jwt-secret
 ENC_SECRET=your-encryption-secret
+CORS_ORIGINS=https://your-frontend-domain.com,https://your-admin-domain.com
 
 # Frontend
 VITE_API_BASE_URL=https://your-api-domain.com

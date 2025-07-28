@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import './models';
 import express from 'express';
+import cors from 'cors';
 import userRouter from './routes/userRouter';
 import adminRouter from './routes/adminRouter';
 import commonRouter from './routes/commonRouter';
@@ -11,6 +12,18 @@ import { appLogger } from './utils/logger';
 import { API_URLS } from '@iitp-dabt/common';
 
 const app = express();
+
+// CORS 설정
+const corsOrigins = process.env.CORS_ORIGINS 
+  ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
+  : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:4173'];
+
+app.use(cors({
+  origin: corsOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 
 // 미들웨어 설정
 app.use(express.json());

@@ -94,6 +94,9 @@ REFRESH_TOKEN_EXPIRES_IN=7d
 # 암호화 설정
 ENC_SECRET=your-encryption-secret
 
+# CORS 설정 (설정하지 않으면 localhost는 기본 허용)
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:4173
+
 # 로깅 설정
 LOG_LEVEL=info
 ```

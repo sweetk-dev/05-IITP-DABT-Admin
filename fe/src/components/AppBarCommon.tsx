@@ -1,22 +1,29 @@
 import { Box, Typography, IconButton } from '@mui/material';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { useNavigate } from 'react-router-dom';
+import { getThemeColors } from '../theme';
 
-export function HomeIconButton({ to = '/' }: { to?: string }) {
+export function HomeIconButton({ to = '/', theme = 'user' }: { to?: string; theme?: 'user' | 'admin' }) {
   const navigate = useNavigate();
+  const colors = getThemeColors(theme);
+  
   return (
     <IconButton
       id="home-icon-button"
-      color="primary"
       onClick={() => navigate(to)}
       sx={{
-        background: '#fff',
+        background: `${colors.primary}20`,
+        color: colors.primary,
         borderRadius: '50%',
-        boxShadow: 2,
+        boxShadow: 1,
         p: 0.7,
         mr: 1,
-        transition: 'box-shadow 0.2s',
-        '&:hover': { boxShadow: 4, background: '#f5f5f5' },
+        transition: 'all 0.2s',
+        '&:hover': { 
+          boxShadow: 2, 
+          background: `${colors.primary}40`,
+          opacity: 0.8
+        },
         height: 36,
         width: 36,
         minWidth: 0,
@@ -27,8 +34,10 @@ export function HomeIconButton({ to = '/' }: { to?: string }) {
   );
 }
 
-export function Logo({ serviceName }: { serviceName: string }) {
+export function Logo({ serviceName, theme = 'user' }: { serviceName: string; theme?: 'user' | 'admin' }) {
   const navigate = useNavigate();
+  const colors = getThemeColors(theme);
+  
   return (
     <Box 
       id="appbar-logo-container" 
@@ -46,9 +55,8 @@ export function Logo({ serviceName }: { serviceName: string }) {
       <Typography 
         id="appbar-logo-text"
         variant="h6" 
-        color="inherit" 
         noWrap 
-        sx={{ color: '#7B3F00', fontWeight: 700, fontSize: '1.25rem' }}
+        sx={{ color: colors.text, fontWeight: 700, fontSize: '1.25rem' }}
       >
         {serviceName}
       </Typography>

@@ -17,17 +17,36 @@ export interface Admin {
   lastLoginAt?: string;
 }
 
-// Admin Profile 조회
+// Admin Profile 조회 (필요한 정보만)
 export interface AdminProfileRes {
   adminId: number;
   loginId: string;
   name: string;
   role: string;
   affiliation?: string;
-  description?: string;
-  status: string;
   createdAt: string;
-  lastLoginAt?: string;
+}
+
+// Admin 프로필 변경
+export interface AdminProfileUpdateReq {
+  name: string;
+  affiliation?: string;
+}
+
+export interface AdminProfileUpdateRes {
+  success: boolean;
+  message: string;
+}
+
+// Admin 비밀번호 변경
+export interface AdminPasswordChangeReq {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface AdminPasswordChangeRes {
+  success: boolean;
+  message: string;
 }
 
 // Admin 계정 목록 조회
@@ -89,17 +108,6 @@ export interface AdminUpdateReq {
 }
 
 export interface AdminUpdateRes {
-  success: boolean;
-  message: string;
-}
-
-// Admin 비밀번호 변경
-export interface AdminPasswordChangeReq {
-  currentPassword: string;
-  newPassword: string;
-}
-
-export interface AdminPasswordChangeRes {
   success: boolean;
   message: string;
 }

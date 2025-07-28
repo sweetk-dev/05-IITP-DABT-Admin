@@ -1,19 +1,9 @@
 import { Box, Typography, Button, Grid, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { logoutAdmin } from '../../api';
 import { ROUTES } from '../../routes';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await logoutAdmin({});
-      navigate(ROUTES.ADMIN.LOGIN);
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
 
   return (
     <Box id="admin-dashboard-page" sx={{ p: 3 }}>
@@ -21,14 +11,6 @@ export default function AdminDashboard() {
         <Typography variant="h4" component="h1">
           관리자 대시보드
         </Typography>
-        <Button 
-          variant="outlined" 
-          color="error" 
-          onClick={handleLogout}
-          id="admin-dashboard-logout-btn"
-        >
-          로그아웃
-        </Button>
       </Box>
 
       <Grid container spacing={3}>

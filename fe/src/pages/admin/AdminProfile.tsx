@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getUserInfo } from '../../store/user';
-import { getAdminProfile } from '../../api/admin';
+import { getAdminProfile, updateAdminProfile, changeAdminPassword } from '../../api/admin';
 import ProfileForm from '../../components/ProfileForm';
 import type { AdminProfileRes } from '@iitp-dabt/common';
 
@@ -40,12 +40,14 @@ export default function AdminProfile() {
   // 정보 변경 저장
   const handleSaveProfile = async (data: { name: string; affiliation: string }) => {
     try {
-      // TODO: API 호출 구현
-      // const response = await updateAdminProfile(data);
+      const response = await updateAdminProfile(data);
       
-      // 임시로 로컬 상태만 업데이트
-      setProfileData(prev => prev ? { ...prev, ...data } : null);
-      setError(null);
+      if (response.success && response.data) {
+        setProfileData(response.data);
+        setError(null);
+      } else {
+        setError(response.errorMessage || '프로필 업데이트 실패');
+      }
     } catch (err) {
       setError('프로필 업데이트 중 오류가 발생했습니다.');
       throw err;
@@ -55,9 +57,13 @@ export default function AdminProfile() {
   // 비밀번호 변경
   const handleChangePassword = async (data: { currentPassword: string; newPassword: string; confirmPassword: string }) => {
     try {
-      // TODO: API 호출 구현
-      // const response = await updateAdminPassword(data);
-      setError(null);
+      const response = await changeAdminPassword(data);
+      
+      if (response.success) {
+        setError(null);
+      } else {
+        setError(response.errorMessage || '비밀번호 변경 실패');
+      }
     } catch (err) {
       setError('비밀번호 변경 중 오류가 발생했습니다.');
       throw err;

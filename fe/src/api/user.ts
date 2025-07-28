@@ -9,6 +9,10 @@ import type {
   UserRefreshTokenReq,
   UserRefreshTokenRes,
   UserProfileRes,
+  UserProfileUpdateReq,
+  UserProfileUpdateRes,
+  UserPasswordChangeReq,
+  UserPasswordChangeRes,
   ApiResponse
 } from '@iitp-dabt/common';
 
@@ -70,6 +74,26 @@ export async function refreshUserToken(params: UserRefreshTokenReq): Promise<Api
  */
 export async function getUserProfile(): Promise<ApiResponse<UserProfileRes>> {
   return apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE);
+}
+
+/**
+ * 사용자 프로필 업데이트
+ */
+export async function updateUserProfile(params: UserProfileUpdateReq): Promise<ApiResponse<UserProfileUpdateRes>> {
+  return apiFetch<UserProfileUpdateRes>(FULL_API_URLS.USER.PROFILE.POST, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+}
+
+/**
+ * 사용자 비밀번호 변경
+ */
+export async function changeUserPassword(params: UserPasswordChangeReq): Promise<ApiResponse<UserPasswordChangeRes>> {
+  return apiFetch<UserPasswordChangeRes>(FULL_API_URLS.USER.PASSWORD.POST, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
 }
 
 /**

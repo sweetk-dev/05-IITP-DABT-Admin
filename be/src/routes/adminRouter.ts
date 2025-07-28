@@ -14,7 +14,7 @@ import {
   updateQnaForAdmin,
   deleteQnaForAdmin
 } from '../controllers/admin/adminQnaController';
-import { getAdminProfile } from '../controllers/admin/adminController';
+import { getAdminProfile, updateAdminProfile, changeAdminPassword } from '../controllers/admin/adminController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { API_URLS } from '@iitp-dabt/common';
 
@@ -22,6 +22,8 @@ const router = express.Router();
 
 // 관리자 프로필
 router.get(API_URLS.ADMIN.PROFILE, authMiddleware, getAdminProfile);
+router.post(API_URLS.ADMIN.PROFILE_UPDATE, authMiddleware, updateAdminProfile);
+router.post(API_URLS.ADMIN.PASSWORD_CHANGE, authMiddleware, changeAdminPassword);
 
 // FAQ 관리
 router.get(API_URLS.ADMIN.FAQ.LIST, authMiddleware, getFaqListForAdmin);

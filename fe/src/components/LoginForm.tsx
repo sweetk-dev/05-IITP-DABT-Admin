@@ -4,35 +4,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { isValidEmail } from '@iitp-dabt/common';
 import { ROUTES } from '../routes';
-
-// 공통 스타일 정의
-const LOGIN_FORM_STYLES = {
-  container: {
-    maxWidth: 360,
-    width: '100%',
-    mx: 'auto',
-    p: 4,
-    borderRadius: 2,
-    bgcolor: '#fff',
-    border: '1.5px solid #d0d0d0',
-    boxShadow: '2px 4px 12px 0 rgba(0,0,0,0.07)',
-  },
-  title: {
-    mb: 2,
-    textAlign: 'center',
-  },
-  submitButton: {
-    mt: 2,
-    fontWeight: 'bold',
-    fontSize: '1.1rem',
-    py: 1.2,
-  },
-  registerButton: {
-    mt: 1,
-    fontSize: '0.95rem',
-    opacity: 0.7,
-  },
-} as const;
+import { getThemeColors } from '../theme';
 
 type LoginFormProps = {
   onSubmit: (emailOrLoginId: string, password: string) => void;
@@ -52,6 +24,57 @@ export default function LoginForm({
   const [showPw, setShowPw] = useState(false);
   const [emailOrLoginIdError, setEmailOrLoginIdError] = useState('');
   const [pwError, setPwError] = useState('');
+
+  const theme = isAdmin ? 'admin' : 'user';
+  const colors = getThemeColors(theme);
+
+  // 공통 스타일 정의
+  const LOGIN_FORM_STYLES = {
+    container: {
+      maxWidth: 360,
+      width: '100%',
+      mx: 'auto',
+      p: 4,
+      borderRadius: 2,
+      bgcolor: 'transparent',
+      border: 'none',
+      boxShadow: 'none',
+    },
+    title: {
+      mb: 2,
+      textAlign: 'center',
+      color: colors.text,
+    },
+    submitButton: {
+      mt: 2,
+      fontWeight: 'bold',
+      fontSize: '1.1rem',
+      py: 1.2,
+      bgcolor: colors.primary,
+      color: colors.text,
+      textShadow: '0 0 1px rgba(0,0,0,0.3)',
+      '&:hover': {
+        bgcolor: colors.primary,
+        opacity: 0.9,
+      },
+      '&:disabled': {
+        bgcolor: '#ccc',
+        color: '#666',
+        textShadow: 'none',
+      },
+    },
+    registerButton: {
+      mt: 1,
+      fontSize: '0.95rem',
+      color: colors.primary,
+      fontWeight: 'bold',
+      '&:hover': {
+        bgcolor: 'transparent',
+        color: colors.primary,
+        opacity: 0.8,
+      },
+    },
+  } as const;
 
   const handleLogin = () => {
     if (loading) return; // 로딩 중에는 중복 요청 방지
@@ -147,7 +170,6 @@ export default function LoginForm({
       <Button 
         id={isAdmin ? "admin-login-submit-btn" : "login-submit-btn"}
         variant="contained" 
-        color="primary" 
         fullWidth 
         sx={LOGIN_FORM_STYLES.submitButton}
         onClick={handleLogin}
@@ -160,7 +182,6 @@ export default function LoginForm({
         <Button 
           id="login-register-btn" 
           variant="text" 
-          color="primary" 
           fullWidth 
           sx={LOGIN_FORM_STYLES.registerButton}
           onClick={() => window.location.href = ROUTES.PUBLIC.REGISTER}

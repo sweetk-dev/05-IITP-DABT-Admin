@@ -1,5 +1,6 @@
 import { apiFetch, publicApiFetch } from './api';
 import { saveTokens, removeTokens } from '../store/auth';
+import { saveLoginInfo, clearLoginInfo } from '../store/user';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type { 
   AdminLoginReq, 
@@ -19,9 +20,16 @@ export async function loginAdmin(params: AdminLoginReq): Promise<ApiResponse<Adm
     body: JSON.stringify(params),
   });
 
-  // 로그인 성공 시 토큰 저장
+  // 로그인 성공 시 토큰과 사용자 정보 저장
   if (response.success && response.data?.token && response.data?.refreshToken) {
-    saveTokens(response.data.token, response.data.refreshToken);
+    const userInfo = {
+      userId: response.data.admin.adminId,
+      email: response.data.admin.email,
+      name: response.data.admin.name,
+      userType: 'A' as const,
+      role: response.data.admin.role,
+    };
+    saveLoginInfo(userInfo, response.data.token, response.data.refreshToken);
   }
 
   return response;
@@ -56,8 +64,8 @@ export async function logoutAdmin() {
     console.warn('Admin logout request failed:', error);
   }
   
-  // 클라이언트에서 토큰 제거
-  removeTokens();
+  // 클라이언트에서 토큰과 사용자 정보 제거
+  clearLoginInfo();
 }
 
 // TODO: Admin FAQ, QnA, Account 관리 API 함수들 추가 예정

@@ -5,6 +5,7 @@ import {
   isValidTokenFormat,
   getTokenInfoString 
 } from '../utils/jwt';
+import { clearLoginInfo } from './user';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -114,17 +115,19 @@ export function validateAndCleanTokens(): void {
   if (accessToken && isTokenExpired(accessToken) && 
       refreshToken && isTokenExpired(refreshToken)) {
     console.log('Both tokens expired, removing from storage');
-    removeTokens();
+    clearLoginInfo(); // 사용자 정보도 함께 제거
   }
   
   // 유효하지 않은 형식의 토큰 제거
   if (accessToken && !isValidTokenFormat(accessToken)) {
     console.warn('Invalid access token format, removing');
     localStorage.removeItem(ACCESS_TOKEN_KEY);
+    clearLoginInfo(); // 사용자 정보도 함께 제거
   }
   
   if (refreshToken && !isValidTokenFormat(refreshToken)) {
     console.warn('Invalid refresh token format, removing');
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    clearLoginInfo(); // 사용자 정보도 함께 제거
   }
 } 

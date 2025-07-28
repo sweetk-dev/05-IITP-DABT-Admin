@@ -113,9 +113,9 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
     if (error instanceof Error) {
       switch (error.message) {
         case 'ADMIN_NOT_FOUND':
-          throw new Error(ErrorCode.USER_NOT_FOUND.toString());
+          throw new Error(ErrorCode.ADMIN_NOT_FOUND.toString());
         case 'ADMIN_PASSWORD_INVALID':
-          throw new Error(ErrorCode.USER_PASSWORD_INVALID.toString());
+          throw new Error(ErrorCode.ADMIN_PASSWORD_INVALID.toString());
         case 'ADMIN_INACTIVE':
           throw new Error(ErrorCode.ADMIN_INACTIVE.toString());
         case 'JWT_SECRET_NOT_CONFIGURED':

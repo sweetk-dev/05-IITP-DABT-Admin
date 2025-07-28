@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginUser, logout, refreshUserToken } from '../../services/user/userAuthService';
+import { appLogger } from '../../utils/logger';
 import { 
   UserLoginReq, 
   UserLoginRes, 
@@ -33,7 +34,18 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
 
     sendSuccess(res, response, undefined, 'USER_LOGIN', { userId: result.userId, email });
   } catch (error) {
-    sendError(res, ErrorCode.LOGIN_FAILED);
+    if (error instanceof Error) {
+      const errorCode = parseInt(error.message);
+      if (!isNaN(errorCode)) {
+        sendError(res, errorCode);
+      } else {
+        appLogger.error('User login error:', error);
+        sendError(res, ErrorCode.LOGIN_FAILED);
+      }
+    } else {
+      appLogger.error('User login unknown error:', error);
+      sendError(res, ErrorCode.LOGIN_FAILED);
+    }
   }
 };
 

@@ -1,13 +1,18 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
 import { ErrorCode } from '@iitp-dabt/common';
+import { getUserType } from '../store/user';
+import { ROUTES } from '../routes';
+
+// API 타임아웃 설정 (기본값: 10초)
+const API_TIMEOUT = 10000;
 
 // API 응답 타입
 interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
-  errorCode?: ErrorCode;
   errorMessage?: string;
+  errorCode?: number;
 }
 
 // API 클라이언트 생성
@@ -50,7 +55,14 @@ const createApiClient = (baseURL: string): AxiosInstance => {
         // 토큰 만료 시 자동 로그아웃 처리
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        
+        // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
+        const userType = getUserType();
+        if (userType === 'A') {
+          window.location.href = ROUTES.ADMIN.LOGIN;
+        } else {
+          window.location.href = ROUTES.PUBLIC.LOGIN;
+        }
       }
       
       return Promise.reject(error);
@@ -59,6 +71,8 @@ const createApiClient = (baseURL: string): AxiosInstance => {
 
   return client;
 };
+
+export default createApiClient;
 
 // 사용자 API 클라이언트
 export const userApiClient = createApiClient('/api/user');

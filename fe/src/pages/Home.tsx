@@ -1,6 +1,7 @@
 import { Box, Typography, Button, Card, CardContent, Stack, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { FloatingLogo } from '../components/AppBarCommon';
+import { getThemeColors } from '../theme';
 
 const dummyNotices = [
   {
@@ -40,28 +41,35 @@ const dummyFaqs = [
   }
 ];
 
-const bgMain = '#FFF7ED';
-const section2 = '#E3F2FD';
-
-
 export default function Home() {
   const navigate = useNavigate();
+  const theme = 'user' as const;
+  const colors = getThemeColors(theme);
   const openApiDocUrl = 'https://your-openapi-doc-url.com';
+  
   return (
     <Box id="home-page" sx={{
-      background: bgMain,
+      background: colors.background,
       py: { xs: 4, md: 8 },
-      pt: { xs: 'calc(var(--appbar-height, 64px) + 24px)', md: 'calc(var(--appbar-height, 64px) + 48px)' },
       pb: { xs: 'calc(var(--footer-height, 56px) + 20px)', md: 'calc(var(--footer-height, 56px) + 40px)' },
     }}>
       {/* 컨텐츠 래퍼: 소개+3구역 */}
       <Box id="home-main-section" sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}>
         {/* 서비스 소개 */}
-        <Box id="home-intro-section" sx={{ mt: { xs: 3, md: 4 }, background: '#90CAF9', borderRadius: 3, p: 4, mb: 4, boxShadow: 1, width: { xs: '100%', md: '80%' }, mx: 'auto' }}>
-          <Typography variant="h4" fontWeight="bold" align="center" gutterBottom sx={{ color: '#2D3142' }}>
+        <Box id="home-intro-section" sx={{ 
+          mt: { xs: 3, md: 4 }, 
+          background: colors.primary, 
+          borderRadius: 3, 
+          p: 4, 
+          mb: 4, 
+          boxShadow: `0 4px 12px ${colors.primary}20`, 
+          width: { xs: '100%', md: '80%' }, 
+          mx: 'auto' 
+        }}>
+          <Typography variant="h4" fontWeight="bold" align="center" gutterBottom sx={{ color: colors.text }}>
             장애인 자립 생활 지원 플랫폼 API 센터
           </Typography>
-          <Typography align="center" color="#2D3142">
+          <Typography align="center" sx={{ color: colors.text }}>
             누구나 쉽고 안전하게 장애인 자립 생활 지원 플랫폼 데이터 API를 탐색하고 활용할 수 있는 공간입니다.
           </Typography>
         </Box>
@@ -73,7 +81,7 @@ export default function Home() {
             divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'transparent' }} />}
             spacing={0}
             sx={{
-              background: section2,
+              background: colors.secondary,
               borderRadius: 3,
               boxShadow: 1,
               minHeight: { xs: 600, md: 700 },
@@ -101,9 +109,9 @@ export default function Home() {
                   minWidth: 160,
                   alignSelf: 'flex-start',
                   mb: 2,
-                  backgroundColor: '#FFE0B2',
-                  color: '#7B3F00',
-                  '&:hover': { backgroundColor: '#FFD8B0' },
+                  backgroundColor: colors.secondary,
+                  color: colors.text,
+                  '&:hover': { backgroundColor: colors.secondary, opacity: 0.9 },
                   fontWeight: 'bold',
                   fontSize: '1rem',
                   boxShadow: 'none',
@@ -135,9 +143,9 @@ export default function Home() {
                   minWidth: 160,
                   alignSelf: 'flex-start',
                   mb: 2,
-                  backgroundColor: '#FFE0B2',
-                  color: '#7B3F00',
-                  '&:hover': { backgroundColor: '#FFD8B0' },
+                  backgroundColor: colors.secondary,
+                  color: colors.text,
+                  '&:hover': { backgroundColor: colors.secondary, opacity: 0.9 },
                   fontWeight: 'bold',
                   fontSize: '1rem',
                   boxShadow: 'none',
@@ -147,7 +155,7 @@ export default function Home() {
               </Button>
               <Stack spacing={2} sx={{ width: '100%', maxWidth: 320 }}>
                 {dummyFaqs.map((faq, idx) => (
-                  <Card key={idx} variant="outlined" sx={{ background: '#fff', width: '100%' }}>
+                  <Card key={idx} variant="outlined" sx={{ background: colors.paper, width: '100%' }}>
                     <CardContent>
                       <Typography variant="subtitle1" fontWeight="bold">Q. {faq.question}</Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>A. {faq.answer}</Typography>
@@ -158,7 +166,7 @@ export default function Home() {
             </Box>
             {/* Open API 문서 */}
             <Box
-              id="openapi-section"
+              id="api-doc-section"
               flex={1}
               display="flex"
               flexDirection="column"
@@ -171,19 +179,19 @@ export default function Home() {
                 variant="outlined"
                 onClick={() => window.open(openApiDocUrl, '_blank')}
                 sx={{
-                  minWidth: 180,
+                  minWidth: 160,
                   alignSelf: 'flex-start',
                   mb: 2,
-                  borderColor: '#64B5F6',
-                  color: '#1976D2',
-                  backgroundColor: '#E3F2FD',
+                  borderColor: colors.primary,
+                  color: colors.primary,
+                  backgroundColor: colors.paper,
                   fontWeight: 'bold',
                   fontSize: '1rem',
                   boxShadow: 'none',
                   '&:hover': {
-                    backgroundColor: '#1976D2',
-                    color: '#fff',
-                    borderColor: '#1976D2',
+                    backgroundColor: colors.primary,
+                    color: colors.paper,
+                    borderColor: colors.primary,
                   },
                 }}
               >

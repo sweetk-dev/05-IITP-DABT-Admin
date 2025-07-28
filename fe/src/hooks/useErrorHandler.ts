@@ -1,13 +1,9 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ErrorCode } from '@iitp-dabt/common';
-import { getErrorUIMeta, shouldShowPopup, shouldAutoLogout, getRedirectPath } from '../types/errorCodes';
-
-interface ErrorResponse {
-  success: false;
-  errorCode: ErrorCode;
-  errorMessage: string;
-}
+import { ErrorCode, getErrorUIMeta, shouldAutoLogout, shouldShowPopup, getRedirectPath } from '@iitp-dabt/common';
+import { getUserType } from '../store/user';
+import { ROUTES } from '../routes';
+import type { ErrorResponse } from '@iitp-dabt/common';
 
 export const useErrorHandler = () => {
   const navigate = useNavigate();
@@ -33,7 +29,13 @@ export const useErrorHandler = () => {
         logout();
         const redirectPath = getRedirectPath(errorCode);
         if (redirectPath) {
-          navigate(redirectPath);
+          // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
+          const userType = getUserType();
+          if (userType === 'A') {
+            navigate(ROUTES.ADMIN.LOGIN);
+          } else {
+            navigate(redirectPath);
+          }
         }
       }
 

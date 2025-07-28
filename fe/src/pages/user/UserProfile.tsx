@@ -1,89 +1,98 @@
-import { Box, Typography, Paper, Grid, Avatar, Button } from '@mui/material';
-import { AccountCircle, Edit } from '@mui/icons-material';
-import { getUserName, getUserEmail } from '../../store/user';
+import { useState, useEffect } from 'react';
+import { getUserInfo } from '../../store/user';
+import { getUserProfile } from '../../api/user';
+import ProfileForm from '../../components/ProfileForm';
+import type { UserProfileRes } from '@iitp-dabt/common';
 
 export default function UserProfile() {
-  const userName = getUserName();
-  const userEmail = getUserEmail();
+  const userInfo = getUserInfo();
+  const [profileData, setProfileData] = useState<UserProfileRes | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!userInfo || userInfo.userType !== 'U') {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await getUserProfile();
+        
+        if (response.success && response.data) {
+          setProfileData(response.data);
+        } else {
+          setError(response.errorMessage || '프로필 정보를 불러올 수 없습니다.');
+        }
+      } catch (err) {
+        setError('프로필 정보를 불러오는 중 오류가 발생했습니다.');
+        console.error('Profile fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // 정보 변경 저장
+  const handleSaveProfile = async (data: { name: string; affiliation: string }) => {
+    try {
+      // TODO: API 호출 구현
+      // const response = await updateUserProfile(data);
+      
+      // 임시로 로컬 상태만 업데이트
+      setProfileData(prev => prev ? { ...prev, ...data } : null);
+      setError(null);
+    } catch (err) {
+      setError('프로필 업데이트 중 오류가 발생했습니다.');
+      throw err;
+    }
+  };
+
+  // 비밀번호 변경
+  const handleChangePassword = async (data: { currentPassword: string; newPassword: string; confirmPassword: string }) => {
+    try {
+      // TODO: API 호출 구현
+      // const response = await updateUserPassword(data);
+      setError(null);
+    } catch (err) {
+      setError('비밀번호 변경 중 오류가 발생했습니다.');
+      throw err;
+    }
+  };
+
+  if (!userInfo || userInfo.userType !== 'U') {
+    return (
+      <ProfileForm
+        title="사용자 프로필"
+        profileData={null}
+        loading={false}
+        error="사용자 정보를 불러올 수 없습니다."
+        onSaveProfile={handleSaveProfile}
+        onChangePassword={handleChangePassword}
+        onCloseError={() => setError(null)}
+        showRole={false}
+        showLoginId={false}
+        theme="user"
+      />
+    );
+  }
 
   return (
-    <Box id="user-profile-page" sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        프로필
-      </Typography>
-      
-      <Paper id="user-profile-container" sx={{ p: 3, mt: 2 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={3}>
-            <Box id="user-profile-avatar-section" sx={{ textAlign: 'center' }}>
-              <Avatar 
-                id="user-profile-avatar"
-                sx={{ 
-                  width: 120, 
-                  height: 120, 
-                  mx: 'auto', 
-                  mb: 2,
-                  bgcolor: 'primary.main',
-                  fontSize: '3rem'
-                }}
-              >
-                <AccountCircle sx={{ fontSize: 'inherit' }} />
-              </Avatar>
-              <Button 
-                id="user-profile-edit-btn"
-                variant="outlined" 
-                startIcon={<Edit />}
-                size="small"
-              >
-                프로필 수정
-              </Button>
-            </Box>
-          </Grid>
-          
-          <Grid item xs={12} md={9}>
-            <Box id="user-profile-info-section">
-              <Typography variant="h6" gutterBottom>
-                기본 정보
-              </Typography>
-              
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Box id="user-profile-name-field">
-                    <Typography variant="body2" color="text.secondary">
-                      이름
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                      {userName}
-                    </Typography>
-                  </Box>
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <Box id="user-profile-email-field">
-                    <Typography variant="body2" color="text.secondary">
-                      이메일
-                    </Typography>
-                    <Typography variant="body1">
-                      {userEmail}
-                    </Typography>
-                  </Box>
-                </Grid>
-                
-                <Grid item xs={12} sm={6}>
-                  <Box id="user-profile-role-field">
-                    <Typography variant="body2" color="text.secondary">
-                      사용자 유형
-                    </Typography>
-                    <Typography variant="body1">
-                      일반 사용자
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Box>
+    <ProfileForm
+      title="사용자 프로필"
+      profileData={profileData}
+      loading={loading}
+      error={error}
+      onSaveProfile={handleSaveProfile}
+      onChangePassword={handleChangePassword}
+      onCloseError={() => setError(null)}
+      showRole={false}
+      showLoginId={false}
+      theme="user"
+    />
   );
 } 

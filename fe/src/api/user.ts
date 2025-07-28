@@ -8,6 +8,7 @@ import type {
   UserLogoutRes,
   UserRefreshTokenReq,
   UserRefreshTokenRes,
+  UserProfileRes,
   ApiResponse
 } from '@iitp-dabt/common';
 
@@ -67,8 +68,8 @@ export async function refreshUserToken(params: UserRefreshTokenReq): Promise<Api
 /**
  * 사용자 프로필 조회
  */
-export async function getUserProfile(): Promise<ApiResponse<any>> { // Assuming UserProfileRes is removed, using 'any' for now
-  return apiFetch<any>(FULL_API_URLS.USER.PROFILE); // Assuming UserProfileRes is removed, using 'any' for now
+export async function getUserProfile(): Promise<ApiResponse<UserProfileRes>> {
+  return apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE);
 }
 
 /**

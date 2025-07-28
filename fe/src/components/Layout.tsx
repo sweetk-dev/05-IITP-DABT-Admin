@@ -80,7 +80,10 @@ export default function Layout() {
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: bgMain }}>
       <AppBar type={appBarType} />
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ 
+        flex: 1,
+        pt: { xs: 'calc(var(--appbar-height, 64px) + 24px)', md: 'calc(var(--appbar-height, 64px) + 48px)' }
+      }}>
         <Outlet />
       </Box>
       <Footer />

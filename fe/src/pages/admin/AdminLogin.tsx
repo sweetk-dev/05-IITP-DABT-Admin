@@ -6,27 +6,13 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { FloatingLogo } from '../../components/AppBarCommon';
 import { loginAdmin } from '../../api';
 import { ROUTES } from '../../routes';
-
-// 공통 스타일 정의 (사용자 로그인과 동일)
-const LOGIN_PAGE_STYLES = {
-  container: {
-    minHeight: '80vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    bgcolor: '#f5f5f5',
-    position: 'relative',
-  },
-  formContainer: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: 400,
-  },
-} as const;
+import { getThemeColors } from '../../theme';
 
 export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const theme = 'admin' as const;
+  const colors = getThemeColors(theme);
 
   const handleAdminLogin = async (loginId: string, password: string) => {
     setLoading(true);
@@ -51,8 +37,19 @@ export default function AdminLogin() {
   };
 
   return (
-    <Box id="admin-login-page" sx={LOGIN_PAGE_STYLES.container}>
-      <Box sx={LOGIN_PAGE_STYLES.formContainer}>
+    <Box id="admin-login-page" sx={{
+      minHeight: '80vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      bgcolor: colors.background,
+      position: 'relative',
+    }}>
+      <Box sx={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: 400,
+      }}>
         <ErrorAlert 
           error={error}
           onClose={() => setError(null)}

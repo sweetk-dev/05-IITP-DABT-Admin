@@ -6,7 +6,7 @@ import { logoutAdmin, logoutUser } from '../api';
 import { getUserName, getUserType, getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
 
-const SERVICE_NAME = 'IITP DABT Admin';
+const SERVICE_NAME = 'IITP DABT';
 
 interface AppBarRowProps {
   left?: React.ReactNode;

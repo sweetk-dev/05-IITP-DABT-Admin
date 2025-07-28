@@ -28,17 +28,17 @@ export async function updateLatestLoginAt(admId: number): Promise<boolean> {
   return affectedRows > 0;
 }
 
-// /**
-//  * 관리자 ID로 관리자 조회
-//  */
-// export async function findAdminById(admId: number): Promise<SysAdmAccount | null> {
-//   return SysAdmAccount.findOne({ 
-//     where: { 
-//       admId,
-//       delYn: 'N'
-//     } 
-//   });
-// }
+/**
+ * 관리자 ID로 관리자 조회
+ */
+export async function findAdminById(admId: number): Promise<SysAdmAccount | null> {
+  return SysAdmAccount.findOne({ 
+    where: { 
+      admId,
+      delYn: 'N'
+    } 
+  });
+}
 
 // /**
 //  * 관리자 생성

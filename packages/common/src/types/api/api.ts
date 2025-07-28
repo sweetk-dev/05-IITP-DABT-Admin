@@ -72,6 +72,21 @@ export const API_URLS = {
     HEALTH_CHECK: '/health',
     VERSION: '/version',
     JWT_CONFIG: '/jwt-config',
+  },
+  
+  // 공통 코드
+  COMMON_CODE: {
+    BASE: '/api/common-code',
+    BY_GROUP: '/:grpId',
+    BY_ID: '/:grpId/:codeId',
+    BY_TYPE: '/type/:codeType',
+    BY_PARENT: '/:grpId/parent',
+    STATS: '/stats/overview',
+    // 관리자용 상세 조회
+    ADMIN_BY_GROUP: '/admin/:grpId',
+    ADMIN_BY_ID: '/admin/:grpId/:codeId',
+    ADMIN_BY_TYPE: '/admin/type/:codeType',
+    ADMIN_BY_PARENT: '/admin/:grpId/parent',
   }
 } as const;
 
@@ -85,6 +100,7 @@ export const getAuthUrl = (path: string): string => buildUrl(API_URLS.AUTH.BASE,
 export const getUserUrl = (path: string): string => buildUrl(API_URLS.USER.BASE, path);
 export const getAdminUrl = (path: string): string => buildUrl(API_URLS.ADMIN.BASE, path);
 export const getCommonUrl = (path: string): string => buildUrl(API_URLS.COMMON.BASE, path);
+export const getCommonCodeUrl = (path: string): string => buildUrl(API_URLS.COMMON_CODE.BASE, path);
 
 // 완전한 URL 상수들 (함수 조합으로 생성)
 export const FULL_API_URLS = {
@@ -132,6 +148,18 @@ export const FULL_API_URLS = {
     HEALTH_CHECK: getCommonUrl(API_URLS.COMMON.HEALTH_CHECK),
     VERSION: getCommonUrl(API_URLS.COMMON.VERSION),
     JWT_CONFIG: getCommonUrl(API_URLS.COMMON.JWT_CONFIG),
+  },
+  COMMON_CODE: {
+    BY_GROUP: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_GROUP),
+    BY_ID: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_ID),
+    BY_TYPE: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_TYPE),
+    BY_PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_PARENT),
+    STATS: getCommonCodeUrl(API_URLS.COMMON_CODE.STATS),
+    // 관리자용 상세 조회
+    ADMIN_BY_GROUP: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_GROUP),
+    ADMIN_BY_ID: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_ID),
+    ADMIN_BY_TYPE: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_TYPE),
+    ADMIN_BY_PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_PARENT),
   }
 } as const;
 

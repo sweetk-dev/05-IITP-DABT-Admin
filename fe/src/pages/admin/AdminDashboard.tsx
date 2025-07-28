@@ -1,13 +1,18 @@
-import { Box, Typography, Paper, Grid, Button } from '@mui/material';
+import { Box, Typography, Button, Grid, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { logoutAdmin } from '../../api';
 import { ROUTES } from '../../routes';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // TODO: 로그아웃 로직 구현
-    navigate(ROUTES.ADMIN.LOGIN);
+  const handleLogout = async () => {
+    try {
+      await logoutAdmin({});
+      navigate(ROUTES.ADMIN.LOGIN);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (

@@ -6,6 +6,7 @@ export function HomeIconButton({ to = '/' }: { to?: string }) {
   const navigate = useNavigate();
   return (
     <IconButton
+      id="home-icon-button"
       color="primary"
       onClick={() => navigate(to)}
       sx={{
@@ -20,9 +21,8 @@ export function HomeIconButton({ to = '/' }: { to?: string }) {
         width: 36,
         minWidth: 0,
       }}
-      id="appbar-home-btn"
     >
-      <HomeOutlinedIcon sx={{ fontSize: 22 }} />
+      <HomeOutlinedIcon id="home-icon" sx={{ fontSize: 22 }} />
     </IconButton>
   );
 }
@@ -30,9 +30,26 @@ export function HomeIconButton({ to = '/' }: { to?: string }) {
 export function Logo({ serviceName }: { serviceName: string }) {
   const navigate = useNavigate();
   return (
-    <Box id="appbar-logo" display="flex" alignItems="center" sx={{ cursor: 'pointer' }} onClick={() => navigate('/') }>
-      <img src="/iitp_cms_logo_img_1.png" alt="IITP Logo" style={{ height: 48, marginRight: 12 }} />
-      <Typography variant="h6" color="inherit" noWrap sx={{ color: '#7B3F00', fontWeight: 700, fontSize: '1.25rem' }}>
+    <Box 
+      id="appbar-logo-container" 
+      display="flex" 
+      alignItems="center" 
+      sx={{ cursor: 'pointer' }} 
+      onClick={() => navigate('/') }
+    >
+      <img 
+        id="appbar-logo-image"
+        src="/iitp_cms_logo_img_1.png" 
+        alt="IITP Logo" 
+        style={{ height: 48, marginRight: 12 }} 
+      />
+      <Typography 
+        id="appbar-logo-text"
+        variant="h6" 
+        color="inherit" 
+        noWrap 
+        sx={{ color: '#7B3F00', fontWeight: 700, fontSize: '1.25rem' }}
+      >
         {serviceName}
       </Typography>
     </Box>
@@ -70,6 +87,7 @@ export function FloatingLogo({
       }}
     >
       <img
+        id={`${id}-image`}
         src={src}
         alt="Floating Logo"
         style={{ width, maxWidth, height: 'auto', opacity }}

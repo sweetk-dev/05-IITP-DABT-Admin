@@ -1,15 +1,14 @@
-import 'dotenv/config';
-import './models';
 import express from 'express';
 import cors from 'cors';
-import userRouter from './routes/userRouter';
-import adminRouter from './routes/adminRouter';
-import commonRouter from './routes/commonRouter';
+import dotenv from 'dotenv';
+import { API_URLS } from '@iitp-dabt/common';
 import authRouter from './routes/authRouter';
-import { authMiddleware } from './middleware/authMiddleware';
+import adminRouter from './routes/adminRouter';
+import userRouter from './routes/userRouter';
+import commonRouter from './routes/commonRouter';
+import commonCodeRouter from './routes/commonCodeRoutes';
 import { accessLogMiddleware } from './middleware/accessLogMiddleware';
 import { appLogger } from './utils/logger';
-import { API_URLS } from '@iitp-dabt/common';
 import sequelize from './models';
 
 const app = express();
@@ -51,6 +50,7 @@ app.use(API_URLS.AUTH.BASE, authRouter);      // '/api/auth'
 app.use(API_URLS.USER.BASE, userRouter);      // '/api/user'
 app.use(API_URLS.ADMIN.BASE, adminRouter);    // '/api/admin'
 app.use(API_URLS.COMMON.BASE, commonRouter);  // '/api/common'
+app.use(API_URLS.COMMON_CODE.BASE, commonCodeRouter);
 
 // 서버 시작 전 데이터베이스 연결 확인
 async function startServer() {

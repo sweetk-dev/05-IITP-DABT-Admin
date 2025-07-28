@@ -1,28 +1,32 @@
 import { SysAdmAccount, SysAdmAccountCreationAttributes } from '../models/sysAdmAccount';
 import { Op } from 'sequelize';
 
-// 임시 더미 함수들 (나중에 구현 예정)
+/**
+ * 로그인 ID로 관리자 조회
+ */
 export async function findAdminByLoginId(loginId: string): Promise<SysAdmAccount | null> {
-  // TODO: 실제 구현 필요
-  return null;
+  return SysAdmAccount.findOne({ 
+    where: { 
+      loginId,
+      delYn: 'N'
+    } 
+  });
 }
 
+/**
+ * 최근 로그인 시간 업데이트
+ */
 export async function updateLatestLoginAt(admId: number): Promise<boolean> {
-  // TODO: 실제 구현 필요
-  return true;
+  const [affectedRows] = await SysAdmAccount.update({
+    latestLoginAt: new Date()
+  }, {
+    where: { 
+      admId,
+      delYn: 'N'
+    }
+  });
+  return affectedRows > 0;
 }
-
-// /**
-//  * 로그인 ID로 관리자 조회
-//  */
-// export async function findAdminByLoginId(loginId: string): Promise<SysAdmAccount | null> {
-//   return SysAdmAccount.findOne({ 
-//     where: { 
-//       loginId,
-//       delYn: 'N'
-//     } 
-//   });
-// }
 
 // /**
 //  * 관리자 ID로 관리자 조회
@@ -100,21 +104,6 @@ export async function updateLatestLoginAt(admId: number): Promise<boolean> {
 //   const [affectedRows] = await SysAdmAccount.update({
 //     password,
 //     updatedBy
-//   }, {
-//     where: { 
-//       admId,
-//       delYn: 'N'
-//     }
-//   });
-//   return affectedRows > 0;
-// }
-
-// /**
-//  * 최근 로그인 시간 업데이트
-//  */
-// export async function updateLatestLoginAt(admId: number): Promise<boolean> {
-//   const [affectedRows] = await SysAdmAccount.update({
-//     latestLoginAt: new Date()
 //   }, {
 //     where: { 
 //       admId,

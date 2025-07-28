@@ -1,5 +1,6 @@
 import { apiFetch, publicApiFetch } from './api';
 import { saveTokens, removeTokens } from '../store/auth';
+import { saveLoginInfo, clearLoginInfo } from '../store/user';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type {
   UserLoginReq,
@@ -23,9 +24,15 @@ export async function loginUser(params: UserLoginReq): Promise<ApiResponse<UserL
     body: JSON.stringify(params),
   });
 
-  // 로그인 성공 시 토큰 저장
+  // 로그인 성공 시 토큰과 사용자 정보 저장
   if (response.success && response.data?.token && response.data?.refreshToken) {
-    saveTokens(response.data.token, response.data.refreshToken);
+    const userInfo = {
+      userId: response.data.user.userId,
+      email: response.data.user.email,
+      name: response.data.user.name || response.data.user.email.split('@')[0], // 이름이 없으면 이메일에서 추출
+      userType: 'U' as const,
+    };
+    saveLoginInfo(userInfo, response.data.token, response.data.refreshToken);
   }
 
   return response;
@@ -88,6 +95,6 @@ export async function logoutUser() {
     console.warn('Logout request failed:', error);
   }
   
-  // 클라이언트에서 토큰 제거
-  removeTokens();
+  // 클라이언트에서 토큰과 사용자 정보 제거
+  clearLoginInfo();
 } 

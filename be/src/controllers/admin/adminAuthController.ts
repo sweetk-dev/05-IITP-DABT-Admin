@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ErrorCode } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginAdmin, logout, refreshAdminToken } from '../../services/admin/adminAuthService';
+import { appLogger } from '../../utils/logger';
 import { 
   AdminLoginReq, 
   AdminLoginRes, 
@@ -34,7 +35,18 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
 
     sendSuccess(res, response, undefined, 'ADMIN_LOGIN', { userId: result.userId, loginId });
   } catch (error) {
-    sendError(res, ErrorCode.LOGIN_FAILED);
+    if (error instanceof Error) {
+      const errorCode = parseInt(error.message);
+      if (!isNaN(errorCode)) {
+        sendError(res, errorCode);
+      } else {
+        appLogger.error('Admin login error:', error);
+        sendError(res, ErrorCode.LOGIN_FAILED);
+      }
+    } else {
+      appLogger.error('Admin login unknown error:', error);
+      sendError(res, ErrorCode.LOGIN_FAILED);
+    }
   }
 };
 

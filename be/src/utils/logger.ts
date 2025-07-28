@@ -34,6 +34,11 @@ const errorLogTransport = new winston.transports.DailyRotateFile({
   level: 'error',
 });
 
+// audit.json 파일 생성을 방지하기 위한 이벤트 핸들러
+appLogTransport.on('rotate', () => {});
+accessLogTransport.on('rotate', () => {});
+errorLogTransport.on('rotate', () => {});
+
 const appLogger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
@@ -60,7 +65,9 @@ const accessLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.json()
+    winston.format.printf(({ timestamp, message }) => {
+      return `[${timestamp}] : ${message}`;
+    })
   ),
   transports: [
     accessLogTransport,

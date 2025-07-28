@@ -10,13 +10,27 @@ import { authMiddleware } from './middleware/authMiddleware';
 import { accessLogMiddleware } from './middleware/accessLogMiddleware';
 import { appLogger } from './utils/logger';
 import { API_URLS } from '@iitp-dabt/common';
+import sequelize from './models';
 
 const app = express();
 
-// CORS 설정
-const corsOrigins = process.env.CORS_ORIGINS 
-  ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
-  : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:4173'];
+// CORS 설정 - localhost는 무조건 허용
+const corsOrigins = [
+  'http://localhost:5173',  // Vite dev server
+  'http://localhost:3000',  // React dev server
+  'http://localhost:4173',  // Vite preview
+  'http://127.0.0.1:5173',  // Vite dev server (IP)
+  'http://127.0.0.1:3000',  // React dev server (IP)
+  'http://127.0.0.1:4173'   // Vite preview (IP)
+];
+
+// 환경 변수에서 추가 CORS origins가 있으면 병합
+if (process.env.CORS_ORIGINS) {
+  const envOrigins = process.env.CORS_ORIGINS.split(',').map(origin => origin.trim());
+  corsOrigins.push(...envOrigins);
+}
+
+appLogger.info('CORS Origins:', corsOrigins);
 
 app.use(cors({
   origin: corsOrigins,
@@ -38,6 +52,30 @@ app.use(API_URLS.USER.BASE, userRouter);      // '/api/user'
 app.use(API_URLS.ADMIN.BASE, adminRouter);    // '/api/admin'
 app.use(API_URLS.COMMON.BASE, commonRouter);  // '/api/common'
 
-app.listen(30000, () => appLogger.info('Server started'));
+// 서버 시작 전 데이터베이스 연결 확인
+async function startServer() {
+  try {
+    // 데이터베이스 연결 테스트
+    await sequelize.authenticate();
+    appLogger.info('Database connection established successfully');
+    
+    // 연결 풀 정보 로깅 (타입 안전하게)
+    const pool = (sequelize.connectionManager as any).pool;
+    if (pool) {
+      appLogger.info(`Database pool - Max: ${pool.size}, Using: ${pool.using}, Pending: ${pool.pending}, Idle: ${pool.idle}, Available: ${pool.size - pool.using}`);
+    } else {
+      appLogger.info('Database connection established successfully');
+    }
+    
+    // 서버 시작
+    app.listen(30000, () => appLogger.info('Server started'));
+    
+  } catch (error) {
+    appLogger.error('Database connection failed:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 export default app;

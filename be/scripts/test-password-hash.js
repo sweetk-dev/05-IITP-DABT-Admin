@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 /**
  * 비밀번호 해싱 테스트 스크립트

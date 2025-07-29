@@ -25,6 +25,7 @@ import ThemedButton from './common/ThemedButton';
 import ThemedCard from './common/ThemedCard';
 import LoadingSpinner from './LoadingSpinner';
 import { usePasswordValidation } from '../hooks/usePasswordValidation';
+import { PAGE_SPACING } from '../constants/spacing';
 
 interface ProfileData {
   name?: string;
@@ -40,7 +41,7 @@ interface ProfileFormProps {
   title: string;
   profileData: ProfileData | null;
   loading: boolean;
-  error: string | null;
+  error: string | undefined;
   onSaveProfile: (data: { name: string; affiliation: string }) => Promise<void>;
   onChangePassword: (data: { currentPassword: string; newPassword: string; confirmPassword: string }) => Promise<void>;
   onCloseError: () => void;
@@ -195,7 +196,7 @@ export default function ProfileForm({
       {error && (
         <Alert 
           severity="error" 
-          sx={{ mb: 3 }} 
+          sx={{ mb: PAGE_SPACING.PROFILE.ERROR_ALERT_BOTTOM }} 
           onClose={onCloseError}
         >
           {error}
@@ -446,7 +447,7 @@ export default function ProfileForm({
         <DialogContent>
           <Box sx={{ pt: 1 }}>
             {passwordError && (
-              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setPasswordError(null)}>
+              <Alert severity="error" sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }} onClose={() => setPasswordError(null)}>
                 {passwordError}
               </Alert>
             )}
@@ -456,7 +457,8 @@ export default function ProfileForm({
               label="현재 비밀번호"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              sx={{ mb: 2 }}
+              margin="none"
+              sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }}
             />
             <TextField
               fullWidth
@@ -466,7 +468,8 @@ export default function ProfileForm({
               onChange={(e) => passwordValidation.setPassword(e.target.value)}
               error={!!passwordValidation.passwordError}
               helperText={passwordValidation.passwordError}
-              sx={{ mb: 2 }}
+              margin="none"
+              sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }}
             />
             <TextField
               fullWidth
@@ -476,6 +479,8 @@ export default function ProfileForm({
               onChange={(e) => passwordValidation.setConfirmPassword(e.target.value)}
               error={!!passwordValidation.confirmPasswordError}
               helperText={passwordValidation.confirmPasswordError}
+              margin="none"
+              sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }}
             />
           </Box>
         </DialogContent>

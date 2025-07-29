@@ -11,6 +11,7 @@ import { getThemeColors } from '../../theme';
 import ThemedButton from '../../components/common/ThemedButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { usePasswordValidation } from '../../hooks/usePasswordValidation';
+import { PAGE_SPACING } from '../../constants/spacing';
 
 export default function Register() {
   const theme = useTheme();
@@ -157,20 +158,21 @@ export default function Register() {
           backgroundOpacity={0.7}
           color="primary"
         />
-        <Typography variant="h5" mb={2} align="center" sx={{ color: colors.text, fontWeight: 600 }}>
+        <Typography variant="h5" mb={PAGE_SPACING.REGISTER.TITLE_BOTTOM} align="center" sx={{ color: colors.text, fontWeight: 600 }}>
           회원가입
         </Typography>
         <TextField
           id="register-name-input"
           label="이름"
           fullWidth
-          margin="normal"
+          margin="none"
           value={name}
           onChange={e => setName(e.target.value)}
           error={!!nameError}
           helperText={nameError}
+          sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
         />
-        <Box display="flex" alignItems="flex-end" gap={1}>
+        <Box display="flex" alignItems="flex-end" gap={1} sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}>
           <Box sx={{ flex: 1 }}>
             <TextField
               id="register-email-input"
@@ -196,8 +198,7 @@ export default function Register() {
                 },
                 '& .MuiInputBase-root': {
                   height: 56
-                },
-                mt: '8px'
+                }
               }}
             />
             <Box sx={{ minHeight: emailError ? '20px' : '0px', mt: 0.5 }}>
@@ -218,7 +219,6 @@ export default function Register() {
             variant="outlined"
             sx={{ 
               height: 56, 
-              mt: '8px',
               whiteSpace: 'nowrap'
             }}
             onClick={handleEmailCheck}
@@ -229,8 +229,7 @@ export default function Register() {
         </Box>
         {emailCheckMsg && emailCheckColor === 'success' && (
           <Typography 
-            mt={1} 
-            mb={1} 
+            mb={PAGE_SPACING.REGISTER.SUCCESS_MESSAGE_BOTTOM} 
             ml={1} 
             fontSize={14} 
             fontWeight="bold"
@@ -247,12 +246,13 @@ export default function Register() {
           label={<span>비밀번호 <span style={{color: theme.palette.error.main}}>*</span></span>}
           type={showPw ? 'text' : 'password'}
           fullWidth
-          margin="normal"
+          margin="none"
           value={passwordValidation.password}
           onChange={e => passwordValidation.setPassword(e.target.value)}
           error={!!passwordValidation.passwordError}
           placeholder="영문, 숫자, 특수문자 포함 8자리 이상"
           helperText={passwordValidation.passwordError}
+          sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -272,11 +272,12 @@ export default function Register() {
           label={<span>비밀번호 확인 <span style={{color: theme.palette.error.main}}>*</span></span>}
           type={showPw2 ? 'text' : 'password'}
           fullWidth
-          margin="normal"
+          margin="none"
           value={passwordValidation.confirmPassword}
           onChange={e => passwordValidation.setConfirmPassword(e.target.value)}
           error={!!passwordValidation.confirmPasswordError}
           helperText={passwordValidation.confirmPasswordError}
+          sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -296,9 +297,10 @@ export default function Register() {
           label="소속"
           placeholder="회사/기관/학교/단체 등 (선택)"
           fullWidth
-          margin="normal"
+          margin="none"
           value={affiliation}
           onChange={e => setAffiliation(e.target.value)}
+          sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
         />
         {success && <Typography color="primary" align="center" mt={2}>회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.</Typography>}
         <ThemedButton 

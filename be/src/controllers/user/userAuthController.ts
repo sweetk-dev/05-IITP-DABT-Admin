@@ -3,6 +3,7 @@ import { ErrorCode } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginUser, logout, refreshUserToken } from '../../services/user/userAuthService';
 import { appLogger } from '../../utils/logger';
+import { trimStringFieldsExcept } from '../../utils/trimUtils';
 import { 
   UserLoginReq, 
   UserLoginRes, 
@@ -15,7 +16,8 @@ import {
 // 사용자 로그인
 export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Response) => {
   try {
-    const { email, password } = req.body;
+    // trim 처리 적용 (비밀번호 제외)
+    const { email, password } = trimStringFieldsExcept(req.body, ['password']);
     const ipAddr = req.ip || req.connection.remoteAddress || '';
     const userAgent = req.headers['user-agent'] as string;
 

@@ -12,6 +12,7 @@ import userRouter from './routes/userRouter';
 import commonRouter from './routes/commonRouter';
 import commonCodeRouter from './routes/commonCodeRoutes';
 import { accessLogMiddleware } from './middleware/accessLogMiddleware';
+import { trimMiddleware } from './middleware/trimMiddleware';
 import { appLogger } from './utils/logger';
 import sequelize from './models';
 
@@ -41,6 +42,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // 자동화된 Access Log 미들웨어 (Morgan 대신 사용)
 app.use(accessLogMiddleware);
+
+// 자동 trim 처리 미들웨어 (비밀번호 필드 제외)
+app.use(trimMiddleware);
 
 // 라우터 설정 - API_URLS BASE 경로 사용
 app.use(API_URLS.AUTH.BASE, authRouter);      // '/api/auth'

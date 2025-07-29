@@ -8,7 +8,7 @@ export default function UserProfile() {
   const userInfo = getUserInfo();
   const [profileData, setProfileData] = useState<UserProfileRes | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -44,7 +44,7 @@ export default function UserProfile() {
       
       if (response.success) {
         setProfileData(prev => prev ? { ...prev, ...data } : null);
-        setError(null);
+        setError(undefined);
       } else {
         setError(response.errorMessage || '프로필 업데이트 실패');
       }
@@ -59,7 +59,7 @@ export default function UserProfile() {
     try {
       const response = await changeUserPassword(data);
       if (response.success) {
-        setError(null);
+        setError(undefined);
       } else {
         setError(response.errorMessage || '비밀번호 변경 실패');
       }
@@ -78,7 +78,7 @@ export default function UserProfile() {
         error="사용자 정보를 불러올 수 없습니다."
         onSaveProfile={handleSaveProfile}
         onChangePassword={handleChangePassword}
-        onCloseError={() => setError(null)}
+        onCloseError={() => setError(undefined)}
         showRole={false}
         showLoginId={false}
         theme="user"
@@ -94,7 +94,7 @@ export default function UserProfile() {
       error={error}
       onSaveProfile={handleSaveProfile}
       onChangePassword={handleChangePassword}
-      onCloseError={() => setError(null)}
+      onCloseError={() => setError(undefined)}
       showRole={false}
       showLoginId={false}
       theme="user"

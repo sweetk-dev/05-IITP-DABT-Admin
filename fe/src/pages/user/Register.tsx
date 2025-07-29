@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Box, TextField, Typography, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
+import { isValidEmail } from '@iitp-dabt/common';
 import type { UserRegisterReq } from '@iitp-dabt/common';
 import { useTheme } from '@mui/material/styles';
 import { checkEmail, registerUser } from '../../api/user';
@@ -194,10 +194,31 @@ export default function Register() {
                 '& .MuiFormHelperText-root': {
                   margin: 0,
                   height: 0,
-                  visibility: 'hidden'
+                  visibility: 'hidden',
+                  display: 'none'
                 },
                 '& .MuiInputBase-root': {
                   height: 56
+                },
+                '& .MuiFormLabel-root': {
+                  transform: 'translate(14px, 16px) scale(1)',
+                  '&.Mui-focused': {
+                    transform: 'translate(14px, -9px) scale(0.75)'
+                  },
+                  '&.MuiFormLabel-filled': {
+                    transform: 'translate(14px, -9px) scale(0.75)'
+                  }
+                },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: emailError ? theme.palette.error.main : undefined
+                  },
+                  '&:hover fieldset': {
+                    borderColor: emailError ? theme.palette.error.main : undefined
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: emailError ? theme.palette.error.main : theme.palette.primary.main
+                  }
                 }
               }}
             />

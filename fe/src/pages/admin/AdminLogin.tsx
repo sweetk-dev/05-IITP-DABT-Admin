@@ -3,7 +3,6 @@ import { useState } from 'react';
 import LoginForm from '../../components/LoginForm';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
-import { FloatingLogo } from '../../components/AppBarCommon';
 import { loginAdmin } from '../../api';
 import { ROUTES } from '../../routes';
 import { getThemeColors } from '../../theme';
@@ -64,7 +63,6 @@ export default function AdminLogin() {
         <LoadingSpinner loading={loading} />
       </Box>
       
-      <FloatingLogo id="admin-login-logo2-floating" width={240} />
     </Box>
   );
 } 

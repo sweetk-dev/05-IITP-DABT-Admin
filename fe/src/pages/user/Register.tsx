@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Box, TextField, Typography, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { FloatingLogo } from '../../components/AppBarCommon';
 import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
 import type { UserRegisterReq } from '@iitp-dabt/common';
 import { useTheme } from '@mui/material/styles';
@@ -301,7 +300,6 @@ export default function Register() {
           로그인 화면으로
         </ThemedButton>
       </Box>
-      <FloatingLogo id="register-logo2-floating" width={240} />
       <CommonDialog
         open={dialogOpen}
         message={dialogMsg}

@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import { useState } from 'react';
-import { FloatingLogo } from '../../components/AppBarCommon';
 import LoginForm from '../../components/LoginForm';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
@@ -65,7 +64,6 @@ export default function Login() {
         <LoadingSpinner loading={loading} />
       </Box>
       
-      <FloatingLogo id="login-logo2-floating" width={240} />
     </Box>
   );
 }

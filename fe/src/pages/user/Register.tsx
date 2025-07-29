@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, TextField, Typography, InputAdornment, IconButton } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
@@ -10,6 +10,7 @@ import { ROUTES } from '../../routes';
 import { getThemeColors } from '../../theme';
 import ThemedButton from '../../components/common/ThemedButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { usePasswordValidation } from '../../hooks/usePasswordValidation';
 
 export default function Register() {
   const theme = useTheme();
@@ -17,15 +18,11 @@ export default function Register() {
   const colors = getThemeColors(userTheme);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [pw, setPw] = useState('');
-  const [pw2, setPw2] = useState('');
   const [affiliation, setAffiliation] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [showPw2, setShowPw2] = useState(false);
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
-  const [pwError, setPwError] = useState('');
-  const [pw2Error, setPw2Error] = useState('');
   const [success, setSuccess] = useState(false);
   const [emailCheckMsg, setEmailCheckMsg] = useState('');
   const [emailCheckColor, setEmailCheckColor] = useState<'success' | 'error' | ''>('');
@@ -34,6 +31,9 @@ export default function Register() {
   const [dialogOnConfirm, setDialogOnConfirm] = useState<(() => void) | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [emailChecked, setEmailChecked] = useState(false);
+
+  // 비밀번호 검증 Hook 사용
+  const passwordValidation = usePasswordValidation();
 
   const handleEmailCheck = async () => {
     if (!email) {
@@ -77,30 +77,26 @@ export default function Register() {
     }
     if (!isValidEmail(email)) {
       setEmailError('이메일 형식으로 입력해 주세요.');
+      setEmailCheckMsg('');
+      setEmailCheckColor('');
       hasError = true;
     } else if (!emailChecked) {
       setEmailError('이메일 중복 확인을 해주세요.');
+      setEmailCheckMsg('');
+      setEmailCheckColor('');
       hasError = true;
     } else {
       setEmailError('');
     }
-    if (!pw) {
-      setPwError('비밀번호를 입력해 주세요.');
+    if (!passwordValidation.password) {
       hasError = true;
-    } else if (!isValidPassword(pw)) {
-      setPwError('비밀번호는 영문, 숫자, 특수문자 포함 8자리 이상이어야 합니다.');
+    } else if (passwordValidation.passwordError) {
       hasError = true;
-    } else {
-      setPwError('');
     }
-    if (!pw2) {
-      setPw2Error('비밀번호 확인을 입력해 주세요.');
+    if (!passwordValidation.confirmPassword) {
       hasError = true;
-    } else if (pw !== pw2) {
-      setPw2Error('비밀번호가 일치하지 않습니다.');
+    } else if (passwordValidation.confirmPasswordError) {
       hasError = true;
-    } else {
-      setPw2Error('');
     }
     if (hasError) return;
     
@@ -109,7 +105,7 @@ export default function Register() {
       // 실제 회원가입 API 연동
       const registerData: UserRegisterReq = { 
         email, 
-        password: pw, 
+        password: passwordValidation.password, 
         name, 
         affiliation 
       };
@@ -174,31 +170,55 @@ export default function Register() {
           error={!!nameError}
           helperText={nameError}
         />
-        <Box display="flex" alignItems="center" gap={1}>
-          <TextField
-            id="register-email-input"
-            label={<span>이메일 <span style={{color: theme.palette.error.main}}>*</span></span>}
-            type="email"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={e => {
-              setEmail(e.target.value);
-              setEmailChecked(false);
-              setEmailCheckMsg('');
-              setEmailCheckColor('');
-              setEmailError('');
-            }}
-            error={!!emailError}
-            helperText={emailError}
-          />
+        <Box display="flex" alignItems="flex-end" gap={1}>
+          <Box sx={{ flex: 1 }}>
+            <TextField
+              id="register-email-input"
+              label={<span>이메일 <span style={{color: theme.palette.error.main}}>*</span></span>}
+              type="email"
+              fullWidth
+              margin="none"
+              value={email}
+              onChange={e => {
+                setEmail(e.target.value);
+                setEmailChecked(false);
+                setEmailCheckMsg('');
+                setEmailCheckColor('');
+                setEmailError('');
+              }}
+              error={!!emailError}
+              helperText=""
+              sx={{
+                '& .MuiFormHelperText-root': {
+                  margin: 0,
+                  height: 0,
+                  visibility: 'hidden'
+                },
+                '& .MuiInputBase-root': {
+                  height: 56
+                },
+                mt: '8px'
+              }}
+            />
+            <Box sx={{ minHeight: emailError ? '20px' : '0px', mt: 0.5 }}>
+              {emailError && (
+                <Typography 
+                  fontSize={12} 
+                  color="error.main"
+                  sx={{ ml: 1 }}
+                >
+                  {emailError}
+                </Typography>
+              )}
+            </Box>
+          </Box>
           <ThemedButton
             id="register-email-check-btn"
             theme={userTheme}
             variant="outlined"
             sx={{ 
               height: 56, 
-              mt: '8px', 
+              mt: '8px',
               whiteSpace: 'nowrap'
             }}
             onClick={handleEmailCheck}
@@ -207,8 +227,18 @@ export default function Register() {
             중복확인
           </ThemedButton>
         </Box>
-        {emailCheckMsg && (
-          <Typography mt={1} mb={-1} ml={1} fontSize={14} color={emailCheckColor === 'success' ? 'success.main' : 'error.main'}>
+        {emailCheckMsg && emailCheckColor === 'success' && (
+          <Typography 
+            mt={1} 
+            mb={1} 
+            ml={1} 
+            fontSize={14} 
+            fontWeight="bold"
+            color="success.main"
+            sx={{ 
+              padding: '4px 0'
+            }}
+          >
             {emailCheckMsg}
           </Typography>
         )}
@@ -218,11 +248,11 @@ export default function Register() {
           type={showPw ? 'text' : 'password'}
           fullWidth
           margin="normal"
-          value={pw}
-          onChange={e => setPw(e.target.value)}
-          error={!!pwError}
+          value={passwordValidation.password}
+          onChange={e => passwordValidation.setPassword(e.target.value)}
+          error={!!passwordValidation.passwordError}
           placeholder="영문, 숫자, 특수문자 포함 8자리 이상"
-          helperText={pwError || '영문, 숫자, 특수문자 포함 8자리 이상'}
+          helperText={passwordValidation.passwordError}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -243,10 +273,10 @@ export default function Register() {
           type={showPw2 ? 'text' : 'password'}
           fullWidth
           margin="normal"
-          value={pw2}
-          onChange={e => setPw2(e.target.value)}
-          error={!!pw2Error}
-          helperText={pw2Error}
+          value={passwordValidation.confirmPassword}
+          onChange={e => passwordValidation.setConfirmPassword(e.target.value)}
+          error={!!passwordValidation.confirmPasswordError}
+          helperText={passwordValidation.confirmPasswordError}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -282,7 +312,7 @@ export default function Register() {
             py: 1.2
           }} 
           onClick={handleRegister}
-          disabled={isLoading || !emailChecked}
+          disabled={isLoading || !emailChecked || !!passwordValidation.passwordError || !!passwordValidation.confirmPasswordError}
         >
           {isLoading ? '회원가입 중...' : !emailChecked ? '이메일 중복 확인 필요' : '회원가입'}
         </ThemedButton>

@@ -43,6 +43,15 @@ export default function Register() {
       setDialogOpen(true);
       return;
     }
+
+    // 이메일 형식 검증
+    if (!isValidEmail(email)) {
+      setEmailError('이메일 형식으로 입력해 주세요.');
+      setEmailCheckMsg('');
+      setEmailCheckColor('');
+      setEmailChecked(false);
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -173,7 +182,7 @@ export default function Register() {
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
         />
         <Box display="flex" alignItems="flex-end" gap={1} sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}>
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, height: 56 }}>
             <TextField
               id="register-email-input"
               label={<span>이메일 <span style={{color: theme.palette.error.main}}>*</span></span>}
@@ -191,10 +200,8 @@ export default function Register() {
               error={!!emailError}
               helperText=""
               sx={{
+                height: 56,
                 '& .MuiFormHelperText-root': {
-                  margin: 0,
-                  height: 0,
-                  visibility: 'hidden',
                   display: 'none'
                 },
                 '& .MuiInputBase-root': {
@@ -210,6 +217,7 @@ export default function Register() {
                   }
                 },
                 '& .MuiOutlinedInput-root': {
+                  height: 56,
                   '& fieldset': {
                     borderColor: emailError ? theme.palette.error.main : undefined
                   },
@@ -222,17 +230,6 @@ export default function Register() {
                 }
               }}
             />
-            <Box sx={{ minHeight: emailError ? '20px' : '0px', mt: 0.5 }}>
-              {emailError && (
-                <Typography 
-                  fontSize={12} 
-                  color="error.main"
-                  sx={{ ml: 1 }}
-                >
-                  {emailError}
-                </Typography>
-              )}
-            </Box>
           </Box>
           <ThemedButton
             id="register-email-check-btn"
@@ -248,6 +245,18 @@ export default function Register() {
             중복확인
           </ThemedButton>
         </Box>
+        {/* 에러 메시지를 별도 영역에 표시 */}
+        {emailError && (
+          <Box sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}>
+            <Typography 
+              fontSize={12} 
+              color="error.main"
+              sx={{ ml: 1 }}
+            >
+              {emailError}
+            </Typography>
+          </Box>
+        )}
         {emailCheckMsg && emailCheckColor === 'success' && (
           <Typography 
             mb={PAGE_SPACING.REGISTER.SUCCESS_MESSAGE_BOTTOM} 
@@ -271,7 +280,7 @@ export default function Register() {
           value={passwordValidation.password}
           onChange={e => passwordValidation.setPassword(e.target.value)}
           error={!!passwordValidation.passwordError}
-          placeholder="영문, 숫자, 특수문자 포함 8자리 이상"
+          placeholder="영문자, 숫자, 특수문자 포함 8자리 이상"
           helperText={passwordValidation.passwordError}
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
           InputProps={{

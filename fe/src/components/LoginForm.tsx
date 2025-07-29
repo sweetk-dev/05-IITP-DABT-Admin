@@ -7,6 +7,7 @@ import { ROUTES } from '../routes';
 import { getThemeColors } from '../theme';
 import ThemedButton from './common/ThemedButton';
 import LoadingSpinner from './LoadingSpinner';
+import { useInputWithTrim } from '../hooks/useInputWithTrim';
 
 type LoginFormProps = {
   onSubmit: (emailOrLoginId: string, password: string) => void;
@@ -21,7 +22,8 @@ export default function LoginForm({
   loading = false,
   isAdmin = false 
 }: LoginFormProps) {
-  const [emailOrLoginId, setEmailOrLoginId] = useState('');
+  // trim 처리가 적용된 입력 필드들
+  const emailOrLoginIdInput = useInputWithTrim('');
   const [pw, setPw] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [emailOrLoginIdError, setEmailOrLoginIdError] = useState('');
@@ -57,7 +59,7 @@ export default function LoginForm({
     // 이메일 또는 로그인 ID 검증
     if (isAdmin) {
       // 관리자: 로그인 ID 검증
-      if (!emailOrLoginId.trim()) {
+      if (!emailOrLoginIdInput.getTrimmedValue()) {
         setEmailOrLoginIdError('로그인 ID를 입력해 주세요.');
         hasError = true;
       } else {
@@ -65,7 +67,7 @@ export default function LoginForm({
       }
     } else {
       // 일반 사용자: 이메일 검증
-      if (!isValidEmail(emailOrLoginId)) {
+      if (!isValidEmail(emailOrLoginIdInput.getTrimmedValue())) {
         setEmailOrLoginIdError('이메일 형식으로 입력해 주세요.');
         hasError = true;
       } else {
@@ -82,7 +84,7 @@ export default function LoginForm({
     }
     
     if (hasError) return;
-    onSubmit(emailOrLoginId.trim(), pw);
+    onSubmit(emailOrLoginIdInput.getTrimmedValue(), pw);
   };
 
   // 엔터 키 처리
@@ -113,8 +115,8 @@ export default function LoginForm({
         label={isAdmin ? "로그인 ID" : "이메일"}
         fullWidth
         margin="normal"
-        value={emailOrLoginId}
-        onChange={e => setEmailOrLoginId(e.target.value)}
+        value={emailOrLoginIdInput.value}
+        onChange={(e) => emailOrLoginIdInput.onChange(e.target.value)}
         onKeyPress={handleKeyPress}
         error={!!emailOrLoginIdError}
         helperText={emailOrLoginIdError}

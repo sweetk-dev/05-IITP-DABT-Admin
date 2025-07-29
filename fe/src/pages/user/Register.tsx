@@ -11,15 +11,19 @@ import { getThemeColors } from '../../theme';
 import ThemedButton from '../../components/common/ThemedButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { usePasswordValidation } from '../../hooks/usePasswordValidation';
+import { useInputWithTrim } from '../../hooks/useInputWithTrim';
 import { PAGE_SPACING } from '../../constants/spacing';
 
 export default function Register() {
   const theme = useTheme();
   const userTheme = 'user' as const;
   const colors = getThemeColors(userTheme);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [affiliation, setAffiliation] = useState('');
+  
+  // trim 처리가 적용된 입력 필드들
+  const nameInput = useInputWithTrim('');
+  const emailInput = useInputWithTrim('');
+  const affiliationInput = useInputWithTrim('');
+  
   const [showPw, setShowPw] = useState(false);
   const [showPw2, setShowPw2] = useState(false);
   const [nameError, setNameError] = useState('');
@@ -37,7 +41,8 @@ export default function Register() {
   const passwordValidation = usePasswordValidation();
 
   const handleEmailCheck = async () => {
-    if (!email) {
+    const trimmedEmail = emailInput.getTrimmedValue();
+    if (!trimmedEmail) {
       setEmailError('이메일을 입력해 주세요.');
       setDialogMsg('이메일을 입력해 주세요.');
       setDialogOpen(true);
@@ -45,7 +50,7 @@ export default function Register() {
     }
 
     // 이메일 형식 검증
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(trimmedEmail)) {
       setEmailError('이메일 형식으로 입력해 주세요.');
       setEmailCheckMsg('');
       setEmailCheckColor('');
@@ -55,7 +60,7 @@ export default function Register() {
     
     setIsLoading(true);
     try {
-      const res = await checkEmail(email);
+      const res = await checkEmail(trimmedEmail);
       if (res.success && res.data?.isAvailable) {
         setEmailCheckMsg('사용 가능한 이메일입니다.');
         setEmailCheckColor('success');
@@ -78,14 +83,18 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
+    const trimmedName = nameInput.getTrimmedValue();
+    const trimmedEmail = emailInput.getTrimmedValue();
+    const trimmedAffiliation = affiliationInput.getTrimmedValue();
+    
     let hasError = false;
-    if (!name) {
+    if (!trimmedName) {
       setNameError('이름을 입력해 주세요.');
       hasError = true;
     } else {
       setNameError('');
     }
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(trimmedEmail)) {
       setEmailError('이메일 형식으로 입력해 주세요.');
       setEmailCheckMsg('');
       setEmailCheckColor('');
@@ -114,10 +123,10 @@ export default function Register() {
     try {
       // 실제 회원가입 API 연동
       const registerData: UserRegisterReq = { 
-        email, 
+        email: trimmedEmail, 
         password: passwordValidation.password, 
-        name, 
-        affiliation 
+        name: trimmedName, 
+        affiliation: trimmedAffiliation 
       };
       const res = await registerUser(registerData);
       if (res.success) {
@@ -175,8 +184,8 @@ export default function Register() {
           label="이름"
           fullWidth
           margin="none"
-          value={name}
-          onChange={e => setName(e.target.value)}
+          value={nameInput.value}
+          onChange={nameInput.onChange}
           error={!!nameError}
           helperText={nameError}
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
@@ -189,14 +198,8 @@ export default function Register() {
               type="email"
               fullWidth
               margin="none"
-              value={email}
-              onChange={e => {
-                setEmail(e.target.value);
-                setEmailChecked(false);
-                setEmailCheckMsg('');
-                setEmailCheckColor('');
-                setEmailError('');
-              }}
+              value={emailInput.value}
+              onChange={emailInput.onChange}
               error={!!emailError}
               helperText=""
               sx={{
@@ -278,7 +281,7 @@ export default function Register() {
           fullWidth
           margin="none"
           value={passwordValidation.password}
-          onChange={e => passwordValidation.setPassword(e.target.value)}
+          onChange={passwordValidation.setPassword}
           error={!!passwordValidation.passwordError}
           placeholder="영문자, 숫자, 특수문자 포함 8자리 이상"
           helperText={passwordValidation.passwordError}
@@ -304,7 +307,7 @@ export default function Register() {
           fullWidth
           margin="none"
           value={passwordValidation.confirmPassword}
-          onChange={e => passwordValidation.setConfirmPassword(e.target.value)}
+          onChange={passwordValidation.setConfirmPassword}
           error={!!passwordValidation.confirmPasswordError}
           helperText={passwordValidation.confirmPasswordError}
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
@@ -328,8 +331,8 @@ export default function Register() {
           placeholder="회사/기관/학교/단체 등 (선택)"
           fullWidth
           margin="none"
-          value={affiliation}
-          onChange={e => setAffiliation(e.target.value)}
+          value={affiliationInput.value}
+          onChange={affiliationInput.onChange}
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
         />
         {success && <Typography color="primary" align="center" mt={2}>회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.</Typography>}

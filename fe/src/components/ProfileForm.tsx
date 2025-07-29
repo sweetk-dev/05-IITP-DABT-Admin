@@ -24,6 +24,7 @@ import ThemedButton from './common/ThemedButton';
 import ThemedCard from './common/ThemedCard';
 import LoadingSpinner from './LoadingSpinner';
 import { usePasswordValidation } from '../hooks/usePasswordValidation';
+import { useInputWithTrim } from '../hooks/useInputWithTrim';
 import { PAGE_SPACING } from '../constants/spacing';
 
 interface ProfileData {
@@ -65,8 +66,11 @@ export default function ProfileForm({
   
   // 편집 모드 상태
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({ name: '', affiliation: '' });
   const [saving, setSaving] = useState(false);
+  
+  // trim 처리가 적용된 입력 필드들
+  const nameInput = useInputWithTrim('');
+  const affiliationInput = useInputWithTrim('');
   
   // 비밀번호 변경 모달 상태
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -84,19 +88,15 @@ export default function ProfileForm({
   // 프로필 데이터가 변경되면 편집 데이터 초기화
   useEffect(() => {
     if (profileData) {
-      setEditData({
-        name: profileData.name || '',
-        affiliation: profileData.affiliation || ''
-      });
+      nameInput.onChange(profileData.name || '');
+      affiliationInput.onChange(profileData.affiliation || '');
     }
-  }, [profileData]);
+  }, [profileData, nameInput, affiliationInput]);
 
   // 편집 모드 시작
   const handleStartEdit = () => {
-    setEditData({
-      name: profileData?.name || '',
-      affiliation: profileData?.affiliation || ''
-    });
+    nameInput.onChange(profileData?.name || '');
+    affiliationInput.onChange(profileData?.affiliation || '');
     setIsEditing(true);
   };
 
@@ -104,7 +104,10 @@ export default function ProfileForm({
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      await onSaveProfile(editData);
+      await onSaveProfile({ 
+        name: nameInput.getTrimmedValue(), 
+        affiliation: affiliationInput.getTrimmedValue() 
+      });
       setIsEditing(false);
     } catch (err) {
       console.error('Profile update error:', err);
@@ -115,10 +118,8 @@ export default function ProfileForm({
 
   // 편집 취소
   const handleCancelEdit = () => {
-    setEditData({
-      name: profileData?.name || '',
-      affiliation: profileData?.affiliation || ''
-    });
+    nameInput.onChange(profileData?.name || '');
+    affiliationInput.onChange(profileData?.affiliation || '');
     setIsEditing(false);
   };
 
@@ -333,8 +334,8 @@ export default function ProfileForm({
                 {isEditing ? (
                   <TextField
                     fullWidth
-                    value={editData.name}
-                    onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
+                    value={nameInput.value}
+                    onChange={nameInput.onChange}
                     size="small"
                     placeholder="이름을 입력하세요"
                     sx={{
@@ -359,8 +360,8 @@ export default function ProfileForm({
                 {isEditing ? (
                   <TextField
                     fullWidth
-                    value={editData.affiliation}
-                    onChange={(e) => setEditData(prev => ({ ...prev, affiliation: e.target.value }))}
+                    value={affiliationInput.value}
+                    onChange={affiliationInput.onChange}
                     size="small"
                     placeholder="소속을 입력하세요"
                     sx={{

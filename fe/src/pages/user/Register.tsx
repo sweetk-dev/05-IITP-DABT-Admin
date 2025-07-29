@@ -185,7 +185,7 @@ export default function Register() {
           fullWidth
           margin="none"
           value={nameInput.value}
-          onChange={nameInput.onChange}
+          onChange={(e) => nameInput.onChange(e.target.value)}
           error={!!nameError}
           helperText={nameError}
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
@@ -199,7 +199,7 @@ export default function Register() {
               fullWidth
               margin="none"
               value={emailInput.value}
-              onChange={emailInput.onChange}
+              onChange={(e) => emailInput.onChange(e.target.value)}
               error={!!emailError}
               helperText=""
               sx={{
@@ -281,7 +281,7 @@ export default function Register() {
           fullWidth
           margin="none"
           value={passwordValidation.password}
-          onChange={passwordValidation.setPassword}
+          onChange={(e) => passwordValidation.setPassword(e.target.value)}
           error={!!passwordValidation.passwordError}
           placeholder="영문자, 숫자, 특수문자 포함 8자리 이상"
           helperText={passwordValidation.passwordError}
@@ -291,7 +291,7 @@ export default function Register() {
               <InputAdornment position="end">
                 <IconButton
                   aria-label="비밀번호 보기/숨기기"
-                  onClick={() => setShowPw(v => !v)}
+                  onClick={() => setShowPw(!showPw)}
                   edge="end"
                 >
                   {showPw ? <VisibilityOff /> : <Visibility />}
@@ -307,7 +307,7 @@ export default function Register() {
           fullWidth
           margin="none"
           value={passwordValidation.confirmPassword}
-          onChange={passwordValidation.setConfirmPassword}
+          onChange={(e) => passwordValidation.setConfirmPassword(e.target.value)}
           error={!!passwordValidation.confirmPasswordError}
           helperText={passwordValidation.confirmPasswordError}
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
@@ -315,8 +315,8 @@ export default function Register() {
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  aria-label="비밀번호 보기/숨기기"
-                  onClick={() => setShowPw2(v => !v)}
+                  aria-label="비밀번호 확인 보기/숨기기"
+                  onClick={() => setShowPw2(!showPw2)}
                   edge="end"
                 >
                   {showPw2 ? <VisibilityOff /> : <Visibility />}
@@ -332,7 +332,7 @@ export default function Register() {
           fullWidth
           margin="none"
           value={affiliationInput.value}
-          onChange={affiliationInput.onChange}
+          onChange={(e) => affiliationInput.onChange(e.target.value)}
           sx={{ mb: PAGE_SPACING.REGISTER.FIELD_BOTTOM }}
         />
         {success && <Typography color="primary" align="center" mt={2}>회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.</Typography>}

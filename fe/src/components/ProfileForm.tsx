@@ -67,6 +67,7 @@ export default function ProfileForm({
   // 편집 모드 상태
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [nameError, setNameError] = useState('');
   
   // trim 처리가 적용된 입력 필드들
   const nameInput = useInputWithTrim('');
@@ -102,10 +103,18 @@ export default function ProfileForm({
 
   // 정보 변경 저장
   const handleSaveProfile = async () => {
+    // 이름 필수 검증
+    const trimmedName = nameInput.getTrimmedValue();
+    if (!trimmedName) {
+      setNameError('이름을 입력해 주세요.');
+      return;
+    }
+    setNameError('');
+
     setSaving(true);
     try {
       await onSaveProfile({ 
-        name: nameInput.getTrimmedValue(), 
+        name: trimmedName, 
         affiliation: affiliationInput.getTrimmedValue() 
       });
       setIsEditing(false);
@@ -120,6 +129,7 @@ export default function ProfileForm({
   const handleCancelEdit = () => {
     nameInput.onChange(profileData?.name || '');
     affiliationInput.onChange(profileData?.affiliation || '');
+    setNameError(''); // 에러 메시지 초기화
     setIsEditing(false);
   };
 
@@ -333,18 +343,16 @@ export default function ProfileForm({
                 </Typography>
                 {isEditing ? (
                   <TextField
+                    id="profile-name-input"
+                    label="이름"
                     fullWidth
+                    margin="none"
                     value={nameInput.value}
-                    onChange={nameInput.onChange}
-                    size="small"
-                    placeholder="이름을 입력하세요"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '&.Mui-focused fieldset': {
-                          borderColor: colors.primary,
-                        },
-                      },
-                    }}
+                    onChange={(e) => nameInput.onChange(e.target.value)}
+                    error={!!nameError}
+                    helperText={nameError}
+                    disabled={saving}
+                    sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }}
                   />
                 ) : (
                   <Typography variant="body1" sx={{ py: 1 }}>
@@ -359,18 +367,14 @@ export default function ProfileForm({
                 </Typography>
                 {isEditing ? (
                   <TextField
+                    id="profile-affiliation-input"
+                    label="소속"
                     fullWidth
+                    margin="none"
                     value={affiliationInput.value}
-                    onChange={affiliationInput.onChange}
-                    size="small"
-                    placeholder="소속을 입력하세요"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '&.Mui-focused fieldset': {
-                          borderColor: colors.primary,
-                        },
-                      },
-                    }}
+                    onChange={(e) => affiliationInput.onChange(e.target.value)}
+                    disabled={saving}
+                    sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }}
                   />
                 ) : (
                   <Typography variant="body1" sx={{ py: 1 }}>

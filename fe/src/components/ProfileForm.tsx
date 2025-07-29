@@ -103,7 +103,7 @@ export default function ProfileForm({
 
   // 정보 변경 저장
   const handleSaveProfile = async () => {
-    // 이름 필수 검증
+    // 이름 필수 검증 (사용자, 관리자 모두)
     const trimmedName = nameInput.getTrimmedValue();
     if (!trimmedName) {
       setNameError('이름을 입력해 주세요.');
@@ -115,7 +115,7 @@ export default function ProfileForm({
     try {
       await onSaveProfile({ 
         name: trimmedName, 
-        affiliation: affiliationInput.getTrimmedValue() 
+        affiliation: affiliationInput.getTrimmedValue() // 소속은 선택적 (빈 값 허용)
       });
       setIsEditing(false);
     } catch (err) {

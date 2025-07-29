@@ -129,64 +129,81 @@ export default function Home() {
           theme={theme} 
           className="home-intro-section"
           sx={{ 
+            width: { xs: '100%', md: '95%' }, 
+            mx: 'auto',
             mb: { xs: 4, md: 6 },
             position: 'relative',
             isolation: 'isolate'
           }}
         >
           <Box sx={{ 
-            textAlign: 'center',
+            background: colors.primary, 
+            borderRadius: 3, 
+            p: 4, 
+            boxShadow: `0 4px 12px ${colors.primary}20`,
             position: 'relative',
             isolation: 'isolate'
           }}>
             <Typography 
-              variant="h3" 
-              component="h1" 
+              variant="h4" 
+              fontWeight="bold" 
+              align="center" 
+              gutterBottom 
               sx={{ 
                 color: colors.text,
-                mb: 3,
-                fontWeight: 'bold',
                 position: 'relative',
                 isolation: 'isolate'
               }}
             >
-              장애인 자립 생활 지원 플랫폼
+              장애인 자립 생활 지원 플랫폼 API 센터
             </Typography>
             <Typography 
-              variant="h5" 
+              align="center" 
               sx={{ 
-                color: colors.textSecondary,
-                mb: 4,
+                color: colors.text,
                 position: 'relative',
                 isolation: 'isolate'
               }}
             >
-              Open API 센터에 오신 것을 환영합니다
+              누구나 쉽고 안전하게 장애인 자립 생활 지원 플랫폼 데이터 API를 탐색하고 활용할 수 있는 공간입니다.
             </Typography>
-            <ThemedButton
-              theme={theme}
-              variant="primary"
-              onClick={() => window.open(openApiDocUrl, '_blank')}
-              className="home-api-button"
-              sx={{
-                fontSize: '1.1rem',
-                px: 4,
-                py: 1.5,
-                position: 'relative',
-                isolation: 'isolate'
-              }}
-            >
-              Open API 문서 바로가기
-            </ThemedButton>
           </Box>
         </ThemedCard>
+
+        {/* Open API 문서 바로가기 버튼 */}
+        <Box sx={{ 
+          width: { xs: '100%', md: '95%' }, 
+          mx: 'auto', 
+          mb: 2,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          position: 'relative',
+          isolation: 'isolate'
+        }}>
+          <ThemedButton
+            theme={theme}
+            variant="outlined"
+            onClick={() => window.open(openApiDocUrl, '_blank')}
+            className="home-api-button"
+            sx={{
+              fontSize: '1rem',
+              px: 3,
+              py: 1,
+              position: 'relative',
+              isolation: 'isolate'
+            }}
+          >
+            Open API 문서 바로가기
+          </ThemedButton>
+        </Box>
         
-        {/* 3구역 */}
+        {/* 3구역(공지/FAQ/Q&A) */}
         <ThemedCard 
           theme={theme} 
           className="home-3section"
           sx={{ 
-            background: colors.secondary,
+            width: { xs: '100%', md: '95%' }, 
+            mx: 'auto',
             position: 'relative',
             isolation: 'isolate'
           }}

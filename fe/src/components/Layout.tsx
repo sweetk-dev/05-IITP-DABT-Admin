@@ -34,8 +34,38 @@ function Footer() {
         py: 3,
         mt: 'auto',
         textAlign: 'center',
+        position: 'relative',
       }}
     >
+      {/* Footer 고정 로고 - Footer 내부 오른쪽 상단 */}
+      <Box
+        className="footer-logo-container"
+        sx={{
+          position: 'absolute !important',
+          top: '-280px !important',
+          right: '5% !important',
+          zIndex: 1000,
+          pointerEvents: 'none',
+          transform: 'none !important',
+        }}
+      >
+        <img
+          className="footer-logo-image"
+          src="/iitp_cms_logo_img_2.png"
+          alt="IITP Logo"
+          style={{ 
+            width: 280, 
+            maxWidth: '40vw', 
+            height: 'auto',
+            opacity: 0.95,
+            position: 'relative',
+            left: 'auto',
+            right: 'auto',
+            transform: 'none'
+          }}
+        />
+      </Box>
+      
       <Container maxWidth="lg">
         <Typography variant="body2" sx={{ opacity: 0.8 }}>
           © 2025 {SERVICE_NAME}. All rights reserved.
@@ -81,14 +111,32 @@ export default function Layout() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: bgMain }}>
+    <Box sx={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      background: bgMain,
+    }}>
+      {/* AppBar는 자체적으로 position fixed를 사용 */}
       <AppBar type={appBarType} />
+      
+      {/* 컨텐츠 영역 - 상단바 높이만큼 여백 확보 */}
       <Box sx={{ 
         flex: 1,
-        pt: { xs: 'calc(var(--appbar-height, 64px) + 24px)', md: 'calc(var(--appbar-height, 64px) + 48px)' }
+        pt: 'calc(var(--appbar-height, 64px) + 32px)',
+        pb: '48px',
+        minHeight: 'calc(100vh - var(--appbar-height, 64px) - var(--footer-height, 56px))',
+        overflow: 'hidden'
       }}>
-        <Outlet />
+        <Box sx={{
+          height: '100%',
+          overflow: 'auto',
+          paddingTop: 0
+        }}>
+          <Outlet />
+        </Box>
       </Box>
+      
       <Footer />
     </Box>
   );

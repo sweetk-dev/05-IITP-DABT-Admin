@@ -77,7 +77,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         sx={{
           background: 'transparent',
           boxShadow: 'none',
-          zIndex: 1200,
+          zIndex: 9999,
           minHeight: 'var(--appbar-height)',
         }}
       >
@@ -101,7 +101,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         sx={{
           background: 'transparent',
           boxShadow: 'none',
-          zIndex: 1200,
+          zIndex: 9999,
           minHeight: 'var(--appbar-height)',
         }}
       >
@@ -124,7 +124,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         sx={{
           background: 'transparent',
           boxShadow: 'none',
-          zIndex: 1200,
+          zIndex: 9999,
           minHeight: 'var(--appbar-height)',
         }}
       >
@@ -192,7 +192,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         sx={{
           background: 'transparent',
           boxShadow: 'none',
-          zIndex: 1200,
+          zIndex: 9999,
           minHeight: 'var(--appbar-height)',
         }}
       >
@@ -251,7 +251,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       sx={{
         background: 'transparent',
         boxShadow: 'none',
-        zIndex: 1200,
+        zIndex: 9999,
         minHeight: 'var(--appbar-height)',
       }}
     >

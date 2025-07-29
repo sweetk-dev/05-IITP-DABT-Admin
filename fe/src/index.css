@@ -22,6 +22,13 @@ a:hover {
   color: #535bf2;
 }
 
+/* 스크롤 시 상단바 고정 및 컨텐츠 영역 보호 */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--appbar-height) + 32px);
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   /* Material UI 레이아웃을 위해 flex와 place-items 제거 */
@@ -29,6 +36,29 @@ body {
   /* place-items: center; */
   min-width: 320px;
   min-height: 100vh;
+  /* 스크롤바가 생겼을 때 레이아웃 시프트 방지 */
+  overflow-x: hidden;
+  /* 상단바 보호 */
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* 고정된 상단바가 컨텐츠를 가리지 않도록 보장 */
+#root {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* 상단바 고정 보장 */
+.MuiAppBar-root {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* 컨텐츠 영역이 상단바를 침범하지 않도록 보장 */
+main, .MuiBox-root {
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 h1 {

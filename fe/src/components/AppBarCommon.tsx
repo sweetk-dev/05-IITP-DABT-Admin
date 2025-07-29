@@ -62,44 +62,4 @@ export function Logo({ serviceName, theme = 'user' }: { serviceName: string; the
       </Typography>
     </Box>
   );
-}
-
-export function FloatingLogo({
-  id = 'floating-logo',
-  src = '/iitp_cms_logo_img_2.png',
-  width = 280,
-  bottom = 'calc(5vh + var(--footer-height, 56px))',
-  right = '10%',
-  maxWidth = '40vw',
-  zIndex = 100,
-  opacity = 0.95,
-}: {
-  id?: string;
-  src?: string;
-  width?: number;
-  bottom?: string;
-  right?: string;
-  maxWidth?: string;
-  zIndex?: number;
-  opacity?: number;
-}) {
-  return (
-    <Box
-      id={id}
-      sx={{
-        position: 'fixed',
-        bottom,
-        right,
-        zIndex,
-        pointerEvents: 'none',
-      }}
-    >
-      <img
-        id={`${id}-image`}
-        src={src}
-        alt="Floating Logo"
-        style={{ width, maxWidth, height: 'auto', opacity }}
-      />
-    </Box>
-  );
 } 

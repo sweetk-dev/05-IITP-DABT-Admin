@@ -42,7 +42,7 @@ function Footer() {
         className="footer-logo-container"
         sx={{
           position: 'absolute !important',
-          top: '-280px !important',
+          top: '-120px !important', 
           right: '5% !important',
           zIndex: 1000,
           pointerEvents: 'none',
@@ -54,7 +54,7 @@ function Footer() {
           src="/iitp_cms_logo_img_2.png"
           alt="IITP Logo"
           style={{ 
-            width: 280, 
+            width: 240, 
             maxWidth: '40vw', 
             height: 'auto',
             opacity: 0.95,
@@ -126,12 +126,15 @@ export default function Layout() {
         pt: 'calc(var(--appbar-height, 64px) + 32px)',
         pb: '48px',
         minHeight: 'calc(100vh - var(--appbar-height, 64px) - var(--footer-height, 56px))',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 1
       }}>
         <Box sx={{
           height: '100%',
           overflow: 'auto',
-          paddingTop: 0
+          paddingTop: 0,
+          scrollPaddingTop: 'calc(var(--appbar-height, 64px) + 32px)'
         }}>
           <Outlet />
         </Box>

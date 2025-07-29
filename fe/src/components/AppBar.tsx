@@ -41,6 +41,36 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
   const themeType = type === 'admin' || type === 'admin-login' ? 'admin' : 'user';
   const colors = getThemeColors(themeType);
 
+  // 공통 AppBar 스타일 정의
+  const commonAppBarStyles = {
+    background: themeType === 'admin' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 247, 237, 0.95)', // 테마별 배경색
+    backdropFilter: 'blur(10px)', // 블러 효과
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)', // 그림자 효과
+    zIndex: 9999,
+    minHeight: 'var(--appbar-height)',
+    // 상단바 아래 그라데이션 라인 추가
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: '2px',
+      background: themeType === 'admin' 
+        ? 'linear-gradient(to right, rgba(45, 49, 66, 0.8), rgba(45, 49, 66, 0.4), rgba(45, 49, 66, 0.8))' // 어드민 테마
+        : 'linear-gradient(to right, rgba(4, 97, 160, 0.8), rgba(4, 97, 160, 0.4), rgba(4, 97, 160, 0.8))', // 유저 테마
+      pointerEvents: 'none',
+      zIndex: 1
+    }
+  };
+
+  // 공통 툴바 스타일 정의
+  const commonToolbarStyles = {
+    minHeight: 'var(--appbar-height) !important',
+    px: { xs: '10%', md: '10%' },
+    justifyContent: 'space-between'
+  };
+
   const handleAdminLogout = async () => {
     try {
       await logoutAdmin({});
@@ -74,14 +104,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         position="fixed"
         color="default"
         elevation={0}
-        sx={{
-          background: 'transparent',
-          boxShadow: 'none',
-          zIndex: 9999,
-          minHeight: 'var(--appbar-height)',
-        }}
+        sx={commonAppBarStyles}
       >
-        <Toolbar id="appbar-auth-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+        <Toolbar id="appbar-auth-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
             left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
             right={<HomeIconButton theme={themeType} />}
@@ -98,14 +123,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         position="fixed"
         color="default"
         elevation={0}
-        sx={{
-          background: 'transparent',
-          boxShadow: 'none',
-          zIndex: 9999,
-          minHeight: 'var(--appbar-height)',
-        }}
+        sx={commonAppBarStyles}
       >
-        <Toolbar id="appbar-admin-login-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+        <Toolbar id="appbar-admin-login-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
             left={<Logo serviceName={SERVICE_NAME + ' - Admin'} theme={themeType} />}
           />
@@ -121,14 +141,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         position="fixed"
         color="default"
         elevation={0}
-        sx={{
-          background: 'transparent',
-          boxShadow: 'none',
-          zIndex: 9999,
-          minHeight: 'var(--appbar-height)',
-        }}
+        sx={commonAppBarStyles}
       >
-        <Toolbar id="appbar-admin-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+        <Toolbar id="appbar-admin-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
             left={
               <Box 
@@ -189,14 +204,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
         position="fixed"
         color="default"
         elevation={0}
-        sx={{
-          background: 'transparent',
-          boxShadow: 'none',
-          zIndex: 9999,
-          minHeight: 'var(--appbar-height)',
-        }}
+        sx={commonAppBarStyles}
       >
-        <Toolbar id="appbar-public-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+        <Toolbar id="appbar-public-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
             left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
             right={
@@ -248,14 +258,9 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       position="fixed"
       color="default"
       elevation={0}
-      sx={{
-        background: 'transparent',
-        boxShadow: 'none',
-        zIndex: 9999,
-        minHeight: 'var(--appbar-height)',
-      }}
+      sx={commonAppBarStyles}
     >
-      <Toolbar id="appbar-user-toolbar" sx={{ minHeight: 'var(--appbar-height) !important', px: { xs: '10%', md: '10%' }, justifyContent: 'space-between' }}>
+      <Toolbar id="appbar-user-toolbar" sx={commonToolbarStyles}>
         <AppBarRow
           left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
           right={

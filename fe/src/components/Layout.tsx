@@ -10,6 +10,9 @@ const bgMain = '#FFF7ED'; // 연한 베이지
 const footerBg = '#2D3142'; // 네이비에 가까운 보라
 const footerText = '#fff';
 
+// 서비스 이름 (AppBar와 동일하게)
+const SERVICE_NAME = 'IITP DABT';
+
 // 공개 페이지 목록 (로그인 없이 접근 가능)
 const PUBLIC_PAGES = [
   ROUTES.PUBLIC.HOME, 
@@ -35,10 +38,10 @@ function Footer() {
     >
       <Container maxWidth="lg">
         <Typography variant="body2" sx={{ opacity: 0.8 }}>
-          © 2024 IITP DABT Admin. All rights reserved.
+          © 2025 {SERVICE_NAME}. All rights reserved.
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.6, display: 'block', mt: 1 }}>
-          장애인 자립 생활 지원 플랫폼 운영관리 시스템
+          장애인 자립 생활 지원 플랫폼 Open Api 센터
         </Typography>
       </Container>
     </Box>

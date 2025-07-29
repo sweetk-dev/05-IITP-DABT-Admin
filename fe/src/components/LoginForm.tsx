@@ -1,10 +1,12 @@
-import { Box, TextField, Button, Typography, IconButton, InputAdornment } from '@mui/material';
+import { Box, TextField, Typography, IconButton, InputAdornment } from '@mui/material';
 import { useState } from 'react';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { isValidEmail } from '@iitp-dabt/common';
 import { ROUTES } from '../routes';
 import { getThemeColors } from '../theme';
+import ThemedButton from './common/ThemedButton';
+import LoadingSpinner from './LoadingSpinner';
 
 type LoginFormProps = {
   onSubmit: (emailOrLoginId: string, password: string) => void;
@@ -44,35 +46,6 @@ export default function LoginForm({
       mb: 2,
       textAlign: 'center',
       color: colors.text,
-    },
-    submitButton: {
-      mt: 2,
-      fontWeight: 'bold',
-      fontSize: '1.1rem',
-      py: 1.2,
-      bgcolor: colors.primary,
-      color: colors.text,
-      textShadow: '0 0 1px rgba(0,0,0,0.3)',
-      '&:hover': {
-        bgcolor: colors.primary,
-        opacity: 0.9,
-      },
-      '&:disabled': {
-        bgcolor: '#ccc',
-        color: '#666',
-        textShadow: 'none',
-      },
-    },
-    registerButton: {
-      mt: 1,
-      fontSize: '0.95rem',
-      color: colors.primary,
-      fontWeight: 'bold',
-      '&:hover': {
-        bgcolor: 'transparent',
-        color: colors.primary,
-        opacity: 0.8,
-      },
     },
   } as const;
 
@@ -121,7 +94,16 @@ export default function LoginForm({
   };
 
   return (
-    <Box id="login-form-box" sx={LOGIN_FORM_STYLES.container}>
+    <Box id="login-form-box" sx={{
+      ...LOGIN_FORM_STYLES.container,
+      position: 'relative'
+    }}>
+      <LoadingSpinner 
+        loading={loading} 
+        size={50}
+        backgroundOpacity={0.7}
+        color="primary"
+      />
       <Typography variant="h5" sx={LOGIN_FORM_STYLES.title}>
         {isAdmin ? '관리자 로그인' : '로그인'}
       </Typography>
@@ -167,28 +149,37 @@ export default function LoginForm({
         }}
       />
       
-      <Button 
+      <ThemedButton 
         id={isAdmin ? "admin-login-submit-btn" : "login-submit-btn"}
-        variant="contained" 
+        theme={theme}
+        variant="primary"
         fullWidth 
-        sx={LOGIN_FORM_STYLES.submitButton}
+        sx={{
+          mt: 2,
+          fontSize: '1.1rem',
+          py: 1.2
+        }}
         onClick={handleLogin}
         disabled={loading}
       >
         {loading ? '로그인 중...' : (isAdmin ? '관리자 로그인' : '로그인')}
-      </Button>
+      </ThemedButton>
       
       {showRegisterButton && !isAdmin && (
-        <Button 
+        <ThemedButton 
           id="login-register-btn" 
-          variant="text" 
+          theme={theme}
+          variant="text"
           fullWidth 
-          sx={LOGIN_FORM_STYLES.registerButton}
+          sx={{
+            mt: 1,
+            fontSize: '0.95rem'
+          }}
           onClick={() => window.location.href = ROUTES.PUBLIC.REGISTER}
           disabled={loading}
         >
           회원가입
-        </Button>
+        </ThemedButton>
       )}
     </Box>
   );

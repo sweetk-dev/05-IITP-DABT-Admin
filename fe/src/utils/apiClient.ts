@@ -5,7 +5,9 @@ import { getUserType } from '../store/user';
 import { ROUTES } from '../routes';
 
 // API 타임아웃 설정 (기본값: 10초)
-const API_TIMEOUT = 10000;
+const API_TIMEOUT = import.meta.env.VITE_API_TIMEOUT 
+  ? parseInt(import.meta.env.VITE_API_TIMEOUT) 
+  : 10000;
 
 // API 응답 타입
 interface ApiResponse<T = any> {
@@ -17,14 +19,9 @@ interface ApiResponse<T = any> {
 
 // API 클라이언트 생성
 const createApiClient = (baseURL: string): AxiosInstance => {
-  // 환경 변수에서 timeout 설정 가져오기 (기본값: 10000ms)
-  const timeout = import.meta.env.VITE_API_TIMEOUT 
-    ? parseInt(import.meta.env.VITE_API_TIMEOUT) 
-    : 10000;
-
   const client = axios.create({
     baseURL,
-    timeout,
+    timeout: API_TIMEOUT,
     headers: {
       'Content-Type': 'application/json',
     },

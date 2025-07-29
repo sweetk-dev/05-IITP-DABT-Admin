@@ -64,7 +64,7 @@ export {
   getAdminAccountList,
   getAdminAccountDetail,
   createAdminAccount,
-  checkAdminAccountEmail,
+  checkAdminEmail,
   updateAdminAccount,
   deleteAdminAccount,
   changeAdminAccountPassword,

@@ -13,6 +13,10 @@ import type {
   UserProfileUpdateRes,
   UserPasswordChangeReq,
   UserPasswordChangeRes,
+  UserRegisterReq,
+  UserRegisterRes,
+  UserCheckEmailReq,
+  UserCheckEmailRes,
   ApiResponse
 } from '@iitp-dabt/common';
 
@@ -41,9 +45,9 @@ export async function loginUser(params: UserLoginReq): Promise<ApiResponse<UserL
 /**
  * 이메일 중복 확인
  */
-export async function checkEmail(email: string): Promise<ApiResponse<any>> { // Assuming UserCheckEmailRes is removed, using 'any' for now
-  const requestData = { email };
-  return publicApiFetch<any>(FULL_API_URLS.USER.CHECK_EMAIL, { // Assuming UserCheckEmailRes is removed, using 'any' for now
+export async function checkEmail(email: string): Promise<ApiResponse<UserCheckEmailRes>> {
+  const requestData: UserCheckEmailReq = { email };
+  return publicApiFetch<UserCheckEmailRes>(FULL_API_URLS.USER.CHECK_EMAIL, {
     method: 'POST',
     body: JSON.stringify(requestData),
   });
@@ -52,8 +56,8 @@ export async function checkEmail(email: string): Promise<ApiResponse<any>> { // 
 /**
  * 사용자 회원가입
  */
-export async function registerUser(params: any): Promise<ApiResponse<any>> { // Assuming UserRegisterRes is removed, using 'any' for now
-  return publicApiFetch<any>(FULL_API_URLS.USER.REGISTER, { // Assuming UserRegisterRes is removed, using 'any' for now
+export async function registerUser(params: UserRegisterReq): Promise<ApiResponse<UserRegisterRes>> {
+  return publicApiFetch<UserRegisterRes>(FULL_API_URLS.USER.REGISTER, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -73,7 +77,7 @@ export async function refreshUserToken(params: UserRefreshTokenReq): Promise<Api
  * 사용자 프로필 조회
  */
 export async function getUserProfile(): Promise<ApiResponse<UserProfileRes>> {
-  return apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE);
+  return apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE.GET);
 }
 
 /**

@@ -1,9 +1,8 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ErrorCode, getErrorUIMeta, shouldAutoLogout, shouldShowPopup, getRedirectPath } from '@iitp-dabt/common';
+import { ErrorCode } from '@iitp-dabt/common';
 import { getUserType } from '../store/user';
 import { ROUTES } from '../routes';
-import type { ErrorResponse } from '@iitp-dabt/common';
 
 export const useErrorHandler = () => {
   const navigate = useNavigate();
@@ -20,52 +19,38 @@ export const useErrorHandler = () => {
 
     // API 응답 에러인 경우
     if (error?.response?.data) {
-      const errorData: ErrorResponse = error.response.data;
+      const errorData = error.response.data;
       const errorCode = errorData.errorCode;
-      const errorUIMeta = getErrorUIMeta(errorCode);
 
-      // 자동 로그아웃이 필요한 경우
-      if (shouldAutoLogout(errorCode)) {
+      // 자동 로그아웃이 필요한 경우 (토큰 만료 등)
+      if (errorCode === ErrorCode.TOKEN_EXPIRED || errorCode === ErrorCode.INVALID_TOKEN) {
         logout();
-        const redirectPath = getRedirectPath(errorCode);
-        if (redirectPath) {
-          // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
-          const userType = getUserType();
-          if (userType === 'A') {
-            navigate(ROUTES.ADMIN.LOGIN);
-          } else {
-            navigate(redirectPath);
-          }
+        // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
+        const userType = getUserType();
+        if (userType === 'A') {
+          navigate(ROUTES.ADMIN.LOGIN);
+        } else {
+          navigate(ROUTES.PUBLIC.LOGIN);
         }
       }
 
-      // 팝업 표시가 필요한 경우
-      if (shouldShowPopup(errorCode)) {
-        // 여기서 토스트나 알림 컴포넌트를 호출
-        // 예: toast.error(errorUIMeta.message);
-        alert(errorUIMeta.message);
-      }
-
-      // 리다이렉트가 필요한 경우
-      const redirectPath = getRedirectPath(errorCode);
-      if (redirectPath && !shouldAutoLogout(errorCode)) {
-        navigate(redirectPath);
-      }
+      // 에러 메시지 표시
+      const errorMessage = errorData.errorMessage || '오류가 발생했습니다.';
+      alert(errorMessage);
 
       return {
         errorCode,
-        errorMessage: errorUIMeta.message,
+        errorMessage,
         handled: true
       };
     }
 
     // 네트워크 에러나 기타 에러
-    const errorUIMeta = getErrorUIMeta(ErrorCode.UNKNOWN_ERROR);
-    alert(errorUIMeta.message);
+    alert('알 수 없는 오류가 발생했습니다.');
 
     return {
       errorCode: ErrorCode.UNKNOWN_ERROR,
-      errorMessage: errorUIMeta.message,
+      errorMessage: '알 수 없는 오류가 발생했습니다.',
       handled: true
     };
   }, [navigate, logout]);

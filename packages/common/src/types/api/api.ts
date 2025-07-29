@@ -30,6 +30,11 @@ export const API_URLS = {
       LIST: '/qna',
       DETAIL: '/qna/:qnaId',
       CREATE: '/qna',
+    },
+    NOTICE: {
+      LIST: '/notice',
+      DETAIL: '/notice/:noticeId',
+      HOME: '/notice/home',
     }
   },
   
@@ -54,6 +59,15 @@ export const API_URLS = {
       ANSWER: '/qna/:qnaId/answer',
       UPDATE: '/qna/:qnaId',
       DELETE: '/qna/:qnaId',
+    },
+    // 공지사항 관리
+    NOTICE: {
+      LIST: '/notice',
+      DETAIL: '/notice/:noticeId',
+      CREATE: '/notice',
+      UPDATE: '/notice/:noticeId',
+      DELETE: '/notice/:noticeId',
+      STATS: '/notice/stats',
     },
     // Admin 계정 관리
     ACCOUNT: {
@@ -135,6 +149,11 @@ export const FULL_API_URLS = {
       LIST: getUserUrl(API_URLS.USER.QNA.LIST),
       DETAIL: getUserUrl(API_URLS.USER.QNA.DETAIL),
       CREATE: getUserUrl(API_URLS.USER.QNA.CREATE),
+    },
+    NOTICE: {
+      LIST: getUserUrl(API_URLS.USER.NOTICE.LIST),
+      DETAIL: getUserUrl(API_URLS.USER.NOTICE.DETAIL),
+      HOME: getUserUrl(API_URLS.USER.NOTICE.HOME),
     }
   },
   ADMIN: {
@@ -161,6 +180,14 @@ export const FULL_API_URLS = {
       ANSWER: getAdminUrl(API_URLS.ADMIN.QNA.ANSWER),
       UPDATE: getAdminUrl(API_URLS.ADMIN.QNA.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.QNA.DELETE),
+    },
+    NOTICE: {
+      LIST: getAdminUrl(API_URLS.ADMIN.NOTICE.LIST),
+      DETAIL: getAdminUrl(API_URLS.ADMIN.NOTICE.DETAIL),
+      CREATE: getAdminUrl(API_URLS.ADMIN.NOTICE.CREATE),
+      UPDATE: getAdminUrl(API_URLS.ADMIN.NOTICE.UPDATE),
+      DELETE: getAdminUrl(API_URLS.ADMIN.NOTICE.DELETE),
+      STATS: getAdminUrl(API_URLS.ADMIN.NOTICE.STATS),
     },
     ACCOUNT: {
       LIST: getAdminUrl(API_URLS.ADMIN.ACCOUNT.LIST),

@@ -24,6 +24,7 @@ import PageTitle from './common/PageTitle';
 import ThemedButton from './common/ThemedButton';
 import ThemedCard from './common/ThemedCard';
 import LoadingSpinner from './LoadingSpinner';
+import { usePasswordValidation } from '../hooks/usePasswordValidation';
 
 interface ProfileData {
   name?: string;
@@ -69,17 +70,16 @@ export default function ProfileForm({
   
   // 비밀번호 변경 모달 상태
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
+  const [currentPassword, setCurrentPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // 비밀번호 확인 검증
-  const passwordConfirmError = passwordData.newPassword && passwordData.confirmPassword && 
-    passwordData.newPassword !== passwordData.confirmPassword ? '새 비밀번호가 일치하지 않습니다.' : null;
+  // 비밀번호 검증 Hook 사용 (현재 비밀번호 포함)
+  const passwordValidation = usePasswordValidation({
+    requireCurrentPassword: true,
+    currentPassword,
+    currentPasswordError: passwordError
+  });
 
   // 프로필 데이터가 변경되면 편집 데이터 초기화
   useEffect(() => {
@@ -124,23 +124,22 @@ export default function ProfileForm({
 
   // 비밀번호 변경
   const handleChangePassword = async () => {
-    // 비밀번호 형식 검증
-    if (!isValidPassword(passwordData.newPassword)) {
-      setPasswordError('비밀번호는 영문, 숫자, 특수문자 포함 8자리 이상이어야 합니다.');
-      return;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('새 비밀번호가 일치하지 않습니다.');
+    // Hook에서 이미 검증된 결과 사용
+    if (!passwordValidation.isValid) {
       return;
     }
 
     setChangingPassword(true);
     setPasswordError(null);
     try {
-      await onChangePassword(passwordData);
+      await onChangePassword({
+        currentPassword,
+        newPassword: passwordValidation.password,
+        confirmPassword: passwordValidation.confirmPassword
+      });
       setPasswordModalOpen(false);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setCurrentPassword('');
+      passwordValidation.reset();
     } catch (err) {
       console.error('Password change error:', err);
     } finally {
@@ -455,26 +454,28 @@ export default function ProfileForm({
               fullWidth
               type="password"
               label="현재 비밀번호"
-              value={passwordData.currentPassword}
-              onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
               sx={{ mb: 2 }}
             />
             <TextField
               fullWidth
               type="password"
               label="새 비밀번호"
-              value={passwordData.newPassword}
-              onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+              value={passwordValidation.password}
+              onChange={(e) => passwordValidation.setPassword(e.target.value)}
+              error={!!passwordValidation.passwordError}
+              helperText={passwordValidation.passwordError}
               sx={{ mb: 2 }}
             />
             <TextField
               fullWidth
               type="password"
               label="새 비밀번호 확인"
-              value={passwordData.confirmPassword}
-              onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-              error={!!passwordConfirmError}
-              helperText={passwordConfirmError}
+              value={passwordValidation.confirmPassword}
+              onChange={(e) => passwordValidation.setConfirmPassword(e.target.value)}
+              error={!!passwordValidation.confirmPasswordError}
+              helperText={passwordValidation.confirmPasswordError}
             />
           </Box>
         </DialogContent>
@@ -491,7 +492,7 @@ export default function ProfileForm({
             theme={theme}
             variant="primary"
             onClick={handleChangePassword} 
-            disabled={changingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword || !!passwordConfirmError}
+            disabled={changingPassword || !passwordValidation.isValid}
           >
             {changingPassword ? <CircularProgress size={20} sx={{ color: 'white' }} /> : '변경'}
           </ThemedButton>

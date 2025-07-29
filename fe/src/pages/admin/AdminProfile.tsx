@@ -42,8 +42,8 @@ export default function AdminProfile() {
     try {
       const response = await updateAdminProfile(data);
       
-      if (response.success && response.data) {
-        setProfileData(response.data);
+      if (response.success) {
+        setProfileData(prev => prev ? { ...prev, ...data } : null);
         setError(null);
       } else {
         setError(response.errorMessage || '프로필 업데이트 실패');

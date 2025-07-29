@@ -1,4 +1,5 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
+import ThemedButton from './common/ThemedButton';
 
 export interface CommonDialogProps {
   open: boolean;
@@ -9,6 +10,7 @@ export interface CommonDialogProps {
   showCancel?: boolean;
   confirmText?: string;
   cancelText?: string;
+  theme?: 'user' | 'admin';
 }
 
 export default function CommonDialog({
@@ -20,6 +22,7 @@ export default function CommonDialog({
   showCancel = false,
   confirmText = '확인',
   cancelText = '취소',
+  theme = 'user',
 }: CommonDialogProps) {
   return (
     <Dialog open={open} onClose={onClose}>
@@ -29,13 +32,22 @@ export default function CommonDialog({
       </DialogContent>
       <DialogActions>
         {showCancel && (
-          <Button onClick={onClose} color="inherit">
+          <ThemedButton 
+            theme={theme}
+            variant="text" 
+            onClick={onClose}
+          >
             {cancelText}
-          </Button>
+          </ThemedButton>
         )}
-        <Button onClick={onConfirm || onClose} color="primary" autoFocus>
+        <ThemedButton 
+          theme={theme}
+          variant="primary" 
+          onClick={onConfirm || onClose}
+          autoFocus
+        >
           {confirmText}
-        </Button>
+        </ThemedButton>
       </DialogActions>
     </Dialog>
   );

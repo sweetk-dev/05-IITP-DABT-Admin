@@ -17,11 +17,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import LockIcon from '@mui/icons-material/Lock';
-import { getThemeColors, themeStyles } from '../theme';
+import { getThemeColors } from '../theme';
 import type { ThemeType } from '../theme';
+import { isValidPassword } from '@iitp-dabt/common';
 import PageTitle from './common/PageTitle';
 import ThemedButton from './common/ThemedButton';
 import ThemedCard from './common/ThemedCard';
+import LoadingSpinner from './LoadingSpinner';
 
 interface ProfileData {
   name?: string;
@@ -122,6 +124,12 @@ export default function ProfileForm({
 
   // 비밀번호 변경
   const handleChangePassword = async () => {
+    // 비밀번호 형식 검증
+    if (!isValidPassword(passwordData.newPassword)) {
+      setPasswordError('비밀번호는 영문, 숫자, 특수문자 포함 8자리 이상이어야 합니다.');
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setPasswordError('새 비밀번호가 일치하지 않습니다.');
       return;
@@ -150,10 +158,16 @@ export default function ProfileForm({
           justifyContent: 'center', 
           alignItems: 'center', 
           minHeight: '400px',
-          backgroundColor: colors.background
+          backgroundColor: colors.background,
+          position: 'relative'
         }}
       >
-        <CircularProgress sx={{ color: colors.primary }} />
+        <LoadingSpinner 
+          loading={loading} 
+          size={60}
+          backgroundOpacity={0.8}
+          color="primary"
+        />
       </Box>
     );
   }
@@ -167,9 +181,16 @@ export default function ProfileForm({
         p: 4, 
         backgroundColor: colors.background,
         minHeight: '100vh',
-        borderTop: `1px solid ${colors.border}`
+        borderTop: `1px solid ${colors.border}`,
+        position: 'relative'
       }}
     >
+      <LoadingSpinner 
+        loading={saving || changingPassword} 
+        size={50}
+        backgroundOpacity={0.7}
+        color="primary"
+      />
       <PageTitle title={title} theme={theme} />
       
       {error && (

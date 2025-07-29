@@ -1,7 +1,6 @@
-import { Box, TextField, Button, Typography, IconButton, InputAdornment } from '@mui/material';
 import { useState } from 'react';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Box, TextField, Typography, InputAdornment, IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { FloatingLogo } from '../../components/AppBarCommon';
 import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
 import type { UserRegisterReq } from '@iitp-dabt/common';
@@ -10,6 +9,8 @@ import { checkEmail, registerUser } from '../../api/user';
 import CommonDialog from '../../components/CommonDialog';
 import { ROUTES } from '../../routes';
 import { getThemeColors } from '../../theme';
+import ThemedButton from '../../components/common/ThemedButton';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function Register() {
   const theme = useTheme();
@@ -32,6 +33,8 @@ export default function Register() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMsg, setDialogMsg] = useState('');
   const [dialogOnConfirm, setDialogOnConfirm] = useState<(() => void) | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailChecked, setEmailChecked] = useState(false);
 
   const handleEmailCheck = async () => {
     if (!email) {
@@ -40,15 +43,28 @@ export default function Register() {
       setDialogOpen(true);
       return;
     }
-    const res = await checkEmail(email);
-    if (res.success && res.data?.isAvailable) {
-      setEmailCheckMsg('사용 가능한 이메일입니다.');
-      setEmailCheckColor('success');
-    } else {
-      setDialogMsg(res.errorMessage || '이미 사용 중인 이메일입니다.');
-      setDialogOpen(true);
-      setEmailCheckMsg(res.errorMessage || '이미 사용 중인 이메일입니다.');
+    
+    setIsLoading(true);
+    try {
+      const res = await checkEmail(email);
+      if (res.success && res.data?.isAvailable) {
+        setEmailCheckMsg('사용 가능한 이메일입니다.');
+        setEmailCheckColor('success');
+        setEmailChecked(true);
+        setEmailError('');
+      } else {
+        setEmailCheckMsg(res.errorMessage || '이미 사용 중인 이메일입니다.');
+        setEmailCheckColor('error');
+        setEmailChecked(false);
+        setEmailError(res.errorMessage || '이미 사용 중인 이메일입니다.');
+      }
+    } catch (error) {
+      setEmailCheckMsg('이메일 확인 중 오류가 발생했습니다.');
       setEmailCheckColor('error');
+      setEmailChecked(false);
+      setEmailError('이메일 확인 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,6 +78,9 @@ export default function Register() {
     }
     if (!isValidEmail(email)) {
       setEmailError('이메일 형식으로 입력해 주세요.');
+      hasError = true;
+    } else if (!emailChecked) {
+      setEmailError('이메일 중복 확인을 해주세요.');
       hasError = true;
     } else {
       setEmailError('');
@@ -86,26 +105,35 @@ export default function Register() {
     }
     if (hasError) return;
     
-    // 실제 회원가입 API 연동
-    const registerData: UserRegisterReq = { 
-      email, 
-      password: pw, 
-      name, 
-      affiliation 
-    };
-    const res = await registerUser(registerData);
-    if (res.success) {
-      setSuccess(true);
-      setDialogMsg('회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.');
-      setDialogOnConfirm(() => () => {
-        setDialogOpen(false);
-        window.location.href = ROUTES.PUBLIC.LOGIN;
-      });
-      setDialogOpen(true);
-    } else {
-      setDialogMsg(res.errorMessage || '회원가입에 실패했습니다.');
+    setIsLoading(true);
+    try {
+      // 실제 회원가입 API 연동
+      const registerData: UserRegisterReq = { 
+        email, 
+        password: pw, 
+        name, 
+        affiliation 
+      };
+      const res = await registerUser(registerData);
+      if (res.success) {
+        setSuccess(true);
+        setDialogMsg('회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.');
+        setDialogOnConfirm(() => () => {
+          setDialogOpen(false);
+          window.location.href = ROUTES.PUBLIC.LOGIN;
+        });
+        setDialogOpen(true);
+      } else {
+        setDialogMsg(res.errorMessage || '회원가입에 실패했습니다.');
+        setDialogOnConfirm(undefined);
+        setDialogOpen(true);
+      }
+    } catch (error) {
+      setDialogMsg('회원가입 중 오류가 발생했습니다.');
       setDialogOnConfirm(undefined);
       setDialogOpen(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -125,9 +153,16 @@ export default function Register() {
         borderRadius: 3,
         bgcolor: colors.paper,
         border: `1px solid ${colors.border}`,
-        boxShadow: `0 4px 12px ${colors.primary}15`
+        boxShadow: `0 4px 12px ${colors.primary}15`,
+        position: 'relative'
       }}>
-        <Typography variant="h5" mb={2} align="center" sx={{ color: colors.primary, fontWeight: 600 }}>
+        <LoadingSpinner 
+          loading={isLoading} 
+          size={50}
+          backgroundOpacity={0.7}
+          color="primary"
+        />
+        <Typography variant="h5" mb={2} align="center" sx={{ color: colors.text, fontWeight: 600 }}>
           회원가입
         </Typography>
         <TextField
@@ -144,22 +179,34 @@ export default function Register() {
           <TextField
             id="register-email-input"
             label={<span>이메일 <span style={{color: theme.palette.error.main}}>*</span></span>}
+            type="email"
             fullWidth
             margin="normal"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => {
+              setEmail(e.target.value);
+              setEmailChecked(false);
+              setEmailCheckMsg('');
+              setEmailCheckColor('');
+              setEmailError('');
+            }}
             error={!!emailError}
             helperText={emailError}
           />
-          <Button
+          <ThemedButton
             id="register-email-check-btn"
+            theme={userTheme}
             variant="outlined"
-            color="primary"
-            sx={{ height: 56, mt: '8px', whiteSpace: 'nowrap' }}
+            sx={{ 
+              height: 56, 
+              mt: '8px', 
+              whiteSpace: 'nowrap'
+            }}
             onClick={handleEmailCheck}
+            disabled={isLoading}
           >
             중복확인
-          </Button>
+          </ThemedButton>
         </Box>
         {emailCheckMsg && (
           <Typography mt={1} mb={-1} ml={1} fontSize={14} color={emailCheckColor === 'success' ? 'success.main' : 'error.main'}>
@@ -225,12 +272,34 @@ export default function Register() {
           onChange={e => setAffiliation(e.target.value)}
         />
         {success && <Typography color="primary" align="center" mt={2}>회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.</Typography>}
-        <Button id="register-submit-btn" variant="contained" color="primary" fullWidth sx={{ mt: 2, fontWeight: 'bold', fontSize: '1.1rem', py: 1.2 }} onClick={handleRegister}>
-          회원가입
-        </Button>
-        <Button id="register-login-btn" variant="text" color="primary" fullWidth sx={{ mt: 1, fontSize: '0.95rem', opacity: 0.7 }} onClick={() => window.location.href = ROUTES.PUBLIC.LOGIN}>
+        <ThemedButton 
+          id="register-submit-btn" 
+          theme={userTheme}
+          variant="primary"
+          fullWidth 
+          sx={{ 
+            mt: 2, 
+            fontSize: '1.1rem', 
+            py: 1.2
+          }} 
+          onClick={handleRegister}
+          disabled={isLoading || !emailChecked}
+        >
+          {isLoading ? '회원가입 중...' : !emailChecked ? '이메일 중복 확인 필요' : '회원가입'}
+        </ThemedButton>
+        <ThemedButton 
+          id="register-login-btn" 
+          theme={userTheme}
+          variant="softText"
+          fullWidth 
+          sx={{ 
+            mt: 1, 
+            fontSize: '0.95rem'
+          }} 
+          onClick={() => window.location.href = ROUTES.PUBLIC.LOGIN}
+        >
           로그인 화면으로
-        </Button>
+        </ThemedButton>
       </Box>
       <FloatingLogo id="register-logo2-floating" width={240} />
       <CommonDialog

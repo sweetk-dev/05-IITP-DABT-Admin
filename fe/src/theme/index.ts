@@ -23,34 +23,34 @@ export interface ThemeColors {
 
 export const THEME_COLORS: Record<ThemeType, ThemeColors> = {
   user: {
-    primary: '#90CAF9', // Home intro-section 색상 - 따뜻하고 아늑
-    secondary: '#FFE0B2', // 따뜻한 베이지
+    primary: '#90CAF9', // Home intro-section 색상 - 따뜻하고 아늑 (원래 배경색)
+    secondary: '#f3e5d0', // 따뜻한 베이지 (홈화면 3구역 배경색)
     background: '#FFF7ED', // 매우 연한 베이지
     paper: '#FFFFFF', // 흰색
-    text: '#2D3142', // 짙은 회색
-    textSecondary: '#6B7280', // 중간 회색
+    text: '#0461a0', // 진한 파랑 - 메인 텍스트 (새로운 글자색)
+    textSecondary: '#2D3142', // 짙은 회색 - 본문/컨텐츠용
     border: '#E5E7EB', // 연한 회색 테두리
-    avatar: '#90CAF9',
-    chip: '#90CAF9',
+    avatar: '#90CAF9', // 원래 배경색과 동일
+    chip: '#90CAF9', // 원래 배경색과 동일
     success: '#10B981', // 초록색
     error: '#EF4444', // 빨간색
     warning: '#F59E0B', // 주황색
     info: '#3B82F6' // 파란색
   },
   admin: {
-    primary: '#1E3A8A', // 짙은 네이비 - 엄격하고 전문적
-    secondary: '#3B82F6', // 파란색
-    background: '#F8FAFC', // 매우 연한 회색
-    paper: '#FFFFFF', // 흰색
-    text: '#1F2937', // 짙은 회색 텍스트
-    textSecondary: '#6B7280', // 중간 회색
-    border: '#E5E7EB', // 연한 회색 테두리
-    avatar: '#1E3A8A',
-    chip: '#1E3A8A',
-    success: '#059669', // 짙은 초록색
-    error: '#DC2626', // 짙은 빨간색
-    warning: '#D97706', // 짙은 주황색
-    info: '#2563EB' // 짙은 파란색
+    primary: '#1E3A8A', // 짙은 네이비
+    secondary: '#3B82F6', // 밝은 파랑
+    background: '#f1f5f9', // 연한 회색 배경
+    paper: '#ffffff', // 흰색 카드 배경
+    text: '#1F2937', // 짙은 회색 - 메인 텍스트
+    textSecondary: '#6B7280', // 중간 회색 - 보조 텍스트
+    border: '#e5e7eb', // 연한 회색 테두리
+    avatar: '#1E3A8A', // 짙은 네이비 아바타
+    chip: '#1E3A8A', // 짙은 네이비 칩
+    success: '#059669',
+    error: '#dc2626',
+    warning: '#d97706',
+    info: '#0891b2'
   }
 };
 
@@ -101,9 +101,17 @@ export const themeStyles = {
   // 기본 버튼 스타일
   primaryButton: (theme: ThemeType) => ({
     bgcolor: THEME_COLORS[theme].primary,
+    color: '#f8f9fa', // 연한 회색 - 눈에 편함
+    fontWeight: 'bold',
+    textShadow: '0 0 1px rgba(0,0,0,0.3)',
     '&:hover': {
       bgcolor: THEME_COLORS[theme].primary,
-      opacity: 0.9
+      opacity: 0.9,
+    },
+    '&:disabled': {
+      bgcolor: '#ccc',
+      color: '#666',
+      textShadow: 'none',
     }
   }),
 
@@ -111,9 +119,40 @@ export const themeStyles = {
   outlinedButton: (theme: ThemeType) => ({
     borderColor: THEME_COLORS[theme].primary,
     color: THEME_COLORS[theme].primary,
+    fontWeight: 'bold',
+    opacity: 0.9,
+    textShadow: '0 0 1px rgba(0,0,0,0.5)',
     '&:hover': {
       borderColor: THEME_COLORS[theme].primary,
-      bgcolor: `${THEME_COLORS[theme].primary}10`
+      color: THEME_COLORS[theme].primary,
+      opacity: 1,
+      textShadow: '0 0 1px rgba(0,0,0,0.7)',
+    }
+  }),
+
+  // 텍스트 버튼 스타일 (로그인 화면으로, 회원가입 등)
+  textButton: (theme: ThemeType) => ({
+    color: THEME_COLORS[theme].primary,
+    fontWeight: 'bold',
+    opacity: 0.9,
+    textShadow: '0 0 1px rgba(0,0,0,0.5)',
+    '&:hover': {
+      bgcolor: 'transparent',
+      color: THEME_COLORS[theme].primary,
+      opacity: 1,
+      textShadow: '0 0 1px rgba(0,0,0,0.7)',
+    }
+  }),
+
+  // 부드러운 텍스트 버튼 스타일 (기존 회원가입 화면과 유사)
+  softTextButton: (theme: ThemeType) => ({
+    color: THEME_COLORS[theme].primary, // 테마 색상 통일
+    fontWeight: 'normal',
+    opacity: 0.8,
+    '&:hover': {
+      bgcolor: 'transparent',
+      color: THEME_COLORS[theme].primary, // Hover 시에도 같은 색상
+      opacity: 1,
     }
   }),
 

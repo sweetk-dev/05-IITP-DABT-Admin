@@ -63,7 +63,7 @@ export async function refreshAdminToken(params: AdminRefreshTokenReq): Promise<A
  * 관리자 프로필 조회
  */
 export async function getAdminProfile(): Promise<ApiResponse<AdminProfileRes>> {
-  return apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE);
+  return apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE.GET);
 }
 
 /**

@@ -1,7 +1,9 @@
-import { Box, Typography, Button, Card, CardContent, Stack, Divider } from '@mui/material';
+import { Box, Typography, CardContent, Stack, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { FloatingLogo } from '../components/AppBarCommon';
 import { getThemeColors } from '../theme';
+import ThemedButton from '../components/common/ThemedButton';
+import ThemedCard from '../components/common/ThemedCard';
 
 const dummyNotices = [
   {
@@ -102,23 +104,19 @@ export default function Home() {
               minWidth={0}
               sx={{ minWidth: { xs: '100%', md: 0 }, maxWidth: { xs: '100%', md: 360 } }}
             >
-              <Button
-                variant="contained"
+              <ThemedButton
+                theme={theme}
+                variant="primary"
                 onClick={() => navigate('/notice')}
                 sx={{
                   minWidth: 160,
                   alignSelf: 'flex-start',
                   mb: 2,
-                  backgroundColor: colors.secondary,
-                  color: colors.text,
-                  '&:hover': { backgroundColor: colors.secondary, opacity: 0.9 },
-                  fontWeight: 'bold',
                   fontSize: '1rem',
-                  boxShadow: 'none',
                 }}
               >
                 공지사항
-              </Button>
+              </ThemedButton>
               {dummyNotices.slice(0, 3).map((notice, idx) => (
                 <Typography key={idx} variant="body1" color="text.secondary" mb={1}>
                   {notice.title}
@@ -136,31 +134,27 @@ export default function Home() {
               minWidth={0}
               sx={{ minWidth: { xs: '100%', md: 0 }, maxWidth: { xs: '100%', md: 360 } }}
             >
-              <Button
-                variant="contained"
+              <ThemedButton
+                theme={theme}
+                variant="primary"
                 onClick={() => navigate('/faq')}
                 sx={{
                   minWidth: 160,
                   alignSelf: 'flex-start',
                   mb: 2,
-                  backgroundColor: colors.secondary,
-                  color: colors.text,
-                  '&:hover': { backgroundColor: colors.secondary, opacity: 0.9 },
-                  fontWeight: 'bold',
                   fontSize: '1rem',
-                  boxShadow: 'none',
                 }}
               >
-                FAQ 바로가기
-              </Button>
+                FAQ
+              </ThemedButton>
               <Stack spacing={2} sx={{ width: '100%', maxWidth: 320 }}>
                 {dummyFaqs.map((faq, idx) => (
-                  <Card key={idx} variant="outlined" sx={{ background: colors.paper, width: '100%' }}>
+                  <ThemedCard key={idx} theme="user" variant="outlined" sx={{ background: colors.paper, width: '100%' }}>
                     <CardContent>
                       <Typography variant="subtitle1" fontWeight="bold">Q. {faq.question}</Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>A. {faq.answer}</Typography>
                     </CardContent>
-                  </Card>
+                  </ThemedCard>
                 ))}
               </Stack>
             </Box>
@@ -175,28 +169,19 @@ export default function Home() {
               minWidth={0}
               sx={{ minWidth: { xs: '100%', md: 0 }, maxWidth: { xs: '100%', md: 360 } }}
             >
-              <Button
+              <ThemedButton
+                theme={theme}
                 variant="outlined"
                 onClick={() => window.open(openApiDocUrl, '_blank')}
                 sx={{
                   minWidth: 160,
                   alignSelf: 'flex-start',
                   mb: 2,
-                  borderColor: colors.primary,
-                  color: colors.primary,
-                  backgroundColor: colors.paper,
-                  fontWeight: 'bold',
                   fontSize: '1rem',
-                  boxShadow: 'none',
-                  '&:hover': {
-                    backgroundColor: colors.primary,
-                    color: colors.paper,
-                    borderColor: colors.primary,
-                  },
                 }}
               >
                 Open API 문서 바로가기
-              </Button>
+              </ThemedButton>
               <Typography variant="body1" color="text.secondary" mt={2}>
                 API 명세, 사용법, 예제 등 자세한 문서를 확인하실 수 있습니다.
               </Typography>

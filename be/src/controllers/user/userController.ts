@@ -171,7 +171,8 @@ export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, 
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    const { name, affiliation } = req.body;
+    // trim 처리 적용
+    const { name, affiliation } = trimStringFieldsExcept(req.body, []);
 
     // 필수 필드 검증
     if (!name) {

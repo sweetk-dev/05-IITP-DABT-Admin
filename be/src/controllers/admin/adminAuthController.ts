@@ -4,6 +4,7 @@ import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginAdmin, logout, refreshAdminToken } from '../../services/admin/adminAuthService';
 import { appLogger } from '../../utils/logger';
 import { getAdminRoleCodeName } from '../../services/common/commonCodeService';
+import { trimStringFieldsExcept } from '../../utils/trimUtils';
 import {
   AdminLoginReq,
   AdminLoginRes,
@@ -17,7 +18,8 @@ import {
 // 관리자 로그인
 export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Response) => {
   try {
-    const { loginId, password } = req.body;
+    // trim 처리 적용 (비밀번호 제외)
+    const { loginId, password } = trimStringFieldsExcept(req.body, ['password']);
     const ipAddr = req.ip || req.connection.remoteAddress || '';
     const userAgent = req.headers['user-agent'] as string;
 

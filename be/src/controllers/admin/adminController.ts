@@ -1,19 +1,27 @@
 import { Request, Response } from 'express';
-import { ErrorCode, isValidPassword } from '@iitp-dabt/common';
-import { sendError, sendValidationError, sendDatabaseError, sendSuccess } from '../../utils/errorHandler';
-import { findAdminById, updateAdmin, updateAdminPassword } from '../../repositories/sysAdmAccountRepository';
-import { getAdminRoleCodeName } from '../../services/common/commonCodeService';
-import { appLogger } from '../../utils/logger';
 import bcrypt from 'bcrypt';
 import { 
-  AdminProfileRes,
-  AdminProfileUpdateReq,
-  AdminProfileUpdateRes,
+  AdminProfileRes, 
+  AdminProfileUpdateReq, 
   AdminPasswordChangeReq,
-  AdminPasswordChangeRes
+  ErrorCode,
+  isValidPassword 
 } from '@iitp-dabt/common';
+import { 
+  findAdminById, 
+  updateAdmin, 
+  updateAdminPassword 
+} from '../../repositories/sysAdmAccountRepository';
+import { 
+  sendSuccess, 
+  sendError, 
+  sendValidationError, 
+  sendDatabaseError 
+} from '../../utils/errorHandler';
+import { appLogger } from '../../utils/logger';
+import { trimStringFieldsExcept } from '../../utils/trimUtils';
 
-// 관리자 프로필 조회 (필요한 정보만)
+// 관리자 프로필 조회
 export const getAdminProfile = async (req: Request, res: Response) => {
   try {
     const adminId = req.user?.userId;
@@ -27,20 +35,19 @@ export const getAdminProfile = async (req: Request, res: Response) => {
       return sendError(res, ErrorCode.ADMIN_NOT_FOUND);
     }
 
-    const roleName = admin.roles ? await getAdminRoleCodeName(admin.roles) : '관리자';
-
     const response: AdminProfileRes = {
       adminId: admin.admId,
       loginId: admin.loginId,
       name: admin.name,
-      role: roleName,
       affiliation: admin.affiliation,
+      role: admin.roles,
       createdAt: admin.createdAt.toISOString()
     };
 
     sendSuccess(res, response, undefined, 'ADMIN_PROFILE_VIEW', {
       adminId: admin.admId,
-      loginId: admin.loginId
+      name: admin.name,
+      affiliation: admin.affiliation
     });
   } catch (error) {
     appLogger.error('관리자 프로필 조회 중 오류 발생', { error, adminId: req.user?.userId });
@@ -57,7 +64,8 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    const { name, affiliation } = req.body;
+    // trim 처리 적용
+    const { name, affiliation } = trimStringFieldsExcept(req.body, []);
 
     // 필수 필드 검증
     if (!name) {
@@ -76,18 +84,13 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
       updatedBy: 'BY-ADMIN'
     });
 
-    const response: AdminProfileUpdateRes = {
-      success: true,
-      message: '프로필이 성공적으로 업데이트되었습니다.'
-    };
-
     appLogger.info('관리자 프로필 업데이트 성공', {
       adminId: adminId,
       name: name,
       affiliation: affiliation
     });
 
-    sendSuccess(res, response, '프로필이 성공적으로 업데이트되었습니다.', 'ADMIN_PROFILE_UPDATE', {
+    sendSuccess(res, { success: true }, '프로필이 성공적으로 업데이트되었습니다.', 'ADMIN_PROFILE_UPDATE', {
       adminId: adminId,
       name: name,
       affiliation: affiliation
@@ -139,16 +142,11 @@ export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChan
     // 비밀번호 업데이트
     await updateAdminPassword(adminId, hashedNewPassword, 'BY-ADMIN');
 
-    const response: AdminPasswordChangeRes = {
-      success: true,
-      message: '비밀번호가 성공적으로 변경되었습니다.'
-    };
-
     appLogger.info('관리자 비밀번호 변경 성공', {
       adminId: adminId
     });
 
-    sendSuccess(res, response, '비밀번호가 성공적으로 변경되었습니다.', 'ADMIN_PASSWORD_CHANGE', {
+    sendSuccess(res, { success: true }, '비밀번호가 성공적으로 변경되었습니다.', 'ADMIN_PASSWORD_CHANGE', {
       adminId: adminId
     });
   } catch (error) {

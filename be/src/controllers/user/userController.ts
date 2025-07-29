@@ -1,46 +1,54 @@
 import { Request, Response } from 'express';
-import { ErrorCode, isValidEmail, isValidPassword } from '@iitp-dabt/common';
-import { sendError, sendValidationError, sendDatabaseError, sendSuccess } from '../../utils/errorHandler';
-import { isEmailExists, createUser, findUserById, updateUser, updatePassword } from '../../repositories/openApiUserRepository';
-import { appLogger } from '../../utils/logger';
 import bcrypt from 'bcrypt';
 import { 
+  UserRegisterReq, 
+  UserRegisterRes, 
   UserCheckEmailReq, 
   UserCheckEmailRes,
-  UserRegisterReq, 
-  UserRegisterRes,
   UserProfileRes,
   UserProfileUpdateReq,
-  UserProfileUpdateRes,
   UserPasswordChangeReq,
-  UserPasswordChangeRes
+  ErrorCode,
+  isValidEmail, 
+  isValidPassword 
 } from '@iitp-dabt/common';
+import { 
+  isEmailExists,
+  createUser, 
+  findUserByEmail, 
+  findUserById, 
+  updateUser, 
+  updatePassword 
+} from '../../repositories/openApiUserRepository';
+import { 
+  sendSuccess, 
+  sendError, 
+  sendValidationError, 
+  sendDatabaseError 
+} from '../../utils/errorHandler';
+import { appLogger } from '../../utils/logger';
+import { trimStringFieldsExcept } from '../../utils/trimUtils';
 
-// 이메일 중복 체크
+// 이메일 중복 확인
 export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: Response) => {
   try {
-    const { email } = req.body;
+    // trim 처리 적용
+    const { email } = trimStringFieldsExcept(req.body, ['password']);
 
-    // 필수 필드 검증
     if (!email) {
       return sendValidationError(res, 'email', '이메일이 필요합니다.');
     }
 
-    // common 패키지의 이메일 형식 검증 사용
     if (!isValidEmail(email)) {
       return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
     }
 
     const exists = await isEmailExists(email);
-    
     const response: UserCheckEmailRes = {
       isAvailable: !exists
     };
-    
-    sendSuccess(res, response, undefined, 'EMAIL_CHECK', { 
-      email, 
-      isAvailable: !exists 
-    });
+
+    sendSuccess(res, response, exists ? '이미 사용 중인 이메일입니다.' : '사용 가능한 이메일입니다.');
   } catch (error) {
     appLogger.error('이메일 중복 확인 중 오류 발생', { error, email: req.body.email });
     sendDatabaseError(res, '조회', '이메일 중복 확인');
@@ -50,7 +58,8 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: R
 // 사용자 회원가입
 export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Response) => {
   try {
-    const { email, password, name, affiliation } = req.body;
+    // trim 처리 적용 (비밀번호 제외)
+    const { email, password, name, affiliation } = trimStringFieldsExcept(req.body, ['password']);
 
     // 필수 필드 검증
     if (!email) {
@@ -181,18 +190,13 @@ export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, 
       updatedBy: 'BY-USER'
     });
 
-    const response: UserProfileUpdateRes = {
-      success: true,
-      message: '프로필이 성공적으로 업데이트되었습니다.'
-    };
-
     appLogger.info('사용자 프로필 업데이트 성공', {
       userId: userId,
       name: name,
       affiliation: affiliation
     });
 
-    sendSuccess(res, response, '프로필이 성공적으로 업데이트되었습니다.', 'USER_PROFILE_UPDATE', {
+    sendSuccess(res, { success: true }, '프로필이 성공적으로 업데이트되었습니다.', 'USER_PROFILE_UPDATE', {
       userId: userId,
       name: name,
       affiliation: affiliation
@@ -244,16 +248,11 @@ export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>
     // 비밀번호 업데이트
     await updatePassword(userId, hashedNewPassword, 'BY-USER');
 
-    const response: UserPasswordChangeRes = {
-      success: true,
-      message: '비밀번호가 성공적으로 변경되었습니다.'
-    };
-
     appLogger.info('사용자 비밀번호 변경 성공', {
       userId: userId
     });
 
-    sendSuccess(res, response, '비밀번호가 성공적으로 변경되었습니다.', 'USER_PASSWORD_CHANGE', {
+    sendSuccess(res, { success: true }, '비밀번호가 성공적으로 변경되었습니다.', 'USER_PASSWORD_CHANGE', {
       userId: userId
     });
   } catch (error) {

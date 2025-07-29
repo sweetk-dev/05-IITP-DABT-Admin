@@ -22,8 +22,8 @@ const router = express.Router();
 
 // 관리자 프로필
 router.get(API_URLS.ADMIN.PROFILE, authMiddleware, getAdminProfile);
-router.post(API_URLS.ADMIN.PROFILE_UPDATE, authMiddleware, updateAdminProfile);
-router.post(API_URLS.ADMIN.PASSWORD_CHANGE, authMiddleware, changeAdminPassword);
+router.post(API_URLS.ADMIN.PROFILE, authMiddleware, updateAdminProfile);
+router.post(API_URLS.ADMIN.PASSWORD, authMiddleware, changeAdminPassword);
 
 // FAQ 관리
 router.get(API_URLS.ADMIN.FAQ.LIST, authMiddleware, getFaqListForAdmin);

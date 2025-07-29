@@ -11,8 +11,8 @@ const router = express.Router();
 router.post(API_URLS.USER.CHECK_EMAIL, checkEmail);
 router.post(API_URLS.USER.REGISTER, register);
 router.get(API_URLS.USER.PROFILE, authMiddleware, getProfile);
-router.post(API_URLS.USER.PROFILE_UPDATE, authMiddleware, updateProfile);
-router.post(API_URLS.USER.PASSWORD_CHANGE, authMiddleware, changePassword);
+router.post(API_URLS.USER.PROFILE, authMiddleware, updateProfile);
+router.post(API_URLS.USER.PASSWORD, authMiddleware, changePassword);
 
 // FAQ 관련
 router.get(API_URLS.USER.FAQ.LIST, getFaqListForUser);

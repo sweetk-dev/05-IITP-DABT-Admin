@@ -130,7 +130,7 @@ export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChan
     // 현재 비밀번호 확인
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, admin.password);
     if (!isCurrentPasswordValid) {
-      return sendError(res, ErrorCode.USER_PASSWORD_INCORRECT);
+      return sendError(res, ErrorCode.USER_PASSWORD_INVALID);
     }
 
     // 새 비밀번호 해시화

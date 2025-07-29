@@ -19,6 +19,9 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email.trim());
 }
 
+// 허용 가능한 특수문자 상수
+const ALLOWED_SPECIAL_CHARS = '!@#$%^&*()_+-=[]{}|;:\'",./<>?';
+
 /**
  * 비밀번호 유효성 검사
  * @param password 검사할 비밀번호
@@ -26,18 +29,61 @@ export function isValidEmail(email: string): boolean {
  * 
  * 조건:
  * - 최소 8자 이상
- * - 영문 대/소문자 포함
+ * - 영문자 포함 (대문자 또는 소문자)
  * - 숫자 포함
  * - 특수문자 포함 (!@#$%^&*()_+-=[]{}|;':",./<>?)
  */
 export function isValidPassword(password: string): boolean {
+  const validation = validatePassword(password);
+  return validation.isValid;
+}
+
+/**
+ * 비밀번호 검증 및 상세 에러 메시지 반환
+ * @param password 검사할 비밀번호
+ * @returns 검증 결과와 상세 에러 메시지
+ */
+export function validatePassword(password: string): { isValid: boolean; errorMessage?: string } {
   if (!password || typeof password !== 'string') {
-    return false;
+    return { isValid: false, errorMessage: '비밀번호를 입력해 주세요.' };
   }
+
+  // 허용되지 않는 특수문자 확인
+  const allowedSpecialChars = /[!@#$%^&*()_+\-=\[\]{}|;':",./<>?]/g;
+  const allSpecialChars = /[^A-Za-z0-9]/g;
   
-  // 최소 8자, 영문/숫자/특수문자 조합
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;':",./<>?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;':",./<>?]{8,}$/;
-  return passwordRegex.test(password);
+  const allChars = password.match(allSpecialChars) || [];
+  const invalidChars = allChars.filter(char => !allowedSpecialChars.test(char));
+  
+  if (invalidChars.length > 0) {
+    const uniqueInvalidChars = [...new Set(invalidChars)];
+    return { 
+      isValid: false, 
+      errorMessage: '허용되지 않는 특수문자: ' + uniqueInvalidChars.join(', ') + '. 허용 가능한 특수문자: ' + ALLOWED_SPECIAL_CHARS
+    };
+  }
+
+  // 길이 확인
+  if (password.length < 8) {
+    return { isValid: false, errorMessage: '비밀번호는 8자리 이상이어야 합니다.' };
+  }
+
+  // 영문자 확인
+  if (!/[a-zA-Z]/.test(password)) {
+    return { isValid: false, errorMessage: '비밀번호는 영문자를 포함해야 합니다.' };
+  }
+
+  // 숫자 확인
+  if (!/\d/.test(password)) {
+    return { isValid: false, errorMessage: '비밀번호는 숫자를 포함해야 합니다.' };
+  }
+
+  // 특수문자 확인
+  if (!allowedSpecialChars.test(password)) {
+    return { isValid: false, errorMessage: '비밀번호는 특수문자를 포함해야 합니다. 허용 가능한 특수문자: ' + ALLOWED_SPECIAL_CHARS };
+  }
+
+  return { isValid: true };
 }
 
 /**

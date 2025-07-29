@@ -8,7 +8,7 @@ export default function AdminProfile() {
   const userInfo = getUserInfo();
   const [profileData, setProfileData] = useState<AdminProfileRes | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -44,7 +44,7 @@ export default function AdminProfile() {
       
       if (response.success) {
         setProfileData(prev => prev ? { ...prev, ...data } : null);
-        setError(null);
+        setError(undefined);
       } else {
         setError(response.errorMessage || '프로필 업데이트 실패');
       }
@@ -60,7 +60,7 @@ export default function AdminProfile() {
       const response = await changeAdminPassword(data);
       
       if (response.success) {
-        setError(null);
+        setError(undefined);
       } else {
         setError(response.errorMessage || '비밀번호 변경 실패');
       }
@@ -79,7 +79,7 @@ export default function AdminProfile() {
         error="관리자 정보를 불러올 수 없습니다."
         onSaveProfile={handleSaveProfile}
         onChangePassword={handleChangePassword}
-        onCloseError={() => setError(null)}
+        onCloseError={() => setError(undefined)}
         showRole={true}
         showLoginId={true}
         theme="admin"
@@ -95,7 +95,7 @@ export default function AdminProfile() {
       error={error}
       onSaveProfile={handleSaveProfile}
       onChangePassword={handleChangePassword}
-      onCloseError={() => setError(null)}
+      onCloseError={() => setError(undefined)}
       showRole={true}
       showLoginId={true}
       theme="admin"

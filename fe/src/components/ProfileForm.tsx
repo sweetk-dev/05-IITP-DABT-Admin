@@ -19,7 +19,6 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import LockIcon from '@mui/icons-material/Lock';
 import { getThemeColors } from '../theme';
 import type { ThemeType } from '../theme';
-import { isValidPassword } from '@iitp-dabt/common';
 import PageTitle from './common/PageTitle';
 import ThemedButton from './common/ThemedButton';
 import ThemedCard from './common/ThemedCard';
@@ -73,7 +72,7 @@ export default function ProfileForm({
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | undefined>(undefined);
 
   // 비밀번호 검증 Hook 사용 (현재 비밀번호 포함)
   const passwordValidation = usePasswordValidation({
@@ -131,7 +130,7 @@ export default function ProfileForm({
     }
 
     setChangingPassword(true);
-    setPasswordError(null);
+    setPasswordError(undefined);
     try {
       await onChangePassword({
         currentPassword,
@@ -447,7 +446,7 @@ export default function ProfileForm({
         <DialogContent>
           <Box sx={{ pt: 1 }}>
             {passwordError && (
-              <Alert severity="error" sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }} onClose={() => setPasswordError(null)}>
+              <Alert severity="error" sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }} onClose={() => setPasswordError(undefined)}>
                 {passwordError}
               </Alert>
             )}

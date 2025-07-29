@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ErrorCode, isValidEmail, isValidPassword } from '@iitp-dabt/common';
 import { sendError, sendValidationError, sendDatabaseError, sendSuccess } from '../../utils/errorHandler';
-import { isEmailExists, createUser, findUserById, updateUser, updateUserPassword } from '../../repositories/openApiUserRepository';
+import { isEmailExists, createUser, findUserById, updateUser, updatePassword } from '../../repositories/openApiUserRepository';
 import { appLogger } from '../../utils/logger';
 import bcrypt from 'bcrypt';
 import { 
@@ -235,14 +235,14 @@ export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>
     // 현재 비밀번호 확인
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
-      return sendError(res, ErrorCode.USER_PASSWORD_INCORRECT);
+      return sendError(res, ErrorCode.USER_PASSWORD_INVALID);
     }
 
     // 새 비밀번호 해시화
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
     // 비밀번호 업데이트
-    await updateUserPassword(userId, hashedNewPassword, 'BY-USER');
+    await updatePassword(userId, hashedNewPassword, 'BY-USER');
 
     const response: UserPasswordChangeRes = {
       success: true,

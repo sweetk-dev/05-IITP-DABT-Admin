@@ -21,7 +21,7 @@ export interface SysAdmAccountAttributes {
   deletedBy?: string;
 }
 
-export interface SysAdmAccountCreationAttributes extends Optional<SysAdmAccountAttributes, 'admId' | 'latestLoginAt' | 'affiliation' | 'description' | 'note' | 'updatedAt' | 'deletedAt' | 'updatedBy' | 'deletedBy'> {}
+export interface SysAdmAccountCreationAttributes extends Optional<SysAdmAccountAttributes, 'admId' | 'latestLoginAt' | 'affiliation' | 'description' | 'note' | 'updatedAt' | 'deletedAt' | 'updatedBy' | 'deletedBy' | 'createdAt'> {}
 
 export class SysAdmAccount extends Model<SysAdmAccountAttributes, SysAdmAccountCreationAttributes> implements SysAdmAccountAttributes {
   public admId!: number;

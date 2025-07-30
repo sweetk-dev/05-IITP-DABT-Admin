@@ -2,10 +2,7 @@ import { ErrorCode } from '@iitp-dabt/common';
 import { ensureValidToken, removeTokens } from '../store/auth';
 import { getUserType } from '../store/user';
 import { ROUTES } from '../routes';
-
-// API 기본 설정
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:30000/api';
-const API_TIMEOUT = import.meta.env.VITE_API_TIMEOUT ? parseInt(import.meta.env.VITE_API_TIMEOUT) : 10000;
+import { API_BASE_URL, API_TIMEOUT } from '../config';
 
 // API 응답 타입
 export interface ApiResponse<T = any> {

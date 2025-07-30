@@ -337,7 +337,10 @@ ENC_SECRET=your-encryption-secret
 CORS_ORIGINS=https://your-frontend-domain.com,https://your-admin-domain.com
 
 # Frontend
+VITE_PORT=5173
 VITE_API_BASE_URL=https://your-api-domain.com
+VITE_API_TIMEOUT=10000
+OPPEN_API_DOC_URL=https://your-openapi-doc-domain.com
 ```
 
 ## 🤝 기여 가이드

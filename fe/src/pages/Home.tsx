@@ -4,6 +4,7 @@ import { getThemeColors } from '../theme';
 import ThemedButton from '../components/common/ThemedButton';
 import ThemedCard from '../components/common/ThemedCard';
 import { ArrowForward } from '@mui/icons-material';
+import { OPPEN_API_DOC_URL} from '../config';
 
 const dummyNotices = [
   {
@@ -93,7 +94,7 @@ export default function Home() {
   const navigate = useNavigate();
   const theme = 'user';
   const colors = getThemeColors(theme);
-  const openApiDocUrl = 'https://your-openapi-doc-url.com';
+  const openApiDocUrl = OPPEN_API_DOC_URL;
   
   const handleContentClick = (type: 'notice' | 'faq' | 'qna', id: number) => {
     navigate(`/${type}/${id}`);

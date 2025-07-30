@@ -29,6 +29,7 @@ import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import { getThemeColors } from '../../theme';
+import { handleApiResponse } from '../../utils/apiResponseHandler';
 import type { UserQnaListRes, UserQnaDetailRes } from '@iitp-dabt/common';
 
 interface QnaHistoryProps {
@@ -57,11 +58,16 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
       setError(null);
 
       const response = await getUserQnaList({});
-      if (response.success) {
-        setQnaList(response.data!);
-      } else {
-        setError(response.errorMessage || '문의 내역을 불러오는데 실패했습니다.');
-      }
+      
+      // handleApiResponse를 사용하여 에러 코드별 자동 처리
+      handleApiResponse(response, 
+        (data) => {
+          setQnaList(data);
+        },
+        (errorMessage) => {
+          setError(errorMessage);
+        }
+      );
     } catch (err) {
       setError('문의 내역을 불러오는 중 오류가 발생했습니다.');
     } finally {
@@ -84,12 +90,19 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 
     try {
       const response = await getUserQnaDetail(qnaId);
-      if (response.success) {
-        setQnaDetails(prev => ({
-          ...prev,
-          [qnaId]: response.data!
-        }));
-      }
+      
+      // handleApiResponse를 사용하여 에러 코드별 자동 처리
+      handleApiResponse(response, 
+        (data) => {
+          setQnaDetails(prev => ({
+            ...prev,
+            [qnaId]: data
+          }));
+        },
+        (errorMessage) => {
+          console.error('QnA 상세 정보 로드 실패:', errorMessage);
+        }
+      );
     } catch (err) {
       console.error('QnA 상세 정보 로드 실패:', err);
     }

@@ -6,6 +6,7 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { loginAdmin } from '../../api';
 import { ROUTES } from '../../routes';
 import { getThemeColors } from '../../theme';
+import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
@@ -20,13 +21,16 @@ export default function AdminLogin() {
     try {
       const res = await loginAdmin({ loginId, password });
       
-      if (res.success) {
-        // 관리자 로그인 성공 시 관리자 대시보드로 이동
-        window.location.href = ROUTES.ADMIN.DASHBOARD;
-      } else {
-        // 로그인 실패 시 에러 메시지 표시
-        setError(res.errorMessage || '관리자 로그인에 실패했습니다.');
-      }
+      // handleApiResponse를 사용하여 에러 코드별 자동 처리
+      handleApiResponse(res, 
+        (data) => {
+          // 관리자 로그인 성공 시 관리자 대시보드로 이동
+          window.location.href = ROUTES.ADMIN.DASHBOARD;
+        },
+        (errorMessage) => {
+          setError(errorMessage);
+        }
+      );
     } catch (err) {
       console.error('Admin login error:', err);
       setError('관리자 로그인 중 오류가 발생했습니다. 다시 시도해주세요.');

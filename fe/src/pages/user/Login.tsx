@@ -6,6 +6,7 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { loginUser } from '../../api';
 import { ROUTES } from '../../routes';
 import { getThemeColors } from '../../theme';
+import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -21,13 +22,16 @@ export default function Login() {
     try {
       const res = await loginUser({ email, password });
       
-      if (res.success) {
-        // 로그인 성공 시 대시보드로 이동
-        window.location.href = ROUTES.USER.DASHBOARD;
-      } else {
-        // 로그인 실패 시 에러 메시지 표시
-        setError(res.errorMessage || '로그인에 실패했습니다.');
-      }
+      // handleApiResponse를 사용하여 에러 코드별 자동 처리
+      handleApiResponse(res, 
+        (data) => {
+          // 로그인 성공 시 대시보드로 이동
+          window.location.href = ROUTES.USER.DASHBOARD;
+        },
+        (errorMessage) => {
+          setError(errorMessage);
+        }
+      );
     } catch (err) {
       console.error('Login error:', err);
       setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');

@@ -31,11 +31,20 @@ export {
   deleteCommonCode
 } from './commonCode';
 
+// Notice management
+export {
+  getUserNoticeList,
+  getUserNoticeDetail,
+  getHomeNoticeList
+} from './notice';
+
 // FAQ management
 export {
   // User FAQ
   getUserFaqList,
   getUserFaqDetail,
+  getHomeFaqList,
+  getUserFaqListByType,
   // Admin FAQ
   getAdminFaqList,
   getAdminFaqDetail,
@@ -50,6 +59,8 @@ export {
   // User QnA
   getUserQnaList,
   getUserQnaDetail,
+  getHomeQnaList,
+  getUserQnaListByType,
   createUserQna,
   // Admin QnA
   getAdminQnaList,

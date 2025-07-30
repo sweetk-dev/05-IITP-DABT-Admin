@@ -1,11 +1,12 @@
 import { apiFetch, publicApiFetch } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
-import type { 
+import type {
   UserQnaListReq,
   UserQnaListRes,
   UserQnaDetailRes,
   UserQnaCreateReq,
   UserQnaCreateRes,
+  UserQnaHomeRes,
   AdminQnaListReq,
   AdminQnaListRes,
   AdminQnaDetailRes,
@@ -17,88 +18,102 @@ import type {
   ApiResponse
 } from '@iitp-dabt/common';
 
-// ===== User QnA API =====
-
 /**
- * 사용자 QnA 목록 조회
+ * Q&A 목록 조회 (사용자용)
  */
-export async function getUserQnaList(_params: UserQnaListReq): Promise<ApiResponse<UserQnaListRes>> {
-  return publicApiFetch<UserQnaListRes>(FULL_API_URLS.USER.QNA.LIST, {
-    method: 'GET',
-    // TODO: 쿼리 파라미터 처리
+export async function getUserQnaList(params: UserQnaListReq): Promise<ApiResponse<UserQnaListRes>> {
+  return apiFetch<UserQnaListRes>(FULL_API_URLS.USER.QNA.LIST, {
+    method: 'POST',
+    body: JSON.stringify(params)
   });
 }
 
 /**
- * 사용자 QnA 상세 조회
+ * Q&A 상세 조회 (사용자용)
  */
 export async function getUserQnaDetail(qnaId: number): Promise<ApiResponse<UserQnaDetailRes>> {
   const url = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
-  return publicApiFetch<UserQnaDetailRes>(url, {
-    method: 'GET',
-  });
+  return apiFetch<UserQnaDetailRes>(url);
 }
 
 /**
- * 사용자 QnA 생성
+ * Q&A 생성 (사용자용)
  */
-export async function createUserQna(params: UserQnaCreateReq): Promise<ApiResponse<UserQnaCreateRes>> {
+export async function createUserQna(data: UserQnaCreateReq): Promise<ApiResponse<UserQnaCreateRes>> {
   return apiFetch<UserQnaCreateRes>(FULL_API_URLS.USER.QNA.CREATE, {
     method: 'POST',
-    body: JSON.stringify(params),
+    body: JSON.stringify(data)
   });
 }
 
-// ===== Admin QnA API =====
-
 /**
- * 관리자 QnA 목록 조회
+ * 홈 화면용 Q&A 조회 (최신 5개)
  */
-export async function getAdminQnaList(_params: AdminQnaListReq): Promise<ApiResponse<AdminQnaListRes>> {
+export async function getHomeQnaList(): Promise<ApiResponse<UserQnaHomeRes>> {
+  return apiFetch<UserQnaHomeRes>(FULL_API_URLS.USER.QNA.HOME);
+}
+
+/**
+ * Q&A 타입별 목록 조회 (사용자용)
+ */
+export async function getUserQnaListByType(qnaType: string, params: Omit<UserQnaListReq, 'qnaType'>): Promise<ApiResponse<UserQnaListRes>> {
+  return apiFetch<UserQnaListRes>(FULL_API_URLS.USER.QNA.LIST, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...params,
+      qnaType: qnaType === 'ALL' ? undefined : qnaType
+    })
+  });
+}
+
+// ===== 관리자용 API 함수들 =====
+
+/**
+ * Q&A 목록 조회 (관리자용)
+ */
+export async function getAdminQnaList(params: AdminQnaListReq): Promise<ApiResponse<AdminQnaListRes>> {
   return apiFetch<AdminQnaListRes>(FULL_API_URLS.ADMIN.QNA.LIST, {
-    method: 'GET',
-    // TODO: 쿼리 파라미터 처리
+    method: 'POST',
+    body: JSON.stringify(params)
   });
 }
 
 /**
- * 관리자 QnA 상세 조회
+ * Q&A 상세 조회 (관리자용)
  */
 export async function getAdminQnaDetail(qnaId: number): Promise<ApiResponse<AdminQnaDetailRes>> {
   const url = FULL_API_URLS.ADMIN.QNA.DETAIL.replace(':qnaId', qnaId.toString());
-  return apiFetch<AdminQnaDetailRes>(url, {
-    method: 'GET',
-  });
+  return apiFetch<AdminQnaDetailRes>(url);
 }
 
 /**
- * 관리자 QnA 답변
+ * Q&A 답변 (관리자용)
  */
-export async function answerAdminQna(qnaId: number, params: AdminQnaAnswerReq): Promise<ApiResponse<AdminQnaAnswerRes>> {
+export async function answerAdminQna(qnaId: number, data: AdminQnaAnswerReq): Promise<ApiResponse<AdminQnaAnswerRes>> {
   const url = FULL_API_URLS.ADMIN.QNA.ANSWER.replace(':qnaId', qnaId.toString());
   return apiFetch<AdminQnaAnswerRes>(url, {
     method: 'POST',
-    body: JSON.stringify(params),
+    body: JSON.stringify(data)
   });
 }
 
 /**
- * 관리자 QnA 수정
+ * Q&A 수정 (관리자용)
  */
-export async function updateAdminQna(qnaId: number, params: AdminQnaUpdateReq): Promise<ApiResponse<AdminQnaUpdateRes>> {
+export async function updateAdminQna(qnaId: number, data: AdminQnaUpdateReq): Promise<ApiResponse<AdminQnaUpdateRes>> {
   const url = FULL_API_URLS.ADMIN.QNA.UPDATE.replace(':qnaId', qnaId.toString());
   return apiFetch<AdminQnaUpdateRes>(url, {
     method: 'PUT',
-    body: JSON.stringify(params),
+    body: JSON.stringify(data)
   });
 }
 
 /**
- * 관리자 QnA 삭제
+ * Q&A 삭제 (관리자용)
  */
 export async function deleteAdminQna(qnaId: number): Promise<ApiResponse<AdminQnaDeleteRes>> {
   const url = FULL_API_URLS.ADMIN.QNA.DELETE.replace(':qnaId', qnaId.toString());
   return apiFetch<AdminQnaDeleteRes>(url, {
-    method: 'DELETE',
+    method: 'DELETE'
   });
 } 

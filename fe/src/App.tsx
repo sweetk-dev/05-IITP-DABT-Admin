@@ -10,9 +10,15 @@ import Dashboard from './pages/user/Dashboard';
 import QnaCreate from './pages/user/QnaCreate';
 import QnaHistory from './pages/user/QnaHistory';
 import OpenApiManagement from './pages/user/OpenApiManagement';
+import NoticeList from './pages/NoticeList';
+import NoticeDetail from './pages/NoticeDetail';
+import FaqList from './pages/FaqList';
+import QnaList from './pages/QnaList';
+import QnaDetail from './pages/QnaDetail';
 import Layout from './components/Layout';
 import { isAuthenticated } from './store/auth';
 import { ROUTES } from './routes';
+
 
 // 인증 보호 라우트 컴포넌트
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -25,13 +31,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// 임시 컴포넌트들 (나중에 실제 컴포넌트로 교체)
-const NoticeList = () => <div>NoticeList</div>;
-const NoticeDetail = () => <div>NoticeDetail</div>;
-const FaqList = () => <div>FaqList</div>;
-const FaqDetail = () => <div>FaqDetail</div>;
-const QnaList = () => <div>QnaList</div>;
-const QnaDetail = () => <div>QnaDetail</div>;
+
 
 // 관리자 페이지 임시 컴포넌트들
 const UserManagement = () => <div>UserManagement</div>;
@@ -84,12 +84,11 @@ function App() {
           <Route path="/" element={<Layout />}>
             {/* 공개 페이지 (로그인 불필요) */}
             <Route path={ROUTES.PUBLIC.HOME} element={<Home />} />
-            <Route path="/notice" element={<NoticeList />} />
-            <Route path="/notice/:id" element={<NoticeDetail />} />
+            <Route path={ROUTES.PUBLIC.NOTICE} element={<NoticeList />} />
+            <Route path={ROUTES.PUBLIC.NOTICE_DETAIL} element={<NoticeDetail />} />
             <Route path={ROUTES.PUBLIC.FAQ} element={<FaqList />} />
-            <Route path="/faq/:id" element={<FaqDetail />} />
             <Route path={ROUTES.PUBLIC.QNA} element={<QnaList />} />
-            <Route path="/qna/:id" element={<QnaDetail />} />
+            <Route path={ROUTES.PUBLIC.QNA_DETAIL} element={<QnaDetail />} />
             <Route path={ROUTES.PUBLIC.LOGIN} element={<Login />} />
             <Route path={ROUTES.PUBLIC.REGISTER} element={<Register />} />
 

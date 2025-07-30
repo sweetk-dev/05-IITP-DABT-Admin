@@ -1,28 +1,21 @@
 import { publicApiFetch } from './api';
-
-export interface JwtConfigResponse {
-  accessTokenExpiresIn: string;
-  refreshTokenExpiresIn: string;
-  issuer: string;
-}
-
-export interface VersionResponse {
-  version: string;
-  buildDate: string;
-}
+import { FULL_API_URLS } from '@iitp-dabt/common';
+import type {
+  JwtConfigRes,
+  VersionRes,
+  ApiResponse
+} from '@iitp-dabt/common';
 
 /**
  * JWT 설정 정보 가져오기
  */
-export async function getJwtConfig(): Promise<JwtConfigResponse> {
-  const response = await publicApiFetch<JwtConfigResponse>('/common/jwt-config');
-  return response.data as JwtConfigResponse;
+export async function getJwtConfig(): Promise<ApiResponse<JwtConfigRes>> {
+  return publicApiFetch<JwtConfigRes>(FULL_API_URLS.COMMON.JWT_CONFIG);
 }
 
 /**
  * 서버 버전 정보 가져오기
  */
-export async function getVersion(): Promise<VersionResponse> {
-  const response = await publicApiFetch<VersionResponse>('/common/version');
-  return response.data as VersionResponse;
+export async function getVersion(): Promise<ApiResponse<VersionRes>> {
+  return publicApiFetch<VersionRes>(FULL_API_URLS.COMMON.VERSION);
 } 

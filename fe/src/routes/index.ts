@@ -9,8 +9,11 @@ export const ROUTES = {
     HOME: '/',
     LOGIN: '/login',
     REGISTER: '/register',
+    NOTICE: '/notice',
+    NOTICE_DETAIL: '/notice/:noticeId',
     FAQ: '/faq',
     QNA: '/qna',
+    QNA_DETAIL: '/qna/:qnaId',
   },
 
   // 사용자 페이지 (로그인 필요)
@@ -185,11 +188,29 @@ export const ROUTE_META = {
     requiresAdmin: false,
     showInNav: true,
   },
+  [ROUTES.PUBLIC.NOTICE]: {
+    title: '공지사항',
+    requiresAuth: false,
+    requiresAdmin: false,
+    showInNav: true,
+  },
+  [ROUTES.PUBLIC.NOTICE_DETAIL]: {
+    title: '공지사항 상세',
+    requiresAuth: false,
+    requiresAdmin: false,
+    showInNav: false,
+  },
   [ROUTES.PUBLIC.QNA]: {
     title: 'Q&A',
     requiresAuth: false,
     requiresAdmin: false,
     showInNav: true,
+  },
+  [ROUTES.PUBLIC.QNA_DETAIL]: {
+    title: 'Q&A 상세',
+    requiresAuth: false,
+    requiresAdmin: false,
+    showInNav: false,
   },
   [ROUTES.USER.DASHBOARD]: {
     title: '대시보드',
@@ -261,6 +282,7 @@ export const ROUTE_GROUPS = {
     name: '공개 페이지',
     routes: [
       { path: ROUTES.PUBLIC.HOME, title: '홈' },
+      { path: ROUTES.PUBLIC.NOTICE, title: '공지사항' },
       { path: ROUTES.PUBLIC.FAQ, title: 'FAQ' },
       { path: ROUTES.PUBLIC.QNA, title: 'Q&A' },
     ],

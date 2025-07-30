@@ -78,6 +78,14 @@ export async function publicApiFetch<T = any>(
       };
     }
     
+    // 204 No Content 처리
+    if (res.status === 204) {
+      return { 
+        success: true, 
+        data: undefined 
+      };
+    }
+    
     return data;
   } catch (e: any) {
     clearTimeout(id);

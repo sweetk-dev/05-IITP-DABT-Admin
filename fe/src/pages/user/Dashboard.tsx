@@ -34,6 +34,7 @@ import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import { getThemeColors } from '../../theme';
+import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 interface DashboardProps {
   id?: string;
@@ -65,13 +66,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
         getUserOpenApiList({})
       ]);
 
-      if (qnaResponse.success) {
-        setQnaList(qnaResponse.data!);
-      }
+      // handleApiResponse를 사용하여 에러 코드별 자동 처리
+      handleApiResponse(qnaResponse, 
+        (data) => {
+          setQnaList(data);
+        },
+        (errorMessage) => {
+          setError(errorMessage);
+        }
+      );
 
-      if (openApiResponse.success) {
-        setOpenApiList(openApiResponse.data!);
-      }
+      handleApiResponse(openApiResponse, 
+        (data) => {
+          setOpenApiList(data);
+        },
+        (errorMessage) => {
+          setError(errorMessage);
+        }
+      );
     } catch (err) {
       setError('대시보드 데이터를 불러오는데 실패했습니다.');
     } finally {

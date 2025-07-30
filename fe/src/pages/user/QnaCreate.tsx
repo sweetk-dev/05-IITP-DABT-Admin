@@ -25,6 +25,7 @@ import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import { getThemeColors } from '../../theme';
+import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 interface QnaCreateProps {
   id?: string;
@@ -74,14 +75,18 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
         writerName: formData.writerName || undefined
       });
 
-      if (response.success) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate(ROUTES.USER.DASHBOARD);
-        }, 2000);
-      } else {
-        setError(response.errorMessage || '문의 등록에 실패했습니다.');
-      }
+      // handleApiResponse를 사용하여 에러 코드별 자동 처리
+      handleApiResponse(response, 
+        (data) => {
+          setSuccess(true);
+          setTimeout(() => {
+            navigate(ROUTES.USER.DASHBOARD);
+          }, 2000);
+        },
+        (errorMessage) => {
+          setError(errorMessage);
+        }
+      );
     } catch (err) {
       setError('문의 등록 중 오류가 발생했습니다.');
     } finally {

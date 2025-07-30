@@ -6,9 +6,11 @@ export interface OpenApiAuthKeyAttributes {
   userId: number;
   authKey: string;
   activeYn: string;
-  startDt: Date;
-  endDt: Date;
+  startDt?: Date;
+  endDt?: Date;
   delYn: string;
+  keyName: string;
+  keyDesc: string;
   activeAt?: Date;
   latestAccAt?: Date;
   createdAt: Date;
@@ -21,6 +23,8 @@ export interface OpenApiAuthKeyAttributes {
 
 export type OpenApiAuthKeyCreationAttributes = Optional<OpenApiAuthKeyAttributes, 
   'keyId' |
+  'startDt' |
+  'endDt' |
   'activeAt' | 
   'latestAccAt' | 
   'createdAt' |
@@ -35,9 +39,11 @@ export class OpenApiAuthKey extends Model<OpenApiAuthKeyAttributes, OpenApiAuthK
   public userId!: number;
   public authKey!: string;
   public activeYn!: string;
-  public startDt!: Date;
-  public endDt!: Date;
+  public startDt?: Date;
+  public endDt?: Date;
   public delYn!: string;
+  public keyName!: string;
+  public keyDesc!: string;
   public activeAt?: Date;
   public latestAccAt?: Date;
   public createdAt!: Date;
@@ -87,13 +93,13 @@ export function initOpenApiAuthKey(sequelize: Sequelize) {
       },
       startDt: {
         type: DataTypes.DATEONLY,
-        allowNull: false,
+        allowNull: true,
         field: 'start_dt',
         comment: 'api auth key 유효 시작일',
       },
       endDt: {
         type: DataTypes.DATEONLY,
-        allowNull: false,
+        allowNull: true,
         field: 'end_dt',
         comment: 'api auth key 유효 종료일',
       },
@@ -103,6 +109,18 @@ export function initOpenApiAuthKey(sequelize: Sequelize) {
         defaultValue: 'N',
         field: 'del_yn',
         comment: '삭제여부 (Y: 삭제)',
+      },
+      keyName: {
+        type: DataTypes.STRING(120),
+        allowNull: false,
+        field: 'key_name',
+        comment: 'api key name',
+      },
+      keyDesc: {
+        type: DataTypes.STRING(600),
+        allowNull: false,
+        field: 'key_desc',
+        comment: 'api key 사용 목적',
       },
       activeAt: {
         type: DataTypes.DATE,

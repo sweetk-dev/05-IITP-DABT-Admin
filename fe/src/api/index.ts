@@ -76,4 +76,13 @@ export {
 export {
   getJwtConfig,
   getVersion
-} from './common'; 
+} from './common';
+
+// OpenAPI management
+export {
+  getUserOpenApiList,
+  getUserOpenApiDetail,
+  createUserOpenApi,
+  deleteUserOpenApi,
+  extendUserOpenApi
+} from './openApi'; 

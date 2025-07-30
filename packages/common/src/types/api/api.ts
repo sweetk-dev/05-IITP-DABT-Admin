@@ -35,6 +35,13 @@ export const API_URLS = {
       LIST: '/notice',
       DETAIL: '/notice/:noticeId',
       HOME: '/notice/home',
+    },
+    OPEN_API: {
+      LIST: '/openapi/keys',
+      DETAIL: '/openapi/keys/:keyId',
+      CREATE: '/openapi/keys',
+      DELETE: '/openapi/keys/:keyId',
+      EXTEND: '/openapi/keys/:keyId/extend',
     }
   },
   
@@ -154,6 +161,13 @@ export const FULL_API_URLS = {
       LIST: getUserUrl(API_URLS.USER.NOTICE.LIST),
       DETAIL: getUserUrl(API_URLS.USER.NOTICE.DETAIL),
       HOME: getUserUrl(API_URLS.USER.NOTICE.HOME),
+    },
+    OPEN_API: {
+      LIST: getUserUrl(API_URLS.USER.OPEN_API.LIST),
+      DETAIL: getUserUrl(API_URLS.USER.OPEN_API.DETAIL),
+      CREATE: getUserUrl(API_URLS.USER.OPEN_API.CREATE),
+      DELETE: getUserUrl(API_URLS.USER.OPEN_API.DELETE),
+      EXTEND: getUserUrl(API_URLS.USER.OPEN_API.EXTEND),
     }
   },
   ADMIN: {

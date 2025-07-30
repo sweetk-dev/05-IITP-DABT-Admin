@@ -1,5 +1,6 @@
 import { Box, Typography, IconButton } from '@mui/material';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import { useNavigate } from 'react-router-dom';
 import { getThemeColors } from '../theme';
 
@@ -61,5 +62,36 @@ export function Logo({ serviceName, theme = 'user' }: { serviceName: string; the
         {serviceName}
       </Typography>
     </Box>
+  );
+}
+
+export function DashboardIconButton({ to = '/dashbd', theme = 'user' }: { to?: string; theme?: 'user' | 'admin' }) {
+  const navigate = useNavigate();
+  const colors = getThemeColors(theme);
+  
+  return (
+    <IconButton
+      id="dashboard-icon-button"
+      onClick={() => navigate(to)}
+      sx={{
+        background: `${colors.primary}20`,
+        color: colors.primary,
+        borderRadius: '50%',
+        boxShadow: 1,
+        p: 0.7,
+        mr: 1,
+        transition: 'all 0.2s',
+        '&:hover': { 
+          boxShadow: 2, 
+          background: `${colors.primary}40`,
+          opacity: 0.8
+        },
+        height: 36,
+        width: 36,
+        minWidth: 0,
+      }}
+    >
+      <DashboardOutlinedIcon id="dashboard-icon" sx={{ fontSize: 22 }} />
+    </IconButton>
   );
 } 

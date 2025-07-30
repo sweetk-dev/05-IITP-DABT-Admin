@@ -22,6 +22,8 @@ export const ROUTES = {
     QNA_LIST: '/user/qna',
     QNA_DETAIL: '/user/qna/:id',
     QNA_CREATE: '/user/qna/create',
+    QNA_HISTORY: '/user/qna/history',
+    OPEN_API_MANAGEMENT: '/user/openapi',
   },
 
   // 관리자 페이지 (관리자 로그인 필요)

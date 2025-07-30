@@ -6,6 +6,10 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserProfile from './pages/user/UserProfile';
 import AdminProfile from './pages/admin/AdminProfile';
+import Dashboard from './pages/user/Dashboard';
+import QnaCreate from './pages/user/QnaCreate';
+import QnaHistory from './pages/user/QnaHistory';
+import OpenApiManagement from './pages/user/OpenApiManagement';
 import Layout from './components/Layout';
 import { isAuthenticated } from './store/auth';
 import { ROUTES } from './routes';
@@ -22,14 +26,12 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 // 임시 컴포넌트들 (나중에 실제 컴포넌트로 교체)
-const UserDashboard = () => <div>UserDashboard</div>;
 const NoticeList = () => <div>NoticeList</div>;
 const NoticeDetail = () => <div>NoticeDetail</div>;
 const FaqList = () => <div>FaqList</div>;
 const FaqDetail = () => <div>FaqDetail</div>;
 const QnaList = () => <div>QnaList</div>;
 const QnaDetail = () => <div>QnaDetail</div>;
-const OpenApiManagement = () => <div>OpenApiManagement</div>;
 
 // 관리자 페이지 임시 컴포넌트들
 const UserManagement = () => <div>UserManagement</div>;
@@ -92,8 +94,10 @@ function App() {
             <Route path={ROUTES.PUBLIC.REGISTER} element={<Register />} />
 
             {/* 일반 사용자 페이지 (로그인 필요) */}
-            <Route path={ROUTES.USER.DASHBOARD} element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
-            <Route path="/mng/openapi" element={<PrivateRoute><OpenApiManagement /></PrivateRoute>} />
+            <Route path={ROUTES.USER.DASHBOARD} element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path={ROUTES.USER.QNA_CREATE} element={<PrivateRoute><QnaCreate /></PrivateRoute>} />
+            <Route path={ROUTES.USER.QNA_HISTORY} element={<PrivateRoute><QnaHistory /></PrivateRoute>} />
+            <Route path={ROUTES.USER.OPEN_API_MANAGEMENT} element={<PrivateRoute><OpenApiManagement /></PrivateRoute>} />
             <Route path={ROUTES.USER.PROFILE} element={<PrivateRoute><UserProfile /></PrivateRoute>} />
 
             {/* 관리자 로그인 */}

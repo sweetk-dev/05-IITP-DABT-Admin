@@ -46,7 +46,6 @@ export async function createUser(userData: {
   password: string;
   userName: string;
   affiliation?: string;
-  description?: string;
   note?: string;
   createdBy: string;
 }): Promise<{ userId: number }> {
@@ -55,7 +54,6 @@ export async function createUser(userData: {
     password: userData.password,
     userName: userData.userName,
     affiliation: userData.affiliation,
-    description: userData.description,
     note: userData.note,
     status: 'A',
     delYn: 'N',
@@ -70,14 +68,12 @@ export async function createUser(userData: {
 export async function updateUser(userId: number, updateData: {
   userName?: string;
   affiliation?: string;
-  description?: string;
   note?: string;
   updatedBy: string;
 }): Promise<boolean> {
   const [affectedRows] = await OpenApiUser.update({
     userName: updateData.userName,
     affiliation: updateData.affiliation,
-    description: updateData.description,
     note: updateData.note,
     updatedBy: updateData.updatedBy
   }, {

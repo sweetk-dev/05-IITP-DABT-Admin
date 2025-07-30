@@ -11,7 +11,6 @@ export interface OpenApiUserAttributes {
   latestKeyCreatedAt?: Date;
   latestLoginAt?: Date;
   affiliation?: string;
-  description?: string;
   note?: string;
   createdAt: Date;
   updatedAt?: Date;
@@ -26,7 +25,6 @@ export type OpenApiUserCreationAttributes = Optional<OpenApiUserAttributes,
   'latestKeyCreatedAt' | 
   'latestLoginAt' | 
   'affiliation' |
-  'description' | 
   'note' | 
   'createdAt' |
   'updatedAt' | 
@@ -45,7 +43,6 @@ export class OpenApiUser extends Model<OpenApiUserAttributes, OpenApiUserCreatio
   public latestKeyCreatedAt?: Date;
   public latestLoginAt?: Date;
   public affiliation?: string;
-  public description?: string;
   public note?: string;
   public createdAt!: Date;
   public updatedAt?: Date;
@@ -118,11 +115,6 @@ export function initOpenApiUser(sequelize: Sequelize) {
         type: DataTypes.STRING(90),
         field: 'affiliation',
         comment: 'client 소속',
-      },
-      description: {
-        type: DataTypes.STRING(300),
-        field: 'description',
-        comment: 'client 설명, key 신청 사유',
       },
       note: {
         type: DataTypes.STRING(600),

@@ -4,7 +4,12 @@ import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginAdmin, logout, refreshAdminToken } from '../../services/admin/adminAuthService';
 import { appLogger } from '../../utils/logger';
 import { getAdminRoleCodeName } from '../../services/common/commonCodeService';
-import { trimStringFieldsExcept } from '../../utils/trimUtils';
+import { 
+  extractUserIdFromRequest,
+  extractClientIP,
+  normalizeUserAgent,
+  normalizeErrorMessage
+} from '../../utils/commonUtils';
 import {
   AdminLoginReq,
   AdminLoginRes,
@@ -18,10 +23,9 @@ import {
 // 관리자 로그인
 export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Response) => {
   try {
-    // trim 처리 적용 (비밀번호 제외)
-    const { loginId, password } = trimStringFieldsExcept(req.body, ['password']);
-    const ipAddr = req.ip || req.connection.remoteAddress || '';
-    const userAgent = req.headers['user-agent'] as string;
+    const { loginId, password } = req.body;
+    const ipAddr = extractClientIP(req);
+    const userAgent = normalizeUserAgent(req.headers['user-agent']);
 
     const result = await loginAdmin(loginId, password, ipAddr, userAgent);
 
@@ -39,9 +43,14 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
     sendSuccess(res, response, undefined, 'ADMIN_LOGIN', { userId: result.userId, loginId });
   } catch (error) {
     appLogger.error('Error in adminLogin:', error);
-    if (error instanceof Error && error.message.includes('ErrorCode.')) {
-      const errorCode = error.message.split('ErrorCode.')[1];
-      sendError(res, ErrorCode[errorCode as keyof typeof ErrorCode]);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('ErrorCode.')) {
+        const errorCode = errorMsg.split('ErrorCode.')[1];
+        sendError(res, ErrorCode[errorCode as keyof typeof ErrorCode]);
+      } else {
+        sendError(res, ErrorCode.LOGIN_FAILED);
+      }
     } else {
       sendError(res, ErrorCode.LOGIN_FAILED);
     }
@@ -51,7 +60,7 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
 // 관리자 로그아웃
 export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = extractUserIdFromRequest(req);
 
     if (!userId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);

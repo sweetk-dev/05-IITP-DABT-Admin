@@ -3,92 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { getThemeColors } from '../theme';
 import ThemedButton from '../components/common/ThemedButton';
 import ThemedCard from '../components/common/ThemedCard';
+import EmptyState from '../components/common/EmptyState';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { ArrowForward } from '@mui/icons-material';
 import { OPPEN_API_DOC_URL} from '../config';
-
-const dummyNotices = [
-  {
-    id: 1,
-    title: '[2024-07-18] 장애인 데이터 API 신규 버전이 출시되었습니다.',
-    content: '신규 버전 안내...'
-  },
-  {
-    id: 2,
-    title: '[2024-07-10] 시스템 점검 안내: 7/20(토) 00:00~04:00',
-    content: '점검 안내...'
-  },
-  {
-    id: 3,
-    title: '[2024-07-01] 회원가입 시 이메일 인증이 추가되었습니다.',
-    content: '이메일 인증 안내...'
-  },
-  {
-    id: 4,
-    title: '[2024-06-20] 개인정보 처리방침이 변경되었습니다.',
-    content: '개인정보 안내...'
-  },
-  {
-    id: 5,
-    title: '[2024-06-10] 장애인 데이터 API 서비스 오픈',
-    content: '서비스 오픈 안내...'
-  }
-];
-
-const dummyFaqs = [
-  {
-    id: 1,
-    question: 'API 신청은 어떻게 하나요?',
-    answer: '로그인 후 [API 관리] 메뉴에서 신청할 수 있습니다.'
-  },
-  {
-    id: 2,
-    question: '키 발급은 얼마나 걸리나요?',
-    answer: '관리자의 승인 후 즉시 발급됩니다.'
-  },
-  {
-    id: 3,
-    question: '비밀번호를 잊어버렸어요?',
-    answer: '로그인 화면에서 비밀번호 찾기를 이용해 주세요.'
-  },
-  {
-    id: 4,
-    question: 'API 사용량 제한이 있나요?',
-    answer: '일일 사용량 제한이 있으며, 상세한 내용은 API 문서를 참조하세요.'
-  },
-  {
-    id: 5,
-    question: '데이터 형식은 어떻게 되나요?',
-    answer: 'JSON 형식으로 제공되며, 상세한 스키마는 API 문서에서 확인할 수 있습니다.'
-  }
-];
-
-const dummyQnas = [
-  {
-    id: 1,
-    title: 'API 키가 만료되었는데 어떻게 하나요?',
-    content: 'API 키가 만료된 경우 새로운 키를 발급받으셔야 합니다...'
-  },
-  {
-    id: 2,
-    title: '데이터 업데이트 주기는 어떻게 되나요?',
-    content: '데이터는 매일 자정에 업데이트되며, 실시간 데이터는 제공되지 않습니다...'
-  },
-  {
-    id: 3,
-    title: 'API 호출 시 오류가 발생합니다.',
-    content: 'API 호출 시 오류가 발생하는 경우 다음 사항들을 확인해주세요...'
-  },
-  {
-    id: 4,
-    title: '대용량 데이터 다운로드는 어떻게 하나요?',
-    content: '대용량 데이터는 배치 처리 방식을 통해 다운로드할 수 있습니다...'
-  },
-  {
-    id: 5,
-    title: 'API 사용 통계는 어디서 확인할 수 있나요?',
-    content: 'API 사용 통계는 대시보드에서 실시간으로 확인할 수 있습니다...'
-  }
-];
+import { PAGINATION } from '../constants/pagination';
+import { useDataFetching } from '../hooks/useDataFetching';
+import { getHomeNoticeList, getHomeFaqList, getHomeQnaList } from '../api';
+import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -96,9 +18,394 @@ export default function Home() {
   const colors = getThemeColors(theme);
   const openApiDocUrl = OPPEN_API_DOC_URL;
   
+  // 공지사항 데이터 페칭
+  const {
+    data: notices,
+    isLoading: noticesLoading,
+    isEmpty: noticesEmpty,
+    isError: noticesError,
+    refetch: refetchNotices
+  } = useDataFetching({
+    fetchFunction: getHomeNoticeList
+  });
+
+  // FAQ 데이터 페칭
+  const {
+    data: faqs,
+    isLoading: faqsLoading,
+    isEmpty: faqsEmpty,
+    isError: faqsError,
+    refetch: refetchFaqs
+  } = useDataFetching({
+    fetchFunction: getHomeFaqList
+  });
+
+  // Q&A 데이터 페칭
+  const {
+    data: qnas,
+    isLoading: qnasLoading,
+    isEmpty: qnasEmpty,
+    isError: qnasError,
+    refetch: refetchQnas
+  } = useDataFetching({
+    fetchFunction: getHomeQnaList
+  });
+  
   const handleContentClick = (type: 'notice' | 'faq' | 'qna', id: number) => {
     navigate(`/${type}/${id}`);
   };
+
+  const handleSectionClick = (type: 'notice' | 'faq' | 'qna') => {
+    navigate(`/${type}`);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
+
+  const renderNoticeSection = () => (
+    <Box
+      id="notice-section"
+      className="home-notice-section"
+      flex={1}
+      display="flex"
+      flexDirection="column"
+      justifyContent="flex-start"
+      p={4}
+      minWidth={0}
+      sx={{ 
+        minWidth: { xs: '100%', md: 0 }, 
+        maxWidth: { xs: '100%', md: 360 },
+        background: 'transparent',
+        position: 'relative',
+        isolation: 'isolate'
+      }}
+    >
+      <ThemedButton
+        theme={theme}
+        variant="primary"
+        className="home-notice-button"
+        onClick={() => handleSectionClick('notice')}
+        endIcon={<ArrowForward />}
+        sx={{
+          width: '100%',
+          mb: 2,
+          fontSize: '1rem',
+          position: 'relative',
+          isolation: 'isolate',
+          '& .MuiButton-endIcon': {
+            position: 'absolute !important',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            isolation: 'isolate'
+          }
+        }}
+      >
+        공지사항
+      </ThemedButton>
+      
+      {/* 컨텐츠 영역 테두리 */}
+      <Box 
+        sx={{ 
+          border: `3px solid ${colors.border}`,
+          borderRadius: 3,
+          p: 3,
+          background: 'transparent',
+          flex: 1,
+          minHeight: 200,
+          boxShadow: `0 2px 8px ${colors.border}30`
+        }}
+      >
+        {noticesLoading ? (
+          <LoadingSpinner loading={true} />
+        ) : noticesError ? (
+          <EmptyState 
+            message="공지사항을 불러오는 중 오류가 발생했습니다." 
+            theme={theme}
+          />
+        ) : noticesEmpty ? (
+          <EmptyState 
+            message="등록된 공지사항이 없습니다." 
+            theme={theme}
+          />
+        ) : (
+          <Stack spacing={1.5}>
+            {notices?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((notice: UserNoticeItem) => (
+              <Box
+                key={notice.noticeId}
+                onClick={() => handleContentClick('notice', notice.noticeId)}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  border: `1px solid ${colors.border}`,
+                  backgroundColor: 'transparent',
+                  '&:hover': {
+                    backgroundColor: `${colors.primary}15`,
+                    borderColor: colors.primary,
+                    transform: 'translateY(-1px)',
+                    boxShadow: `0 4px 12px ${colors.primary}20`,
+                    '& .content-text': {
+                      textDecoration: 'underline',
+                      textDecorationColor: colors.text,
+                      textDecorationThickness: '2px'
+                    }
+                  }
+                }}
+              >
+                <Typography 
+                  variant="body2" 
+                  className="content-text"
+                  sx={{ 
+                    color: colors.textSecondary,
+                    transition: 'all 0.2s ease-in-out',
+                    mb: 0.5
+                  }}
+                >
+                  {notice.title}
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: colors.textSecondary,
+                    opacity: 0.7
+                  }}
+                >
+                  {formatDate(notice.postedAt)}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
+    </Box>
+  );
+
+  const renderFaqSection = () => (
+    <Box
+      id="faq-section"
+      flex={1}
+      display="flex"
+      flexDirection="column"
+      justifyContent="flex-start"
+      p={4}
+      minWidth={0}
+      sx={{ 
+        minWidth: { xs: '100%', md: 0 }, 
+        maxWidth: { xs: '100%', md: 360 },
+        background: 'transparent'
+      }}
+    >
+      <ThemedButton
+        theme={theme}
+        variant="primary"
+        className="home-faq-button"
+        onClick={() => handleSectionClick('faq')}
+        endIcon={<ArrowForward />}
+        sx={{
+          width: '100%',
+          mb: 2,
+          fontSize: '1rem',
+          position: 'relative',
+          '& .MuiButton-endIcon': {
+            position: 'absolute !important',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }
+        }}
+      >
+        FAQ
+      </ThemedButton>
+      
+      {/* 컨텐츠 영역 테두리 */}
+      <Box 
+        sx={{ 
+          border: `3px solid ${colors.border}`,
+          borderRadius: 3,
+          p: 3,
+          background: 'transparent',
+          flex: 1,
+          minHeight: 200,
+          boxShadow: `0 2px 8px ${colors.border}30`
+        }}
+      >
+        {faqsLoading ? (
+          <LoadingSpinner loading={true} />
+        ) : faqsError ? (
+          <EmptyState 
+            message="FAQ를 불러오는 중 오류가 발생했습니다." 
+            theme={theme}
+          />
+        ) : faqsEmpty ? (
+          <EmptyState 
+            message="등록된 FAQ가 없습니다." 
+            theme={theme}
+          />
+        ) : (
+          <Stack spacing={1.5}>
+            {faqs?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((faq: UserFaqItem) => (
+              <Box
+                key={faq.faqId}
+                onClick={() => handleContentClick('faq', faq.faqId)}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  border: `1px solid ${colors.border}`,
+                  backgroundColor: 'transparent',
+                  '&:hover': {
+                    backgroundColor: `${colors.primary}15`,
+                    borderColor: colors.primary,
+                    transform: 'translateY(-1px)',
+                    boxShadow: `0 4px 12px ${colors.primary}20`,
+                    '& .content-text': {
+                      textDecoration: 'underline',
+                      textDecorationColor: colors.text,
+                      textDecorationThickness: '2px'
+                    }
+                  }
+                }}
+              >
+                <Typography 
+                  variant="body2" 
+                  className="content-text"
+                  sx={{ 
+                    color: colors.textSecondary,
+                    transition: 'all 0.2s ease-in-out'
+                  }}
+                >
+                  Q. {faq.question}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
+    </Box>
+  );
+
+  const renderQnaSection = () => (
+    <Box
+      id="qna-section"
+      flex={1}
+      display="flex"
+      flexDirection="column"
+      justifyContent="flex-start"
+      p={4}
+      minWidth={0}
+      sx={{ 
+        minWidth: { xs: '100%', md: 0 }, 
+        maxWidth: { xs: '100%', md: 360 },
+        background: 'transparent'
+      }}
+    >
+      <ThemedButton
+        theme={theme}
+        variant="primary"
+        className="home-qna-button"
+        onClick={() => handleSectionClick('qna')}
+        endIcon={<ArrowForward />}
+        sx={{
+          width: '100%',
+          mb: 2,
+          fontSize: '1rem',
+          position: 'relative',
+          '& .MuiButton-endIcon': {
+            position: 'absolute !important',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }
+        }}
+      >
+        Q&A
+      </ThemedButton>
+      
+      {/* 컨텐츠 영역 테두리 */}
+      <Box 
+        sx={{ 
+          border: `3px solid ${colors.border}`,
+          borderRadius: 3,
+          p: 3,
+          background: 'transparent',
+          flex: 1,
+          minHeight: 200,
+          boxShadow: `0 2px 8px ${colors.border}30`
+        }}
+      >
+        {qnasLoading ? (
+          <LoadingSpinner loading={true} />
+        ) : qnasError ? (
+          <EmptyState 
+            message="Q&A를 불러오는 중 오류가 발생했습니다." 
+            theme={theme}
+          />
+        ) : qnasEmpty ? (
+          <EmptyState 
+            message="등록된 Q&A가 없습니다." 
+            theme={theme}
+          />
+        ) : (
+          <Stack spacing={1.5}>
+            {qnas?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: UserQnaItem) => (
+              <Box
+                key={qna.qnaId}
+                onClick={() => handleContentClick('qna', qna.qnaId)}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
+                  border: `1px solid ${colors.border}`,
+                  backgroundColor: 'transparent',
+                  '&:hover': {
+                    backgroundColor: `${colors.primary}15`,
+                    borderColor: colors.primary,
+                    transform: 'translateY(-1px)',
+                    boxShadow: `0 4px 12px ${colors.primary}20`,
+                    '& .content-text': {
+                      textDecoration: 'underline',
+                      textDecorationColor: colors.text,
+                      textDecorationThickness: '2px'
+                    }
+                  }
+                }}
+              >
+                <Typography 
+                  variant="body2" 
+                  className="content-text"
+                  sx={{ 
+                    color: colors.textSecondary,
+                    transition: 'all 0.2s ease-in-out',
+                    mb: 0.5
+                  }}
+                >
+                  {qna.title}
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: colors.textSecondary,
+                    opacity: 0.7
+                  }}
+                >
+                  {formatDate(qna.postedAt)}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
+    </Box>
+  );
   
   return (
     <Box 
@@ -107,7 +414,7 @@ export default function Home() {
         minHeight: '100%',
         width: '100%',
         position: 'relative',
-        isolation: 'isolate' // CSS 격리
+        isolation: 'isolate'
       }}
     >
       {/* 컨텐츠 래퍼: 소개+3구역 */}
@@ -225,278 +532,9 @@ export default function Home() {
               flexWrap: { xs: 'wrap', md: 'nowrap' },
             }}
           >
-            {/* 공지사항 */}
-            <Box
-              id="notice-section"
-              className="home-notice-section"
-              flex={1}
-              display="flex"
-              flexDirection="column"
-              justifyContent="flex-start"
-              p={4}
-              minWidth={0}
-              sx={{ 
-                minWidth: { xs: '100%', md: 0 }, 
-                maxWidth: { xs: '100%', md: 360 },
-                background: 'transparent',
-                position: 'relative',
-                isolation: 'isolate'
-              }}
-            >
-              <ThemedButton
-                theme={theme}
-                variant="primary"
-                className="home-notice-button"
-                onClick={() => navigate('/notice')}
-                endIcon={<ArrowForward />}
-                sx={{
-                  width: '100%',
-                  mb: 2,
-                  fontSize: '1rem',
-                  position: 'relative',
-                  isolation: 'isolate',
-                  '& .MuiButton-endIcon': {
-                    position: 'absolute !important',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    isolation: 'isolate'
-                  }
-                }}
-              >
-                공지사항
-              </ThemedButton>
-              
-              {/* 컨텐츠 영역 테두리 */}
-              <Box 
-                sx={{ 
-                  border: `3px solid ${colors.border}`,
-                  borderRadius: 3,
-                  p: 3,
-                  background: 'transparent',
-                  flex: 1,
-                  minHeight: 200,
-                  boxShadow: `0 2px 8px ${colors.border}30`
-                }}
-              >
-                <Stack spacing={1.5}>
-                  {dummyNotices.slice(0, 5).map((notice) => (
-                    <Box
-                      key={notice.id}
-                      onClick={() => handleContentClick('notice', notice.id)}
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
-                        border: `1px solid ${colors.border}`,
-                        backgroundColor: 'transparent',
-                        '&:hover': {
-                          backgroundColor: `${colors.primary}15`,
-                          borderColor: colors.primary,
-                          transform: 'translateY(-1px)',
-                          boxShadow: `0 4px 12px ${colors.primary}20`,
-                          '& .content-text': {
-                            textDecoration: 'underline',
-                            textDecorationColor: colors.text,
-                            textDecorationThickness: '2px'
-                          }
-                        }
-                      }}
-                    >
-                      <Typography 
-                        variant="body2" 
-                        className="content-text"
-                        sx={{ 
-                          color: colors.textSecondary,
-                          transition: 'all 0.2s ease-in-out'
-                        }}
-                      >
-                        {notice.title}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            </Box>
-            
-            {/* FAQ */}
-            <Box
-              id="faq-section"
-              flex={1}
-              display="flex"
-              flexDirection="column"
-              justifyContent="flex-start"
-              p={4}
-              minWidth={0}
-              sx={{ 
-                minWidth: { xs: '100%', md: 0 }, 
-                maxWidth: { xs: '100%', md: 360 },
-                background: 'transparent'
-              }}
-            >
-              <ThemedButton
-                theme={theme}
-                variant="primary"
-                onClick={() => navigate('/faq')}
-                endIcon={<ArrowForward />}
-                sx={{
-                  width: '100%',
-                  mb: 2,
-                  fontSize: '1rem',
-                  position: 'relative',
-                  '& .MuiButton-endIcon': {
-                    position: 'absolute !important',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)'
-                  }
-                }}
-              >
-                FAQ
-              </ThemedButton>
-              
-              {/* 컨텐츠 영역 테두리 */}
-              <Box 
-                sx={{ 
-                  border: `3px solid ${colors.border}`,
-                  borderRadius: 3,
-                  p: 3,
-                  background: 'transparent',
-                  flex: 1,
-                  minHeight: 200,
-                  boxShadow: `0 2px 8px ${colors.border}30`
-                }}
-              >
-                <Stack spacing={1.5}>
-                  {dummyFaqs.slice(0, 5).map((faq) => (
-                    <Box
-                      key={faq.id}
-                      onClick={() => handleContentClick('faq', faq.id)}
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
-                        border: `1px solid ${colors.border}`,
-                        backgroundColor: 'transparent',
-                        '&:hover': {
-                          backgroundColor: `${colors.primary}15`,
-                          borderColor: colors.primary,
-                          transform: 'translateY(-1px)',
-                          boxShadow: `0 4px 12px ${colors.primary}20`,
-                          '& .content-text': {
-                            textDecoration: 'underline',
-                            textDecorationColor: colors.text,
-                            textDecorationThickness: '2px'
-                          }
-                        }
-                      }}
-                    >
-                      <Typography 
-                        variant="body2" 
-                        className="content-text"
-                        sx={{ 
-                          color: colors.textSecondary,
-                          transition: 'all 0.2s ease-in-out'
-                        }}
-                      >
-                        Q. {faq.question}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            </Box>
-            
-            {/* Q&A */}
-            <Box
-              id="qna-section"
-              flex={1}
-              display="flex"
-              flexDirection="column"
-              justifyContent="flex-start"
-              p={4}
-              minWidth={0}
-              sx={{ 
-                minWidth: { xs: '100%', md: 0 }, 
-                maxWidth: { xs: '100%', md: 360 },
-                background: 'transparent'
-              }}
-            >
-              <ThemedButton
-                theme={theme}
-                variant="primary"
-                onClick={() => navigate('/qna')}
-                endIcon={<ArrowForward />}
-                sx={{
-                  width: '100%',
-                  mb: 2,
-                  fontSize: '1rem',
-                  position: 'relative',
-                  '& .MuiButton-endIcon': {
-                    position: 'absolute !important',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)'
-                  }
-                }}
-              >
-                Q&A
-              </ThemedButton>
-              
-              {/* 컨텐츠 영역 테두리 */}
-              <Box 
-                sx={{ 
-                  border: `3px solid ${colors.border}`,
-                  borderRadius: 3,
-                  p: 3,
-                  background: 'transparent',
-                  flex: 1,
-                  minHeight: 200,
-                  boxShadow: `0 2px 8px ${colors.border}30`
-                }}
-              >
-                <Stack spacing={1.5}>
-                  {dummyQnas.slice(0, 5).map((qna) => (
-                    <Box
-                      key={qna.id}
-                      onClick={() => handleContentClick('qna', qna.id)}
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
-                        border: `1px solid ${colors.border}`,
-                        backgroundColor: 'transparent',
-                        '&:hover': {
-                          backgroundColor: `${colors.primary}15`,
-                          borderColor: colors.primary,
-                          transform: 'translateY(-1px)',
-                          boxShadow: `0 4px 12px ${colors.primary}20`,
-                          '& .content-text': {
-                            textDecoration: 'underline',
-                            textDecorationColor: colors.text,
-                            textDecorationThickness: '2px'
-                          }
-                        }
-                      }}
-                    >
-                      <Typography 
-                        variant="body2" 
-                        className="content-text"
-                        sx={{ 
-                          color: colors.textSecondary,
-                          transition: 'all 0.2s ease-in-out'
-                        }}
-                      >
-                        {qna.title}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            </Box>
+            {renderNoticeSection()}
+            {renderFaqSection()}
+            {renderQnaSection()}
           </Stack>
         </ThemedCard>
       </Box>

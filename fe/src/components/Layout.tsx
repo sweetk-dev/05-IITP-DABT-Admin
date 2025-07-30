@@ -16,7 +16,7 @@ const SERVICE_NAME = 'IITP DABT';
 // 공개 페이지 목록 (로그인 없이 접근 가능)
 const PUBLIC_PAGES = [
   ROUTES.PUBLIC.HOME, 
-  '/notice', 
+  ROUTES.PUBLIC.NOTICE, 
   ROUTES.PUBLIC.FAQ, 
   ROUTES.PUBLIC.QNA, 
   ROUTES.PUBLIC.LOGIN, 

@@ -1,4 +1,5 @@
-// 공지사항 관련 API 타입 정의
+// Notice 관련 DTO 정의
+import { PaginationReq, PaginationRes } from './api';
 
 // 사용자용 공지사항 아이템 (제한된 정보만)
 export interface UserNoticeItem {
@@ -27,46 +28,52 @@ export interface AdminNoticeItem {
   updatedAt?: string;
 }
 
-// 공지사항 목록 조회 요청
-export interface NoticeListReq {
-  page?: number;
-  limit?: number;
+// 공지사항 목록 조회 (사용자용)
+export interface UserNoticeListReq extends PaginationReq {
   noticeType?: 'G' | 'S' | 'E';
   publicOnly?: boolean;
   includeExpired?: boolean;
-  isAdmin?: boolean; // 관리자 여부
 }
 
-// 사용자용 공지사항 목록 조회 응답
-export interface UserNoticeListRes {
+export interface UserNoticeListRes extends PaginationRes<UserNoticeItem> {
   notices: UserNoticeItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
-// 관리자용 공지사항 목록 조회 응답
-export interface AdminNoticeListRes {
-  notices: AdminNoticeItem[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+export interface UserNoticeDetailReq {
+  noticeId: string;
 }
 
-// 사용자용 공지사항 상세 조회 응답
 export interface UserNoticeDetailRes {
   notice: UserNoticeItem;
 }
 
-// 관리자용 공지사항 상세 조회 응답
+// 홈 화면용 공지사항 조회 (사용자용)
+export interface UserNoticeHomeRes {
+  notices: UserNoticeItem[];
+}
+
+// 공지사항 목록 조회 (관리자용)
+export interface AdminNoticeListReq extends PaginationReq {
+  noticeType?: 'G' | 'S' | 'E';
+  publicYn?: 'Y' | 'N';
+  pinnedYn?: 'Y' | 'N';
+  search?: string;
+}
+
+export interface AdminNoticeListRes extends PaginationRes<AdminNoticeItem> {
+  notices: AdminNoticeItem[];
+}
+
+export interface AdminNoticeDetailReq {
+  noticeId: string;
+}
+
 export interface AdminNoticeDetailRes {
   notice: AdminNoticeItem;
 }
 
-// 공지사항 생성 요청
-export interface NoticeCreateReq {
+// 공지사항 생성 (관리자용)
+export interface AdminNoticeCreateReq {
   title: string;
   content: string;
   noticeType: 'G' | 'S' | 'E';
@@ -77,8 +84,13 @@ export interface NoticeCreateReq {
   createdBy?: string;
 }
 
-// 공지사항 수정 요청
-export interface NoticeUpdateReq {
+export interface AdminNoticeCreateRes {
+  noticeId: number;
+  message: string;
+}
+
+// 공지사항 수정 (관리자용)
+export interface AdminNoticeUpdateReq {
   title?: string;
   content?: string;
   noticeType?: 'G' | 'S' | 'E';
@@ -89,14 +101,25 @@ export interface NoticeUpdateReq {
   updatedBy?: string;
 }
 
-// 사용자용 홈 화면 공지사항 조회 응답
-export interface UserHomeNoticeRes {
-  pinnedNotices: UserNoticeItem[];
-  recentNotices: UserNoticeItem[];
+export interface AdminNoticeUpdateRes {
+  success: boolean;
+  message: string;
 }
 
-// 관리자용 홈 화면 공지사항 조회 응답
-export interface AdminHomeNoticeRes {
-  pinnedNotices: AdminNoticeItem[];
-  recentNotices: AdminNoticeItem[];
+// 공지사항 삭제 (관리자용)
+export interface AdminNoticeDeleteRes {
+  success: boolean;
+  message: string;
+}
+
+// 공지사항 통계 (관리자용)
+export interface AdminNoticeStatsRes {
+  totalNotices: number;
+  activeNotices: number;
+  pinnedNotices: number;
+  recentNotices: Array<{
+    noticeId: number;
+    title: string;
+    createdAt: string;
+  }>;
 } 

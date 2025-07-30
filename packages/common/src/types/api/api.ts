@@ -23,13 +23,15 @@ export const API_URLS = {
     REGISTER: '/register',
     CHECK_EMAIL: '/email/check',
     FAQ: {
-      LIST: '/faq',
+      LIST: '/faq/list',
       DETAIL: '/faq/:faqId',
+      HOME: '/faq/home',
     },
     QNA: {
-      LIST: '/qna',
+      LIST: '/qna/list',
       DETAIL: '/qna/:qnaId',
       CREATE: '/qna',
+      HOME: '/qna/home',
     },
     NOTICE: {
       LIST: '/notice',
@@ -161,11 +163,13 @@ export const FULL_API_URLS = {
     FAQ: {
       LIST: getUserUrl(API_URLS.USER.FAQ.LIST),
       DETAIL: getUserUrl(API_URLS.USER.FAQ.DETAIL),
+      HOME: getUserUrl(API_URLS.USER.FAQ.HOME),
     },
     QNA: {
       LIST: getUserUrl(API_URLS.USER.QNA.LIST),
       DETAIL: getUserUrl(API_URLS.USER.QNA.DETAIL),
       CREATE: getUserUrl(API_URLS.USER.QNA.CREATE),
+      HOME: getUserUrl(API_URLS.USER.QNA.HOME),
     },
     NOTICE: {
       LIST: getUserUrl(API_URLS.USER.NOTICE.LIST),

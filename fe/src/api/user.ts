@@ -16,9 +16,10 @@ import type {
   UserRegisterReq,
   UserRegisterRes,
   UserCheckEmailReq,
-  UserCheckEmailRes,
-  ApiResponse
+  UserCheckEmailRes
 } from '@iitp-dabt/common';
+import type { ApiResponse } from '../types/api';
+import { enhanceApiResponse } from '../utils/apiResponseHandler';
 
 /**
  * 사용자 로그인
@@ -39,7 +40,7 @@ export async function loginUser(params: UserLoginReq): Promise<ApiResponse<UserL
     };
     saveLoginInfo(userInfo, response.data.token, response.data.refreshToken);
   }
-  return response;
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -47,65 +48,72 @@ export async function loginUser(params: UserLoginReq): Promise<ApiResponse<UserL
  */
 export async function checkEmail(email: string): Promise<ApiResponse<UserCheckEmailRes>> {
   const requestData: UserCheckEmailReq = { email };
-  return publicApiFetch<UserCheckEmailRes>(FULL_API_URLS.USER.CHECK_EMAIL, {
+  const response = await publicApiFetch<UserCheckEmailRes>(FULL_API_URLS.USER.CHECK_EMAIL, {
     method: 'POST',
     body: JSON.stringify(requestData),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 회원가입
  */
 export async function registerUser(params: UserRegisterReq): Promise<ApiResponse<UserRegisterRes>> {
-  return publicApiFetch<UserRegisterRes>(FULL_API_URLS.USER.REGISTER, {
+  const response = await publicApiFetch<UserRegisterRes>(FULL_API_URLS.USER.REGISTER, {
     method: 'POST',
     body: JSON.stringify(params),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 토큰 갱신
  */
 export async function refreshUserToken(params: UserRefreshTokenReq): Promise<ApiResponse<UserRefreshTokenRes>> {
-  return apiFetch<UserRefreshTokenRes>(FULL_API_URLS.AUTH.USER_REFRESH, {
+  const response = await apiFetch<UserRefreshTokenRes>(FULL_API_URLS.AUTH.USER_REFRESH, {
     method: 'POST',
     body: JSON.stringify(params),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 프로필 조회
  */
 export async function getUserProfile(): Promise<ApiResponse<UserProfileRes>> {
-  return apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE.GET);
+  const response = await apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE.GET);
+  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 프로필 업데이트
  */
 export async function updateUserProfile(params: UserProfileUpdateReq): Promise<ApiResponse<UserProfileUpdateRes>> {
-  return apiFetch<UserProfileUpdateRes>(FULL_API_URLS.USER.PROFILE.POST, {
+  const response = await apiFetch<UserProfileUpdateRes>(FULL_API_URLS.USER.PROFILE.POST, {
     method: 'POST',
     body: JSON.stringify(params),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 비밀번호 변경
  */
 export async function changeUserPassword(params: UserPasswordChangeReq): Promise<ApiResponse<UserPasswordChangeRes>> {
-  return apiFetch<UserPasswordChangeRes>(FULL_API_URLS.USER.PASSWORD.POST, {
+  const response = await apiFetch<UserPasswordChangeRes>(FULL_API_URLS.USER.PASSWORD.POST, {
     method: 'POST',
     body: JSON.stringify(params),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 로그아웃
  */
 export async function logoutUser(params: UserLogoutReq): Promise<ApiResponse<UserLogoutRes>> {
-  return apiFetch<UserLogoutRes>(FULL_API_URLS.AUTH.USER_LOGOUT, {
+  const response = await apiFetch<UserLogoutRes>(FULL_API_URLS.AUTH.USER_LOGOUT, {
     method: 'POST',
     body: JSON.stringify(params),
   });
+  return enhanceApiResponse(response);
 } 

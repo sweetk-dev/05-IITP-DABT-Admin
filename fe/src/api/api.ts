@@ -3,14 +3,8 @@ import { ensureValidToken, removeTokens } from '../store/auth';
 import { getUserType } from '../store/user';
 import { ROUTES } from '../routes';
 import { API_BASE_URL, API_TIMEOUT } from '../config';
-
-// API 응답 타입
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  errorMessage?: string;
-  errorCode?: number;
-}
+import type { ApiResponse } from '../types/api';
+import { enhanceApiResponse } from '../utils/apiResponseHandler';
 
 // 사용자 친화적 에러 메시지 생성
 function createUserFriendlyMessage(data: any): string {

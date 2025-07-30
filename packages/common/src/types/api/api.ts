@@ -257,16 +257,12 @@ export const FULL_API_URLS = {
   }
 } as const;
 
-// API 응답 기본 구조
+// API 응답 기본 구조 (BE/FE 공통)
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   errorCode?: number;
   errorMessage?: string;
-  showPopup?: boolean;
-  redirectTo?: string;
-  autoLogout?: boolean;
-  details?: any;
 }
 
 // 페이징 관련 타입

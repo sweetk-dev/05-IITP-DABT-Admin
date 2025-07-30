@@ -1,7 +1,6 @@
 import { apiFetch, publicApiFetch } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type { 
-  ApiResponse,
   CommonCodeByGroupRes,
   CommonCodeByGroupDetailRes,
   CommonCodeByIdRes,
@@ -17,15 +16,18 @@ import type {
   CommonCodeUpdateRes,
   CommonCodeDeleteRes
 } from '@iitp-dabt/common';
+import type { ApiResponse } from '../types/api';
+import { enhanceApiResponse } from '../utils/apiResponseHandler';
 
 /**
  * 그룹 ID로 공통 코드 목록 조회 (사용자용)
  */
 export async function getCommonCodesByGroupId(grpId: string): Promise<ApiResponse<CommonCodeByGroupRes>> {
   const url = FULL_API_URLS.COMMON_CODE.BY_GROUP.replace(':grpId', grpId);
-  return publicApiFetch<CommonCodeByGroupRes>(url, {
+  const response = await publicApiFetch<CommonCodeByGroupRes>(url, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -33,9 +35,10 @@ export async function getCommonCodesByGroupId(grpId: string): Promise<ApiRespons
  */
 export async function getCommonCodesByGroupIdDetail(grpId: string): Promise<ApiResponse<CommonCodeByGroupDetailRes>> {
   const url = FULL_API_URLS.COMMON_CODE.ADMIN_BY_GROUP.replace(':grpId', grpId);
-  return apiFetch<CommonCodeByGroupDetailRes>(url, {
+  const response = await apiFetch<CommonCodeByGroupDetailRes>(url, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -45,9 +48,10 @@ export async function getCommonCodeById(grpId: string, codeId: string): Promise<
   const url = FULL_API_URLS.COMMON_CODE.BY_ID
     .replace(':grpId', grpId)
     .replace(':codeId', codeId);
-  return publicApiFetch<CommonCodeByIdRes>(url, {
+  const response = await publicApiFetch<CommonCodeByIdRes>(url, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -57,9 +61,10 @@ export async function getCommonCodeByIdDetail(grpId: string, codeId: string): Pr
   const url = FULL_API_URLS.COMMON_CODE.ADMIN_BY_ID
     .replace(':grpId', grpId)
     .replace(':codeId', codeId);
-  return apiFetch<CommonCodeByIdDetailRes>(url, {
+  const response = await apiFetch<CommonCodeByIdDetailRes>(url, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -67,9 +72,10 @@ export async function getCommonCodeByIdDetail(grpId: string, codeId: string): Pr
  */
 export async function getCommonCodesByType(codeType: 'B' | 'A' | 'S'): Promise<ApiResponse<CommonCodeByTypeRes>> {
   const url = FULL_API_URLS.COMMON_CODE.BY_TYPE.replace(':codeType', codeType);
-  return publicApiFetch<CommonCodeByTypeRes>(url, {
+  const response = await publicApiFetch<CommonCodeByTypeRes>(url, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -77,9 +83,10 @@ export async function getCommonCodesByType(codeType: 'B' | 'A' | 'S'): Promise<A
  */
 export async function getCommonCodesByTypeDetail(codeType: 'B' | 'A' | 'S'): Promise<ApiResponse<CommonCodeByTypeDetailRes>> {
   const url = FULL_API_URLS.COMMON_CODE.ADMIN_BY_TYPE.replace(':codeType', codeType);
-  return apiFetch<CommonCodeByTypeDetailRes>(url, {
+  const response = await apiFetch<CommonCodeByTypeDetailRes>(url, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -88,9 +95,10 @@ export async function getCommonCodesByTypeDetail(codeType: 'B' | 'A' | 'S'): Pro
 export async function getCommonCodesByParent(grpId: string, parentCodeId?: string): Promise<ApiResponse<CommonCodeByParentRes>> {
   const url = FULL_API_URLS.COMMON_CODE.BY_PARENT.replace(':grpId', grpId);
   const params = parentCodeId ? `?parentCodeId=${parentCodeId}` : '';
-  return publicApiFetch<CommonCodeByParentRes>(url + params, {
+  const response = await publicApiFetch<CommonCodeByParentRes>(url + params, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -99,28 +107,31 @@ export async function getCommonCodesByParent(grpId: string, parentCodeId?: strin
 export async function getCommonCodesByParentDetail(grpId: string, parentCodeId?: string): Promise<ApiResponse<CommonCodeByParentDetailRes>> {
   const url = FULL_API_URLS.COMMON_CODE.ADMIN_BY_PARENT.replace(':grpId', grpId);
   const params = parentCodeId ? `?parentCodeId=${parentCodeId}` : '';
-  return apiFetch<CommonCodeByParentDetailRes>(url + params, {
+  const response = await apiFetch<CommonCodeByParentDetailRes>(url + params, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
  * 공통 코드 통계 조회
  */
 export async function getCommonCodeStats(): Promise<ApiResponse<CommonCodeStatsRes>> {
-  return apiFetch<CommonCodeStatsRes>(FULL_API_URLS.COMMON_CODE.STATS, {
+  const response = await apiFetch<CommonCodeStatsRes>(FULL_API_URLS.COMMON_CODE.STATS, {
     method: 'GET',
   });
+  return enhanceApiResponse(response);
 }
 
 /**
  * 공통 코드 생성 (관리자 전용)
  */
 export async function createCommonCode(codeData: CommonCodeCreateReq): Promise<ApiResponse<CommonCodeCreateRes>> {
-  return apiFetch<CommonCodeCreateRes>(FULL_API_URLS.COMMON_CODE.BY_GROUP.replace(':grpId', codeData.grpId), {
+  const response = await apiFetch<CommonCodeCreateRes>(FULL_API_URLS.COMMON_CODE.BY_GROUP.replace(':grpId', codeData.grpId), {
     method: 'POST',
     body: JSON.stringify(codeData),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -130,10 +141,11 @@ export async function updateCommonCode(grpId: string, codeId: string, updateData
   const url = FULL_API_URLS.COMMON_CODE.BY_ID
     .replace(':grpId', grpId)
     .replace(':codeId', codeId);
-  return apiFetch<CommonCodeUpdateRes>(url, {
+  const response = await apiFetch<CommonCodeUpdateRes>(url, {
     method: 'PUT',
     body: JSON.stringify(updateData),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
@@ -143,7 +155,8 @@ export async function deleteCommonCode(grpId: string, codeId: string): Promise<A
   const url = FULL_API_URLS.COMMON_CODE.BY_ID
     .replace(':grpId', grpId)
     .replace(':codeId', codeId);
-  return apiFetch<CommonCodeDeleteRes>(url, {
+  const response = await apiFetch<CommonCodeDeleteRes>(url, {
     method: 'DELETE',
   });
+  return enhanceApiResponse(response);
 } 

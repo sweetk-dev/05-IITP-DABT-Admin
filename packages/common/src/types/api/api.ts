@@ -87,6 +87,16 @@ export const API_URLS = {
       PASSWORD_CHANGE: '/accounts/:adminId/password',
       STATUS_CHANGE: '/accounts/:adminId/status',
       STATS: '/accounts/stats',
+    },
+    // OpenAPI 인증키 관리
+    OPEN_API: {
+      LIST: '/openapi/keys',
+      DETAIL: '/openapi/keys/:keyId',
+      CREATE: '/openapi/keys',
+      UPDATE: '/openapi/keys/:keyId',
+      DELETE: '/openapi/keys/:keyId',
+      EXTEND: '/openapi/keys/:keyId/extend',
+      STATS: '/openapi/keys/stats',
     }
   },
   
@@ -213,6 +223,15 @@ export const FULL_API_URLS = {
       PASSWORD_CHANGE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.PASSWORD_CHANGE),
       STATUS_CHANGE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.STATUS_CHANGE),
       STATS: getAdminUrl(API_URLS.ADMIN.ACCOUNT.STATS),
+    },
+    OPEN_API: {
+      LIST: getAdminUrl(API_URLS.ADMIN.OPEN_API.LIST),
+      DETAIL: getAdminUrl(API_URLS.ADMIN.OPEN_API.DETAIL),
+      CREATE: getAdminUrl(API_URLS.ADMIN.OPEN_API.CREATE),
+      UPDATE: getAdminUrl(API_URLS.ADMIN.OPEN_API.UPDATE),
+      DELETE: getAdminUrl(API_URLS.ADMIN.OPEN_API.DELETE),
+      EXTEND: getAdminUrl(API_URLS.ADMIN.OPEN_API.EXTEND),
+      STATS: getAdminUrl(API_URLS.ADMIN.OPEN_API.STATS),
     }
   },
   COMMON: {

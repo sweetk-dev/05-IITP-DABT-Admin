@@ -80,9 +80,18 @@ export {
 
 // OpenAPI management
 export {
+  // User OpenAPI
   getUserOpenApiList,
   getUserOpenApiDetail,
   createUserOpenApi,
   deleteUserOpenApi,
-  extendUserOpenApi
+  extendUserOpenApi,
+  // Admin OpenAPI
+  getAdminOpenApiList,
+  getAdminOpenApiDetail,
+  createAdminOpenApi,
+  updateAdminOpenApi,
+  deleteAdminOpenApi,
+  extendAdminOpenApi,
+  getAdminOpenApiStats
 } from './openApi'; 

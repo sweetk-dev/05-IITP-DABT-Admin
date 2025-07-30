@@ -64,8 +64,8 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
   
   // 폼 데이터
   const [createForm, setCreateForm] = useState({
-    apiName: '',
-    description: '',
+    keyName: '',
+    keyDesc: '',
     startDt: '',
     endDt: ''
   });
@@ -100,7 +100,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
   };
 
   const handleCreateKey = async () => {
-    if (!createForm.apiName || !createForm.description) {
+    if (!createForm.keyName || !createForm.keyDesc) {
       setError('필수 항목을 모두 입력해주세요.');
       return;
     }
@@ -110,8 +110,8 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
       setError(null);
 
       const requestData: UserOpenApiCreateReq = {
-        apiName: createForm.apiName,
-        description: createForm.description,
+        keyName: createForm.keyName,
+        keyDesc: createForm.keyDesc,
         startDt: createForm.startDt || undefined,
         endDt: createForm.endDt || undefined
       };
@@ -119,7 +119,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
       const response = await createUserOpenApi(requestData);
       if (response.success) {
         setCreateDialogOpen(false);
-        setCreateForm({ apiName: '', description: '', startDt: '', endDt: '' });
+        setCreateForm({ keyName: '', keyDesc: '', startDt: '', endDt: '' });
         await loadOpenApiList();
       } else {
         setError(response.errorMessage || '인증키 생성에 실패했습니다.');
@@ -322,26 +322,26 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         <DialogTitle>신규 인증키 발행</DialogTitle>
         <DialogContent>
           <TextField
-            id="api-name"
+            id="key-name"
             fullWidth
-            label="API 이름 (필수, 40자 이내)"
-            value={createForm.apiName}
-            onChange={(e) => setCreateForm(prev => ({ ...prev, apiName: e.target.value }))}
+            label="API 이름 (필수, 120자 이내)"
+            value={createForm.keyName}
+            onChange={(e) => setCreateForm(prev => ({ ...prev, keyName: e.target.value }))}
             required
             sx={{ mb: 2, mt: 1 }}
-            inputProps={{ maxLength: 40 }}
+            inputProps={{ maxLength: 120 }}
           />
           <TextField
-            id="api-description"
+            id="key-desc"
             fullWidth
-            label="API 사용 목적 (필수, 200자 이내)"
-            value={createForm.description}
-            onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
+            label="API 사용 목적 (필수, 600자 이내)"
+            value={createForm.keyDesc}
+            onChange={(e) => setCreateForm(prev => ({ ...prev, keyDesc: e.target.value }))}
             required
             multiline
             rows={3}
             sx={{ mb: 2 }}
-            inputProps={{ maxLength: 200 }}
+            inputProps={{ maxLength: 600 }}
           />
           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
             <TextField

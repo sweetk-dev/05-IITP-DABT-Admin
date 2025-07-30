@@ -19,12 +19,15 @@ import {
   sendDatabaseError 
 } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
-import { trimStringFieldsExcept } from '../../utils/trimUtils';
+import { 
+  extractUserIdFromRequest,
+  normalizeErrorMessage
+} from '../../utils/commonUtils';
 
 // 관리자 프로필 조회
 export const getAdminProfile = async (req: Request, res: Response) => {
   try {
-    const adminId = req.user?.userId;
+    const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -50,7 +53,7 @@ export const getAdminProfile = async (req: Request, res: Response) => {
       affiliation: admin.affiliation
     });
   } catch (error) {
-    appLogger.error('관리자 프로필 조회 중 오류 발생', { error, adminId: req.user?.userId });
+    appLogger.error('관리자 프로필 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     sendDatabaseError(res, '조회', '관리자 프로필');
   }
 };
@@ -58,14 +61,13 @@ export const getAdminProfile = async (req: Request, res: Response) => {
 // 관리자 프로필 변경
 export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdateReq>, res: Response) => {
   try {
-    const adminId = req.user?.userId;
+    const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    // trim 처리 적용
-    const { name, affiliation } = trimStringFieldsExcept(req.body, []);
+    const { name, affiliation } = req.body;
 
     // 필수 필드 검증
     if (!name) {
@@ -96,7 +98,7 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
       affiliation: affiliation
     });
   } catch (error) {
-    appLogger.error('관리자 프로필 업데이트 중 오류 발생', { error, adminId: req.user?.userId });
+    appLogger.error('관리자 프로필 업데이트 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     sendDatabaseError(res, '업데이트', '관리자 프로필');
   }
 };
@@ -104,7 +106,7 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
 // 관리자 비밀번호 변경
 export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChangeReq>, res: Response) => {
   try {
-    const adminId = req.user?.userId;
+    const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -150,7 +152,7 @@ export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChan
       adminId: adminId
     });
   } catch (error) {
-    appLogger.error('관리자 비밀번호 변경 중 오류 발생', { error, adminId: req.user?.userId });
+    appLogger.error('관리자 비밀번호 변경 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     sendDatabaseError(res, '변경', '관리자 비밀번호');
   }
 }; 

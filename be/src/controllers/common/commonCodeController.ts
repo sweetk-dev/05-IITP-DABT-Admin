@@ -12,6 +12,11 @@ import {
   getCommonCodeStatistics
 } from '../../services/common/commonCodeService';
 import { appLogger } from '../../utils/logger';
+import { 
+  extractUserIdFromRequest,
+  validateAndParseNumber,
+  normalizeErrorMessage
+} from '../../utils/commonUtils';
 import type {
   CommonCodeByGroupReq,
   CommonCodeByGroupRes,
@@ -65,6 +70,10 @@ export const getCommonCodes = async (req: Request<CommonCodeByGroupReq>, res: Re
     sendSuccess(res, response, undefined, 'COMMON_CODES_RETRIEVED', { grpId, count: userCodes.length });
   } catch (error) {
     appLogger.error('Error in getCommonCodes:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      appLogger.error('Error details:', errorMsg);
+    }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -94,6 +103,10 @@ export const getCommonCodesDetail = async (req: Request<CommonCodeByGroupReq>, r
     sendSuccess(res, response, undefined, 'COMMON_CODES_DETAIL_RETRIEVED', { grpId, count: detailCodes.length });
   } catch (error) {
     appLogger.error('Error in getCommonCodesDetail:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      appLogger.error('Error details:', errorMsg);
+    }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -319,7 +332,7 @@ export const createCommonCode = async (req: Request<{}, {}, CommonCodeCreateReq>
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const newCode = await createCommonCodeService(codeData, req.user?.userId?.toString());
+    const newCode = await createCommonCodeService(codeData, extractUserIdFromRequest(req)?.toString());
     
     // 관리자용 응답 - Date를 string으로 변환
     const detailCode = {
@@ -336,6 +349,10 @@ export const createCommonCode = async (req: Request<{}, {}, CommonCodeCreateReq>
     });
   } catch (error) {
     appLogger.error('Error in createCommonCode:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      appLogger.error('Error details:', errorMsg);
+    }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -352,7 +369,7 @@ export const updateCommonCode = async (req: Request<{ grpId: string; codeId: str
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const affectedCount = await updateCommonCodeById(grpId, codeId, updateData, req.user?.userId?.toString());
+    const affectedCount = await updateCommonCodeById(grpId, codeId, updateData, extractUserIdFromRequest(req)?.toString());
     
     if (affectedCount === 0) {
       return sendError(res, ErrorCode.INVALID_PARAMETER);
@@ -362,6 +379,10 @@ export const updateCommonCode = async (req: Request<{ grpId: string; codeId: str
     sendSuccess(res, response, undefined, 'COMMON_CODE_UPDATED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in updateCommonCode:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      appLogger.error('Error details:', errorMsg);
+    }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -377,7 +398,7 @@ export const deleteCommonCode = async (req: Request<{ grpId: string; codeId: str
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const affectedCount = await deleteCommonCodeById(grpId, codeId, req.user?.userId?.toString());
+    const affectedCount = await deleteCommonCodeById(grpId, codeId, extractUserIdFromRequest(req)?.toString());
     
     if (affectedCount === 0) {
       return sendError(res, ErrorCode.INVALID_PARAMETER);
@@ -387,6 +408,10 @@ export const deleteCommonCode = async (req: Request<{ grpId: string; codeId: str
     sendSuccess(res, response, undefined, 'COMMON_CODE_DELETED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in deleteCommonCode:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      appLogger.error('Error details:', errorMsg);
+    }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -402,6 +427,10 @@ export const getCommonCodeStats = async (req: Request, res: Response) => {
     sendSuccess(res, response, undefined, 'COMMON_CODE_STATS_RETRIEVED', { count: stats.length });
   } catch (error) {
     appLogger.error('Error in getCommonCodeStats:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      appLogger.error('Error details:', errorMsg);
+    }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 }; 

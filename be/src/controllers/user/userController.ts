@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
 import { 
   UserRegisterReq, 
   UserRegisterRes, 
@@ -9,17 +8,12 @@ import {
   UserProfileUpdateReq,
   UserPasswordChangeReq,
   ErrorCode,
-  isValidEmail, 
-  isValidPassword 
+  isValidEmail,
+  isValidPassword,
+  isValidName,
+  isValidAffiliation
 } from '@iitp-dabt/common';
-import { 
-  isEmailExists,
-  createUser, 
-  findUserByEmail, 
-  findUserById, 
-  updateUser, 
-  updatePassword 
-} from '../../repositories/openApiUserRepository';
+import { UserService } from '../../services/user/userService';
 import { 
   sendSuccess, 
   sendError, 
@@ -27,30 +21,40 @@ import {
   sendDatabaseError 
 } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
-import { trimStringFieldsExcept } from '../../utils/trimUtils';
+import { 
+  extractUserIdFromRequest,
+  normalizeErrorMessage 
+} from '../../utils/commonUtils';
 
 // 이메일 중복 확인
 export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: Response) => {
   try {
-    // trim 처리 적용
-    const { email } = trimStringFieldsExcept(req.body, ['password']);
+    // 기본 파라미터 검증
+    const { email } = req.body;
 
     if (!email) {
       return sendValidationError(res, 'email', '이메일이 필요합니다.');
     }
 
+    // 이메일 형식 검증
     if (!isValidEmail(email)) {
       return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
     }
 
-    const exists = await isEmailExists(email);
-    const response: UserCheckEmailRes = {
-      isAvailable: !exists
-    };
-
-    sendSuccess(res, response, exists ? '이미 사용 중인 이메일입니다.' : '사용 가능한 이메일입니다.');
+    const response = await UserService.checkEmailAvailability(email);
+    
+    sendSuccess(res, response, response.isAvailable ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.');
   } catch (error) {
     appLogger.error('이메일 중복 확인 중 오류 발생', { error, email: req.body.email });
+    
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('이메일 형식')) {
+        return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
+      }
+      return sendValidationError(res, 'email', errorMsg);
+    }
+    
     sendDatabaseError(res, '조회', '이메일 중복 확인');
   }
 };
@@ -58,8 +62,8 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: R
 // 사용자 회원가입
 export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Response) => {
   try {
-    // trim 처리 적용 (비밀번호 제외)
-    const { email, password, name, affiliation } = trimStringFieldsExcept(req.body, ['password']);
+    // 기본 파라미터 검증
+    const { email, password, name, affiliation } = req.body;
 
     // 필수 필드 검증
     if (!email) {
@@ -72,53 +76,33 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
       return sendValidationError(res, 'name', '이름이 필요합니다.');
     }
 
-    // common 패키지의 이메일 형식 검증 사용
+    // 이메일 형식 검증
     if (!isValidEmail(email)) {
       return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
     }
 
-    // common 패키지의 비밀번호 강도 검증 사용
+    // 비밀번호 강도 검증
     if (!isValidPassword(password)) {
       return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);
     }
 
-    // 이메일 중복 체크
-    const exists = await isEmailExists(email);
-    if (exists) {
-      return sendError(res, ErrorCode.USER_EMAIL_DUPLICATE);
+    // 이름 형식 검증
+    if (!isValidName(name)) {
+      return sendValidationError(res, 'name', '유효한 이름을 입력해주세요. (2-50자, 한글/영문/숫자/공백)');
     }
 
-    // 비밀번호 해시화
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 소속 형식 검증 (선택적)
+    if (affiliation && !isValidAffiliation(affiliation)) {
+      return sendValidationError(res, 'affiliation', '유효한 소속을 입력해주세요. (2-100자, 한글/영문/숫자/공백/특수문자)');
+    }
 
-    // 사용자 생성
-    const newUser = await createUser({
-      loginId: email,
-      password: hashedPassword,
-      userName: name,
-      affiliation: affiliation,
-      createdBy: 'BY-USER'
-    });
-
-    const response: UserRegisterRes = {
-      userId: newUser.userId,
-      email: email,
-      name: name,
-      affiliation: affiliation
-    };
-
-    appLogger.info('사용자 회원가입 성공', {
-      userId: newUser.userId,
-      email: email,
-      name: name,
-      affiliation: affiliation
-    });
+    const response = await UserService.registerUser({ email, password, name, affiliation });
 
     sendSuccess(res, response, '회원가입이 완료되었습니다.', 'USER_REGISTRATION', {
-      userId: newUser.userId,
-      email: email,
-      name: name,
-      affiliation: affiliation
+      userId: response.userId,
+      email: response.email,
+      name: response.name,
+      affiliation: response.affiliation
     });
   } catch (error) {
     appLogger.error('사용자 회원가입 중 오류 발생', { 
@@ -126,6 +110,21 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
       email: req.body.email, 
       name: req.body.name 
     });
+    
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('이메일 형식')) {
+        return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
+      }
+      if (errorMsg.includes('이미 사용 중인 이메일')) {
+        return sendError(res, ErrorCode.USER_EMAIL_DUPLICATE);
+      }
+      if (errorMsg.includes('비밀번호가 너무 약')) {
+        return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);
+      }
+      return sendValidationError(res, 'general', errorMsg);
+    }
+    
     sendDatabaseError(res, '생성', '사용자');
   }
 };
@@ -133,31 +132,29 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
 // 사용자 프로필 조회
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = extractUserIdFromRequest(req);
     
     if (!userId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    const user = await findUserById(userId);
-    if (!user) {
-      return sendError(res, ErrorCode.USER_NOT_FOUND);
-    }
-
-    const response: UserProfileRes = {
-      userId: user.userId,
-      email: user.loginId,
-      name: user.userName,
-      affiliation: user.affiliation,
-      createdAt: user.createdAt.toISOString()
-    };
+    const response = await UserService.getUserProfile(userId);
 
     sendSuccess(res, response, undefined, 'USER_PROFILE_VIEW', {
-      userId: user.userId,
-      email: user.loginId
+      userId: response.userId,
+      email: response.email
     });
   } catch (error) {
-    appLogger.error('사용자 프로필 조회 중 오류 발생', { error, userId: req.user?.userId });
+    appLogger.error('사용자 프로필 조회 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('사용자를 찾을 수 없습니다')) {
+        return sendError(res, ErrorCode.USER_NOT_FOUND);
+      }
+      return sendValidationError(res, 'general', errorMsg);
+    }
+    
     sendDatabaseError(res, '조회', '사용자 프로필');
   }
 };
@@ -165,37 +162,31 @@ export const getProfile = async (req: Request, res: Response) => {
 // 사용자 프로필 변경
 export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = extractUserIdFromRequest(req);
     
     if (!userId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    // trim 처리 적용
-    const { name, affiliation } = trimStringFieldsExcept(req.body, []);
+    // 기본 파라미터 검증
+    const { name, affiliation } = req.body;
 
     // 필수 필드 검증
     if (!name) {
       return sendValidationError(res, 'name', '이름이 필요합니다.');
     }
 
-    const user = await findUserById(userId);
-    if (!user) {
-      return sendError(res, ErrorCode.USER_NOT_FOUND);
+    // 이름 형식 검증
+    if (!isValidName(name)) {
+      return sendValidationError(res, 'name', '유효한 이름을 입력해주세요. (2-50자, 한글/영문/숫자/공백)');
     }
 
-    // 프로필 업데이트
-    await updateUser(userId, {
-      userName: name,
-      affiliation: affiliation,
-      updatedBy: 'BY-USER'
-    });
+    // 소속 형식 검증 (선택적)
+    if (affiliation && !isValidAffiliation(affiliation)) {
+      return sendValidationError(res, 'affiliation', '유효한 소속을 입력해주세요. (2-100자, 한글/영문/숫자/공백/특수문자)');
+    }
 
-    appLogger.info('사용자 프로필 업데이트 성공', {
-      userId: userId,
-      name: name,
-      affiliation: affiliation
-    });
+    await UserService.updateUserProfile(userId, { name, affiliation });
 
     sendSuccess(res, { success: true }, '프로필이 성공적으로 업데이트되었습니다.', 'USER_PROFILE_UPDATE', {
       userId: userId,
@@ -203,7 +194,16 @@ export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, 
       affiliation: affiliation
     });
   } catch (error) {
-    appLogger.error('사용자 프로필 업데이트 중 오류 발생', { error, userId: req.user?.userId });
+    appLogger.error('사용자 프로필 업데이트 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('사용자를 찾을 수 없습니다')) {
+        return sendError(res, ErrorCode.USER_NOT_FOUND);
+      }
+      return sendValidationError(res, 'general', errorMsg);
+    }
+    
     sendDatabaseError(res, '업데이트', '사용자 프로필');
   }
 };
@@ -211,12 +211,13 @@ export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, 
 // 사용자 비밀번호 변경
 export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = extractUserIdFromRequest(req);
     
     if (!userId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
+    // 기본 파라미터 검증
     const { currentPassword, newPassword } = req.body;
 
     // 필수 필드 검증
@@ -227,37 +228,38 @@ export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>
       return sendValidationError(res, 'newPassword', '새 비밀번호가 필요합니다.');
     }
 
-    // common 패키지의 비밀번호 강도 검증 사용
+    // 새 비밀번호 강도 검증
     if (!isValidPassword(newPassword)) {
       return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);
     }
 
-    const user = await findUserById(userId);
-    if (!user) {
-      return sendError(res, ErrorCode.USER_NOT_FOUND);
+    // 새 비밀번호가 현재 비밀번호와 같은지 확인
+    if (currentPassword === newPassword) {
+      return sendValidationError(res, 'newPassword', '새 비밀번호는 현재 비밀번호와 달라야 합니다.');
     }
 
-    // 현재 비밀번호 확인
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isCurrentPasswordValid) {
-      return sendError(res, ErrorCode.USER_PASSWORD_INVALID);
-    }
-
-    // 새 비밀번호 해시화
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-    // 비밀번호 업데이트
-    await updatePassword(userId, hashedNewPassword, 'BY-USER');
-
-    appLogger.info('사용자 비밀번호 변경 성공', {
-      userId: userId
-    });
+    await UserService.changeUserPassword(userId, { currentPassword, newPassword });
 
     sendSuccess(res, { success: true }, '비밀번호가 성공적으로 변경되었습니다.', 'USER_PASSWORD_CHANGE', {
       userId: userId
     });
   } catch (error) {
-    appLogger.error('사용자 비밀번호 변경 중 오류 발생', { error, userId: req.user?.userId });
+    appLogger.error('사용자 비밀번호 변경 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('사용자를 찾을 수 없습니다')) {
+        return sendError(res, ErrorCode.USER_NOT_FOUND);
+      }
+      if (errorMsg.includes('현재 비밀번호가 올바르지 않습니다')) {
+        return sendError(res, ErrorCode.USER_PASSWORD_INVALID);
+      }
+      if (errorMsg.includes('새 비밀번호가 너무 약')) {
+        return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);
+      }
+      return sendValidationError(res, 'general', errorMsg);
+    }
+    
     sendDatabaseError(res, '변경', '사용자 비밀번호');
   }
 }; 

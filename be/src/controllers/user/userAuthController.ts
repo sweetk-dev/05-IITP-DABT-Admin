@@ -3,7 +3,13 @@ import { ErrorCode } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginUser, logout, refreshUserToken } from '../../services/user/userAuthService';
 import { appLogger } from '../../utils/logger';
-import { trimStringFieldsExcept } from '../../utils/trimUtils';
+import { 
+  extractUserIdFromRequest,
+  extractUserTypeFromRequest,
+  extractClientIP,
+  normalizeUserAgent,
+  normalizeErrorMessage
+} from '../../utils/commonUtils';
 import { 
   UserLoginReq, 
   UserLoginRes, 
@@ -16,10 +22,9 @@ import {
 // 사용자 로그인
 export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Response) => {
   try {
-    // trim 처리 적용 (비밀번호 제외)
-    const { email, password } = trimStringFieldsExcept(req.body, ['password']);
-    const ipAddr = req.ip || req.connection.remoteAddress || '';
-    const userAgent = req.headers['user-agent'] as string;
+    const { email, password } = req.body;
+    const ipAddr = extractClientIP(req);
+    const userAgent = normalizeUserAgent(req.headers['user-agent']);
 
     const result = await loginUser(email, password, ipAddr, userAgent);
 
@@ -36,7 +41,8 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
     sendSuccess(res, response, undefined, 'USER_LOGIN', { userId: result.userId, email });
   } catch (error) {
     if (error instanceof Error) {
-      const errorCode = parseInt(error.message);
+      const errorMsg = normalizeErrorMessage(error);
+      const errorCode = parseInt(errorMsg);
       if (!isNaN(errorCode)) {
         sendError(res, errorCode);
       } else {
@@ -54,8 +60,8 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
 export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>, res: Response) => {
   try {
     const { refreshToken } = req.body;
-    const ipAddr = req.ip || req.connection.remoteAddress || '';
-    const userAgent = req.headers['user-agent'] as string;
+    const ipAddr = extractClientIP(req);
+    const userAgent = normalizeUserAgent(req.headers['user-agent']);
 
     const result = await refreshUserToken(refreshToken, ipAddr, userAgent);
 
@@ -67,7 +73,8 @@ export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>
     sendSuccess(res, response, undefined, 'USER_TOKEN_REFRESH', { userId: result.userId });
   } catch (error) {
     if (error instanceof Error) {
-      const errorCode = parseInt(error.message);
+      const errorMsg = normalizeErrorMessage(error);
+      const errorCode = parseInt(errorMsg);
       if (!isNaN(errorCode)) {
         sendError(res, errorCode);
       } else {
@@ -82,10 +89,10 @@ export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>
 // 사용자 로그아웃
 export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Response) => {
   try {
-    const userId = (req as any).user?.userId;
-    const userType = (req as any).user?.userType;
-    const ipAddr = req.ip || req.connection.remoteAddress || '';
-    const userAgent = req.headers['user-agent'] as string;
+    const userId = extractUserIdFromRequest(req);
+    const userType = extractUserTypeFromRequest(req);
+    const ipAddr = extractClientIP(req);
+    const userAgent = normalizeUserAgent(req.headers['user-agent']);
 
     const result = await logout(userId, userType, '사용자 로그아웃', ipAddr, userAgent);
 

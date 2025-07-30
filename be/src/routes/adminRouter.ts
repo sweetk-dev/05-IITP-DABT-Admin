@@ -15,29 +15,29 @@ import {
   deleteQnaForAdmin
 } from '../controllers/admin/adminQnaController';
 import { getAdminProfile, updateAdminProfile, changeAdminPassword } from '../controllers/admin/adminController';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { routerMiddleware } from '../middleware';
 import { API_URLS } from '@iitp-dabt/common';
 
 const router = express.Router();
 
 // 관리자 프로필
-router.get(API_URLS.ADMIN.PROFILE, authMiddleware, getAdminProfile);
-router.post(API_URLS.ADMIN.PROFILE, authMiddleware, updateAdminProfile);
-router.post(API_URLS.ADMIN.PASSWORD, authMiddleware, changeAdminPassword);
+router.get(API_URLS.ADMIN.PROFILE, ...routerMiddleware.admin, getAdminProfile);
+router.post(API_URLS.ADMIN.PROFILE, ...routerMiddleware.admin, updateAdminProfile);
+router.post(API_URLS.ADMIN.PASSWORD, ...routerMiddleware.admin, changeAdminPassword);
 
 // FAQ 관리
-router.get(API_URLS.ADMIN.FAQ.LIST, authMiddleware, getFaqListForAdmin);
-router.get(API_URLS.ADMIN.FAQ.DETAIL, authMiddleware, getFaqDetailForAdmin);
-router.post(API_URLS.ADMIN.FAQ.CREATE, authMiddleware, createFaqForAdmin);
-router.put(API_URLS.ADMIN.FAQ.UPDATE, authMiddleware, updateFaqForAdmin);
-router.delete(API_URLS.ADMIN.FAQ.DELETE, authMiddleware, deleteFaqForAdmin);
-router.get(API_URLS.ADMIN.FAQ.STATS, authMiddleware, getFaqStatsForAdmin);
+router.get(API_URLS.ADMIN.FAQ.LIST, ...routerMiddleware.admin, getFaqListForAdmin);
+router.get(API_URLS.ADMIN.FAQ.DETAIL, ...routerMiddleware.admin, getFaqDetailForAdmin);
+router.post(API_URLS.ADMIN.FAQ.CREATE, ...routerMiddleware.admin, createFaqForAdmin);
+router.put(API_URLS.ADMIN.FAQ.UPDATE, ...routerMiddleware.admin, updateFaqForAdmin);
+router.delete(API_URLS.ADMIN.FAQ.DELETE, ...routerMiddleware.admin, deleteFaqForAdmin);
+router.get(API_URLS.ADMIN.FAQ.STATS, ...routerMiddleware.admin, getFaqStatsForAdmin);
 
 // QnA 관리
-router.get(API_URLS.ADMIN.QNA.LIST, authMiddleware, getQnaListForAdmin);
-router.get(API_URLS.ADMIN.QNA.DETAIL, authMiddleware, getQnaDetailForAdmin);
-router.post(API_URLS.ADMIN.QNA.ANSWER, authMiddleware, answerQnaForAdmin);
-router.put(API_URLS.ADMIN.QNA.UPDATE, authMiddleware, updateQnaForAdmin);
-router.delete(API_URLS.ADMIN.QNA.DELETE, authMiddleware, deleteQnaForAdmin);
+router.get(API_URLS.ADMIN.QNA.LIST, ...routerMiddleware.admin, getQnaListForAdmin);
+router.get(API_URLS.ADMIN.QNA.DETAIL, ...routerMiddleware.admin, getQnaDetailForAdmin);
+router.post(API_URLS.ADMIN.QNA.ANSWER, ...routerMiddleware.admin, answerQnaForAdmin);
+router.put(API_URLS.ADMIN.QNA.UPDATE, ...routerMiddleware.admin, updateQnaForAdmin);
+router.delete(API_URLS.ADMIN.QNA.DELETE, ...routerMiddleware.admin, deleteQnaForAdmin);
 
 export default router; 

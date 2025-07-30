@@ -1,8 +1,18 @@
 // FAQ 관련 DTO 정의
 import { PaginationReq, PaginationRes } from './api';
 
-// FAQ 엔티티
-export interface Faq {
+// 사용자용 FAQ 아이템 (제한된 정보만)
+export interface UserFaqItem {
+  faqId: number;
+  faqType: string;
+  question: string;
+  answer: string;
+  hitCnt: number;
+  sortOrder: number;
+}
+
+// 관리자용 FAQ 아이템 (전체 정보)
+export interface AdminFaqItem {
   faqId: number;
   faqType: string;
   question: string;
@@ -12,6 +22,8 @@ export interface Faq {
   useYn: string;
   createdAt: string;
   updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 // FAQ 목록 조회 (사용자용)
@@ -20,8 +32,8 @@ export interface UserFaqListReq extends PaginationReq {
   search?: string;
 }
 
-export interface UserFaqListRes extends PaginationRes<Faq> {
-  faqs: Faq[];
+export interface UserFaqListRes extends PaginationRes<UserFaqItem> {
+  faqs: UserFaqItem[];
 }
 
 export interface UserFaqDetailReq {
@@ -29,7 +41,12 @@ export interface UserFaqDetailReq {
 }
 
 export interface UserFaqDetailRes {
-  faq: Faq;
+  faq: UserFaqItem;
+}
+
+// 홈 화면용 FAQ 조회 (사용자용)
+export interface UserFaqHomeRes {
+  faqs: UserFaqItem[];
 }
 
 // FAQ 목록 조회 (관리자용)
@@ -39,8 +56,8 @@ export interface AdminFaqListReq extends PaginationReq {
   useYn?: string;
 }
 
-export interface AdminFaqListRes extends PaginationRes<Faq> {
-  faqs: Faq[];
+export interface AdminFaqListRes extends PaginationRes<AdminFaqItem> {
+  faqs: AdminFaqItem[];
 }
 
 export interface AdminFaqDetailReq {
@@ -48,7 +65,7 @@ export interface AdminFaqDetailReq {
 }
 
 export interface AdminFaqDetailRes {
-  faq: Faq;
+  faq: AdminFaqItem;
 }
 
 // FAQ 생성 (관리자용)

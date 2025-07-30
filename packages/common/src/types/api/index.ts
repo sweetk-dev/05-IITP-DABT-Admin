@@ -5,5 +5,6 @@ export * from './admin.js';
 export * from './user.js';
 export * from './faq.js';
 export * from './qna.js';
+export * from './notice.js';
 export * from './common.js';
 export * from './commonCode.js'; 

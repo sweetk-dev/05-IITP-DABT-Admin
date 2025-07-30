@@ -1,8 +1,21 @@
 // QnA 관련 DTO 정의
 import { PaginationReq, PaginationRes } from './api';
 
-// QnA 엔티티
-export interface Qna {
+// 사용자용 Q&A 아이템 (제한된 정보만)
+export interface UserQnaItem {
+  qnaId: number;
+  qnaType: string;
+  title: string;
+  content: string;
+  secretYn: string;
+  status: string;
+  writerName: string;
+  createdAt: string;
+  answeredAt?: string;
+}
+
+// 관리자용 Q&A 아이템 (전체 정보)
+export interface AdminQnaItem {
   qnaId: number;
   userId: number;
   qnaType: string;
@@ -14,21 +27,31 @@ export interface Qna {
   createdAt: string;
   answeredAt?: string;
   answeredBy?: number;
+  updatedAt?: string;
+  deletedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  deletedBy?: string;
 }
 
-// QnA 상세 (답변 포함)
-export interface QnaDetail extends Qna {
+// Q&A 상세 (답변 포함) - 사용자용
+export interface UserQnaDetailItem extends UserQnaItem {
   answerContent?: string;
 }
 
-// QnA 목록 조회 (사용자용)
+// Q&A 상세 (답변 포함) - 관리자용
+export interface AdminQnaDetailItem extends AdminQnaItem {
+  answerContent?: string;
+}
+
+// Q&A 목록 조회 (사용자용)
 export interface UserQnaListReq extends PaginationReq {
   qnaType?: string;
   search?: string;
 }
 
-export interface UserQnaListRes extends PaginationRes<Qna> {
-  qnas: Qna[];
+export interface UserQnaListRes extends PaginationRes<UserQnaItem> {
+  qnas: UserQnaItem[];
 }
 
 export interface UserQnaDetailReq {
@@ -36,10 +59,10 @@ export interface UserQnaDetailReq {
 }
 
 export interface UserQnaDetailRes {
-  qna: QnaDetail;
+  qna: UserQnaDetailItem;
 }
 
-// QnA 생성 (사용자용)
+// Q&A 생성 (사용자용)
 export interface UserQnaCreateReq {
   qnaType: string;
   title: string;
@@ -53,13 +76,18 @@ export interface UserQnaCreateRes {
   message: string;
 }
 
-// QnA 목록 조회 (관리자용)
+// 홈 화면용 Q&A 조회 (사용자용)
+export interface UserQnaHomeRes {
+  qnas: UserQnaItem[];
+}
+
+// Q&A 목록 조회 (관리자용)
 export interface AdminQnaListReq extends PaginationReq {
   search?: string;
 }
 
-export interface AdminQnaListRes extends PaginationRes<Qna> {
-  qnas: Qna[];
+export interface AdminQnaListRes extends PaginationRes<AdminQnaItem> {
+  qnas: AdminQnaItem[];
 }
 
 export interface AdminQnaDetailReq {
@@ -67,10 +95,10 @@ export interface AdminQnaDetailReq {
 }
 
 export interface AdminQnaDetailRes {
-  qna: QnaDetail;
+  qna: AdminQnaDetailItem;
 }
 
-// QnA 답변 (관리자용)
+// Q&A 답변 (관리자용)
 export interface AdminQnaAnswerReq {
   answer: string;
   answeredBy?: string;
@@ -81,7 +109,7 @@ export interface AdminQnaAnswerRes {
   message: string;
 }
 
-// QnA 수정 (관리자용)
+// Q&A 수정 (관리자용)
 export interface AdminQnaUpdateReq {
   title?: string;
   content?: string;
@@ -93,7 +121,7 @@ export interface AdminQnaUpdateRes {
   message: string;
 }
 
-// QnA 삭제 (관리자용)
+// Q&A 삭제 (관리자용)
 export interface AdminQnaDeleteRes {
   success: boolean;
   message: string;

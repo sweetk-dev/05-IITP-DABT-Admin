@@ -1,39 +1,50 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DataState } from '../types/api';
+import { DataState, ApiResponse } from '../types/api';
+import { handleApiResponse } from '../utils/apiResponseHandler';
 
 interface UseDataFetchingOptions<T> {
-  fetchFunction: () => Promise<T>;
+  fetchFunction: () => Promise<ApiResponse<T>>;
   dependencies?: any[];
   autoFetch?: boolean;
+  onError?: (error: string) => void;
 }
 
 export function useDataFetching<T>({
   fetchFunction,
   dependencies = [],
-  autoFetch = true
+  autoFetch = true,
+  onError
 }: UseDataFetchingOptions<T>) {
   const [state, setState] = useState<DataState<T>>({ status: 'loading' });
 
   const fetchData = useCallback(async () => {
     try {
       setState({ status: 'loading' });
-      const data = await fetchFunction();
+      const response = await fetchFunction();
       
-      // 빈 배열이거나 빈 객체인 경우 empty 상태로 처리
-      if (Array.isArray(data) && data.length === 0) {
-        setState({ status: 'empty' });
-      } else if (typeof data === 'object' && data !== null && Object.keys(data).length === 0) {
-        setState({ status: 'empty' });
+      // ApiResponse 구조 처리
+      if (response.success && response.data) {
+        // 빈 배열이거나 빈 객체인 경우 empty 상태로 처리
+        if (Array.isArray(response.data) && response.data.length === 0) {
+          setState({ status: 'empty' });
+        } else if (typeof response.data === 'object' && response.data !== null && Object.keys(response.data).length === 0) {
+          setState({ status: 'empty' });
+        } else {
+          setState({ status: 'success', data: response.data });
+        }
       } else {
-        setState({ status: 'success', data });
+        // 에러 처리 - handleApiResponse 사용
+        handleApiResponse(response, undefined, (error) => {
+          setState({ status: 'error', error });
+          onError?.(error);
+        });
       }
     } catch (error) {
-      setState({ 
-        status: 'error', 
-        error: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.' 
-      });
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
+      setState({ status: 'error', error: errorMessage });
+      onError?.(errorMessage);
     }
-  }, [fetchFunction]);
+  }, [fetchFunction, onError]);
 
   useEffect(() => {
     if (autoFetch) {

@@ -123,9 +123,13 @@ export default function Layout() {
       {/* 컨텐츠 영역 - 상단바 높이만큼 여백 확보 */}
       <Box sx={{ 
         flex: 1,
-        pt: 'calc(var(--appbar-height, 64px) + 32px)',
+        pt: location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN
+          ? 'calc(var(--appbar-height, 64px) + var(--admin-menu-height, 56px) + 32px)'
+          : 'calc(var(--appbar-height, 64px) + 32px)',
         pb: '48px',
-        minHeight: 'calc(100vh - var(--appbar-height, 64px) - var(--footer-height, 56px))',
+        minHeight: location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN
+          ? 'calc(100vh - var(--appbar-height, 64px) - var(--admin-menu-height, 56px) - var(--footer-height, 56px))'
+          : 'calc(100vh - var(--appbar-height, 64px) - var(--footer-height, 56px))',
         overflow: 'hidden',
         position: 'relative',
         zIndex: 1
@@ -134,7 +138,9 @@ export default function Layout() {
           height: '100%',
           overflow: 'auto',
           paddingTop: 0,
-          scrollPaddingTop: 'calc(var(--appbar-height, 64px) + 32px)'
+          scrollPaddingTop: location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN
+            ? 'calc(var(--appbar-height, 64px) + var(--admin-menu-height, 56px) + 32px)'
+            : 'calc(var(--appbar-height, 64px) + 32px)'
         }}>
           <Outlet />
         </Box>

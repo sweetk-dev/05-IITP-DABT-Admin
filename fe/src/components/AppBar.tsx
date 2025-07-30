@@ -1,12 +1,13 @@
 import { AppBar as MuiAppBar, Toolbar, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Logo, HomeIconButton } from './AppBarCommon';
+import { Logo, HomeIconButton, DashboardIconButton } from './AppBarCommon';
 import { logoutUser, logoutAdmin } from '../api';
 import { getUserName, getUserType, getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
 import { AccountCircle } from '@mui/icons-material';
 import ThemedButton from './common/ThemedButton';
 import { getThemeColors } from '../theme';
+import AdminMenuBar from './AdminMenuBar';
 
 const SERVICE_NAME = 'IITP DABT';
 
@@ -136,64 +137,67 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
 
   if (type === 'admin') {
     return (
-      <MuiAppBar
-        id="appbar-admin"
-        position="fixed"
-        color="default"
-        elevation={0}
-        sx={commonAppBarStyles}
-      >
-        <Toolbar id="appbar-admin-toolbar" sx={commonToolbarStyles}>
-          <AppBarRow
-            left={
-              <Box 
-                id="appbar-admin-logo-container"
-                onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)} 
-                sx={{ cursor: 'pointer' }}
-              >
-                <Logo serviceName={SERVICE_NAME + ' - Admin'} theme={themeType} />
-              </Box>
-            }
-            right={
-              <>
-                <HomeIconButton to={ROUTES.ADMIN.DASHBOARD} theme={themeType} />
-                <ThemedButton 
-                  id="appbar-admin-profile-btn"
-                  theme={themeType}
-                  variant="text"
-                  startIcon={<AccountCircle />} 
-                  sx={{ 
-                    ml: 2,
-                    color: colors.text
-                  }}
-                  onClick={handleProfileClick}
+      <>
+        <MuiAppBar
+          id="appbar-admin"
+          position="fixed"
+          color="default"
+          elevation={0}
+          sx={commonAppBarStyles}
+        >
+          <Toolbar id="appbar-admin-toolbar" sx={commonToolbarStyles}>
+            <AppBarRow
+              left={
+                <Box 
+                  id="appbar-admin-logo-container"
+                  onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)} 
+                  sx={{ cursor: 'pointer' }}
                 >
-                  <Box id="appbar-admin-user-info">
-                    <Typography variant="caption" component="span" sx={{ fontWeight: 'bold', color: colors.text }}>
-                      {userName}
-                    </Typography>
-                    <Typography variant="caption" component="div" sx={{ opacity: 0.7, color: colors.textSecondary }}>
-                      {adminRole}
-                    </Typography>
-                  </Box>
-                </ThemedButton>
-                <ThemedButton 
-                  id="appbar-admin-logout-btn"
-                  theme={themeType}
-                  variant="text"
-                  sx={{ 
-                    ml: 2,
-                    color: colors.text
-                  }} 
-                  onClick={handleAdminLogout}
-                >
-                  로그아웃
-                </ThemedButton>
-              </>
-            }
-          />
-        </Toolbar>
-      </MuiAppBar>
+                  <Logo serviceName={SERVICE_NAME + ' - Admin'} theme={themeType} />
+                </Box>
+              }
+              right={
+                <>
+                  <HomeIconButton to={ROUTES.ADMIN.DASHBOARD} theme={themeType} />
+                  <ThemedButton 
+                    id="appbar-admin-profile-btn"
+                    theme={themeType}
+                    variant="text"
+                    startIcon={<AccountCircle />} 
+                    sx={{ 
+                      ml: 2,
+                      color: colors.text
+                    }}
+                    onClick={handleProfileClick}
+                  >
+                    <Box id="appbar-admin-user-info">
+                      <Typography variant="caption" component="span" sx={{ fontWeight: 'bold', color: colors.text }}>
+                        {userName}
+                      </Typography>
+                      <Typography variant="caption" component="div" sx={{ opacity: 0.7, color: colors.textSecondary }}>
+                        {adminRole}
+                      </Typography>
+                    </Box>
+                  </ThemedButton>
+                  <ThemedButton 
+                    id="appbar-admin-logout-btn"
+                    theme={themeType}
+                    variant="text"
+                    sx={{ 
+                      ml: 2,
+                      color: colors.text
+                    }} 
+                    onClick={handleAdminLogout}
+                  >
+                    로그아웃
+                  </ThemedButton>
+                </>
+              }
+            />
+          </Toolbar>
+        </MuiAppBar>
+        <AdminMenuBar />
+      </>
     );
   }
 
@@ -253,52 +257,55 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
 
   // 기본: 일반 유저
   return (
-    <MuiAppBar
-      id="appbar-user"
-      position="fixed"
-      color="default"
-      elevation={0}
-      sx={commonAppBarStyles}
-    >
-      <Toolbar id="appbar-user-toolbar" sx={commonToolbarStyles}>
-        <AppBarRow
-          left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
-          right={
-            <>
-              <HomeIconButton to="/" theme={themeType} />
-              <ThemedButton 
-                id="appbar-user-profile-btn"
-                theme={themeType}
-                variant="text"
-                startIcon={<AccountCircle />} 
-                sx={{ 
-                  ml: 2,
-                  color: colors.text
-                }} 
-                onClick={handleProfileClick}
-              >
-                <Box id="appbar-user-info">
-                  <Typography variant="caption" component="span" sx={{ fontWeight: 'bold', color: colors.text }}>
-                    {userName}
-                  </Typography>
-                </Box>
-              </ThemedButton>
-              <ThemedButton 
-                id="appbar-user-logout-btn"
-                theme={themeType}
-                variant="text"
-                sx={{ 
-                  ml: 2,
-                  color: colors.text
-                }} 
-                onClick={handleUserLogout}
-              >
-                로그아웃
-              </ThemedButton>
-            </>
-          }
-        />
-      </Toolbar>
-    </MuiAppBar>
+    <>
+      <MuiAppBar
+        id="appbar-user"
+        position="fixed"
+        color="default"
+        elevation={0}
+        sx={commonAppBarStyles}
+      >
+        <Toolbar id="appbar-user-toolbar" sx={commonToolbarStyles}>
+          <AppBarRow
+            left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
+            right={
+              <>
+                <HomeIconButton to="/" theme={themeType} />
+                <DashboardIconButton to={ROUTES.USER.DASHBOARD} theme={themeType} />
+                <ThemedButton 
+                  id="appbar-user-profile-btn"
+                  theme={themeType}
+                  variant="text"
+                  startIcon={<AccountCircle />} 
+                  sx={{ 
+                    ml: 2,
+                    color: colors.text
+                  }} 
+                  onClick={handleProfileClick}
+                >
+                  <Box id="appbar-user-info">
+                    <Typography variant="caption" component="span" sx={{ fontWeight: 'bold', color: colors.text }}>
+                      {userName}
+                    </Typography>
+                  </Box>
+                </ThemedButton>
+                <ThemedButton 
+                  id="appbar-user-logout-btn"
+                  theme={themeType}
+                  variant="text"
+                  sx={{ 
+                    ml: 2,
+                    color: colors.text
+                  }} 
+                  onClick={handleUserLogout}
+                >
+                  로그아웃
+                </ThemedButton>
+              </>
+            }
+          />
+        </Toolbar>
+      </MuiAppBar>
+    </>
   );
 } 

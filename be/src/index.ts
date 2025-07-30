@@ -20,7 +20,7 @@ const app = express();
 
 // CORS 설정 - localhost는 무조건 허용
 const corsOrigins = [
-  'http://localhost:5173',  // Vite dev server
+  'http://localhost:5173',  // Vite dev server (기본)
   'http://localhost:3000',  // React dev server
   'http://localhost:4173',  // Vite preview
   'http://127.0.0.1:5173',  // Vite dev server (IP)

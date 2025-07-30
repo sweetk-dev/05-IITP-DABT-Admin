@@ -150,4 +150,59 @@ export function isValidAffiliation(affiliation: string): boolean {
   // 2-100자, 한글/영문/숫자/공백/특수문자 허용
   const affiliationRegex = /^[가-힣a-zA-Z0-9\s\-_\.]{2,100}$/;
   return affiliationRegex.test(trimmedAffiliation) && trimmedAffiliation.length > 0;
-} 
+}
+
+/**
+ * API 키 이름 유효성 검사
+ * @param keyName 검사할 API 키 이름
+ * @returns 유효한 API 키 이름 형식인지 여부
+ */
+export function isValidApiKeyName(keyName: string): boolean {
+  if (!keyName || typeof keyName !== 'string') {
+    return false;
+  }
+  
+  const trimmedKeyName = keyName.trim();
+  // 1-120자, 한글/영문/숫자/공백/특수문자 허용
+  const keyNameRegex = /^[가-힣a-zA-Z0-9\s\-_\.]{1,120}$/;
+  return keyNameRegex.test(trimmedKeyName) && trimmedKeyName.length > 0;
+}
+
+/**
+ * API 키 설명 유효성 검사
+ * @param keyDesc 검사할 API 키 설명
+ * @returns 유효한 API 키 설명 형식인지 여부
+ */
+export function isValidApiKeyDesc(keyDesc: string): boolean {
+  if (!keyDesc || typeof keyDesc !== 'string') {
+    return false;
+  }
+  
+  const trimmedKeyDesc = keyDesc.trim();
+  // 1-600자, 한글/영문/숫자/공백/특수문자 허용
+  const keyDescRegex = /^[가-힣a-zA-Z0-9\s\-_\.]{1,600}$/;
+  return keyDescRegex.test(trimmedKeyDesc) && trimmedKeyDesc.length > 0;
+}
+
+/**
+ * 날짜 형식 유효성 검사 (YYYY-MM-DD)
+ * @param dateString 검사할 날짜 문자열
+ * @returns 유효한 날짜 형식인지 여부
+ */
+export function isValidDate(dateString: string): boolean {
+  if (!dateString || typeof dateString !== 'string') {
+    return false;
+  }
+  
+  // YYYY-MM-DD 형식 검증
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(dateString)) {
+    return false;
+  }
+  
+  // 실제 유효한 날짜인지 확인
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime()) && dateString === date.toISOString().split('T')[0];
+}
+
+ 

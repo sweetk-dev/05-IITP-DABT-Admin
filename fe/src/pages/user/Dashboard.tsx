@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Grid, 
   Typography, 
-  Card, 
   CardContent, 
-  Button, 
   List, 
   ListItem, 
   ListItemText, 
   Chip,
-  Alert,
-  CircularProgress
+  Alert
 } from '@mui/material';
 import { 
   QuestionAnswer as QnaIcon, 
@@ -23,18 +20,19 @@ import {
 } from '@mui/icons-material';
 import { 
   getUserQnaList, 
-  getUserOpenApiList,
-  type UserQnaListRes,
-  type UserOpenApiListRes
+  getUserOpenApiList
 } from '../../api';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
-import { ErrorAlert } from '../../components/ErrorAlert';
+// 타입은 API 응답에서 추론하도록 any 사용
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
+import { PAGINATION } from '../../constants/pagination';
+import { SPACING } from '../../constants/spacing';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import { getThemeColors } from '../../theme';
-import { handleApiResponse } from '../../utils/apiResponseHandler';
+import { useDataFetching } from '../../hooks/useDataFetching';
 
 interface DashboardProps {
   id?: string;
@@ -42,54 +40,43 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) => {
   const navigate = useNavigate();
-  const [qnaList, setQnaList] = useState<UserQnaListRes | null>(null);
-  const [openApiList, setOpenApiList] = useState<UserOpenApiListRes | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // 테마 설정 (사용자 페이지는 'user' 테마)
   const theme: 'user' | 'admin' = 'user';
   const colors = getThemeColors(theme);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  // QnA 데이터 페칭 (대시보드용 제한된 수량)
+  const {
+    data: qnaList,
+    isLoading: qnaLoading,
+    isError: qnaError,
+    refetch: refetchQna
+  } = useDataFetching({
+    fetchFunction: () => getUserQnaList({
+      page: 1,
+      limit: PAGINATION.HOME_PAGE_SIZE // 5개로 제한
+    }),
+    autoFetch: true
+  });
 
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // OpenAPI 데이터 페칭 (대시보드용 제한된 수량)  
+  const {
+    data: openApiList,
+    isLoading: openApiLoading,
+    isError: openApiError,
+    refetch: refetchOpenApi
+  } = useDataFetching({
+    fetchFunction: () => getUserOpenApiList({
+      page: 1,
+      limit: 3 // 3개로 제한
+    }),
+    autoFetch: true
+  });
 
-      // 병렬로 데이터 로드
-      const [qnaResponse, openApiResponse] = await Promise.all([
-        getUserQnaList({}),
-        getUserOpenApiList({})
-      ]);
+  const loading = qnaLoading || openApiLoading;
+  const error = qnaError || openApiError;
 
-      // handleApiResponse를 사용하여 에러 코드별 자동 처리
-      handleApiResponse(qnaResponse, 
-        (data) => {
-          setQnaList(data);
-        },
-        (errorMessage) => {
-          setError(errorMessage);
-        }
-      );
 
-      handleApiResponse(openApiResponse, 
-        (data) => {
-          setOpenApiList(data);
-        },
-        (errorMessage) => {
-          setError(errorMessage);
-        }
-      );
-    } catch (err) {
-      setError('대시보드 데이터를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCreateQna = () => {
     navigate(ROUTES.USER.QNA_CREATE);
@@ -104,21 +91,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
   };
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner loading={true} />;
   }
 
   return (
-    <Box id={id} sx={{ p: 3 }}>
-      <PageTitle title="대시보드" theme={theme} />
+    <Box id={id} sx={{ p: SPACING.LARGE }}>
+      <Box sx={{ mb: SPACING.TITLE_BOTTOM }}>
+        <PageTitle title="대시보드" theme={theme} />
+      </Box>
 
-      {error && <ErrorAlert message={error} />}
+      {error && (
+        <Box sx={{ mb: SPACING.ERROR_ALERT_BOTTOM }}>
+          <ErrorAlert error={error.toString()} />
+        </Box>
+      )}
 
-      <Grid container spacing={3}>
+      <Grid container spacing={SPACING.LARGE}>
         {/* 내 QnA 섹션 */}
         <Grid item xs={12} md={6}>
           <ThemedCard theme={theme}>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
                 <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
                   <QnaIcon sx={{ mr: 1, color: colors.primary }} />
                   내 QnA
@@ -150,7 +143,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
 
               {qnaList?.qnas && qnaList.qnas.length > 0 ? (
                 <List>
-                  {qnaList.qnas.slice(0, 5).map((qna) => (
+                  {qnaList.qnas.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
                     <ListItem key={qna.qnaId} divider>
                       <ListItemText
                         primary={qna.title}
@@ -170,14 +163,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                 </Alert>
               )}
             </CardContent>
-          </Card>
+          </ThemedCard>
         </Grid>
 
         {/* API 인증키 관리 섹션 */}
         <Grid item xs={12} md={6}>
           <ThemedCard theme={theme}>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
                 <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
                   <KeyIcon sx={{ mr: 1, color: colors.primary }} />
                   API 인증키 관리
@@ -196,7 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
 
               {openApiList?.authKeys && openApiList.authKeys.length > 0 ? (
                 <List>
-                  {openApiList.authKeys.slice(0, 3).map((authKey) => (
+                  {openApiList.authKeys.slice(0, 3).map((authKey: any) => (
                     <ListItem key={authKey.keyId} divider>
                       <ListItemText
                         primary={`API Key: ${authKey.authKey.substring(0, 8)}...`}
@@ -216,7 +209,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                 </Alert>
               )}
             </CardContent>
-          </Card>
+          </ThemedCard>
         </Grid>
       </Grid>
     </Box>

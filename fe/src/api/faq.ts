@@ -1,4 +1,4 @@
-import { apiFetch, enhanceApiResponse } from './api';
+import { apiFetch, publicApiFetch, enhanceApiResponse } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type {
   UserFaqListReq,
@@ -41,7 +41,7 @@ export async function getUserFaqDetail(faqId: number): Promise<ApiResponse<UserF
  * 홈 화면용 FAQ 조회 (조회수 높은 5개)
  */
 export async function getHomeFaqList(): Promise<ApiResponse<UserFaqHomeRes>> {
-  const response = await apiFetch<UserFaqHomeRes>(FULL_API_URLS.USER.FAQ.HOME);
+  const response = await publicApiFetch<UserFaqHomeRes>(FULL_API_URLS.USER.FAQ.HOME);
   return enhanceApiResponse(response);
 }
 

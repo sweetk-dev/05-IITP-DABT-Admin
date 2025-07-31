@@ -1,4 +1,4 @@
-import { apiFetch, enhanceApiResponse } from './api';
+import { apiFetch, publicApiFetch, enhanceApiResponse } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type {
   UserQnaListReq,
@@ -53,7 +53,7 @@ export async function createUserQna(data: UserQnaCreateReq): Promise<ApiResponse
  * 홈 화면용 Q&A 조회 (최신 5개)
  */
 export async function getHomeQnaList(): Promise<ApiResponse<UserQnaHomeRes>> {
-  const response = await apiFetch<UserQnaHomeRes>(FULL_API_URLS.USER.QNA.HOME);
+  const response = await publicApiFetch<UserQnaHomeRes>(FULL_API_URLS.USER.QNA.HOME);
   return enhanceApiResponse(response);
 }
 

@@ -33,7 +33,7 @@ import type {
 /**
  * 사용자 OpenAPI 인증키 목록 조회
  */
-export async function getUserOpenApiList(params: UserOpenApiListReq): Promise<ApiResponse<UserOpenApiListRes>> {
+export async function getUserOpenApiList(_params: UserOpenApiListReq): Promise<ApiResponse<UserOpenApiListRes>> {
   return apiFetch<UserOpenApiListRes>(FULL_API_URLS.USER.OPEN_API.LIST, {
     method: 'GET',
   });

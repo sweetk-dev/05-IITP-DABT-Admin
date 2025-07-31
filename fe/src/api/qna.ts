@@ -1,4 +1,4 @@
-import { apiFetch, publicApiFetch } from './api';
+import { apiFetch, enhanceApiResponse } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type {
   UserQnaListReq,

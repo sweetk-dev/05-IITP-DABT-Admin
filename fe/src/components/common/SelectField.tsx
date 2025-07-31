@@ -1,4 +1,5 @@
-import { FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import { getThemeColors } from '../../theme';
 
 interface SelectOption {

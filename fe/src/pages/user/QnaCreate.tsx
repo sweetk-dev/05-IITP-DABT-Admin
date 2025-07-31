@@ -2,24 +2,20 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Typography,
-  Card,
   CardContent,
   TextField,
-  Button,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   FormControlLabel,
   Switch,
-  Alert,
-  CircularProgress
+  Alert
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { createUserQna } from '../../api';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
-import { ErrorAlert } from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
@@ -99,7 +95,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
   };
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner loading={true} />;
   }
 
   return (
@@ -118,7 +114,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
         <PageTitle title="문의하기" theme={theme} />
       </Box>
 
-      {error && <ErrorAlert message={error} />}
+      {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
       {success && (
         <Alert severity="success" sx={{ mb: 2 }}>
           문의가 성공적으로 등록되었습니다. 잠시 후 대시보드로 이동합니다.
@@ -213,7 +209,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
             </Box>
           </Box>
         </CardContent>
-      </Card>
+      </ThemedCard>
     </Box>
   );
 }; 

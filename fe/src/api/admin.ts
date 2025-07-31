@@ -31,7 +31,7 @@ export async function loginAdmin(params: AdminLoginReq): Promise<ApiResponse<Adm
     const userInfo = {
       userId: response.data.admin.adminId,
       email: '', // email 정보는 더 이상 제공되지 않음
-      name: response.data.admin.admin.name,
+      name: response.data.admin.name,
       userType: 'A' as const,
       role: response.data.admin.role,
     };

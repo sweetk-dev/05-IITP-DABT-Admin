@@ -1,5 +1,6 @@
 import { ErrorCode } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
+import { getUserType } from '../store/user';
 
 // 에러 코드별 FE 전용 응답 설정
 export function enhanceApiResponse<T>(response: any): ApiResponse<T> {
@@ -51,11 +52,19 @@ function shouldAutoLogout(errorCode?: number): boolean {
 function getRedirectUrl(errorCode?: number): string | undefined {
   if (!errorCode) return undefined;
   
+  const userType = getUserType();
+  console.log('[getRedirectUrl]', { errorCode, userType });
+  
   switch (errorCode) {
     case ErrorCode.TOKEN_EXPIRED:
     case ErrorCode.INVALID_TOKEN:
     case ErrorCode.UNAUTHORIZED:
-      return '/login';
+      // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
+      if (userType === 'A') {
+        return '/admin/login';
+      } else {
+        return '/login';
+      }
     case ErrorCode.ACCESS_DENIED:
       return '/';
     default:
@@ -77,20 +86,21 @@ export function handleApiResponse<T>(
     
     // 자동 로그아웃 처리
     if (response.autoLogout) {
-      // TODO: 로그아웃 처리
-      console.log('자동 로그아웃 처리');
+      //console.log('자동 로그아웃 처리');
+      // localStorage 정리는 validateAndCleanTokens에서 처리됨
     }
     
     // 팝업 표시
     if (response.showPopup) {
-      // TODO: 팝업 표시 처리
-      console.log('팝업 표시:', errorMessage);
+      //console.log('팝업 표시:', errorMessage);
+      // 실제 팝업 표시는 UI 컴포넌트에서 처리
     }
     
     // 리다이렉트 처리
     if (response.redirectTo) {
-      // TODO: 리다이렉트 처리
-      console.log('리다이렉트:', response.redirectTo);
+      //console.log('리다이렉트:', response.redirectTo);
+      // 실제 리다이렉트는 React Router에서 처리되므로 여기서는 로그만
+      // 실제 리다이렉트는 ProtectedRoute 컴포넌트에서 처리됨
     }
   }
 } 

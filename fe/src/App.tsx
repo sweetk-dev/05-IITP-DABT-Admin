@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/user/Login';
 import Home from './pages/Home';
 import Register from './pages/user/Register';
@@ -16,22 +16,9 @@ import FaqList from './pages/FaqList';
 import QnaList from './pages/QnaList';
 import QnaDetail from './pages/QnaDetail';
 import Layout from './components/Layout';
-import { isAuthenticated } from './store/auth';
+import { PrivateRoute, AdminProtectedRoute } from './components/ProtectedRoute';
+
 import { ROUTES } from './routes';
-
-
-// 인증 보호 라우트 컴포넌트
-function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const isLoggedIn = isAuthenticated();
-  const location = useLocation();
-  
-  if (!isLoggedIn) {
-    return <Navigate to={ROUTES.PUBLIC.LOGIN} state={{ from: location }} replace />;
-  }
-  return <>{children}</>;
-}
-
-
 
 // 관리자 페이지 임시 컴포넌트들
 const UserManagement = () => <div>UserManagement</div>;
@@ -52,21 +39,9 @@ const AdminQnaList = () => <div>AdminQnaList</div>;
 const AdminQnaDetail = () => <div>AdminQnaDetail</div>;
 const AdminQnaEdit = () => <div>AdminQnaEdit</div>;
 
-// 관리자 보호 라우트 컴포넌트
-function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isLoggedIn = isAuthenticated();
-  const location = useLocation();
-  
-  if (location.pathname === ROUTES.ADMIN.LOGIN) {
-    return <>{children}</>;
-  }
-  if (!isLoggedIn) {
-    return <Navigate to={ROUTES.ADMIN.LOGIN} state={{ from: location }} replace />;
-  }
-  return <>{children}</>;
-}
-
 function App() {
+  console.log('[App] Rendering App component');
+  
   return (
     <>
       <style>{`
@@ -83,7 +58,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             {/* 공개 페이지 (로그인 불필요) */}
-            <Route path={ROUTES.PUBLIC.HOME} element={<Home />} />
+            <Route index element={<Home />} />
             <Route path={ROUTES.PUBLIC.NOTICE} element={<NoticeList />} />
             <Route path={ROUTES.PUBLIC.NOTICE_DETAIL} element={<NoticeDetail />} />
             <Route path={ROUTES.PUBLIC.FAQ} element={<FaqList />} />
@@ -101,10 +76,10 @@ function App() {
 
             {/* 관리자 로그인 */}
             <Route path={ROUTES.ADMIN.LOGIN} element={<AdminLogin />} />
-            {/* /admin 또는 /admin/로 접근 시 /admin/login으로 리다이렉트 */}
+            
+            {/* 관리자 페이지 (로그인 필요) */}
             <Route path="/admin" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
             <Route path="/admin/" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
-            {/* /admin/* 경로는 보호 */}
             <Route path="/admin/*" element={
               <AdminProtectedRoute>
                 <Routes>
@@ -127,12 +102,14 @@ function App() {
                   <Route path="qnas" element={<AdminQnaList />} />
                   <Route path="qnas/:id" element={<AdminQnaDetail />} />
                   <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
+                  {/* 관리자 경로에서 인증되지 않은 경우 로그인으로 리다이렉트 */}
+                  <Route path="*" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
                 </Routes>
               </AdminProtectedRoute>
             } />
 
-            {/* 404 */}
-            <Route path="*" element={<Navigate to={ROUTES.PUBLIC.HOME} replace />} />
+            {/* 404 - 홈으로 리다이렉트 */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -25,4 +25,4 @@ export interface EmptyResponse {
   page: 1;
   limit: number;
   totalPages: 0;
-} 
+}

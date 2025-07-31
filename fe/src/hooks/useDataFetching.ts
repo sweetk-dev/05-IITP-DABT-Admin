@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DataState, ApiResponse } from '../types/api';
+import type { DataState, ApiResponse } from '../types/api';
 import { handleApiResponse } from '../utils/apiResponseHandler';
 
 interface UseDataFetchingOptions<T> {

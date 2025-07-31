@@ -5,7 +5,7 @@ import {
   isValidTokenFormat,
   getTokenInfoString 
 } from '../utils/jwt';
-import { clearLoginInfo } from './user';
+import { clearLoginInfo, getUserType } from './user';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -94,23 +94,37 @@ export function getAccessTokenInfo(): string {
 }
 
 /**
- * 사용자 인증 상태 확인
+ * 사용자 인증 상태 확인 (기본)
  */
 export function isAuthenticated(): boolean {
   const accessToken = getAccessToken();
   const refreshToken = getRefreshToken();
   
-  // Access Token이 유효하면 인증됨
-  if (accessToken && !isTokenExpired(accessToken)) {
-    return true;
-  }
+  const result = (accessToken && !isTokenExpired(accessToken)) || 
+                 (refreshToken && !isTokenExpired(refreshToken));
   
-  // Access Token이 만료되었지만 Refresh Token이 유효하면 인증됨
-  if (refreshToken && !isTokenExpired(refreshToken)) {
-    return true;
-  }
+  return result;
+}
+
+/**
+ * 일반 사용자 인증 상태 확인
+ */
+export function isUserAuthenticated(): boolean {
+  const authenticated = isAuthenticated();
+  const userType = getUserType();
+  const result = authenticated && userType === 'U';
   
-  return false;
+  return result;
+}
+
+/**
+ * 관리자 인증 상태 확인
+ */
+export function isAdminAuthenticated(): boolean {
+  const authenticated = isAuthenticated();
+  const userType = getUserType();
+  const result = authenticated && userType === 'A';
+  return result;
 }
 
 /**
@@ -120,11 +134,17 @@ export function validateAndCleanTokens(): void {
   const accessToken = getAccessToken();
   const refreshToken = getRefreshToken();
   
+  // 토큰이 없으면 사용자 정보도 제거
+  if (!accessToken && !refreshToken) {
+    clearLoginInfo();
+    return;
+  }
+  
   // 두 토큰 모두 만료되었으면 제거
   if (accessToken && isTokenExpired(accessToken) && 
       refreshToken && isTokenExpired(refreshToken)) {
-    console.log('Both tokens expired, removing from storage');
     clearLoginInfo(); // 사용자 정보도 함께 제거
+    return;
   }
   
   // 유효하지 않은 형식의 토큰 제거
@@ -132,12 +152,14 @@ export function validateAndCleanTokens(): void {
     console.warn('Invalid access token format, removing');
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     clearLoginInfo(); // 사용자 정보도 함께 제거
+    return;
   }
   
   if (refreshToken && !isValidTokenFormat(refreshToken)) {
     console.warn('Invalid refresh token format, removing');
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     clearLoginInfo(); // 사용자 정보도 함께 제거
+    return;
   }
 }
 

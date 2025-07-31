@@ -56,6 +56,19 @@ export default function Home() {
   };
 
   const handleSectionClick = (type: 'notice' | 'faq' | 'qna') => {
+    console.log('🏠 [Home] Section clicked:', type);
+    // 섹션 클릭 시 해당 데이터를 새로고침
+    switch (type) {
+      case 'notice':
+        refetchNotices();
+        break;
+      case 'faq':
+        refetchFaqs();
+        break;
+      case 'qna':
+        refetchQnas();
+        break;
+    }
     navigate(`/${type}`);
   };
 
@@ -135,7 +148,7 @@ export default function Home() {
           />
         ) : (
           <Stack spacing={1.5}>
-            {notices?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((notice: UserNoticeItem) => (
+            {notices?.notices?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((notice: UserNoticeItem) => (
               <Box
                 key={notice.noticeId}
                 onClick={() => handleContentClick('notice', notice.noticeId)}
@@ -250,7 +263,7 @@ export default function Home() {
           />
         ) : (
           <Stack spacing={1.5}>
-            {faqs?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((faq: UserFaqItem) => (
+            {faqs?.faqs?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((faq: UserFaqItem) => (
               <Box
                 key={faq.faqId}
                 onClick={() => handleContentClick('faq', faq.faqId)}
@@ -355,7 +368,7 @@ export default function Home() {
           />
         ) : (
           <Stack spacing={1.5}>
-            {qnas?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: UserQnaItem) => (
+            {qnas?.qnas?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: UserQnaItem) => (
               <Box
                 key={qna.qnaId}
                 onClick={() => handleContentClick('qna', qna.qnaId)}
@@ -397,7 +410,7 @@ export default function Home() {
                     opacity: 0.7
                   }}
                 >
-                  {formatDate(qna.postedAt)}
+                  {formatDate(qna.createdAt)}
                 </Typography>
               </Box>
             ))}

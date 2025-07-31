@@ -2,7 +2,7 @@ import { Typography, Box, Container } from '@mui/material';
 import { useLocation, Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import AppBar from './AppBar';
-import { isAuthenticated, validateAndCleanTokens } from '../store/auth';
+import { isAuthenticated, validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
 import { ROUTES } from '../routes';
 
 // 따뜻한 색상 팔레트
@@ -81,6 +81,18 @@ function Footer() {
 export default function Layout() {
   const location = useLocation();
   const isLoggedIn = isAuthenticated();
+  const isUserLoggedIn = isUserAuthenticated();
+  const isAdminLoggedIn = isAdminAuthenticated();
+  
+  console.log('[Layout]', {
+    pathname: location.pathname,
+    isLoggedIn,
+    isUserLoggedIn,
+    isAdminLoggedIn,
+    isAuthenticated: isAuthenticated(),
+    isUserAuthenticated: isUserAuthenticated(),
+    isAdminAuthenticated: isAdminAuthenticated()
+  });
   
   // 토큰 유효성 검사 및 정리 (컴포넌트 마운트 시)
   useEffect(() => {
@@ -109,6 +121,8 @@ export default function Layout() {
   else {
     appBarType = 'user';
   }
+
+  console.log('[Layout] AppBar type determined:', appBarType);
 
   return (
     <Box sx={{ 

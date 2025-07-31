@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
-  Card,
   CardContent,
-  Button,
   List,
   ListItem,
   ListItemText,
@@ -36,15 +34,16 @@ import {
   deleteUserOpenApi, 
   extendUserOpenApi 
 } from '../../api';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
-import { ErrorAlert } from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
 import { getThemeColors } from '../../theme';
-import type { UserOpenApiListRes, UserOpenApiCreateReq, UserOpenApiExtendReq } from '@iitp-dabt/common';
+import type { UserOpenApiCreateReq, UserOpenApiExtendReq } from '@iitp-dabt/common';
+import type { UserOpenApiListRes } from '../../types/api';
 
 interface OpenApiManagementProps {
   id?: string;
@@ -315,7 +314,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
             </Alert>
           )}
         </CardContent>
-      </Card>
+      </ThemedCard>
 
       {/* 신규 인증키 발행 다이얼로그 */}
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>

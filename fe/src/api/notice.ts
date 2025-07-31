@@ -1,4 +1,4 @@
-import { apiFetch, enhanceApiResponse } from './api';
+import { apiFetch, publicApiFetch, enhanceApiResponse } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type {
   UserNoticeListReq,
@@ -32,6 +32,6 @@ export async function getUserNoticeDetail(noticeId: number): Promise<ApiResponse
  * 홈 화면용 공지사항 조회 (최신 5개)
  */
 export async function getHomeNoticeList(): Promise<ApiResponse<UserNoticeHomeRes>> {
-  const response = await apiFetch<UserNoticeHomeRes>(FULL_API_URLS.USER.NOTICE.HOME);
+  const response = await publicApiFetch<UserNoticeHomeRes>(FULL_API_URLS.USER.NOTICE.HOME);
   return enhanceApiResponse(response);
 } 

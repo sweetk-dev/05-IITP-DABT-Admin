@@ -3,15 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
-  Card,
   CardContent,
   List,
   ListItem,
   ListItemText,
-  Button,
   Chip,
   Accordion,
-  AccordionSummary,
   AccordionDetails,
   Alert,
   Divider
@@ -22,13 +19,17 @@ import {
   QuestionAnswer as QnaIcon
 } from '@mui/icons-material';
 import { getUserQnaList, getUserQnaDetail } from '../../api';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
-import { ErrorAlert } from '../../components/ErrorAlert';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorAlert from '../../components/ErrorAlert';
+import Pagination from '../../components/common/Pagination';
 import { ROUTES } from '../../routes';
+import { PAGINATION } from '../../constants/pagination';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import { getThemeColors } from '../../theme';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { usePagination } from '../../hooks/usePagination';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import type { UserQnaListRes, UserQnaDetailRes } from '@iitp-dabt/common';
 
@@ -38,41 +39,44 @@ interface QnaHistoryProps {
 
 export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) => {
   const navigate = useNavigate();
-  const [qnaList, setQnaList] = useState<UserQnaListRes | null>(null);
   const [expandedQna, setExpandedQna] = useState<number | null>(null);
   const [qnaDetails, setQnaDetails] = useState<Record<number, UserQnaDetailRes>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // 테마 설정 (사용자 페이지는 'user' 테마)
   const theme: 'user' | 'admin' = 'user';
   const colors = getThemeColors(theme);
 
+  // Pagination 훅 사용
+  const pagination = usePagination({
+    initialLimit: PAGINATION.DEFAULT_PAGE_SIZE
+  });
+
+  // 데이터 페칭 훅 사용
+  const {
+    data: qnaList,
+    isLoading: loading,
+    isEmpty,
+    isError,
+    refetch
+  } = useDataFetching({
+    fetchFunction: () => getUserQnaList({
+      page: pagination.currentPage,
+      limit: pagination.pageSize
+    }),
+    dependencies: [pagination.currentPage, pagination.pageSize],
+    autoFetch: true
+  });
+
+  // 페이지 크기 동기화
   useEffect(() => {
-    loadQnaHistory();
-  }, []);
-
-  const loadQnaHistory = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await getUserQnaList({});
-      
-      // handleApiResponse를 사용하여 에러 코드별 자동 처리
-      handleApiResponse(response, 
-        (data) => {
-          setQnaList(data);
-        },
-        (errorMessage) => {
-          setError(errorMessage);
-        }
-      );
-    } catch (err) {
-      setError('문의 내역을 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
+    if (qnaList) {
+      pagination.handlePageSizeChange(qnaList.limit);
     }
+  }, [qnaList]);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    pagination.handlePageChange(page);
   };
 
   const handleQnaExpand = async (qnaId: number) => {
@@ -113,17 +117,12 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('ko-KR');
   };
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner loading={true} />;
   }
 
   return (
@@ -142,11 +141,26 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
         <PageTitle title="내 문의 내역" theme={theme} />
       </Box>
 
-      {error && <ErrorAlert message={error} />}
-
       <ThemedCard theme={theme}>
-        <CardContent>
-          {qnaList?.qnas && qnaList.qnas.length > 0 ? (
+        {loading ? (
+          <Box sx={{ position: 'relative', minHeight: 400 }}>
+            <LoadingSpinner loading={true} />
+          </Box>
+        ) : isError ? (
+          <CardContent>
+            <Alert severity="error">
+              문의 내역을 불러오는 중 오류가 발생했습니다.
+            </Alert>
+          </CardContent>
+        ) : isEmpty ? (
+          <CardContent>
+            <Alert severity="info">
+              등록된 문의가 없습니다.
+            </Alert>
+          </CardContent>
+        ) : (
+          <CardContent>
+            {qnaList?.qnas && qnaList.qnas.length > 0 && (
             <List>
               {qnaList.qnas.map((qna, index) => (
                 <React.Fragment key={qna.qnaId}>
@@ -208,7 +222,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
                               </Typography>
                               {qnaDetails[qna.qnaId].qna.answeredAt && (
                                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                  답변일: {formatDate(qnaDetails[qna.qnaId].qna.answeredAt)}
+                                  답변일: {qnaDetails[qna.qnaId].qna.answeredAt ? formatDate(qnaDetails[qna.qnaId].qna.answeredAt || '') : '-'}
                                 </Typography>
                               )}
                             </>
@@ -222,13 +236,22 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
                 </React.Fragment>
               ))}
             </List>
-          ) : (
-            <Alert severity="info">
-              등록된 문의가 없습니다.
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+            )}
+
+            {/* 페이지네이션 */}
+            {qnaList && qnaList.totalPages > 1 && (
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={qnaList.totalPages}
+                  onPageChange={handlePageChange}
+                  theme={theme}
+                />
+              </Box>
+            )}
+          </CardContent>
+        )}
+      </ThemedCard>
     </Box>
   );
 }; 

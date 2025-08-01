@@ -10,6 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { ArrowBack, NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { useDataFetching } from '../hooks/useDataFetching';
 import { getUserQnaDetail, getUserQnaList } from '../api';
+import { SPACING } from '../constants/spacing';
 import type { QnaItem } from '../types/api';
 
 export default function QnaDetail() {
@@ -94,24 +95,27 @@ export default function QnaDetail() {
       sx={{
         minHeight: '100vh',
         background: colors.background,
-        py: 4
+       //Ｐ가 이상하면 ４로 수정 현재는 ３임
+        py: SPACING.LARGE
       }}
     >
       <Box
         sx={{
           maxWidth: 1000,
           mx: 'auto',
-          px: { xs: 2, md: 4 }
+          //Ｐ가 이상하면 ４로 수정 현재는 ３임 
+          px: { xs: SPACING.MEDIUM, md: SPACING.LARGE }
         }}
       >
         {/* 헤더 */}
-        <Box sx={{ mb: 4 }}>
+        {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+        <Box sx={{ mb: SPACING.LARGE }}>
           <ThemedButton
             theme={theme}
             variant="outlined"
             startIcon={<ArrowBack />}
             onClick={handleBackToList}
-            sx={{ mb: 2 }}
+            sx={{ mb: SPACING.MEDIUM }}
           >
             목록으로
           </ThemedButton>
@@ -135,34 +139,35 @@ export default function QnaDetail() {
               theme={theme}
             />
           ) : qna ? (
-            <Box sx={{ p: 4 }}>
+            //Ｐ가 이상하면 ４로 수정 현재는 ３임
+            <Box sx={{ p: SPACING.LARGE }}>
               {/* 헤더 정보 */}
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ mb: SPACING.LARGE }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.MEDIUM, flexWrap: 'wrap' }}>
                   <Chip
                     label={qna.publicYn === 'Y' ? '공개' : '비공개'}
                     color={qna.publicYn === 'Y' ? 'success' : 'default'}
                     size="medium"
-                    sx={{ mr: 2, mb: 1 }}
+                    sx={{ mr: SPACING.MEDIUM, mb: SPACING.SMALL }}
                   />
                   <Chip
                     label={qna.qnaType}
                     color="primary"
                     size="medium"
-                    sx={{ mr: 2, mb: 1 }}
+                    sx={{ mr: SPACING.MEDIUM, mb: SPACING.SMALL }}
                   />
                   <Chip
                     label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}
                     color={qna.answeredYn === 'Y' ? 'success' : 'warning'}
                     size="medium"
-                    sx={{ mr: 2, mb: 1 }}
+                    sx={{ mr: SPACING.MEDIUM, mb: SPACING.SMALL }}
                   />
                   <Typography
                     variant="body2"
                     sx={{
                       color: colors.textSecondary,
                       ml: 'auto',
-                      mb: 1
+                      mb: SPACING.SMALL
                     }}
                   >
                     {formatDate(qna.postedAt)}
@@ -173,7 +178,7 @@ export default function QnaDetail() {
                   sx={{
                     color: colors.text,
                     fontWeight: 600,
-                    mb: 2
+                    mb: SPACING.MEDIUM
                   }}
                 >
                   {qna.title}
@@ -182,23 +187,24 @@ export default function QnaDetail() {
                   variant="body2"
                   sx={{
                     color: colors.textSecondary,
-                    mb: 1
+                    mb: SPACING.SMALL
                   }}
                 >
                   작성자: {maskAuthorName(qna.authorName)}
                 </Typography>
               </Box>
 
-              <Divider sx={{ mb: 3 }} />
+              <Divider sx={{ mb: SPACING.LARGE }} />
 
               {/* 질문 내용 */}
-              <Box sx={{ mb: 4 }}>
+              {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+              <Box sx={{ mb: SPACING.LARGE }}>
                 <Typography
                   variant="h6"
                   sx={{
                     color: colors.text,
                     fontWeight: 500,
-                    mb: 2
+                    mb: SPACING.MEDIUM
                   }}
                 >
                   질문
@@ -210,7 +216,7 @@ export default function QnaDetail() {
                     lineHeight: 1.8,
                     whiteSpace: 'pre-wrap',
                     backgroundColor: `${colors.primary}05`,
-                    p: 3,
+                    p: SPACING.LARGE,
                     borderRadius: 2,
                     border: `1px solid ${colors.border}`
                   }}
@@ -221,13 +227,14 @@ export default function QnaDetail() {
 
               {/* 답변 내용 */}
               {qna.answeredYn === 'Y' && qna.answerContent && (
-                <Box sx={{ mb: 4 }}>
+                //Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+                <Box sx={{ mb: SPACING.LARGE }}>
                   <Typography
                     variant="h6"
                     sx={{
                       color: colors.text,
                       fontWeight: 500,
-                      mb: 2
+                      mb: SPACING.MEDIUM
                     }}
                   >
                     답변
@@ -239,7 +246,7 @@ export default function QnaDetail() {
                       lineHeight: 1.8,
                       whiteSpace: 'pre-wrap',
                       backgroundColor: `${colors.secondary}10`,
-                      p: 3,
+                      p: SPACING.LARGE,
                       borderRadius: 2,
                       border: `1px solid ${colors.border}`
                     }}
@@ -252,7 +259,7 @@ export default function QnaDetail() {
                       sx={{
                         color: colors.textSecondary,
                         display: 'block',
-                        mt: 1,
+                        mt: SPACING.SMALL,
                         textAlign: 'right'
                       }}
                     >
@@ -267,7 +274,7 @@ export default function QnaDetail() {
                 display: 'flex', 
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                pt: 3,
+                pt: SPACING.LARGE,
                 borderTop: `1px solid ${colors.border}`
               }}>
                 <ThemedButton

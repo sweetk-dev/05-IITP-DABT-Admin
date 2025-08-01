@@ -8,6 +8,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { ArrowForward } from '@mui/icons-material';
 import { OPPEN_API_DOC_URL} from '../config';
 import { PAGINATION } from '../constants/pagination';
+import { SPACING } from '../constants/spacing';
 import { useDataFetching } from '../hooks/useDataFetching';
 import { getHomeNoticeList, getHomeFaqList, getHomeQnaList } from '../api';
 import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
@@ -88,7 +89,8 @@ export default function Home() {
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      p={4}
+      {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+      p={SPACING.LARGE} 
       minWidth={0}
       sx={{ 
         minWidth: { xs: '100%', md: 0 }, 
@@ -207,7 +209,8 @@ export default function Home() {
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      p={4}
+      {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+      p={SPACING.LARGE}
       minWidth={0}
       sx={{ 
         minWidth: { xs: '100%', md: 0 }, 
@@ -223,7 +226,7 @@ export default function Home() {
         endIcon={<ArrowForward />}
         sx={{
           width: '100%',
-          mb: 2,
+          mb: SPACING.MEDIUM,
           fontSize: '1rem',
           position: 'relative',
           '& .MuiButton-endIcon': {
@@ -242,7 +245,7 @@ export default function Home() {
         sx={{ 
           border: `3px solid ${colors.border}`,
           borderRadius: 3,
-          p: 3,
+          p: SPACING.LARGE,
           background: 'transparent',
           flex: 1,
           minHeight: 200,
@@ -312,7 +315,8 @@ export default function Home() {
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      p={4}
+      {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+      p={SPACING.LARGE}
       minWidth={0}
       sx={{ 
         minWidth: { xs: '100%', md: 0 }, 
@@ -328,7 +332,7 @@ export default function Home() {
         endIcon={<ArrowForward />}
         sx={{
           width: '100%',
-          mb: 2,
+          mb: SPACING.MEDIUM,
           fontSize: '1rem',
           position: 'relative',
           '& .MuiButton-endIcon': {
@@ -347,7 +351,7 @@ export default function Home() {
         sx={{ 
           border: `3px solid ${colors.border}`,
           borderRadius: 3,
-          p: 3,
+          p: SPACING.LARGE,
           background: 'transparent',
           flex: 1,
           minHeight: 200,
@@ -457,10 +461,11 @@ export default function Home() {
             isolation: 'isolate'
           }}
         >
+          {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
           <Box sx={{ 
             background: colors.primary, 
             borderRadius: 3, 
-            p: 4, 
+            p: SPACING.LARGE, 
             boxShadow: `0 4px 12px ${colors.primary}20`,
             position: 'relative',
             isolation: 'isolate'
@@ -495,7 +500,7 @@ export default function Home() {
         <Box sx={{ 
           width: { xs: '100%', md: '95%' }, 
           mx: 'auto', 
-          mb: 2,
+          mb:  SPACING.MEDIUM,
           display: 'flex',
           justifyContent: 'flex-end',
           position: 'relative',

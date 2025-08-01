@@ -11,6 +11,7 @@ import Pagination from '../components/common/Pagination';
 import SelectField from '../components/common/SelectField';
 import { ArrowBack, ExpandMore } from '@mui/icons-material';
 import { PAGINATION } from '../constants/pagination';
+import { SPACING } from '../constants/spacing';
 import { useDataFetching } from '../hooks/useDataFetching';
 import { usePagination } from '../hooks/usePagination';
 import { getUserFaqList, getUserFaqListByType, getCommonCodesByGroupId } from '../api';
@@ -118,24 +119,24 @@ export default function FaqList() {
       sx={{
         minHeight: '100vh',
         background: colors.background,
-        py: 4
+        py: SPACING.LARGE
       }}
     >
       <Box
         sx={{
           maxWidth: 1200,
           mx: 'auto',
-          px: { xs: 2, md: 4 }
+          px: { xs: SPACING.MEDIUM, md: SPACING.LARGE }
         }}
       >
         {/* 헤더 */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: SPACING.LARGE }}>
           <ThemedButton
             theme={theme}
             variant="outlined"
             startIcon={<ArrowBack />}
             onClick={() => navigate('/')}
-            sx={{ mb: 2 }}
+            sx={{ mb: SPACING.MEDIUM }}
           >
             홈으로
           </ThemedButton>
@@ -143,13 +144,13 @@ export default function FaqList() {
         </Box>
 
         {/* FAQ 타입 선택 */}
-        <ThemedCard theme={theme} sx={{ mb: 3 }}>
-          <Box sx={{ p: 3 }}>
+        <ThemedCard theme={theme} sx={{ mb: SPACING.LARGE }}>
+          <Box sx={{ p: SPACING.LARGE }}>
             <Typography
               variant="h6"
               sx={{
                 color: colors.text,
-                mb: 2,
+                mb: SPACING.MEDIUM,
                 fontWeight: 500
               }}
             >

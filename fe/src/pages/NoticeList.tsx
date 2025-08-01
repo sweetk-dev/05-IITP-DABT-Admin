@@ -10,6 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/common/Pagination';
 import { ArrowBack } from '@mui/icons-material';
 import { PAGINATION } from '../constants/pagination';
+import { SPACING } from '../constants/spacing';
 import { useDataFetching } from '../hooks/useDataFetching';
 import { usePagination } from '../hooks/usePagination';
 import { getUserNoticeList } from '../api';
@@ -83,28 +84,31 @@ export default function NoticeList() {
   };
 
   return (
+    
     <Box
       sx={{
         minHeight: '100vh',
         background: colors.background,
-        py: 4
+        //Ｐ가 이상하면 ４로 수정 현재는 ３임
+        py: SPACING.LARGE
       }}
     >
       <Box
         sx={{
           maxWidth: 1200,
           mx: 'auto',
-          px: { xs: 2, md: 4 }
+          //Ｐ가 이상하면 ４로 수정 현재는 ３임 
+          px: { xs: SPACING.MEDIUM, md: SPACING.LARGE }
         }}
       >
         {/* 헤더 */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: SPACING.LARGE }}>
           <ThemedButton
             theme={theme}
             variant="outlined"
             startIcon={<ArrowBack />}
             onClick={() => navigate('/')}
-            sx={{ mb: 2 }}
+            sx={{ mb: SPACING.MEDIUM }}
           >
             홈으로
           </ThemedButton>
@@ -129,13 +133,13 @@ export default function NoticeList() {
             />
           ) : (
             <>
-              <Stack spacing={2}>
+              <Stack spacing={SPACING.MEDIUM}>
                 {noticeData?.items.map((notice: NoticeItem) => (
                   <Box
                     key={notice.noticeId}
                     onClick={() => handleNoticeClick(notice.noticeId)}
                     sx={{
-                      p: 3,
+                      p: SPACING.LARGE,
                       borderRadius: 2,
                       cursor: 'pointer',
                       transition: 'all 0.2s ease-in-out',
@@ -149,19 +153,19 @@ export default function NoticeList() {
                       }
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
                       <Chip
                         label={getNoticeTypeLabel(notice.noticeType)}
                         color={getNoticeTypeColor(notice.noticeType) as any}
                         size="small"
-                        sx={{ mr: 2 }}
+                        sx={{ mr: SPACING.MEDIUM }}
                       />
                       {notice.pinnedYn === 'Y' && (
                         <Chip
                           label="고정"
                           color="warning"
                           size="small"
-                          sx={{ mr: 2 }}
+                          sx={{ mr: SPACING.MEDIUM }}
                         />
                       )}
                       <Typography
@@ -179,7 +183,7 @@ export default function NoticeList() {
                       sx={{
                         color: colors.text,
                         fontWeight: 500,
-                        mb: 1
+                        mb: SPACING.SMALL
                       }}
                     >
                       {notice.title}

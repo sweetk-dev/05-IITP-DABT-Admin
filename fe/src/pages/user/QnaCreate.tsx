@@ -17,6 +17,7 @@ import { createUserQna } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
+import { SPACING } from '../../constants/spacing';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -99,15 +100,15 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
   }
 
   return (
-    <Box id={id} sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+    <Box id={id} sx={{ p: SPACING.LARGE }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.LARGE }}>
         <ThemedButton
           id="back-btn"
           theme={theme}
           variant="text"
           startIcon={<ArrowBackIcon />}
           onClick={handleBack}
-          sx={{ mr: 2 }}
+          sx={{ mr: SPACING.MEDIUM }}
         >
           뒤로가기
         </ThemedButton>
@@ -116,15 +117,15 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
 
       {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
       {success && (
-        <Alert severity="success" sx={{ mb: 2 }}>
+        <Alert severity="success" sx={{ mb: SPACING.MEDIUM }}>
           문의가 성공적으로 등록되었습니다. 잠시 후 대시보드로 이동합니다.
         </Alert>
       )}
 
       <ThemedCard theme={theme}>
         <CardContent>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-            <FormControl fullWidth sx={{ mb: 2 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: SPACING.MEDIUM }}>
+            <FormControl fullWidth sx={{ mb: SPACING.MEDIUM }}>
               <InputLabel id="qna-type-label">문의 유형</InputLabel>
               <Select
                 id="qna-type-select"
@@ -149,7 +150,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               required
-              sx={{ mb: 2 }}
+              sx={{ mb: SPACING.MEDIUM }}
               inputProps={{ maxLength: 200 }}
             />
 
@@ -162,7 +163,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
               required
               multiline
               rows={6}
-              sx={{ mb: 2 }}
+              sx={{ mb: SPACING.MEDIUM }}
               inputProps={{ maxLength: 2000 }}
             />
 
@@ -172,7 +173,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
               label="작성자명 (선택)"
               value={formData.writerName}
               onChange={(e) => handleInputChange('writerName', e.target.value)}
-              sx={{ mb: 2 }}
+              sx={{ mb: SPACING.MEDIUM }}
               inputProps={{ maxLength: 50 }}
             />
 
@@ -185,10 +186,10 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
                 />
               }
               label="비공개 문의"
-              sx={{ mb: 2 }}
+              sx={{ mb: SPACING.MEDIUM }}
             />
 
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', gap: SPACING.MEDIUM, justifyContent: 'flex-end' }}>
               <ThemedButton
                 id="cancel-btn"
                 theme={theme}

@@ -6,5 +6,6 @@ export * from './user.js';
 export * from './faq.js';
 export * from './qna.js';
 export * from './notice.js';
+export * from './openApi.js';
 export * from './common.js';
 export * from './commonCode.js'; 

@@ -36,14 +36,15 @@ import {
 } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
+import Pagination from '../../components/common/Pagination';
 import { ROUTES } from '../../routes';
+import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
 import { getThemeColors } from '../../theme';
-import { useDataFetching } from '../../hooks/useDataFetching';
 import type { 
   UserOpenApiCreateReq, 
   UserOpenApiExtendReq, 
@@ -58,6 +59,9 @@ interface OpenApiManagementProps {
 
 export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'openapi-management' }) => {
   const navigate = useNavigate();
+  const [openApiList, setOpenApiList] = useState<UserOpenApiListRes | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // 다이얼로그 상태
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -80,7 +84,12 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
   const theme: 'user' | 'admin' = 'user';
   const colors = getThemeColors(theme);
 
-  // 데이터 페칭 훅 사용 (페이징 없음)
+  // Pagination 훅 사용
+  const pagination = usePagination({
+    initialLimit: PAGINATION.DEFAULT_PAGE_SIZE
+  });
+
+  // 데이터 페칭 훅 사용
   const {
     data: openApiList,
     isLoading: loading,
@@ -88,12 +97,25 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     isError,
     refetch
   } = useDataFetching({
-    fetchFunction: () => getUserOpenApiList({}),
-    dependencies: [],
+    fetchFunction: () => getUserOpenApiList({
+      page: pagination.currentPage,
+      limit: pagination.pageSize
+    }),
+    dependencies: [pagination.currentPage, pagination.pageSize],
     autoFetch: true
   });
 
+  // 페이지 크기 동기화
+  useEffect(() => {
+    if (openApiList) {
+      pagination.handlePageSizeChange(openApiList.limit);
+    }
+  }, [openApiList]);
 
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    pagination.handlePageChange(page);
+  };
 
   const handleCreateKey = async () => {
     if (!createForm.keyName || !createForm.keyDesc) {
@@ -148,19 +170,18 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     navigate(ROUTES.USER.DASHBOARD);
   };
 
-  const handleCopyKey = (authKey: string): void => {
+  const handleCopyKey = (authKey: string) => {
     navigator.clipboard.writeText(authKey);
   };
 
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return '';
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR');
   };
 
   const hasActiveKey = openApiList?.authKeys && openApiList.authKeys.length > 0;
 
   if (loading) {
-    return <LoadingSpinner loading={true} />;
+    return <LoadingSpinner />;
   }
 
   return (
@@ -181,10 +202,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
 
       {isError && (
         <Box sx={{ mb: SPACING.ERROR_ALERT_BOTTOM }}>
-          <ErrorAlert 
-            error="인증키 목록을 불러오는 중 오류가 발생했습니다." 
-            onClose={() => {}}
-          />
+          <ErrorAlert error="인증키 목록을 불러오는 중 오류가 발생했습니다." />
         </Box>
       )}
 
@@ -193,128 +211,120 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
           <Box sx={{ position: 'relative', minHeight: 400 }}>
             <LoadingSpinner loading={true} />
           </Box>
+        ) : isEmpty ? (
+          <CardContent>
+            <Alert severity="info">
+              발행된 인증키가 없습니다. 신규 발행 버튼을 클릭하여 인증키를 발행하세요.
+            </Alert>
+          </CardContent>
         ) : (
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
-              <Typography variant="h6" component="h2" sx={{ color: colors.text }}>
-                발행된 인증키
-              </Typography>
-              {(!openApiList?.authKeys || openApiList.authKeys.length === 0) && (
-                <ThemedButton
-                  id="create-key-btn"
-                  theme={theme}
-                  variant="primary"
-                  startIcon={<AddIcon />}
-                  onClick={() => setCreateDialogOpen(true)}
-                >
-                  신규 인증키 발행
-                </ThemedButton>
-              )}
-            </Box>
+            <Typography variant="h6" component="h2" sx={{ color: colors.text }}>
+              발행된 인증키
+            </Typography>
+            {!hasActiveKey && (
+              <ThemedButton
+                id="create-key-btn"
+                theme={theme}
+                variant="primary"
+                startIcon={<AddIcon />}
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                신규 인증키 발행
+              </ThemedButton>
+            )}
+          </Box>
 
-            {openApiList?.authKeys && openApiList.authKeys.length > 0 ? (
-              <List>
-                {openApiList.authKeys.map((authKey) => (
-                  <ListItem key={authKey.keyId} divider>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                            {authKey.authKey.substring(0, 8)}...
-                          </Typography>
-                          <Tooltip title="복사">
-                            <IconButton
-                              id={`copy-key-${authKey.keyId}`}
-                              size="small"
-                              onClick={() => handleCopyKey(authKey.authKey)}
-                            >
-                              <CopyIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            유효기간: {formatDate(authKey.startDt)} ~ {formatDate(authKey.endDt)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            생성일: {formatDate(authKey.createdAt)}
-                          </Typography>
-                        </Box>
-                      }
+          {hasActiveKey ? (
+            <List>
+              {openApiList!.authKeys.map((authKey) => (
+                <ListItem key={authKey.keyId} divider>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                          {authKey.authKey.substring(0, 8)}...
+                        </Typography>
+                        <Tooltip title="복사">
+                          <IconButton
+                            id={`copy-key-${authKey.keyId}`}
+                            size="small"
+                            onClick={() => handleCopyKey(authKey.authKey)}
+                          >
+                            <CopyIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          유효기간: {formatDate(authKey.startDt)} ~ {formatDate(authKey.endDt)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          생성일: {formatDate(authKey.createdAt)}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Chip
+                      label={authKey.activeYn === 'Y' ? '활성' : '비활성'}
+                      color={authKey.activeYn === 'Y' ? 'success' : 'default'}
+                      size="small"
                     />
-                    <Box sx={{ display: 'flex', gap: SPACING.SMALL }}>
-                      <Chip
-                        label={authKey.activeYn === 'Y' ? '활성' : '비활성'}
-                        color={authKey.activeYn === 'Y' ? 'success' : 'default'}
-                        size="small"
-                      />
-                      {authKey.activeYn === 'Y' && (
-                        <>
-                          <ThemedButton
-                            id={`extend-key-${authKey.keyId}`}
-                            theme={theme}
-                            variant="outlined"
-                            size="small"
-                            startIcon={<ScheduleIcon />}
-                            onClick={() => {
-                              setSelectedKeyId(authKey.keyId);
-                              setExtendDialogOpen(true);
-                            }}
-                          >
-                            기간연장
-                          </ThemedButton>
-                          <ThemedButton
-                            id={`delete-key-${authKey.keyId}`}
-                            theme={theme}
-                            variant="outlined"
-                            size="small"
-                            startIcon={<DeleteIcon />}
-                            onClick={() => {
-                              setSelectedKeyId(authKey.keyId);
-                              setDeleteDialogOpen(true);
-                            }}
-                            sx={{ color: colors.error }}
-                          >
-                            삭제
-                          </ThemedButton>
-                        </>
-                      )}
-                    </Box>
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                py: SPACING.LARGE,
-                minHeight: 200
-              }}>
-                <Typography 
-                  variant="body1" 
-                  color="text.secondary" 
-                  sx={{ mb: SPACING.MEDIUM, textAlign: 'center' }}
-                >
-                  발행된 인증키가 없습니다.
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  color="text.secondary" 
-                  sx={{ textAlign: 'center' }}
-                >
-                  신규 발행 버튼을 클릭하여 인증키를 발행하세요.
-                </Typography>
+                    {authKey.activeYn === 'Y' && (
+                      <>
+                        <ThemedButton
+                          id={`extend-key-${authKey.keyId}`}
+                          theme={theme}
+                          variant="outlined"
+                          size="small"
+                          startIcon={<ScheduleIcon />}
+                          onClick={() => {
+                            setSelectedKeyId(authKey.keyId);
+                            setExtendDialogOpen(true);
+                          }}
+                        >
+                          기간연장
+                        </ThemedButton>
+                        <ThemedButton
+                          id={`delete-key-${authKey.keyId}`}
+                          theme={theme}
+                          variant="outlined"
+                          size="small"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => {
+                            setSelectedKeyId(authKey.keyId);
+                            setDeleteDialogOpen(true);
+                          }}
+                          sx={{ color: colors.error }}
+                        >
+                          삭제
+                        </ThemedButton>
+                      </>
+                    )}
+                  </Box>
+                </ListItem>
+              ))}
+            </List>
+
+            // 페이지네이션
+            {openApiList && openApiList.totalPages > 1 && (
+              <Box sx={{ mt: SPACING.LARGE, display: 'flex', justifyContent: 'center' }}>
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={openApiList.totalPages}
+                  onPageChange={handlePageChange}
+                  theme={theme}
+                />
               </Box>
             )}
           </CardContent>
         )}
       </ThemedCard>
-
-      {/* 신규 인증키 발행 다이얼로그 */}
+      // 신규 인증키 발행 다이얼로그 
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>신규 인증키 발행</DialogTitle>
         <DialogContent>
@@ -360,7 +370,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
               sx={{ flex: 1 }}
             />
           </Box>
-          <Box sx={{ display: 'flex', gap: SPACING.SMALL }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <ThemedButton
               theme={theme}
               variant="outlined"
@@ -416,11 +426,11 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         theme={theme}
       />
 
-      {/* 기간 연장 다이얼로그 */}
+     // 기간 연장 다이얼로그
       <Dialog open={extendDialogOpen} onClose={() => setExtendDialogOpen(false)}>
         <DialogTitle>인증키 기간 연장</DialogTitle>
         <DialogContent>
-          <FormControl component="fieldset" sx={{ mt: SPACING.SMALL }}>
+          <FormControl component="fieldset" sx={{ mt: 1 }}>
             <RadioGroup
               value={extendForm.extensionDays}
               onChange={(e) => setExtendForm(prev => ({ ...prev, extensionDays: Number(e.target.value) }))}

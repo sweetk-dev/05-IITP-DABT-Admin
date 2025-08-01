@@ -10,6 +10,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { ArrowBack, NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { useDataFetching } from '../hooks/useDataFetching';
 import { getUserNoticeDetail, getUserNoticeList } from '../api';
+import { SPACING } from '../constants/spacing';
 import type { NoticeItem } from '../types/api';
 
 export default function NoticeDetail() {
@@ -103,28 +104,32 @@ export default function NoticeDetail() {
   const hasNext = currentIndex < allNotices.length - 1;
 
   return (
+    
     <Box
       sx={{
         minHeight: '100vh',
         background: colors.background,
-        py: 4
+        //Ｐ가 이상하면 ４로 수정 현재는 ３임 
+        py: SPACING.LARGE
       }}
     >
       <Box
         sx={{
           maxWidth: 1000,
           mx: 'auto',
-          px: { xs: 2, md: 4 }
+          //Ｐ가 이상하면 ４로 수정 현재는 ３임 
+          px: { xs: SPACING.MEDIUM, md: SPACING.LARGE }
         }}
       >
         {/* 헤더 */}
-        <Box sx={{ mb: 4 }}>
+      {/*Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+        <Box sx={{ mb: SPACING.LARGE }}>
           <ThemedButton
             theme={theme}
             variant="outlined"
             startIcon={<ArrowBack />}
             onClick={handleBackToList}
-            sx={{ mb: 2 }}
+            sx={{ mb: SPACING.MEDIUM }}
           >
             목록으로
           </ThemedButton>
@@ -148,22 +153,23 @@ export default function NoticeDetail() {
               theme={theme}
             />
           ) : notice ? (
-            <Box sx={{ p: 4 }}>
+            //Ｐ가 이상하면 ４로 수정 현재는 ３임 
+            <Box sx={{ p: SPACING.LARGE }}>
               {/* 헤더 정보 */}
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ mb: SPACING.LARGE }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.MEDIUM }}>
                   <Chip
                     label={getNoticeTypeLabel(notice.noticeType)}
                     color={getNoticeTypeColor(notice.noticeType) as any}
                     size="medium"
-                    sx={{ mr: 2 }}
+                    sx={{ mr: SPACING.MEDIUM }}
                   />
                   {notice.pinnedYn === 'Y' && (
                     <Chip
                       label="고정"
                       color="warning"
                       size="medium"
-                      sx={{ mr: 2 }}
+                      sx={{ mr: SPACING.MEDIUM }}
                     />
                   )}
                   <Typography
@@ -181,17 +187,18 @@ export default function NoticeDetail() {
                   sx={{
                     color: colors.text,
                     fontWeight: 600,
-                    mb: 2
+                    mb: SPACING.MEDIUM
                   }}
                 >
                   {notice.title}
                 </Typography>
               </Box>
 
-              <Divider sx={{ mb: 3 }} />
+              <Divider sx={{ mb: SPACING.LARGE }} />
 
               {/* 내용 */}
-              <Box sx={{ mb: 4 }}>
+              {/*Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+              <Box sx={{ mb: SPACING.LARGE }}>
                 <Typography
                   variant="body1"
                   sx={{
@@ -209,7 +216,7 @@ export default function NoticeDetail() {
                 display: 'flex', 
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                pt: 3,
+                pt: SPACING.LARGE,
                 borderTop: `1px solid ${colors.border}`
               }}>
                 <ThemedButton

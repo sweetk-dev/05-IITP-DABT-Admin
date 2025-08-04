@@ -59,7 +59,6 @@ export const API_URLS = {
       CREATE: '/faq',
       UPDATE: '/faq/:faqId',
       DELETE: '/faq/:faqId',
-      STATS: '/faq/stats',
     },
     // QnA 관리
     QNA: {
@@ -76,7 +75,6 @@ export const API_URLS = {
       CREATE: '/notice',
       UPDATE: '/notice/:noticeId',
       DELETE: '/notice/:noticeId',
-      STATS: '/notice/stats',
     },
     // Admin 계정 관리
     ACCOUNT: {
@@ -87,8 +85,6 @@ export const API_URLS = {
       UPDATE: '/accounts/:adminId',
       DELETE: '/accounts/:adminId',
       PASSWORD_CHANGE: '/accounts/:adminId/password',
-      STATUS_CHANGE: '/accounts/:adminId/status',
-      STATS: '/accounts/stats',
     },
     // OpenAPI 인증키 관리
     OPEN_API: {
@@ -98,7 +94,6 @@ export const API_URLS = {
       UPDATE: '/openapi/keys/:keyId',
       DELETE: '/openapi/keys/:keyId',
       EXTEND: '/openapi/keys/:keyId/extend',
-      STATS: '/openapi/keys/stats',
     }
   },
   
@@ -112,17 +107,61 @@ export const API_URLS = {
   
   // 공통 코드
   COMMON_CODE: {
-    BASE: '/api/common-code',
-    BY_GROUP: '/:grpId',
-    BY_ID: '/:grpId/:codeId',
-    BY_TYPE: '/type/:codeType',
-    BY_PARENT: '/:grpId/parent',
-    STATS: '/stats/overview',
-    // 관리자용 상세 조회
-    ADMIN_BY_GROUP: '/admin/:grpId',
-    ADMIN_BY_ID: '/admin/:grpId/:codeId',
-    ADMIN_BY_TYPE: '/admin/type/:codeType',
-    ADMIN_BY_PARENT: '/admin/:grpId/parent',
+    BASE: '/api/code',
+    
+    // 기본 조회 API
+    BASIC: {
+      BY_GROUP: '/:grpId',
+      BY_ID: '/:grpId/:codeId',
+      BY_TYPE: '/type/:codeType',
+      BY_PARENT: '/:grpId/parent',
+      STATS: '/stats/overview',
+    },
+    
+    // 관리자용 상세 조회 API
+    ADMIN: {
+      BY_GROUP: '/admin/:grpId',
+      BY_ID: '/admin/:grpId/:codeId',
+      BY_TYPE: '/admin/type/:codeType',
+      BY_PARENT: '/admin/:grpId/parent',
+    },
+    
+    // 계층 구조 조회 API
+    HIERARCHY: {
+      USER: '/:grpId/hierarchy',
+      ADMIN: '/admin/:grpId/hierarchy',
+      CHILDREN: {
+        USER: '/:grpId/children',
+        ADMIN: '/admin/:grpId/children',
+      },
+    },
+    
+    // 고급 조회 API
+    ADVANCED: {
+      TREE: '/admin/:grpId/tree',
+      PARENT: '/admin/:grpId/:codeId/parent',
+      DESCENDANTS: '/admin/:grpId/:codeId/descendants',
+    },
+    
+    // 유틸리티 API
+    UTILITY: {
+      LEVEL: '/admin/:grpId/level/:level',
+    },
+    
+    // 관리자용 그룹 관리 API
+    GROUP: {
+      LIST: '/admin/groups',           // GET
+      CREATE: '/admin/group',          // POST
+      UPDATE: '/admin/group/:grpId',  // PUT
+      DELETE: '/admin/group/:grpId',  // DELETE
+    },
+    
+    // 관리자용 코드 관리 API
+    CODE: {
+      CREATE: '/admin/:grpId/code',        // POST
+      UPDATE: '/admin/:grpId/:codeId',    // PUT
+      DELETE: '/admin/:grpId/:codeId',    // DELETE
+    },
   }
 } as const;
 
@@ -141,22 +180,24 @@ export const getCommonCodeUrl = (path: string): string => buildUrl(API_URLS.COMM
 // 완전한 URL 상수들 (함수 조합으로 생성)
 export const FULL_API_URLS = {
   AUTH: {
-    USER_LOGIN: getAuthUrl(API_URLS.AUTH.USER.LOGIN),
-    USER_LOGOUT: getAuthUrl(API_URLS.AUTH.USER.LOGOUT),
-    USER_REFRESH: getAuthUrl(API_URLS.AUTH.USER.REFRESH),
-    ADMIN_LOGIN: getAuthUrl(API_URLS.AUTH.ADMIN.LOGIN),
-    ADMIN_LOGOUT: getAuthUrl(API_URLS.AUTH.ADMIN.LOGOUT),
-    ADMIN_REFRESH: getAuthUrl(API_URLS.AUTH.ADMIN.REFRESH),
+    USER: {
+      LOGIN: getAuthUrl(API_URLS.AUTH.USER.LOGIN),
+      LOGOUT: getAuthUrl(API_URLS.AUTH.USER.LOGOUT),
+      REFRESH: getAuthUrl(API_URLS.AUTH.USER.REFRESH)
+    },
+    ADMIN: {
+      LOGIN: getAuthUrl(API_URLS.AUTH.ADMIN.LOGIN),
+      LOGOUT: getAuthUrl(API_URLS.AUTH.ADMIN.LOGOUT),
+      REFRESH: getAuthUrl(API_URLS.AUTH.ADMIN.REFRESH)
+    }
   },
   USER: {
     PROFILE: {
-      GET: getUserUrl(API_URLS.USER.PROFILE),
-      POST: getUserUrl(API_URLS.USER.PROFILE),
-      PUT: getUserUrl(API_URLS.USER.PROFILE)
+      DETAIL: getUserUrl(API_URLS.USER.PROFILE),
+      UPDATE: getUserUrl(API_URLS.USER.PROFILE)
     },
     PASSWORD: {
-      POST: getUserUrl(API_URLS.USER.PASSWORD),
-      PUT: getUserUrl(API_URLS.USER.PASSWORD)
+      UPDATE: getUserUrl(API_URLS.USER.PASSWORD)
     },
     REGISTER: getUserUrl(API_URLS.USER.REGISTER),
     CHECK_EMAIL: getUserUrl(API_URLS.USER.CHECK_EMAIL),
@@ -186,13 +227,11 @@ export const FULL_API_URLS = {
   },
   ADMIN: {
     PROFILE: {
-      GET: getAdminUrl(API_URLS.ADMIN.PROFILE),
-      POST: getAdminUrl(API_URLS.ADMIN.PROFILE),
-      PUT: getAdminUrl(API_URLS.ADMIN.PROFILE)
+      DETAIL: getAdminUrl(API_URLS.ADMIN.PROFILE),
+      UPDATE: getAdminUrl(API_URLS.ADMIN.PROFILE)
     },
     PASSWORD: {
-      POST: getAdminUrl(API_URLS.ADMIN.PASSWORD),
-      PUT: getAdminUrl(API_URLS.ADMIN.PASSWORD)
+      UPDATE: getAdminUrl(API_URLS.ADMIN.PASSWORD)
     },
     FAQ: {
       LIST: getAdminUrl(API_URLS.ADMIN.FAQ.LIST),
@@ -200,7 +239,6 @@ export const FULL_API_URLS = {
       CREATE: getAdminUrl(API_URLS.ADMIN.FAQ.CREATE),
       UPDATE: getAdminUrl(API_URLS.ADMIN.FAQ.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.FAQ.DELETE),
-      STATS: getAdminUrl(API_URLS.ADMIN.FAQ.STATS),
     },
     QNA: {
       LIST: getAdminUrl(API_URLS.ADMIN.QNA.LIST),
@@ -215,7 +253,6 @@ export const FULL_API_URLS = {
       CREATE: getAdminUrl(API_URLS.ADMIN.NOTICE.CREATE),
       UPDATE: getAdminUrl(API_URLS.ADMIN.NOTICE.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.NOTICE.DELETE),
-      STATS: getAdminUrl(API_URLS.ADMIN.NOTICE.STATS),
     },
     ACCOUNT: {
       LIST: getAdminUrl(API_URLS.ADMIN.ACCOUNT.LIST),
@@ -225,8 +262,6 @@ export const FULL_API_URLS = {
       UPDATE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.DELETE),
       PASSWORD_CHANGE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.PASSWORD_CHANGE),
-      STATUS_CHANGE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.STATUS_CHANGE),
-      STATS: getAdminUrl(API_URLS.ADMIN.ACCOUNT.STATS),
     },
     OPEN_API: {
       LIST: getAdminUrl(API_URLS.ADMIN.OPEN_API.LIST),
@@ -235,7 +270,6 @@ export const FULL_API_URLS = {
       UPDATE: getAdminUrl(API_URLS.ADMIN.OPEN_API.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.OPEN_API.DELETE),
       EXTEND: getAdminUrl(API_URLS.ADMIN.OPEN_API.EXTEND),
-      STATS: getAdminUrl(API_URLS.ADMIN.OPEN_API.STATS),
     }
   },
   COMMON: {
@@ -244,16 +278,59 @@ export const FULL_API_URLS = {
     JWT_CONFIG: getCommonUrl(API_URLS.COMMON.JWT_CONFIG),
   },
   COMMON_CODE: {
-    BY_GROUP: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_GROUP),
-    BY_ID: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_ID),
-    BY_TYPE: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_TYPE),
-    BY_PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.BY_PARENT),
-    STATS: getCommonCodeUrl(API_URLS.COMMON_CODE.STATS),
-    // 관리자용 상세 조회
-    ADMIN_BY_GROUP: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_GROUP),
-    ADMIN_BY_ID: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_ID),
-    ADMIN_BY_TYPE: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_TYPE),
-    ADMIN_BY_PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN_BY_PARENT),
+    // 기본 조회 API
+    BASIC: {
+      BY_GROUP: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.BY_GROUP),
+      BY_ID: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.BY_ID),
+      BY_TYPE: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.BY_TYPE),
+      BY_PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.BY_PARENT),
+      STATS: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.STATS),
+    },
+    
+    // 관리자용 상세 조회 API
+    ADMIN: {
+      BY_GROUP: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN.BY_GROUP),
+      BY_ID: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN.BY_ID),
+      BY_TYPE: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN.BY_TYPE),
+      BY_PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.ADMIN.BY_PARENT),
+    },
+    
+    // 계층 구조 조회 API
+    HIERARCHY: {
+      USER: getCommonCodeUrl(API_URLS.COMMON_CODE.HIERARCHY.USER),
+      ADMIN: getCommonCodeUrl(API_URLS.COMMON_CODE.HIERARCHY.ADMIN),
+      CHILDREN: {
+        USER: getCommonCodeUrl(API_URLS.COMMON_CODE.HIERARCHY.CHILDREN.USER),
+        ADMIN: getCommonCodeUrl(API_URLS.COMMON_CODE.HIERARCHY.CHILDREN.ADMIN),
+      },
+    },
+    
+    // 고급 조회 API
+    ADVANCED: {
+      TREE: getCommonCodeUrl(API_URLS.COMMON_CODE.ADVANCED.TREE),
+      PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.ADVANCED.PARENT),
+      DESCENDANTS: getCommonCodeUrl(API_URLS.COMMON_CODE.ADVANCED.DESCENDANTS),
+    },
+    
+    // 유틸리티 API
+    UTILITY: {
+      LEVEL: getCommonCodeUrl(API_URLS.COMMON_CODE.UTILITY.LEVEL),
+    },
+    
+    // 관리자용 그룹 관리 API
+    GROUP: {
+      LIST: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.LIST),           // GET
+      CREATE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.CREATE),       // POST
+      UPDATE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.UPDATE),       // PUT
+      DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.DELETE),       // DELETE
+    },
+    
+    // 관리자용 코드 관리 API
+    CODE: {
+      CREATE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.CREATE),        // POST
+      UPDATE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.UPDATE),        // PUT
+      DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.DELETE),        // DELETE
+    },
   }
 } as const;
 

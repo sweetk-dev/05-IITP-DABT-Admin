@@ -114,8 +114,7 @@ export const API_URLS = {
       BY_GROUP: '/:grpId',
       BY_ID: '/:grpId/:codeId',
       BY_TYPE: '/type/:codeType',
-      BY_PARENT: '/:grpId/parent',
-      STATS: '/stats/overview',
+      BY_PARENT: '/:grpId/parent'
     },
     
     // 관리자용 상세 조회 API
@@ -284,7 +283,6 @@ export const FULL_API_URLS = {
       BY_ID: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.BY_ID),
       BY_TYPE: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.BY_TYPE),
       BY_PARENT: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.BY_PARENT),
-      STATS: getCommonCodeUrl(API_URLS.COMMON_CODE.BASIC.STATS),
     },
     
     // 관리자용 상세 조회 API

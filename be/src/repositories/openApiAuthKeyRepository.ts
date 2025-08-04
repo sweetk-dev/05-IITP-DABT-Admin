@@ -16,24 +16,38 @@ export async function findAuthKeyByKey(authKey: string): Promise<OpenApiAuthKey 
 
 /**
  * 사용자 ID로 활성 인증 키 조회
+ * @param userId 사용자 ID
+ * @param includeUnlimited 기간이 설정되지 않은 키도 포함할지 여부 (관리자용)
  */
-export async function findActiveAuthKeysByUserId(userId: number): Promise<OpenApiAuthKey[]> {
+export async function findActiveAuthKeysByUserId(userId: number, includeUnlimited: boolean = false): Promise<OpenApiAuthKey[]> {
+  const currDate = new Date();
+  
+  const whereClause: any = {
+    userId,
+    delYn: 'N',
+    activeYn: 'Y'
+  };
+
+  if (includeUnlimited) {
+    // 관리자용: 기간이 설정되지 않은 키도 포함
+    whereClause[Op.or] = [
+      {
+        startDt: { [Op.lte]: currDate },
+        endDt: { [Op.gte]: currDate }
+      },
+      {
+        startDt: { [Op.is]: null },
+        endDt: { [Op.is]: null }
+      }
+    ];
+  } else {
+    // 사용자용: 기간이 설정된 활성 키만
+    whereClause.startDt = { [Op.lte]: currDate };
+    whereClause.endDt = { [Op.gte]: currDate };
+  }
+  
   return OpenApiAuthKey.findAll({ 
-    where: { 
-      userId,
-      delYn: 'N',
-      activeYn: 'Y',
-      [Op.or]: [
-        {
-          startDt: { [Op.lte]: new Date() },
-          endDt: { [Op.gte]: new Date() }
-        },
-        {
-          startDt: null,
-          endDt: null
-        }
-      ]
-    },
+    where: whereClause,
     order: [['createdAt', 'DESC']]
   });
 }
@@ -199,61 +213,83 @@ export async function deleteAuthKey(keyId: number, deletedBy: string): Promise<b
 
 /**
  * 유효한 인증 키인지 확인
+ * @param authKey 인증 키
+ * @param includeUnlimited 기간이 설정되지 않은 키도 포함할지 여부 (관리자용)
  */
-export async function isValidAuthKey(authKey: string): Promise<boolean> {
-  const key = await OpenApiAuthKey.findOne({ 
-    where: { 
-      authKey,
-      delYn: 'N',
-      activeYn: 'Y',
-      [Op.or]: [
-        {
-          startDt: { [Op.lte]: new Date() },
-          endDt: { [Op.gte]: new Date() }
-        },
-        {
-          startDt: null,
-          endDt: null
-        }
-      ]
-    } 
-  });
+export async function isValidAuthKey(authKey: string, includeUnlimited: boolean = false): Promise<boolean> {
+  const currDate = new Date();
+  
+  const whereClause: any = {
+    authKey,
+    delYn: 'N',
+    activeYn: 'Y'
+  };
+
+  if (includeUnlimited) {
+    // 관리자용: 기간이 설정되지 않은 키도 포함
+    whereClause[Op.or] = [
+      {
+        startDt: { [Op.lte]: currDate },
+        endDt: { [Op.gte]: currDate }
+      },
+      {
+        startDt: { [Op.is]: null },
+        endDt: { [Op.is]: null }
+      }
+    ];
+  } else {
+    // 사용자용: 기간이 설정된 활성 키만
+    whereClause.startDt = { [Op.lte]: currDate };
+    whereClause.endDt = { [Op.gte]: currDate };
+  }
+  
+  const key = await OpenApiAuthKey.findOne({ where: whereClause });
   return !!key;
 }
 
 /**
  * 인증 키 통계 조회
+ * @param userId 사용자 ID
+ * @param includeUnlimited 기간이 설정되지 않은 키도 포함할지 여부 (관리자용)
  */
-export async function getAuthKeyStats(userId: number): Promise<{
+export async function getAuthKeyStats(userId: number, includeUnlimited: boolean = false): Promise<{
   total: number;
   active: number;
   expired: number;
 }> {
+  const currDate = new Date();
+  
+  const activeWhereClause: any = {
+    userId, 
+    delYn: 'N', 
+    activeYn: 'Y'
+  };
+
+  if (includeUnlimited) {
+    activeWhereClause[Op.or] = [
+      {
+        startDt: { [Op.lte]: currDate },
+        endDt: { [Op.gte]: currDate }
+      },
+      {
+        startDt: { [Op.is]: null },
+        endDt: { [Op.is]: null }
+      }
+    ];
+  } else {
+    activeWhereClause.startDt = { [Op.lte]: currDate };
+    activeWhereClause.endDt = { [Op.gte]: currDate };
+  }
+  
   const [total, active, expired] = await Promise.all([
     OpenApiAuthKey.count({ where: { userId, delYn: 'N' } }),
+    OpenApiAuthKey.count({ where: activeWhereClause }),
     OpenApiAuthKey.count({ 
       where: { 
         userId, 
         delYn: 'N', 
         activeYn: 'Y',
-        [Op.or]: [
-          {
-            startDt: { [Op.lte]: new Date() },
-            endDt: { [Op.gte]: new Date() }
-          },
-          {
-            startDt: null,
-            endDt: null
-          }
-        ]
-      } 
-    }),
-    OpenApiAuthKey.count({ 
-      where: { 
-        userId, 
-        delYn: 'N', 
-        activeYn: 'Y',
-        endDt: { [Op.lt]: new Date() }
+        endDt: { [Op.lt]: currDate }
       } 
     })
   ]);
@@ -306,23 +342,33 @@ export async function findAuthKeyById(keyId: number): Promise<OpenApiAuthKey | n
 
 /**
  * 사용자별 활성 인증 키 개수 조회
+ * @param userId 사용자 ID
+ * @param includeUnlimited 기간이 설정되지 않은 키도 포함할지 여부 (관리자용)
  */
-export async function countActiveAuthKeysByUserId(userId: number): Promise<number> {
-  return OpenApiAuthKey.count({
-    where: { 
-      userId,
-      delYn: 'N',
-      activeYn: 'Y',
-      [Op.or]: [
-        {
-          startDt: { [Op.lte]: new Date() },
-          endDt: { [Op.gte]: new Date() }
-        },
-        {
-          startDt: null,
-          endDt: null
-        }
-      ]
-    }
-  });
+export async function countActiveAuthKeysByUserId(userId: number, includeUnlimited: boolean = false): Promise<number> {
+  const currDate = new Date();
+  
+  const whereClause: any = {
+    userId,
+    delYn: 'N',
+    activeYn: 'Y'
+  };
+
+  if (includeUnlimited) {
+    whereClause[Op.or] = [
+      {
+        startDt: { [Op.lte]: currDate },
+        endDt: { [Op.gte]: currDate }
+      },
+      {
+        startDt: { [Op.is]: null },
+        endDt: { [Op.is]: null }
+      }
+    ];
+  } else {
+    whereClause.startDt = { [Op.lte]: currDate };
+    whereClause.endDt = { [Op.gte]: currDate };
+  }
+  
+  return OpenApiAuthKey.count({ where: whereClause });
 } 

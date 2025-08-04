@@ -6,6 +6,14 @@
 import { Request } from 'express';
 
 /**
+ * 사용자 타입 상수
+ */
+export const USER_TYPE_ADMIN = 'A' as const;
+export const USER_TYPE_GENERAL = 'U' as const;
+
+export type UserType = typeof USER_TYPE_ADMIN | typeof USER_TYPE_GENERAL;
+
+/**
  * Request에서 사용자 정보 추출
  * @param req Express Request 객체
  * @returns 사용자 정보 또는 null
@@ -28,7 +36,7 @@ export function extractUserIdFromRequest(req: Request): number | null {
  * @param req Express Request 객체
  * @returns 사용자 타입 또는 null
  */
-export function extractUserTypeFromRequest(req: Request): 'U' | 'A' | null {
+export function extractUserTypeFromRequest(req: Request): UserType | null {
   return req.user?.userType || null;
 }
 
@@ -38,7 +46,7 @@ export function extractUserTypeFromRequest(req: Request): 'U' | 'A' | null {
  * @returns 관리자 여부
  */
 export function isAdmin(userType: string | null): boolean {
-  return userType === 'A';
+  return userType === USER_TYPE_ADMIN;
 }
 
 /**
@@ -47,7 +55,7 @@ export function isAdmin(userType: string | null): boolean {
  * @returns 사용자 여부
  */
 export function isUser(userType: string | null): boolean {
-  return userType === 'U';
+  return userType === USER_TYPE_GENERAL;
 }
 
 /**

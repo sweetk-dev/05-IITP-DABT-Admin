@@ -8,7 +8,8 @@ import {
   extractUserTypeFromRequest,
   extractClientIP,
   normalizeUserAgent,
-  normalizeErrorMessage
+  normalizeErrorMessage,
+  USER_TYPE_GENERAL
 } from '../../utils/commonUtils';
 import { 
   UserLoginReq, 
@@ -93,6 +94,15 @@ export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Respo
     const userType = extractUserTypeFromRequest(req);
     const ipAddr = extractClientIP(req);
     const userAgent = normalizeUserAgent(req.headers['user-agent']);
+
+    // userId가 null인 경우 처리
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+     if(userType !== USER_TYPE_GENERAL) {
+          return sendError(res, ErrorCode.ACCESS_DENIED);
+        }
 
     const result = await logout(userId, userType, '사용자 로그아웃', ipAddr, userAgent);
 

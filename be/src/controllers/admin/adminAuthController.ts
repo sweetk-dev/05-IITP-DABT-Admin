@@ -6,9 +6,11 @@ import { appLogger } from '../../utils/logger';
 import { getAdminRoleCodeName } from '../../services/common/commonCodeService';
 import { 
   extractUserIdFromRequest,
+  extractUserTypeFromRequest,
   extractClientIP,
   normalizeUserAgent,
-  normalizeErrorMessage
+  normalizeErrorMessage,
+  USER_TYPE_ADMIN
 } from '../../utils/commonUtils';
 import {
   AdminLoginReq,
@@ -61,13 +63,28 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
 export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Response) => {
   try {
     const userId = extractUserIdFromRequest(req);
+    const userType = extractUserTypeFromRequest(req);
+    const ipAddr = extractClientIP(req);
+    const userAgent = normalizeUserAgent(req.headers['user-agent']);
 
+    // userId가 null인 경우 처리
     if (!userId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    await logout(userId, 'A');
-    sendSuccess(res, { success: true, message: '로그아웃되었습니다.' } as AdminLogoutRes, undefined, 'ADMIN_LOGOUT', { userId });
+    if(userType !== USER_TYPE_ADMIN) {
+      return sendError(res, ErrorCode.ACCESS_DENIED);
+    }
+
+      
+    const result = await logout(userId, userType, '관리자 로그아웃', ipAddr, userAgent);
+
+    const response: AdminLogoutRes = {
+      success: result.success,
+      message: result.message
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_LOGOUT', { userId, userType });
   } catch (error) {
     appLogger.error('Error in adminLogout:', error);
     sendError(res, ErrorCode.LOGOUT_FAILED);

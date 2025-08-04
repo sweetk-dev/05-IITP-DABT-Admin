@@ -92,7 +92,7 @@ export const getUserOpenApiDetail = async (req: Request<{ keyId: string }>, res:
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
       if (errorMsg.includes('인증키를 찾을 수 없습니다')) {
-        return sendError(res, ErrorCode.NOT_FOUND);
+        return sendError(res, ErrorCode.USER_NOT_FOUND);
       }
       if (errorMsg.includes('접근 권한이 없습니다')) {
         return sendError(res, ErrorCode.FORBIDDEN);
@@ -199,7 +199,7 @@ export const deleteUserOpenApi = async (req: Request<{ keyId: string }>, res: Re
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
       if (errorMsg.includes('인증키를 찾을 수 없습니다')) {
-        return sendError(res, ErrorCode.NOT_FOUND);
+        return sendError(res, ErrorCode.USER_NOT_FOUND);
       }
       if (errorMsg.includes('접근 권한이 없습니다')) {
         return sendError(res, ErrorCode.FORBIDDEN);
@@ -256,7 +256,7 @@ export const extendUserOpenApi = async (req: Request<{ keyId: string }, {}, User
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
       if (errorMsg.includes('인증키를 찾을 수 없습니다')) {
-        return sendError(res, ErrorCode.NOT_FOUND);
+        return sendError(res, ErrorCode.USER_NOT_FOUND);
       }
       if (errorMsg.includes('접근 권한이 없습니다')) {
         return sendError(res, ErrorCode.FORBIDDEN);

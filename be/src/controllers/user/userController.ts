@@ -8,6 +8,8 @@ import {
   UserProfileUpdateReq,
   UserPasswordChangeReq,
   ErrorCode,
+  USER_API_MAPPING,
+  API_URLS,
   isValidEmail,
   isValidPassword,
   isValidName,
@@ -26,9 +28,20 @@ import {
   normalizeErrorMessage 
 } from '../../utils/commonUtils';
 
-// 이메일 중복 확인
+/**
+ * 사용자 이메일 중복 확인
+ * API: POST /api/user/email/check
+ * 매핑: USER_API_MAPPING[`POST ${API_URLS.USER.CHECK_EMAIL}`]
+ */
 export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.USER.CHECK_EMAIL}`;
+    const mapping = USER_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 이메일 중복 확인'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     // 기본 파라미터 검증
     const { email } = req.body;
 
@@ -43,7 +56,12 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: R
 
     const response = await UserService.checkEmailAvailability(email);
     
-    sendSuccess(res, response, response.isAvailable ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.');
+    const result: UserCheckEmailRes = {
+      isAvailable: response.isAvailable,
+      message: response.isAvailable ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.'
+    };
+    
+    sendSuccess(res, result, result.message);
   } catch (error) {
     appLogger.error('이메일 중복 확인 중 오류 발생', { error, email: req.body.email });
     
@@ -59,9 +77,20 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: R
   }
 };
 
-// 사용자 회원가입
+/**
+ * 사용자 회원가입
+ * API: POST /api/user/register
+ * 매핑: USER_API_MAPPING[`POST ${API_URLS.USER.REGISTER}`]
+ */
 export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.USER.REGISTER}`;
+    const mapping = USER_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 회원가입'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     // 기본 파라미터 검증
     const { email, password, name, affiliation } = req.body;
 
@@ -98,7 +127,15 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
 
     const response = await UserService.registerUser({ email, password, name, affiliation });
 
-    sendSuccess(res, response, '회원가입이 완료되었습니다.', 'USER_REGISTRATION', {
+    const result: UserRegisterRes = {
+      userId: response.userId,
+      email: response.email,
+      name: response.name,
+      affiliation: response.affiliation,
+      message: '회원가입이 완료되었습니다.'
+    };
+
+    sendSuccess(res, result, result.message, 'USER_REGISTRATION', {
       userId: response.userId,
       email: response.email,
       name: response.name,
@@ -129,9 +166,20 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
   }
 };
 
-// 사용자 프로필 조회
+/**
+ * 사용자 프로필 조회
+ * API: GET /api/user/profile
+ * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.PROFILE}`]
+ */
 export const getProfile = async (req: Request, res: Response) => {
   try {
+    const apiKey = `GET ${API_URLS.USER.PROFILE}`;
+    const mapping = USER_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 프로필 조회'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const userId = extractUserIdFromRequest(req);
     
     if (!userId) {
@@ -140,7 +188,15 @@ export const getProfile = async (req: Request, res: Response) => {
 
     const response = await UserService.getUserProfile(userId);
 
-    sendSuccess(res, response, undefined, 'USER_PROFILE_VIEW', {
+    const result: UserProfileRes = {
+      userId: response.userId,
+      email: response.email,
+      name: response.name,
+      affiliation: response.affiliation,
+      createdAt: response.createdAt
+    };
+
+    sendSuccess(res, result, undefined, 'USER_PROFILE_VIEW', {
       userId: response.userId,
       email: response.email
     });
@@ -188,7 +244,12 @@ export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, 
 
     await UserService.updateUserProfile(userId, { name, affiliation });
 
-    sendSuccess(res, { success: true }, '프로필이 성공적으로 업데이트되었습니다.', 'USER_PROFILE_UPDATE', {
+    const result: UserProfileUpdateRes = {
+      success: true,
+      message: '프로필이 성공적으로 업데이트되었습니다.'
+    };
+
+    sendSuccess(res, result, result.message, 'USER_PROFILE_UPDATE', {
       userId: userId,
       name: name,
       affiliation: affiliation
@@ -240,7 +301,12 @@ export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>
 
     await UserService.changeUserPassword(userId, { currentPassword, newPassword });
 
-    sendSuccess(res, { success: true }, '비밀번호가 성공적으로 변경되었습니다.', 'USER_PASSWORD_CHANGE', {
+    const result: UserPasswordChangeRes = {
+      success: true,
+      message: '비밀번호가 성공적으로 변경되었습니다.'
+    };
+
+    sendSuccess(res, result, result.message, 'USER_PASSWORD_CHANGE', {
       userId: userId
     });
   } catch (error) {

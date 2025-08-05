@@ -1,142 +1,131 @@
 import { Request, Response } from 'express';
-import { ErrorCode } from '@iitp-dabt/common';
-// import { sendError, sendSuccess } from '../../utils/errorHandler';
-// import { 
-//   getQnaList, 
-//   getQnaDetail, 
-//   createQna 
-// } from '../../services/user/userQnaService';
-// import { 
-//   UserQnaListReq, 
-//   UserQnaListRes, 
-//   UserQnaDetailReq, 
-//   UserQnaDetailRes,
-//   UserQnaCreateReq,
-//   UserQnaCreateRes
-// } from '@iitp-dabt/common';
+import { 
+  ErrorCode,
+  USER_API_MAPPING,
+  API_URLS,
+  UserQnaListReq,
+  UserQnaListRes,
+  UserQnaDetailReq,
+  UserQnaDetailRes,
+  UserQnaCreateReq,
+  UserQnaCreateRes
+} from '@iitp-dabt/common';
+import { sendError, sendSuccess } from '../../utils/errorHandler';
+import { appLogger } from '../../utils/logger';
+import { extractUserIdFromRequest } from '../../utils/commonUtils';
+import { 
+  getUserQnaList, 
+  getUserQnaDetail, 
+  createUserQna 
+} from '../../services/user/userQnaService';
 
-// 임시 더미 함수들 (나중에 구현 예정)
-export const getQnaListForUser = async (req: Request, res: Response) => {
-  res.status(501).json({ message: 'Not implemented yet' });
+/**
+ * 사용자 Q&A 목록 조회
+ * API: GET /api/user/qna
+ * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.QNA.LIST}`]
+ */
+export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListReq>, res: Response) => {
+  try {
+    const apiKey = `GET ${API_URLS.USER.QNA.LIST}`;
+    const mapping = USER_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 Q&A 목록 조회'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+
+    const userId = extractUserIdFromRequest(req);
+    
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    const params = req.query;
+
+    const response = await getUserQnaList(userId, params);
+    
+    const result: UserQnaListRes = {
+      qnas: response.qnas,
+      total: response.total,
+      page: response.page,
+      limit: response.limit,
+      totalPages: response.totalPages
+    };
+
+    sendSuccess(res, result, undefined, 'USER_QNA_LIST_VIEW', { userId });
+  } catch (error) {
+    appLogger.error('사용자 Q&A 목록 조회 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    sendError(res, ErrorCode.QNA_NOT_FOUND);
+  }
 };
 
-export const getQnaDetailForUser = async (req: Request, res: Response) => {
-  res.status(501).json({ message: 'Not implemented yet' });
+/**
+ * 사용자 Q&A 상세 조회
+ * API: GET /api/user/qna/:qnaId
+ * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.QNA.DETAIL}`]
+ */
+export const getQnaDetailForUser = async (req: Request<UserQnaDetailReq>, res: Response) => {
+  try {
+    const apiKey = `GET ${API_URLS.USER.QNA.DETAIL}`;
+    const mapping = USER_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 Q&A 상세 조회'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+
+    const userId = extractUserIdFromRequest(req);
+    
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    const { qnaId } = req.params;
+    const keyId = parseInt(qnaId);
+
+    const response = await getUserQnaDetail(userId, keyId);
+    
+    const result: UserQnaDetailRes = {
+      qna: response.qna
+    };
+
+    sendSuccess(res, result, undefined, 'USER_QNA_DETAIL_VIEW', { userId, qnaId });
+  } catch (error) {
+    appLogger.error('사용자 Q&A 상세 조회 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    sendError(res, ErrorCode.QNA_NOT_FOUND);
+  }
 };
 
-export const createQnaForUser = async (req: Request, res: Response) => {
-  res.status(501).json({ message: 'Not implemented yet' });
-};
+/**
+ * 사용자 Q&A 생성
+ * API: POST /api/user/qna
+ * 매핑: USER_API_MAPPING[`POST ${API_URLS.USER.QNA.CREATE}`]
+ */
+export const createQnaForUser = async (req: Request<{}, {}, UserQnaCreateReq>, res: Response) => {
+  try {
+    const apiKey = `POST ${API_URLS.USER.QNA.CREATE}`;
+    const mapping = USER_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 Q&A 생성'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
 
-// // QnA 목록 조회 (사용자용)
-// export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListReq>, res: Response) => {
-//   try {
-//     const { page = 1, limit = 10, qnaType, search } = req.query;
-//     const userId = (req as any).user?.userId;
+    const userId = extractUserIdFromRequest(req);
     
-//     if (!userId) {
-//       return sendError(res, ErrorCode.UNAUTHORIZED);
-//     }
-    
-//     const result = await getQnaList({
-//       page: parseInt(page as string),
-//       limit: parseInt(limit as string),
-//       qnaType,
-//       search,
-//       userId
-//     });
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
 
-//     const response: UserQnaListRes = {
-//       qnas: result.qnas.map(qna => ({
-//         qnaId: qna.qnaId,
-//         userId: qna.userId,
-//         qnaType: qna.qnaType,
-//         title: qna.title,
-//         content: qna.content,
-//         secretYn: qna.secretYn,
-//         status: qna.status,
-//         writerName: qna.writerName || '',
-//         createdAt: qna.createdAt.toISOString(),
-//         answeredAt: qna.answeredAt?.toISOString(),
-//         answeredBy: qna.answeredBy
-//       })),
-//       total: result.total,
-//       page: result.page,
-//       limit: result.limit,
-//       totalPages: Math.ceil(result.total / result.limit),
-//       items: result.qnas
-//     };
+    const { qnaType, title, content, secretYn, writerName } = req.body;
 
-//     sendSuccess(res, response);
-//   } catch (error) {
-//     sendError(res, ErrorCode.QNA_NOT_FOUND);
-//   }
-// };
+    const result = await createUserQna(userId, { qnaType, title, content, secretYn, writerName });
 
-// // QnA 상세 조회 (사용자용)
-// export const getQnaDetailForUser = async (req: Request<UserQnaDetailReq>, res: Response) => {
-//   try {
-//     const { qnaId } = req.params;
-//     const userId = (req as any).user?.userId;
-    
-//     if (!userId) {
-//       return sendError(res, ErrorCode.UNAUTHORIZED);
-//     }
-    
-//     const qna = await getQnaDetail(parseInt(qnaId), userId);
-//     if (!qna) {
-//       return sendError(res, ErrorCode.QNA_NOT_FOUND);
-//     }
-
-//     const response: UserQnaDetailRes = {
-//       qna: {
-//         qnaId: qna.qnaId,
-//         userId: qna.userId,
-//         qnaType: qna.qnaType,
-//         title: qna.title,
-//         content: qna.content,
-//         secretYn: qna.secretYn,
-//         status: qna.status,
-//         writerName: qna.writerName || '',
-//         createdAt: qna.createdAt.toISOString(),
-//         answeredAt: qna.answeredAt?.toISOString(),
-//         answeredBy: qna.answeredBy,
-//         answerContent: qna.answerContent
-//       }
-//     };
-
-//     sendSuccess(res, response);
-//   } catch (error) {
-//     sendError(res, ErrorCode.QNA_NOT_FOUND);
-//   }
-// };
-
-// // QnA 생성 (사용자용)
-// export const createQnaForUser = async (req: Request<{}, {}, UserQnaCreateReq>, res: Response) => {
-//   try {
-//     const { qnaType, title, content, secretYn, writerName } = req.body;
-//     const userId = (req as any).user?.user;
-    
-//     if (!userId) {
-//       return sendError(res, ErrorCode.UNAUTHORIZED);
-//     }
-    
-//     const result = await createQna({
-//       userId,
-//       qnaType,
-//       title,
-//       content,
-//       secretYn,
-//       writerName
-//     });
-
-//     const response: UserQnaCreateRes = {
-//       qnaId: result.qnaId,
-//       message: 'QnA가 등록되었습니다.'
-//     };
-
-//     sendSuccess(res, response);
-//   } catch (error) {
-//     sendError(res, ErrorCode.QNA_CREATE_FAILED);
-//   }
-// }; 
+    sendSuccess(res, result, result.message, 'USER_QNA_CREATE', { 
+      userId, 
+      qnaId: result.qnaId,
+      qnaType,
+      title 
+    });
+  } catch (error) {
+    appLogger.error('사용자 Q&A 생성 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    sendError(res, ErrorCode.QNA_CREATE_FAILED);
+  }
+}; 

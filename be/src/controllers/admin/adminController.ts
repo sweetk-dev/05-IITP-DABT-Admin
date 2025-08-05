@@ -5,6 +5,8 @@ import {
   AdminProfileUpdateReq, 
   AdminPasswordChangeReq,
   ErrorCode,
+  ADMIN_API_MAPPING,
+  API_URLS,
   isValidPassword 
 } from '@iitp-dabt/common';
 import { 
@@ -24,9 +26,20 @@ import {
   normalizeErrorMessage
 } from '../../utils/commonUtils';
 
-// 관리자 프로필 조회
+/**
+ * 관리자 프로필 조회
+ * API: GET /api/admin/profile
+ * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.PROFILE}`]
+ */
 export const getAdminProfile = async (req: Request, res: Response) => {
   try {
+    const apiKey = `GET ${API_URLS.ADMIN.PROFILE}`;
+    const mapping = ADMIN_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '관리자 프로필 조회'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
@@ -58,9 +71,20 @@ export const getAdminProfile = async (req: Request, res: Response) => {
   }
 };
 
-// 관리자 프로필 변경
+/**
+ * 관리자 프로필 변경
+ * API: PUT /api/admin/profile
+ * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.PROFILE}`]
+ */
 export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdateReq>, res: Response) => {
   try {
+    const apiKey = `PUT ${API_URLS.ADMIN.PROFILE}`;
+    const mapping = ADMIN_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '관리자 프로필 변경'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
@@ -103,9 +127,20 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
   }
 };
 
-// 관리자 비밀번호 변경
+/**
+ * 관리자 비밀번호 변경
+ * API: PUT /api/admin/password
+ * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.PASSWORD}`]
+ */
 export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChangeReq>, res: Response) => {
   try {
+    const apiKey = `PUT ${API_URLS.ADMIN.PASSWORD}`;
+    const mapping = ADMIN_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '관리자 비밀번호 변경'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {

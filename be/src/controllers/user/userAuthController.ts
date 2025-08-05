@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ErrorCode } from '@iitp-dabt/common';
+import { ErrorCode, AUTH_API_MAPPING, API_URLS } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginUser, logout, refreshUserToken } from '../../services/user/userAuthService';
 import { appLogger } from '../../utils/logger';
@@ -20,9 +20,20 @@ import {
   UserRefreshTokenRes
 } from '@iitp-dabt/common';
 
-// 사용자 로그인
+/**
+ * 사용자 로그인
+ * API: POST /api/auth/user/login
+ * 매핑: AUTH_API_MAPPING[`POST ${API_URLS.AUTH.USER.LOGIN}`]
+ */
 export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.AUTH.USER.LOGIN}`;
+    const mapping = AUTH_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 로그인'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const { email, password } = req.body;
     const ipAddr = extractClientIP(req);
     const userAgent = normalizeUserAgent(req.headers['user-agent']);
@@ -57,9 +68,20 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
   }
 };
 
-// 사용자 토큰 갱신
+/**
+ * 사용자 토큰 갱신
+ * API: POST /api/auth/user/refresh
+ * 매핑: AUTH_API_MAPPING[`POST ${API_URLS.AUTH.USER.REFRESH}`]
+ */
 export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.AUTH.USER.REFRESH}`;
+    const mapping = AUTH_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 토큰 갱신'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const { refreshToken } = req.body;
     const ipAddr = extractClientIP(req);
     const userAgent = normalizeUserAgent(req.headers['user-agent']);
@@ -87,9 +109,20 @@ export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>
   }
 };
 
-// 사용자 로그아웃
+/**
+ * 사용자 로그아웃
+ * API: POST /api/auth/user/logout
+ * 매핑: AUTH_API_MAPPING[`POST ${API_URLS.AUTH.USER.LOGOUT}`]
+ */
 export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.AUTH.USER.LOGOUT}`;
+    const mapping = AUTH_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '사용자 로그아웃'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const userId = extractUserIdFromRequest(req);
     const userType = extractUserTypeFromRequest(req);
     const ipAddr = extractClientIP(req);

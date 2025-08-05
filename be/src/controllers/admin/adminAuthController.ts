@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ErrorCode, COMMON_CODE_GROUPS } from '@iitp-dabt/common';
+import { ErrorCode, COMMON_CODE_GROUPS, AUTH_API_MAPPING, API_URLS } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { loginAdmin, logout, refreshAdminToken } from '../../services/admin/adminAuthService';
 import { appLogger } from '../../utils/logger';
@@ -22,9 +22,20 @@ import {
   ApiResponse
 } from '@iitp-dabt/common';
 
-// 관리자 로그인
+/**
+ * 관리자 로그인
+ * API: POST /api/auth/admin/login
+ * 매핑: AUTH_API_MAPPING[`POST ${API_URLS.AUTH.ADMIN.LOGIN}`]
+ */
 export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.AUTH.ADMIN.LOGIN}`;
+    const mapping = AUTH_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '관리자 로그인'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const { loginId, password } = req.body;
     const ipAddr = extractClientIP(req);
     const userAgent = normalizeUserAgent(req.headers['user-agent']);
@@ -59,9 +70,20 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
   }
 };
 
-// 관리자 로그아웃
+/**
+ * 관리자 로그아웃
+ * API: POST /api/auth/admin/logout
+ * 매핑: AUTH_API_MAPPING[`POST ${API_URLS.AUTH.ADMIN.LOGOUT}`]
+ */
 export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.AUTH.ADMIN.LOGOUT}`;
+    const mapping = AUTH_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '관리자 로그아웃'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const userId = extractUserIdFromRequest(req);
     const userType = extractUserTypeFromRequest(req);
     const ipAddr = extractClientIP(req);
@@ -91,9 +113,20 @@ export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Res
   }
 };
 
-// 관리자 토큰 갱신
+/**
+ * 관리자 토큰 갱신
+ * API: POST /api/auth/admin/refresh
+ * 매핑: AUTH_API_MAPPING[`POST ${API_URLS.AUTH.ADMIN.REFRESH}`]
+ */
 export const adminRefresh = async (req: Request<{}, {}, AdminRefreshTokenReq>, res: Response) => {
   try {
+    const apiKey = `POST ${API_URLS.AUTH.ADMIN.REFRESH}`;
+    const mapping = AUTH_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '관리자 토큰 갱신'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+    
     const { refreshToken } = req.body;
 
     const result = await refreshAdminToken(refreshToken);

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ErrorCode } from '@iitp-dabt/common';
+import { ErrorCode, COMMON_CODE_API_MAPPING, API_URLS } from '@iitp-dabt/common';
 import { sendError, sendSuccess } from '../../utils/errorHandler';
 import { 
   getCommonCodesByGroupId,
@@ -9,7 +9,6 @@ import {
   createCommonCode as createCommonCodeService,
   updateCommonCodeById,
   deleteCommonCodeById,
-  getCommonCodeStatistics
 } from '../../services/common/commonCodeService';
 import { appLogger } from '../../utils/logger';
 import { 
@@ -30,7 +29,6 @@ import type {
   CommonCodeByParentReq,
   CommonCodeByParentRes,
   CommonCodeByParentDetailRes,
-  CommonCodeStatsRes,
   CommonCodeCreateReq,
   CommonCodeCreateRes,
   CommonCodeUpdateReq,
@@ -41,9 +39,20 @@ import type {
 
 /**
  * 그룹 ID로 공통 코드 목록 조회 (사용자용)
+ * 
+ * API: GET /api/common-code/:grpId
+ * 매핑: COMMON_CODE_API_MAPPING[`GET ${API_URLS.COMMON_CODE.BASIC.BY_GROUP}`]
  */
 export const getCommonCodes = async (req: Request<CommonCodeByGroupReq>, res: Response) => {
   try {
+    // API 매핑 정보 로깅
+    const apiKey = `GET ${API_URLS.COMMON_CODE.BASIC.BY_GROUP}`;
+    const mapping = COMMON_CODE_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '그룹별 조회 (사용자용)'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+
     const { grpId } = req.params;
     
     if (!grpId) {
@@ -80,9 +89,20 @@ export const getCommonCodes = async (req: Request<CommonCodeByGroupReq>, res: Re
 
 /**
  * 그룹 ID로 공통 코드 목록 조회 (관리자용)
+ * 
+ * API: GET /api/common-code/admin/:grpId
+ * 매핑: COMMON_CODE_API_MAPPING[`GET ${API_URLS.COMMON_CODE.ADMIN.BY_GROUP}`]
  */
 export const getCommonCodesDetail = async (req: Request<CommonCodeByGroupReq>, res: Response) => {
   try {
+    // API 매핑 정보 로깅
+    const apiKey = `GET ${API_URLS.COMMON_CODE.ADMIN.BY_GROUP}`;
+    const mapping = COMMON_CODE_API_MAPPING[apiKey];
+    appLogger.info(`API 호출: ${mapping?.description || '그룹별 조회 (관리자용)'}`, {
+      requestType: mapping?.req,
+      responseType: mapping?.res
+    });
+
     const { grpId } = req.params;
     
     if (!grpId) {
@@ -415,22 +435,3 @@ export const deleteCommonCode = async (req: Request<{ grpId: string; codeId: str
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
-
-/**
- * 공통 코드 통계 조회
- */
-export const getCommonCodeStats = async (req: Request, res: Response) => {
-  try {
-    const stats = await getCommonCodeStatistics();
-    
-    const response: CommonCodeStatsRes = { stats };
-    sendSuccess(res, response, undefined, 'COMMON_CODE_STATS_RETRIEVED', { count: stats.length });
-  } catch (error) {
-    appLogger.error('Error in getCommonCodeStats:', error);
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      appLogger.error('Error details:', errorMsg);
-    }
-    sendError(res, ErrorCode.UNKNOWN_ERROR);
-  }
-}; 

@@ -43,9 +43,6 @@ export const deleteFaqForAdmin = async (req: Request, res: Response) => {
   res.status(501).json({ message: 'Not implemented yet' });
 };
 
-export const getFaqStatsForAdmin = async (req: Request, res: Response) => {
-  res.status(501).json({ message: 'Not implemented yet' });
-};
 
 // // FAQ 목록 조회 (관리자용)
 // export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListReq>, res: Response) => {

@@ -45,6 +45,8 @@ import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
 import { getThemeColors } from '../../theme';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { usePagination } from '../../hooks/usePagination';
 import type { 
   UserOpenApiCreateReq, 
   UserOpenApiExtendReq, 
@@ -59,9 +61,6 @@ interface OpenApiManagementProps {
 
 export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'openapi-management' }) => {
   const navigate = useNavigate();
-  const [openApiList, setOpenApiList] = useState<UserOpenApiListRes | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // 다이얼로그 상태
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -84,11 +83,6 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
   const theme: 'user' | 'admin' = 'user';
   const colors = getThemeColors(theme);
 
-  // Pagination 훅 사용
-  const pagination = usePagination({
-    initialLimit: PAGINATION.DEFAULT_PAGE_SIZE
-  });
-
   // 데이터 페칭 훅 사용
   const {
     data: openApiList,
@@ -96,25 +90,18 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     isEmpty,
     isError,
     refetch
-  } = useDataFetching({
-    fetchFunction: () => getUserOpenApiList({
-      page: pagination.currentPage,
-      limit: pagination.pageSize
-    }),
-    dependencies: [pagination.currentPage, pagination.pageSize],
+  } = useDataFetching<UserOpenApiListRes>({
+    fetchFunction: () => getUserOpenApiList({}),
     autoFetch: true
   });
 
-  // 페이지 크기 동기화
-  useEffect(() => {
-    if (openApiList) {
-      pagination.handlePageSizeChange(openApiList.limit);
-    }
-  }, [openApiList]);
-
-  // 페이지 변경 핸들러
-  const handlePageChange = (page: number) => {
-    pagination.handlePageChange(page);
+  // 임시: 페이지네이션 정보 (실제 UI 확인 후 정리 예정)
+  const tempPagination = {
+    currentPage: 1,
+    pageSize: 10,
+    totalPages: 1,
+    handlePageChange: (page: number) => {},
+    handlePageSizeChange: (size: number) => {}
   };
 
   const handleCreateKey = async () => {
@@ -174,14 +161,15 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     navigator.clipboard.writeText(authKey);
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('ko-KR');
   };
 
   const hasActiveKey = openApiList?.authKeys && openApiList.authKeys.length > 0;
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner loading={true} />;
   }
 
   return (
@@ -202,7 +190,10 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
 
       {isError && (
         <Box sx={{ mb: SPACING.ERROR_ALERT_BOTTOM }}>
-          <ErrorAlert error="인증키 목록을 불러오는 중 오류가 발생했습니다." />
+          <ErrorAlert 
+            error="인증키 목록을 불러오는 중 오류가 발생했습니다." 
+            onClose={() => {}}
+          />
         </Box>
       )}
 
@@ -309,22 +300,11 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
                 </ListItem>
               ))}
             </List>
-
-            // 페이지네이션
-            {openApiList && openApiList.totalPages > 1 && (
-              <Box sx={{ mt: SPACING.LARGE, display: 'flex', justifyContent: 'center' }}>
-                <Pagination
-                  currentPage={pagination.currentPage}
-                  totalPages={openApiList.totalPages}
-                  onPageChange={handlePageChange}
-                  theme={theme}
-                />
-              </Box>
-            )}
+          ) : null}
           </CardContent>
         )}
       </ThemedCard>
-      // 신규 인증키 발행 다이얼로그 
+      {/* 신규 인증키 발행 다이얼로그 */}
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>신규 인증키 발행</DialogTitle>
         <DialogContent>

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { COMMON_API_MAPPING, API_URLS, CommonHealthRes, CommonVersionRes, CommonJwtConfigRes } from '@iitp-dabt/common';
+import { sendSuccess } from '../../utils/errorHandler';
 import fs from 'fs';
 import path from 'path';
 import { JWT_CONFIG } from '../../utils/jwt';
@@ -21,9 +22,11 @@ export const version = async (req: Request, res: Response) => {
     const buildInfoPath = path.join(process.cwd(), 'build-info.json');
     if (fs.existsSync(buildInfoPath)) {
         const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, 'utf-8'));
-        res.status(200).json(buildInfo);
+        const result: CommonVersionRes = buildInfo;
+        sendSuccess(res, result, undefined, 'VERSION_INFO_RETRIEVED');
     } else {
-        res.status(404).json({ error: 'Build info not found' });
+        const result: CommonVersionRes = { error: 'Build info not found' };
+        sendSuccess(res, result, undefined, 'VERSION_INFO_NOT_FOUND');
     }
 };
 
@@ -41,13 +44,13 @@ export const health = async (req: Request, res: Response) => {
     });
     
     // CommonHealthRes 타입에 맞는 응답 생성
-    const response: CommonHealthRes = {
+    const result: CommonHealthRes = {
         status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     };
     
-    res.status(200).json(response);
+    sendSuccess(res, result, undefined, 'HEALTH_CHECK_OK');
 };
 
 /**
@@ -63,10 +66,10 @@ export const jwtConfig = async (req: Request, res: Response) => {
       responseType: mapping?.res
     });
     // CommonJwtConfigRes 타입에 맞는 응답 생성
-    const response: CommonJwtConfigRes = {
+    const result: CommonJwtConfigRes = {
         accessTokenExpiresIn: JWT_CONFIG.accessTokenExpiresIn,
         refreshTokenExpiresIn: JWT_CONFIG.refreshTokenExpiresIn,
         issuer: JWT_CONFIG.issuer
     };
-    res.status(200).json(response);
+    sendSuccess(res, result, undefined, 'JWT_CONFIG_RETRIEVED');
 };

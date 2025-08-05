@@ -43,10 +43,9 @@ export interface CommonJwtConfigReq {
 }
 
 export interface CommonJwtConfigRes {
-  secret: string;
-  expiresIn: string;
-  refreshExpiresIn: string;
-  algorithm: string;
+  accessTokenExpiresIn: string;
+  refreshTokenExpiresIn: string;
+  issuer: string;
 }
 
 // JwtConfigRes 타입 (FE 호환성)
@@ -61,11 +60,4 @@ export interface CommonHealthRes {
   status: 'ok' | 'error';
   timestamp: string;
   uptime: number;
-  memory: {
-    used: number;
-    total: number;
-  };
-  database: {
-    status: 'connected' | 'disconnected';
-  };
 } 

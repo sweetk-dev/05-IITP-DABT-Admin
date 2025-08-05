@@ -4,8 +4,7 @@ import {
   getFaqDetailForAdmin,
   createFaqForAdmin,
   updateFaqForAdmin,
-  deleteFaqForAdmin,
-  getFaqStatsForAdmin
+  deleteFaqForAdmin
 } from '../controllers/admin/adminFaqController';
 import {
   getQnaListForAdmin,
@@ -31,7 +30,6 @@ router.get(API_URLS.ADMIN.FAQ.DETAIL, ...routerMiddleware.admin, getFaqDetailFor
 router.post(API_URLS.ADMIN.FAQ.CREATE, ...routerMiddleware.admin, createFaqForAdmin);
 router.put(API_URLS.ADMIN.FAQ.UPDATE, ...routerMiddleware.admin, updateFaqForAdmin);
 router.delete(API_URLS.ADMIN.FAQ.DELETE, ...routerMiddleware.admin, deleteFaqForAdmin);
-router.get(API_URLS.ADMIN.FAQ.STATS, ...routerMiddleware.admin, getFaqStatsForAdmin);
 
 // QnA 관리
 router.get(API_URLS.ADMIN.QNA.LIST, ...routerMiddleware.admin, getQnaListForAdmin);

@@ -21,7 +21,7 @@ import { enhanceApiResponse } from '../utils/apiResponseHandler';
  * 관리자 로그인
  */
 export async function loginAdmin(params: AdminLoginReq): Promise<ApiResponse<AdminLoginRes>> {
-  const response = await publicApiFetch<AdminLoginRes>(FULL_API_URLS.AUTH.ADMIN_LOGIN, {
+  const response = await publicApiFetch<AdminLoginRes>(FULL_API_URLS.AUTH.ADMIN.LOGIN, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -44,7 +44,7 @@ export async function loginAdmin(params: AdminLoginReq): Promise<ApiResponse<Adm
  * 관리자 로그아웃
  */
 export async function logoutAdmin(params: AdminLogoutReq): Promise<ApiResponse<AdminLogoutRes>> {
-  const response = await apiFetch<AdminLogoutRes>(FULL_API_URLS.AUTH.ADMIN_LOGOUT, {
+  const response = await apiFetch<AdminLogoutRes>(FULL_API_URLS.AUTH.ADMIN.LOGOUT, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -55,7 +55,7 @@ export async function logoutAdmin(params: AdminLogoutReq): Promise<ApiResponse<A
  * 관리자 토큰 갱신
  */
 export async function refreshAdminToken(params: AdminRefreshTokenReq): Promise<ApiResponse<AdminRefreshTokenRes>> {
-  const response = await apiFetch<AdminRefreshTokenRes>(FULL_API_URLS.AUTH.ADMIN_REFRESH, {
+  const response = await apiFetch<AdminRefreshTokenRes>(FULL_API_URLS.AUTH.ADMIN.REFRESH, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -66,7 +66,7 @@ export async function refreshAdminToken(params: AdminRefreshTokenReq): Promise<A
  * 관리자 프로필 조회
  */
 export async function getAdminProfile(): Promise<ApiResponse<AdminProfileRes>> {
-  const response = await apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE.GET);
+  const response = await apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE.DETAIL);
   return enhanceApiResponse(response);
 }
 
@@ -74,7 +74,7 @@ export async function getAdminProfile(): Promise<ApiResponse<AdminProfileRes>> {
  * 관리자 프로필 업데이트
  */
 export async function updateAdminProfile(params: AdminProfileUpdateReq): Promise<ApiResponse<AdminProfileUpdateRes>> {
-  const response = await apiFetch<AdminProfileUpdateRes>(FULL_API_URLS.ADMIN.PROFILE.POST, {
+  const response = await apiFetch<AdminProfileUpdateRes>(FULL_API_URLS.ADMIN.PROFILE.UPDATE, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -85,7 +85,7 @@ export async function updateAdminProfile(params: AdminProfileUpdateReq): Promise
  * 관리자 비밀번호 변경
  */
 export async function changeAdminPassword(params: AdminPasswordChangeReq): Promise<ApiResponse<AdminPasswordChangeRes>> {
-  const response = await apiFetch<AdminPasswordChangeRes>(FULL_API_URLS.ADMIN.PASSWORD.POST, {
+  const response = await apiFetch<AdminPasswordChangeRes>(FULL_API_URLS.ADMIN.PASSWORD.UPDATE, {
     method: 'POST',
     body: JSON.stringify(params),
   });

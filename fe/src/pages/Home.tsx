@@ -89,10 +89,10 @@ export default function Home() {
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
-      p={SPACING.LARGE} 
+      p={SPACING.LARGE}
       minWidth={0}
-      sx={{ 
+      sx={{
+        // P가 이상하면 4로 수정 현재는 3임 
         minWidth: { xs: '100%', md: 0 }, 
         maxWidth: { xs: '100%', md: 360 },
         background: 'transparent',
@@ -209,10 +209,10 @@ export default function Home() {
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
       p={SPACING.LARGE}
       minWidth={0}
-      sx={{ 
+      sx={{
+        // P가 이상하면 4로 수정 현재는 3임 
         minWidth: { xs: '100%', md: 0 }, 
         maxWidth: { xs: '100%', md: 360 },
         background: 'transparent'
@@ -315,10 +315,10 @@ export default function Home() {
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
       p={SPACING.LARGE}
       minWidth={0}
-      sx={{ 
+      sx={{
+        // P가 이상하면 4로 수정 현재는 3임 
         minWidth: { xs: '100%', md: 0 }, 
         maxWidth: { xs: '100%', md: 360 },
         background: 'transparent'
@@ -461,7 +461,7 @@ export default function Home() {
             isolation: 'isolate'
           }}
         >
-          {/* Ｐ가 이상하면 ４로 수정 현재는 ３임 */}
+          {/* P가 이상하면 4로 수정 현재는 3임 */}
           <Box sx={{ 
             background: colors.primary, 
             borderRadius: 3, 

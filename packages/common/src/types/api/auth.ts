@@ -1,4 +1,42 @@
 // Auth API Request/Response 타입 정의
+import { API_URLS } from './api.js';
+
+/**
+ * AUTH API 매핑 테이블
+ * API URL과 Request/Response 타입을 명시적으로 연결
+ */
+export const AUTH_API_MAPPING = {
+  [`POST ${API_URLS.AUTH.USER.LOGIN}`]: {
+    req: 'UserLoginReq',
+    res: 'UserLoginRes',
+    description: '사용자 로그인'
+  },
+  [`POST ${API_URLS.AUTH.USER.LOGOUT}`]: {
+    req: 'UserLogoutReq',
+    res: 'UserLogoutRes',
+    description: '사용자 로그아웃'
+  },
+  [`POST ${API_URLS.AUTH.USER.REFRESH}`]: {
+    req: 'UserRefreshTokenReq',
+    res: 'UserRefreshTokenRes',
+    description: '사용자 토큰 갱신'
+  },
+  [`POST ${API_URLS.AUTH.ADMIN.LOGIN}`]: {
+    req: 'AdminLoginReq',
+    res: 'AdminLoginRes',
+    description: '관리자 로그인'
+  },
+  [`POST ${API_URLS.AUTH.ADMIN.LOGOUT}`]: {
+    req: 'AdminLogoutReq',
+    res: 'AdminLogoutRes',
+    description: '관리자 로그아웃'
+  },
+  [`POST ${API_URLS.AUTH.ADMIN.REFRESH}`]: {
+    req: 'AdminRefreshTokenReq',
+    res: 'AdminRefreshTokenRes',
+    description: '관리자 토큰 갱신'
+  }
+} as const;
 
 // Admin 로그인
 export interface AdminLoginReq {

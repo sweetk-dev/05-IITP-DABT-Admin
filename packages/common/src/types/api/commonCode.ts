@@ -1,6 +1,6 @@
 // Common Code API Request/Response 타입 정의
 
-import { API_URLS } from './api';
+import { API_URLS } from './api.js';
 
 // API URL과 타입 매핑 테이블
 export const COMMON_CODE_API_MAPPING = {

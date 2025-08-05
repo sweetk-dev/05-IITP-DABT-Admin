@@ -120,19 +120,6 @@ export async function deleteCommonCodeById(grpId: string, codeId: string, delete
   }
 }
 
-/**
- * 그룹별 공통 코드 통계 조회
- */
-export async function getCommonCodeStatistics(): Promise<Array<{ grpId: string; grpNm: string; count: number }>> {
-  try {
-    const stats = await getCommonCodeStats();
-    appLogger.info(`Retrieved common code statistics for ${stats.length} groups`);
-    return stats;
-  } catch (error) {
-    appLogger.error('Error retrieving common code statistics:', error);
-    throw error;
-  }
-}
 
 /**
  * 관리자 역할 코드 이름 조회

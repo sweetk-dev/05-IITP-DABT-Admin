@@ -52,19 +52,21 @@ export const sendError = (
 };
 
 /**
- * 성공 응답 전송
+ * 성공 응답 전송 (ApiResponse<T> 구조)
  * @param res Express Response 객체
  * @param data 응답 데이터
  * @param message 성공 메시지 (선택사항)
  * @param event 비즈니스 이벤트명 (선택사항)
  * @param eventData 이벤트 데이터 (선택사항)
+ * @param isListResponse 리스트 응답 여부 (빈 데이터 처리용, 기본값: false)
  */
 export const sendSuccess = (
   res: Response, 
   data: any, 
   message?: string,
   event?: string,
-  eventData?: any
+  eventData?: any,
+  isListResponse: boolean = false
 ) => {
   const req = res.req as unknown as RequestWithId;
   
@@ -81,11 +83,35 @@ export const sendSuccess = (
     });
   }
 
-  res.json({
-    success: true,
-    data,
-    ...(message && { message })
-  });
+  // 빈 데이터 처리 로직
+  const isEmpty = data === null || data === undefined || 
+                 (Array.isArray(data) && data.length === 0) ||
+                 (typeof data === 'object' && Object.keys(data).length === 0);
+
+  if (isEmpty) {
+    // 리스트 응답이거나 명시적으로 빈 배열을 보내야 하는 경우
+    if (isListResponse || (Array.isArray(data) && data.length === 0)) {
+      // 200 OK + 빈 배열 또는 빈 객체
+      res.status(200).json({
+        success: true,
+        data: Array.isArray(data) ? [] : {},
+        ...(message && { message })
+      });
+    } else {
+      // 204 No Content (단건 조회에서 데이터가 없는 경우)
+      res.status(204).json({
+        success: true,
+        ...(message && { message })
+      });
+    }
+  } else {
+    // 정상 데이터 응답
+    res.status(200).json({
+      success: true,
+      data,
+      ...(message && { message })
+    });
+  }
 };
 
 /**

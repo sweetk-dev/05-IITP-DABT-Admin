@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ErrorCode, COMMON_CODE_GROUPS, AUTH_API_MAPPING, API_URLS } from '@iitp-dabt/common';
-import { sendError, sendSuccess } from '../../utils/errorHandler';
+import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { loginAdmin, logout, refreshAdminToken } from '../../services/admin/adminAuthService';
 import { appLogger } from '../../utils/logger';
 import { getAdminRoleCodeName } from '../../services/common/commonCodeService';
@@ -58,15 +58,18 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
     appLogger.error('Error in adminLogin:', error);
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '로그인', '관리자');
+      }
       if (errorMsg.includes('ErrorCode.')) {
         const errorCode = errorMsg.split('ErrorCode.')[1];
-        sendError(res, ErrorCode[errorCode as keyof typeof ErrorCode]);
-      } else {
-        sendError(res, ErrorCode.LOGIN_FAILED);
+        return sendError(res, ErrorCode[errorCode as keyof typeof ErrorCode]);
       }
-    } else {
-      sendError(res, ErrorCode.LOGIN_FAILED);
     }
+    sendError(res, ErrorCode.LOGIN_FAILED);
   }
 };
 
@@ -109,6 +112,15 @@ export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Res
     sendSuccess(res, response, undefined, 'ADMIN_LOGOUT', { userId, userType });
   } catch (error) {
     appLogger.error('Error in adminLogout:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '로그아웃', '관리자');
+      }
+    }
     sendError(res, ErrorCode.LOGOUT_FAILED);
   }
 };
@@ -137,6 +149,15 @@ export const adminRefresh = async (req: Request<{}, {}, AdminRefreshTokenReq>, r
     sendSuccess(res, response, undefined, 'ADMIN_REFRESH', { userId: result.userId });
   } catch (error) {
     appLogger.error('Error in adminRefresh:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '토큰 갱신', '관리자');
+      }
+    }
     sendError(res, ErrorCode.LOGIN_FAILED);
   }
 }; 

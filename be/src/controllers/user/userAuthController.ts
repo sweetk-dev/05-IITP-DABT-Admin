@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ErrorCode, AUTH_API_MAPPING, API_URLS } from '@iitp-dabt/common';
-import { sendError, sendSuccess } from '../../utils/errorHandler';
+import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { loginUser, logout, refreshUserToken } from '../../services/user/userAuthService';
 import { appLogger } from '../../utils/logger';
 import { 
@@ -52,19 +52,21 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
 
     sendSuccess(res, response, undefined, 'USER_LOGIN', { userId: result.userId, email });
   } catch (error) {
+    appLogger.error('User login error:', error);
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '로그인', '사용자');
+      }
       const errorCode = parseInt(errorMsg);
       if (!isNaN(errorCode)) {
-        sendError(res, errorCode);
-      } else {
-        appLogger.error('User login error:', error);
-        sendError(res, ErrorCode.LOGIN_FAILED);
+        return sendError(res, errorCode);
       }
-    } else {
-      appLogger.error('User login unknown error:', error);
-      sendError(res, ErrorCode.LOGIN_FAILED);
     }
+    sendError(res, ErrorCode.LOGIN_FAILED);
   }
 };
 
@@ -95,17 +97,21 @@ export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>
 
     sendSuccess(res, response, undefined, 'USER_TOKEN_REFRESH', { userId: result.userId });
   } catch (error) {
+    appLogger.error('User refresh token error:', error);
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '토큰 갱신', '사용자');
+      }
       const errorCode = parseInt(errorMsg);
       if (!isNaN(errorCode)) {
-        sendError(res, errorCode);
-      } else {
-        sendError(res, ErrorCode.INVALID_TOKEN);
+        return sendError(res, errorCode);
       }
-    } else {
-      sendError(res, ErrorCode.INVALID_TOKEN);
     }
+    sendError(res, ErrorCode.INVALID_TOKEN);
   }
 };
 
@@ -146,6 +152,16 @@ export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Respo
 
     sendSuccess(res, response, undefined, 'USER_LOGOUT', { userId, userType });
   } catch (error) {
+    appLogger.error('User logout error:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '로그아웃', '사용자');
+      }
+    }
     sendError(res, ErrorCode.LOGOUT_FAILED);
   }
 }; 

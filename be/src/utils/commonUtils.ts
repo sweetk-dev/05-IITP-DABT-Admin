@@ -15,28 +15,28 @@ export type UserType = typeof USER_TYPE_ADMIN | typeof USER_TYPE_GENERAL;
 
 /**
  * Request에서 사용자 정보 추출
- * @param req Express Request 객체
+ * @param req Express Request 객체 (모든 제네릭 타입 지원)
  * @returns 사용자 정보 또는 null
  */
-export function extractUserFromRequest(req: Request) {
+export function extractUserFromRequest<T = any>(req: Request<any, any, any, T>) {
   return req.user || null;
 }
 
 /**
  * Request에서 사용자 ID 추출
- * @param req Express Request 객체
+ * @param req Express Request 객체 (모든 제네릭 타입 지원)
  * @returns 사용자 ID 또는 null
  */
-export function extractUserIdFromRequest(req: Request): number | null {
+export function extractUserIdFromRequest<T = any>(req: Request<any, any, any, T>): number | null {
   return req.user?.userId || null;
 }
 
 /**
  * Request에서 사용자 타입 추출
- * @param req Express Request 객체
+ * @param req Express Request 객체 (모든 제네릭 타입 지원)
  * @returns 사용자 타입 또는 null
  */
-export function extractUserTypeFromRequest(req: Request): UserType | null {
+export function extractUserTypeFromRequest<T = any>(req: Request<any, any, any, T>): UserType | null {
   return req.user?.userType || null;
 }
 

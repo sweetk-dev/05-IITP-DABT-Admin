@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ErrorCode, COMMON_CODE_API_MAPPING, API_URLS } from '@iitp-dabt/common';
-import { sendError, sendSuccess } from '../../utils/errorHandler';
+import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { 
   getCommonCodesByGroupId,
   getCommonCodeById,
@@ -75,13 +75,18 @@ export const getCommonCodes = async (req: Request<CommonCodeByGroupReq>, res: Re
       codeDes: code.codeDes
     }));
     
-    const response: CommonCodeByGroupRes = { codes: userCodes };
-    sendSuccess(res, response, undefined, 'COMMON_CODES_RETRIEVED', { grpId, count: userCodes.length });
+    const result: CommonCodeByGroupRes = { codes: userCodes };
+    sendSuccess(res, result, undefined, 'COMMON_CODES_RETRIEVED', { grpId, count: userCodes.length }, true); // isListResponse: true
   } catch (error) {
     appLogger.error('Error in getCommonCodes:', error);
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
-      appLogger.error('Error details:', errorMsg);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', '공통 코드 목록');
+      }
     }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
@@ -119,13 +124,18 @@ export const getCommonCodesDetail = async (req: Request<CommonCodeByGroupReq>, r
       deletedAt: code.deletedAt?.toISOString()
     }));
     
-    const response: CommonCodeByGroupDetailRes = { codes: detailCodes };
-    sendSuccess(res, response, undefined, 'COMMON_CODES_DETAIL_RETRIEVED', { grpId, count: detailCodes.length });
+    const result: CommonCodeByGroupDetailRes = { codes: detailCodes };
+    sendSuccess(res, result, undefined, 'COMMON_CODES_DETAIL_RETRIEVED', { grpId, count: detailCodes.length }, true); // isListResponse: true
   } catch (error) {
     appLogger.error('Error in getCommonCodesDetail:', error);
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
-      appLogger.error('Error details:', errorMsg);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', '공통 코드 상세 목록');
+      }
     }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
@@ -162,10 +172,19 @@ export const getCommonCode = async (req: Request<CommonCodeByIdReq>, res: Respon
       codeDes: code.codeDes
     };
 
-    const response: CommonCodeByIdRes = { code: userCode };
-    sendSuccess(res, response, undefined, 'COMMON_CODE_RETRIEVED', { grpId, codeId });
+    const result: CommonCodeByIdRes = { code: userCode };
+    sendSuccess(res, result, undefined, 'COMMON_CODE_RETRIEVED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in getCommonCode:', error);
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', '공통 코드');
+      }
+    }
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -195,8 +214,8 @@ export const getCommonCodeDetail = async (req: Request<CommonCodeByIdReq>, res: 
       deletedAt: code.deletedAt?.toISOString()
     };
 
-    const response: CommonCodeByIdDetailRes = { code: detailCode };
-    sendSuccess(res, response, undefined, 'COMMON_CODE_DETAIL_RETRIEVED', { grpId, codeId });
+    const result: CommonCodeByIdDetailRes = { code: detailCode };
+    sendSuccess(res, result, undefined, 'COMMON_CODE_DETAIL_RETRIEVED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in getCommonCodeDetail:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
@@ -230,8 +249,8 @@ export const getCommonCodesByType = async (req: Request<CommonCodeByTypeReq>, re
       codeDes: code.codeDes
     }));
     
-    const response: CommonCodeByTypeRes = { codes: userCodes };
-    sendSuccess(res, response, undefined, 'COMMON_CODES_BY_TYPE_RETRIEVED', { codeType, count: userCodes.length });
+    const result: CommonCodeByTypeRes = { codes: userCodes };
+    sendSuccess(res, result, undefined, 'COMMON_CODES_BY_TYPE_RETRIEVED', { codeType, count: userCodes.length });
   } catch (error) {
     appLogger.error('Error in getCommonCodesByType:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
@@ -259,8 +278,8 @@ export const getCommonCodesByTypeDetail = async (req: Request<CommonCodeByTypeRe
       deletedAt: code.deletedAt?.toISOString()
     }));
     
-    const response: CommonCodeByTypeDetailRes = { codes: detailCodes };
-    sendSuccess(res, response, undefined, 'COMMON_CODES_BY_TYPE_DETAIL_RETRIEVED', { codeType, count: detailCodes.length });
+    const result: CommonCodeByTypeDetailRes = { codes: detailCodes };
+    sendSuccess(res, result, undefined, 'COMMON_CODES_BY_TYPE_DETAIL_RETRIEVED', { codeType, count: detailCodes.length });
   } catch (error) {
     appLogger.error('Error in getCommonCodesByTypeDetail:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
@@ -295,12 +314,8 @@ export const getCommonCodesByParent = async (req: Request<CommonCodeByParentReq>
       codeDes: code.codeDes
     }));
     
-    const response: CommonCodeByParentRes = { codes: userCodes };
-    sendSuccess(res, response, undefined, 'COMMON_CODES_BY_PARENT_RETRIEVED', { 
-      grpId, 
-      parentCodeId: parentCodeId || 'root', 
-      count: userCodes.length 
-    });
+    const result: CommonCodeByParentRes = { codes: userCodes };
+    sendSuccess(res, result, undefined, 'COMMON_CODES_BY_PARENT_RETRIEVED', { grpId, parentCodeId, count: userCodes.length });
   } catch (error) {
     appLogger.error('Error in getCommonCodesByParent:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
@@ -329,12 +344,8 @@ export const getCommonCodesByParentDetail = async (req: Request<CommonCodeByPare
       deletedAt: code.deletedAt?.toISOString()
     }));
     
-    const response: CommonCodeByParentDetailRes = { codes: detailCodes };
-    sendSuccess(res, response, undefined, 'COMMON_CODES_BY_PARENT_DETAIL_RETRIEVED', { 
-      grpId, 
-      parentCodeId: parentCodeId || 'root', 
-      count: detailCodes.length 
-    });
+    const result: CommonCodeByParentDetailRes = { codes: detailCodes };
+    sendSuccess(res, result, undefined, 'COMMON_CODES_BY_PARENT_DETAIL_RETRIEVED', { grpId, parentCodeId, count: detailCodes.length });
   } catch (error) {
     appLogger.error('Error in getCommonCodesByParentDetail:', error);
     sendError(res, ErrorCode.UNKNOWN_ERROR);
@@ -362,11 +373,12 @@ export const createCommonCode = async (req: Request<{}, {}, CommonCodeCreateReq>
       deletedAt: newCode.deletedAt?.toISOString()
     };
     
-    const response: CommonCodeCreateRes = { code: detailCode };
-    sendSuccess(res, response, undefined, 'COMMON_CODE_CREATED', { 
-      grpId: codeData.grpId, 
-      codeId: codeData.codeId 
-    });
+    const result: CommonCodeCreateRes = { 
+      grpId: newCode.grpId, 
+      codeId: newCode.codeId, 
+      message: '공통 코드가 성공적으로 생성되었습니다.' 
+    };
+    sendSuccess(res, result, result.message, 'COMMON_CODE_CREATED', { grpId: newCode.grpId, codeId: newCode.codeId });
   } catch (error) {
     appLogger.error('Error in createCommonCode:', error);
     if (error instanceof Error) {
@@ -395,8 +407,12 @@ export const updateCommonCode = async (req: Request<{ grpId: string; codeId: str
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const response: CommonCodeUpdateRes = { affectedCount };
-    sendSuccess(res, response, undefined, 'COMMON_CODE_UPDATED', { grpId, codeId });
+    const result: CommonCodeUpdateRes = { 
+      grpId, 
+      codeId, 
+      message: '공통 코드가 성공적으로 수정되었습니다.' 
+    };
+    sendSuccess(res, result, result.message, 'COMMON_CODE_UPDATED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in updateCommonCode:', error);
     if (error instanceof Error) {
@@ -424,8 +440,12 @@ export const deleteCommonCode = async (req: Request<{ grpId: string; codeId: str
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const response: CommonCodeDeleteRes = { affectedCount };
-    sendSuccess(res, response, undefined, 'COMMON_CODE_DELETED', { grpId, codeId });
+    const result: CommonCodeDeleteRes = { 
+      grpId, 
+      codeId, 
+      message: '공통 코드가 성공적으로 삭제되었습니다.' 
+    };
+    sendSuccess(res, result, result.message, 'COMMON_CODE_DELETED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in deleteCommonCode:', error);
     if (error instanceof Error) {

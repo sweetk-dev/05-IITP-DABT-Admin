@@ -1,230 +1,108 @@
 import { SysQna, SysQnaCreationAttributes } from '../models/sysQna';
 import { Op } from 'sequelize';
 
-// /**
-//  * QnA ID로 조회
-//  */
-// export async function findQnaById(qnaId: number): Promise<SysQna | null> {
-//   return SysQna.findByPk(qnaId);
-// }
+/**
+ * QnA 목록 조회 (페이징)
+ */
+export async function findQnas(options: {
+  where?: any;
+  limit?: number;
+  offset?: number;
+  order?: any[];
+}): Promise<{
+  qnas: SysQna[];
+  total: number;
+  page: number;
+  limit: number;
+}> {
+  const limit = options.limit || 10;
+  const offset = options.offset || 0;
+  const order = options.order || [['createdAt', 'DESC']];
 
-// /**
-//  * QnA 생성
-//  */
-// export async function createQna(qnaData: {
-//   userId: number;
-//   qnaType: string;
-//   title: string;
-//   content: string;
-//   secretYn?: string;
-//   writerName?: string;
-//   createdBy?: string;
-// }): Promise<{ qnaId: number }> {
-//   // createdAt은 Sequelize에서 자동으로 설정됨 (defaultValue: DataTypes.NOW)
-//   const qna = await SysQna.create({
-//     userId: qnaData.userId,
-//     qnaType: qnaData.qnaType,
-//     title: qnaData.title,
-//     content: qnaData.content,
-//     secretYn: qnaData.secretYn || 'N',
-//     writerName: qnaData.writerName,
-//     createdBy: qnaData.createdBy
-//   });
-//   return { qnaId: qna.qnaId };
-// }
+  const { count, rows } = await SysQna.findAndCountAll({
+    where: options.where || {},
+    limit,
+    offset,
+    order
+  });
 
-// /**
-//  * QnA 업데이트
-//  */
-// export async function updateQna(qnaId: number, updateData: {
-//   title?: string;
-//   content?: string;
-//   secretYn?: string;
-//   writerName?: string;
-//   updatedBy?: string;
-// }): Promise<boolean> {
-//   const [affectedRows] = await SysQna.update({
-//     title: updateData.title,
-//     content: updateData.content,
-//     secretYn: updateData.secretYn,
-//     writerName: updateData.writerName,
-//     updatedBy: updateData.updatedBy
-//   }, {
-//     where: { qnaId }
-//   });
-//   return affectedRows > 0;
-// }
+  return {
+    qnas: rows,
+    total: count,
+    page: Math.floor(offset / limit) + 1,
+    limit
+  };
+}
 
-// /**
-//  * QnA 답변 등록/수정
-//  */
-// export async function updateAnswer(qnaId: number, answerData: {
-//   answerContent: string;
-//   answeredBy: string;
-// }): Promise<boolean> {
-//   const [affectedRows] = await SysQna.update({
-//     answerContent: answerData.answerContent,
-//     answeredBy: answerData.answeredBy,
-//     answeredAt: new Date()
-//   }, {
-//     where: { qnaId }
-//   });
-//   return affectedRows > 0;
-// }
+/**
+ * QnA ID로 조회
+ */
+export async function findQnaById(qnaId: number): Promise<SysQna | null> {
+  return SysQna.findByPk(qnaId);
+}
 
-// /**
-//  * QnA 답변 등록/수정 (answerQna 별칭)
-//  */
-// export async function answerQna(qnaId: number, answerData: {
-//   answerContent: string;
-//   answeredBy: string;
-// }): Promise<boolean> {
-//   return updateAnswer(qnaId, answerData);
-// }
+/**
+ * QnA 생성
+ */
+export async function createQna(qnaData: SysQnaCreationAttributes): Promise<SysQna> {
+  return SysQna.create(qnaData);
+}
 
-// /**
-//  * QnA 목록 조회 (페이징)
-//  */
-// export async function findQnas(options: {
-//   page?: number;
-//   limit?: number;
-//   userId?: number;
-//   qnaType?: string;
-//   secretYn?: string;
-//   search?: string;
-//   hasAnswer?: boolean;
-// }): Promise<{
-//   qnas: SysQna[];
-//   total: number;
-//   page: number;
-//   limit: number;
-// }> {
-//   const page = options.page || 1;
-//   const limit = options.limit || 10;
-//   const offset = (page - 1) * limit;
+/**
+ * QnA 수정
+ */
+export async function updateQna(qnaId: number, updateData: Partial<SysQnaCreationAttributes>): Promise<SysQna | null> {
+  const [affectedCount] = await SysQna.update(updateData, {
+    where: { qnaId }
+  });
+  
+  if (affectedCount > 0) {
+    return findQnaById(qnaId);
+  }
+  return null;
+}
 
-//   const whereClause: any = {};
+/**
+ * QnA 삭제
+ */
+export async function deleteQna(qnaId: number, deletedBy?: string): Promise<SysQna | null> {
+  const qna = await findQnaById(qnaId);
+  if (!qna) {
+    return null;
+  }
 
-//   if (options.userId) {
-//     whereClause.userId = options.userId;
-//   }
+  const [affectedCount] = await SysQna.update({
+    delYn: 'Y',
+    deletedBy,
+    deletedAt: new Date()
+  }, {
+    where: { qnaId }
+  });
 
-//   if (options.qnaType) {
-//     whereClause.qnaType = options.qnaType;
-//   }
+  if (affectedCount > 0) {
+    return findQnaById(qnaId);
+  }
+  return null;
+}
 
-//   if (options.secretYn) {
-//     whereClause.secretYn = options.secretYn;
-//   }
+/**
+ * QnA 답변 등록/수정
+ */
+export async function answerQna(qnaId: number, answerData: {
+  answerContent: string;
+  answeredBy: string;
+}): Promise<SysQna | null> {
+  const [affectedCount] = await SysQna.update({
+    answerContent: answerData.answerContent,
+    answeredBy: answerData.answeredBy,
+    answeredAt: new Date(),
+    status: 'ANSWERED'
+  }, {
+    where: { qnaId }
+  });
 
-//   if (options.hasAnswer !== undefined) {
-//     if (options.hasAnswer) {
-//       whereClause.answerContent = { [Op.ne]: null };
-//     } else {
-//       whereClause.answerContent = null;
-//     }
-//   }
-
-//   if (options.search) {
-//     whereClause[Op.or] = [
-//       { title: { [Op.iLike]: `%${options.search}%` } },
-//       { content: { [Op.iLike]: `%${options.search}%` } }
-//     ];
-//   }
-
-//   const { count, rows } = await SysQna.findAndCountAll({
-//     where: whereClause,
-//     limit,
-//     offset,
-//     order: [['createdAt', 'DESC']]
-//   });
-
-//   return {
-//     qnas: rows,
-//     total: count,
-//     page,
-//     limit
-//   };
-// }
-
-// /**
-//  * 사용자별 QnA 목록 조회
-//  */
-// export async function findQnasByUser(userId: number, options: {
-//   page?: number;
-//   limit?: number;
-//   qnaType?: string;
-// }): Promise<{
-//   qnas: SysQna[];
-//   total: number;
-//   page: number;
-//   limit: number;
-// }> {
-//   const page = options.page || 1;
-//   const limit = options.limit || 10;
-//   const offset = (page - 1) * limit;
-
-//   const whereClause: any = {
-//     userId
-//   };
-
-//   if (options.qnaType) {
-//     whereClause.qnaType = options.qnaType;
-//   }
-
-//   const { count, rows } = await SysQna.findAndCountAll({
-//     where: whereClause,
-//     limit,
-//     offset,
-//     order: [['createdAt', 'DESC']]
-//   });
-
-//   return {
-//     qnas: rows,
-//     total: count,
-//     page,
-//     limit
-//   };
-// }
-
-// /**
-//  * QnA 삭제 (논리 삭제 - paranoid: true 설정으로 인해)
-//  */
-// export async function deleteQna(qnaId: number, deletedBy?: string): Promise<boolean> {
-//   // 논리 삭제를 위해 update 사용
-//   const [affectedRows] = await SysQna.update({
-//     deletedBy
-//   }, {
-//     where: { qnaId }
-//   });
-//   return affectedRows > 0;
-// }
-
-// /**
-//  * 답변 대기 중인 QnA 개수 조회
-//  */
-// export async function getPendingAnswerCount(): Promise<number> {
-//   return SysQna.count({
-//     where: {
-//       answerContent: { [Op.is]: null }
-//     }
-//   });
-// }
-
-// /**
-//  * QnA 타입별 개수 조회
-//  */
-// export async function getQnaCountByType(): Promise<Array<{ qnaType: string; count: number }>> {
-//   const result = await SysQna.findAll({
-//     attributes: [
-//       'qnaType',
-//       [SysQna.sequelize!.fn('COUNT', SysQna.sequelize!.col('qna_id')), 'count']
-//     ],
-//     group: ['qnaType']
-//   });
-
-//   return result.map(item => ({
-//     qnaType: item.qnaType,
-//     count: parseInt(item.get('count') as string)
-//   }));
-// } 
+  if (affectedCount > 0) {
+    return findQnaById(qnaId);
+  }
+  return null;
+} 

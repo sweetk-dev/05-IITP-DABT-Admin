@@ -371,4 +371,141 @@ export async function countActiveAuthKeysByUserId(userId: number, includeUnlimit
   }
   
   return OpenApiAuthKey.count({ where: whereClause });
+}
+
+// ===== Admin Service 호출을 위한 별칭 함수들 =====
+
+/**
+ * OpenAPI 인증 키 목록 조회 (관리자용)
+ */
+export async function findOpenApiAuthKeys(options: {
+  where?: any;
+  limit?: number;
+  offset?: number;
+  order?: any[];
+}): Promise<{
+  openApis: OpenApiAuthKey[];
+  total: number;
+  page: number;
+  limit: number;
+}> {
+  const limit = options.limit || 10;
+  const offset = options.offset || 0;
+  const order = options.order || [['createdAt', 'DESC']];
+
+  const { count, rows } = await OpenApiAuthKey.findAndCountAll({
+    where: options.where || {},
+    limit,
+    offset,
+    order
+  });
+
+  return {
+    openApis: rows,
+    total: count,
+    page: Math.floor(offset / limit) + 1,
+    limit
+  };
+}
+
+/**
+ * OpenAPI 인증 키 상세 조회 (관리자용)
+ */
+export async function findOpenApiAuthKeyById(apiId: number): Promise<OpenApiAuthKey | null> {
+  return findAuthKeyById(apiId);
+}
+
+/**
+ * OpenAPI 인증 키 생성 (관리자용)
+ */
+export async function createOpenApiAuthKey(authKeyData: {
+  userId: number;
+  keyName: string;
+  keyDesc?: string;
+  extensionDays: number;
+  createdBy: string;
+}): Promise<{ apiId: number }> {
+  const { userId, keyName, keyDesc, extensionDays, createdBy } = authKeyData;
+  
+  // 기본 기간 설정 (현재 시간부터 extensionDays 후까지)
+  const startDt = new Date();
+  const endDt = new Date(startDt.getTime() + extensionDays * 24 * 60 * 60 * 1000);
+  
+  // 임시 인증키 생성 (실제로는 generateAuthKey 함수 사용)
+  const authKey = `API_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  const result = await createAuthKey({
+    userId,
+    authKey,
+    keyName,
+    keyDesc: keyDesc || '',
+    startDt,
+    endDt,
+    createdBy
+  });
+  
+  return { apiId: result.keyId };
+}
+
+/**
+ * OpenAPI 인증 키 수정 (관리자용)
+ */
+export async function updateOpenApiAuthKey(apiId: number, updateData: {
+  keyName?: string;
+  keyDesc?: string;
+  extensionDays?: number;
+  status?: string;
+  updatedBy: string;
+}): Promise<OpenApiAuthKey | null> {
+  const authKey = await findAuthKeyById(apiId);
+  if (!authKey) {
+    return null;
+  }
+
+  const updateFields: any = {
+    updatedBy: updateData.updatedBy
+  };
+
+  if (updateData.keyName) {
+    updateFields.keyName = updateData.keyName;
+  }
+
+  if (updateData.keyDesc !== undefined) {
+    updateFields.keyDesc = updateData.keyDesc;
+  }
+
+  if (updateData.status) {
+    updateFields.activeYn = updateData.status === 'ACTIVE' ? 'Y' : 'N';
+  }
+
+  if (updateData.extensionDays) {
+    const currentEndDt = authKey.endDt ? new Date(authKey.endDt) : new Date();
+    const newEndDt = new Date(currentEndDt.getTime() + updateData.extensionDays * 24 * 60 * 60 * 1000);
+    updateFields.endDt = newEndDt;
+  }
+
+  const [affectedCount] = await OpenApiAuthKey.update(updateFields, {
+    where: { keyId: apiId }
+  });
+
+  if (affectedCount > 0) {
+    return findAuthKeyById(apiId);
+  }
+  return null;
+}
+
+/**
+ * OpenAPI 인증 키 삭제 (관리자용)
+ */
+export async function deleteOpenApiAuthKey(apiId: number, deletedBy: string): Promise<OpenApiAuthKey | null> {
+  const authKey = await findAuthKeyById(apiId);
+  if (!authKey) {
+    return null;
+  }
+
+  const success = await deleteAuthKey(apiId, deletedBy);
+  if (success) {
+    return findAuthKeyById(apiId);
+  }
+  return null;
 } 

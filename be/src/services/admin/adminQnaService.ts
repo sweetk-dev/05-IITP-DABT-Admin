@@ -1,53 +1,149 @@
-// import { 
-//   findQnas, 
-//   findQnaById, 
-//   answerQna, 
-//   updateQna, 
-//   deleteQna 
-// } from '../../repositories/sysQnaRepository';
+import { Op } from 'sequelize';
+import { 
+  findQnas, 
+  findQnaById, 
+  answerQna as answerQnaRepo, 
+  updateQna as updateQnaRepo, 
+  deleteQna as deleteQnaRepo 
+} from '../../repositories/sysQnaRepository';
+import { appLogger } from '../../utils/logger';
 
-// // QnA 목록 조회 (관리자용)
-// export const getQnaList = async (options: {
-//   page: number;
-//   limit: number;
-//   search?: string;
-// }) => {
-//   const result = await findQnas(options);
-//   return {
-//     qnas: result.qnas,
-//     total: result.total,
-//     page: result.page,
-//     limit: result.limit
-//   };
-// };
+export interface QnaListParams {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: string;
+}
 
-// // QnA 상세 조회 (관리자용)
-// export const getQnaDetail = async (qnaId: number) => {
-//   return await findQnaById(qnaId);
-// };
+export interface QnaAnswerData {
+  answer: string;
+}
 
-// // QnA 답변 (관리자용)
-// export const answerQnaForAdmin = async (qnaId: number, answer: string, answeredBy?: string) => {
-//   return await answerQna(qnaId, {
-//     answerContent: answer,
-//     answeredBy: answeredBy || 'admin',
-//     answeredAt: new Date()
-//   });
-// };
+export interface QnaUpdateData {
+  title?: string;
+  content?: string;
+  qnaType?: string;
+  secretYn?: string;
+}
 
-// // QnA 수정 (관리자용)
-// export const updateQnaForAdmin = async (qnaId: number, data: {
-//   title?: string;
-//   content?: string;
-//   updatedBy?: string;
-// }) => {
-//   return await updateQna(qnaId, {
-//     ...data,
-//     updatedBy: data.updatedBy || 'admin'
-//   });
-// };
+/**
+ * QnA 목록 조회 (관리자용)
+ */
+export const getQnaList = async (params: QnaListParams) => {
+  try {
+    const { page, limit, search, status } = params;
+    const offset = (page - 1) * limit;
 
-// // QnA 삭제 (관리자용)
-// export const deleteQnaForAdmin = async (qnaId: number) => {
-//   return await deleteQna(qnaId, 'admin');
-// }; 
+    // 검색 조건 구성
+    const whereConditions: any = {};
+    
+    if (search) {
+      whereConditions[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { content: { [Op.like]: `%${search}%` } }
+      ];
+    }
+    
+    if (status) {
+      whereConditions.status = status;
+    }
+
+    const result = await findQnas({
+      where: whereConditions,
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    });
+
+    return {
+      qnas: result.rows,
+      total: result.count,
+      page,
+      limit
+    };
+  } catch (error) {
+    appLogger.error('QnA 목록 조회 중 오류 발생', { error, params });
+    throw error;
+  }
+};
+
+/**
+ * QnA 상세 조회 (관리자용)
+ */
+export const getQnaDetail = async (qnaId: number) => {
+  try {
+    const qna = await findQnaById(qnaId);
+    if (!qna) {
+      throw new Error('QNA_NOT_FOUND');
+    }
+    return qna;
+  } catch (error) {
+    appLogger.error('QnA 상세 조회 중 오류 발생', { error, qnaId });
+    throw error;
+  }
+};
+
+/**
+ * QnA 답변 (관리자용)
+ */
+export const answerQna = async (qnaId: number, answerData: QnaAnswerData, adminId: number) => {
+  try {
+    const answeredQna = await answerQnaRepo(qnaId, {
+      answer: answerData.answer,
+      answeredBy: adminId,
+      answeredAt: new Date(),
+      status: 'ANSWERED'
+    });
+
+    if (!answeredQna) {
+      throw new Error('QNA_NOT_FOUND');
+    }
+
+    appLogger.info('QnA 답변 성공', { qnaId, adminId });
+    return answeredQna;
+  } catch (error) {
+    appLogger.error('QnA 답변 중 오류 발생', { error, qnaId, answerData, adminId });
+    throw error;
+  }
+};
+
+/**
+ * QnA 수정 (관리자용)
+ */
+export const updateQna = async (qnaId: number, updateData: QnaUpdateData, adminId: number) => {
+  try {
+    const updatedQna = await updateQnaRepo(qnaId, {
+      ...updateData,
+      updatedBy: adminId
+    });
+
+    if (!updatedQna) {
+      throw new Error('QNA_NOT_FOUND');
+    }
+
+    appLogger.info('QnA 수정 성공', { qnaId, adminId });
+    return updatedQna;
+  } catch (error) {
+    appLogger.error('QnA 수정 중 오류 발생', { error, qnaId, updateData, adminId });
+    throw error;
+  }
+};
+
+/**
+ * QnA 삭제 (관리자용)
+ */
+export const deleteQna = async (qnaId: number, adminId: number) => {
+  try {
+    const deletedQna = await deleteQnaRepo(qnaId, adminId);
+
+    if (!deletedQna) {
+      throw new Error('QNA_NOT_FOUND');
+    }
+
+    appLogger.info('QnA 삭제 성공', { qnaId, adminId });
+    return deletedQna;
+  } catch (error) {
+    appLogger.error('QnA 삭제 중 오류 발생', { error, qnaId, adminId });
+    throw error;
+  }
+}; 

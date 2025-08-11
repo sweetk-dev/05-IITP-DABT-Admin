@@ -10,7 +10,7 @@ import {
   UserQnaCreateReq,
   UserQnaCreateRes
 } from '@iitp-dabt/common';
-import { sendError, sendSuccess } from '../../utils/errorHandler';
+import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
 import { extractUserIdFromRequest } from '../../utils/commonUtils';
 import { 
@@ -51,9 +51,18 @@ export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListReq>
       totalPages: response.totalPages
     };
 
-    sendSuccess(res, result, undefined, 'USER_QNA_LIST_VIEW', { userId });
+    sendSuccess(res, result, undefined, 'USER_QNA_LIST_VIEW', { userId }, true); // isListResponse: true
   } catch (error) {
     appLogger.error('사용자 Q&A 목록 조회 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    if (error instanceof Error) {
+      const errorMsg = error.message;
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', 'Q&A 목록');
+      }
+    }
     sendError(res, ErrorCode.QNA_NOT_FOUND);
   }
 };
@@ -90,6 +99,15 @@ export const getQnaDetailForUser = async (req: Request<UserQnaDetailReq>, res: R
     sendSuccess(res, result, undefined, 'USER_QNA_DETAIL_VIEW', { userId, qnaId });
   } catch (error) {
     appLogger.error('사용자 Q&A 상세 조회 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    if (error instanceof Error) {
+      const errorMsg = error.message;
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', 'Q&A 상세');
+      }
+    }
     sendError(res, ErrorCode.QNA_NOT_FOUND);
   }
 };

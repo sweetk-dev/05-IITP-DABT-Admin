@@ -8,7 +8,7 @@ import {
   UserFaqDetailReq,
   UserFaqDetailRes
 } from '@iitp-dabt/common';
-import { sendError, sendSuccess } from '../../utils/errorHandler';
+import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
 import { 
   getUserFaqList, 
@@ -41,9 +41,18 @@ export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListReq>
       totalPages: response.totalPages
     };
 
-    sendSuccess(res, result, undefined, 'USER_FAQ_LIST_VIEW');
+    sendSuccess(res, result, undefined, 'USER_FAQ_LIST_VIEW', undefined, true); // isListResponse: true
   } catch (error) {
     appLogger.error('사용자 FAQ 목록 조회 중 오류 발생', { error });
+    if (error instanceof Error) {
+      const errorMsg = error.message;
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', 'FAQ 목록');
+      }
+    }
     sendError(res, ErrorCode.FAQ_NOT_FOUND);
   }
 };
@@ -74,76 +83,17 @@ export const getFaqDetailForUser = async (req: Request<UserFaqDetailReq>, res: R
     sendSuccess(res, result, undefined, 'USER_FAQ_DETAIL_VIEW', { faqId });
   } catch (error) {
     appLogger.error('사용자 FAQ 상세 조회 중 오류 발생', { error });
+    if (error instanceof Error) {
+      const errorMsg = error.message;
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', 'FAQ 상세');
+      }
+    }
     sendError(res, ErrorCode.FAQ_NOT_FOUND);
   }
 };
 
-// // FAQ 목록 조회 (사용자용)
-// export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListReq>, res: Response) => {
-//   try {
-//     const { page = 1, limit = 10, faqType, search } = req.query;
-    
-//     const result = await getFaqList({
-//       page: parseInt(page as string),
-//       limit: parseInt(limit as string),
-//       faqType,
-//       search
-//     });
-
-//     const response: UserFaqListRes = {
-//       faqs: result.faqs.map(faq => ({
-//         faqId: faq.faqId,
-//         faqType: faq.faqType,
-//         question: faq.question,
-//         answer: faq.answer,
-//         hitCnt: faq.hitCnt,
-//         sortOrder: faq.sortOrder,
-//         useYn: faq.useYn,
-//         createdAt: faq.createdAt.toISOString(),
-//         updatedAt: faq.updatedAt?.toISOString()
-//       })),
-//       total: result.total,
-//       page: result.page,
-//       limit: result.limit,
-//       totalPages: Math.ceil(result.total / result.limit),
-//       items: result.faqs
-//     };
-
-//     sendSuccess(res, response);
-//   } catch (error) {
-//     sendError(res, ErrorCode.FAQ_NOT_FOUND);
-//   }
-// };
-
-// // FAQ 상세 조회 (사용자용)
-// export const getFaqDetailForUser = async (req: Request<UserFaqDetailReq>, res: Response) => {
-//   try {
-//     const { faqId } = req.params;
-    
-//     const faq = await getFaqDetail(parseInt(faqId));
-//     if (!faq) {
-//       return sendError(res, ErrorCode.FAQ_NOT_FOUND);
-//     }
-
-//     // 조회수 증가
-//     await incrementHitCount(parseInt(faqId));
-
-//     const response: UserFaqDetailRes = {
-//       faq: {
-//         faqId: faq.faqId,
-//         faqType: faq.faqType,
-//         question: faq.question,
-//         answer: faq.answer,
-//         hitCnt: faq.hitCnt,
-//         sortOrder: faq.sortOrder,
-//         useYn: faq.useYn,
-//         createdAt: faq.createdAt.toISOString(),
-//         updatedAt: faq.updatedAt?.toISOString()
-//       }
-//     };
-
-//     sendSuccess(res, response);
-//   } catch (error) {
-//     sendError(res, ErrorCode.FAQ_NOT_FOUND);
-//   }
-// }; 
+ 

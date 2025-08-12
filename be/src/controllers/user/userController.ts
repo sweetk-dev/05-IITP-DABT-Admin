@@ -23,6 +23,7 @@ import {
   sendDatabaseError 
 } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   extractUserIdFromRequest,
   normalizeErrorMessage 
@@ -35,12 +36,7 @@ import {
  */
 export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.USER.CHECK_EMAIL}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 이메일 중복 확인'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.USER.CHECK_EMAIL, USER_API_MAPPING as any, '사용자 이메일 중복 확인');
     
     // 기본 파라미터 검증
     const { email } = req.body;
@@ -51,24 +47,23 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: R
 
     // 이메일 형식 검증
     if (!isValidEmail(email)) {
-      return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
+      return sendError(res, ErrorCode.EMAIL_INVALID_FORMAT);
     }
 
     const response = await UserService.checkEmailAvailability(email);
     
     const result: UserCheckEmailRes = {
-      isAvailable: response.isAvailable,
-      message: response.isAvailable ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.'
+      isAvailable: response.isAvailable
     };
-    
-    sendSuccess(res, result, result.message);
+
+    sendSuccess(res, result);
   } catch (error) {
     appLogger.error('이메일 중복 확인 중 오류 발생', { error, email: req.body.email });
     
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
       if (errorMsg.includes('이메일 형식')) {
-        return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
+        return sendError(res, ErrorCode.EMAIL_INVALID_FORMAT);
       }
       return sendValidationError(res, 'email', errorMsg);
     }
@@ -84,12 +79,7 @@ export const checkEmail = async (req: Request<{}, {}, UserCheckEmailReq>, res: R
  */
 export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.USER.REGISTER}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 회원가입'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.USER.REGISTER, USER_API_MAPPING as any, '사용자 회원가입');
     
     // 기본 파라미터 검증
     const { email, password, name, affiliation } = req.body;
@@ -107,7 +97,7 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
 
     // 이메일 형식 검증
     if (!isValidEmail(email)) {
-      return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
+      return sendError(res, ErrorCode.EMAIL_INVALID_FORMAT);
     }
 
     // 비밀번호 강도 검증
@@ -131,11 +121,10 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
       userId: response.userId,
       email: response.email,
       name: response.name,
-      affiliation: response.affiliation,
-      message: '회원가입이 완료되었습니다.'
+      affiliation: response.affiliation
     };
 
-    sendSuccess(res, result, result.message, 'USER_REGISTRATION', {
+    sendSuccess(res, result, undefined, 'USER_REGISTRATION', {
       userId: response.userId,
       email: response.email,
       name: response.name,
@@ -151,7 +140,7 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
     if (error instanceof Error) {
       const errorMsg = normalizeErrorMessage(error);
       if (errorMsg.includes('이메일 형식')) {
-        return sendError(res, ErrorCode.USER_EMAIL_INVALID_FORMAT);
+        return sendError(res, ErrorCode.EMAIL_INVALID_FORMAT);
       }
       if (errorMsg.includes('이미 사용 중인 이메일')) {
         return sendError(res, ErrorCode.USER_EMAIL_DUPLICATE);
@@ -173,12 +162,7 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
  */
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.USER.PROFILE}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 프로필 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.USER.PROFILE, USER_API_MAPPING as any, '사용자 프로필 조회');
     
     const userId = extractUserIdFromRequest(req);
     
@@ -244,12 +228,7 @@ export const updateProfile = async (req: Request<{}, {}, UserProfileUpdateReq>, 
 
     await UserService.updateUserProfile(userId, { name, affiliation });
 
-    const result: UserProfileUpdateRes = {
-      success: true,
-      message: '프로필이 성공적으로 업데이트되었습니다.'
-    };
-
-    sendSuccess(res, result, result.message, 'USER_PROFILE_UPDATE', {
+    sendSuccess(res, undefined, undefined, 'USER_PROFILE_UPDATE', {
       userId: userId,
       name: name,
       affiliation: affiliation
@@ -301,12 +280,7 @@ export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>
 
     await UserService.changeUserPassword(userId, { currentPassword, newPassword });
 
-    const result: UserPasswordChangeRes = {
-      success: true,
-      message: '비밀번호가 성공적으로 변경되었습니다.'
-    };
-
-    sendSuccess(res, result, result.message, 'USER_PASSWORD_CHANGE', {
+    sendSuccess(res, undefined, undefined, 'USER_PASSWORD_CHANGE', {
       userId: userId
     });
   } catch (error) {

@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { JWT_CONFIG } from '../../utils/jwt';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 
 /**
  * 버전 정보 조회
@@ -13,12 +14,7 @@ import { appLogger } from '../../utils/logger';
  */
 export const version = async (req: Request, res: Response) => {
     try {
-        const apiKey = `GET ${API_URLS.COMMON.VERSION}`;
-        const mapping = COMMON_API_MAPPING[apiKey];
-        appLogger.info(`API 호출: ${mapping?.description || '버전 정보 조회'}`, {
-          requestType: mapping?.req,
-          responseType: mapping?.res
-        });
+        logApiCall('GET', API_URLS.COMMON.VERSION, COMMON_API_MAPPING as any, '버전 정보 조회');
         
         const buildInfoPath = path.join(process.cwd(), 'build-info.json');
         if (fs.existsSync(buildInfoPath)) {
@@ -51,12 +47,7 @@ export const version = async (req: Request, res: Response) => {
  */
 export const health = async (req: Request, res: Response) => {
     try {
-        const apiKey = `GET ${API_URLS.COMMON.HEALTH_CHECK}`;
-        const mapping = COMMON_API_MAPPING[apiKey];
-        appLogger.info(`API 호출: ${mapping?.description || '헬스 체크'}`, {
-          requestType: mapping?.req,
-          responseType: mapping?.res
-        });
+        logApiCall('GET', API_URLS.COMMON.HEALTH_CHECK, COMMON_API_MAPPING as any, '헬스 체크');
         
         // CommonHealthRes 타입에 맞는 응답 생성
         const result: CommonHealthRes = {
@@ -88,12 +79,7 @@ export const health = async (req: Request, res: Response) => {
  */
 export const jwtConfig = async (req: Request, res: Response) => {
     try {
-        const apiKey = `GET ${API_URLS.COMMON.JWT_CONFIG}`;
-        const mapping = COMMON_API_MAPPING[apiKey];
-        appLogger.info(`API 호출: ${mapping?.description || 'JWT 설정 정보 조회'}`, {
-          requestType: mapping?.req,
-          responseType: mapping?.res
-        });
+        logApiCall('GET', API_URLS.COMMON.JWT_CONFIG, COMMON_API_MAPPING as any, 'JWT 설정 정보 조회');
         // CommonJwtConfigRes 타입에 맞는 응답 생성
         const result: CommonJwtConfigRes = {
             accessTokenExpiresIn: JWT_CONFIG.accessTokenExpiresIn,

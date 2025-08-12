@@ -3,16 +3,19 @@ import {
   ErrorCode,
   USER_API_MAPPING,
   API_URLS,
-  UserFaqListReq,
+  UserFaqListQuery,
   UserFaqListRes,
-  UserFaqDetailReq,
-  UserFaqDetailRes
+  UserFaqDetailParams,
+  UserFaqDetailRes,
+  UserFaqHomeRes
 } from '@iitp-dabt/common';
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   getUserFaqList, 
-  getUserFaqDetail 
+  getUserFaqDetail,
+  getUserFaqHome 
 } from '../../services/user/userFaqService';
 
 /**
@@ -20,26 +23,15 @@ import {
  * API: GET /api/user/faq
  * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.FAQ.LIST}`]
  */
-export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListReq>, res: Response) => {
+export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListQuery>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.USER.FAQ.LIST}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 FAQ 목록 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.USER.FAQ.LIST, USER_API_MAPPING as any, '사용자 FAQ 목록 조회');
 
-    const params = req.query;
+    const params = req.query as any;
 
     const response = await getUserFaqList(params);
     
-    const result: UserFaqListRes = {
-      faqs: response.faqs,
-      total: response.total,
-      page: response.page,
-      limit: response.limit,
-      totalPages: response.totalPages
-    };
+    const result: UserFaqListRes = response;
 
     sendSuccess(res, result, undefined, 'USER_FAQ_LIST_VIEW', undefined, true); // isListResponse: true
   } catch (error) {
@@ -62,14 +54,9 @@ export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListReq>
  * API: GET /api/user/faq/:faqId
  * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.FAQ.DETAIL}`]
  */
-export const getFaqDetailForUser = async (req: Request<UserFaqDetailReq>, res: Response) => {
+export const getFaqDetailForUser = async (req: Request<UserFaqDetailParams>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.USER.FAQ.DETAIL}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 FAQ 상세 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.USER.FAQ.DETAIL, USER_API_MAPPING as any, '사용자 FAQ 상세 조회');
 
     const { faqId } = req.params;
     const keyId = parseInt(faqId);
@@ -92,6 +79,17 @@ export const getFaqDetailForUser = async (req: Request<UserFaqDetailReq>, res: R
         return sendDatabaseError(res, '조회', 'FAQ 상세');
       }
     }
+    sendError(res, ErrorCode.FAQ_NOT_FOUND);
+  }
+};
+
+export const getFaqHomeForUser = async (_req: Request, res: Response) => {
+  try {
+    logApiCall('GET', API_URLS.USER.FAQ.HOME, USER_API_MAPPING as any, '사용자 FAQ 홈 조회');
+    const data = await getUserFaqHome();
+    const response: UserFaqHomeRes = data;
+    sendSuccess(res, response, undefined, 'USER_FAQ_HOME_VIEW', { count: response.faqs.length });
+  } catch (error) {
     sendError(res, ErrorCode.FAQ_NOT_FOUND);
   }
 };

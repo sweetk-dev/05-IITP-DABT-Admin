@@ -9,21 +9,19 @@ import {
   deleteFaq
 } from '../../services/admin/adminFaqService';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   extractUserIdFromRequest,
   normalizeErrorMessage
 } from '../../utils/commonUtils';
 import type {
-  AdminFaqListReq, 
-  AdminFaqListRes, 
-  AdminFaqDetailReq, 
+  AdminFaqListQuery,
+  AdminFaqListRes,
+  AdminFaqDetailParams,
   AdminFaqDetailRes,
   AdminFaqCreateReq,
   AdminFaqCreateRes,
-  AdminFaqUpdateReq,
-  AdminFaqUpdateRes,
-  AdminFaqDeleteRes,
-  AdminFaqStatsRes
+  AdminFaqUpdateReq
 } from '@iitp-dabt/common';
 
 /**
@@ -31,42 +29,46 @@ import type {
  * API: GET /api/admin/faq
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.FAQ.LIST}`]
  */
-export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListReq>, res: Response) => {
+export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListQuery>, res: Response) => {
+  let adminId: number | null;
+  
   try {
-    const apiKey = `GET ${API_URLS.ADMIN.FAQ.LIST}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'FAQ 목록 조회 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.ADMIN.FAQ.LIST, ADMIN_API_MAPPING as any, 'FAQ 목록 조회 (관리자용)');
 
-    const { page = 1, limit = 10, faqType, search, useYn } = req.query;
-    const adminId = extractUserIdFromRequest(req);
+    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
+    const faqType = typeof req.query.faqType === 'string' ? req.query.faqType : undefined;
+    const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+    const useYn = typeof req.query.useYn === 'string' ? req.query.useYn : undefined;
+    
+    adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
-
+    
     const result = await getFaqList({
-      page: parseInt(page as string),
-      limit: parseInt(limit as string),
+      page,
+      limit,
       faqType,
       search,
       useYn
     });
 
+    const mappedFaqs = result.faqs.map(faq => ({
+      faqId: faq.faqId,
+      faqType: faq.faqType,
+      question: faq.question,
+      answer: faq.answer,
+      hitCnt: faq.hitCnt,
+      sortOrder: faq.sortOrder,
+      useYn: faq.useYn,
+      createdAt: faq.createdAt.toISOString(),
+      updatedAt: faq.updatedAt?.toISOString()
+    }));
+
     const response: AdminFaqListRes = {
-      faqs: result.faqs.map(faq => ({
-        faqId: faq.faqId,
-        faqType: faq.faqType,
-        question: faq.question,
-        answer: faq.answer,
-        hitCnt: faq.hitCnt,
-        sortOrder: faq.sortOrder,
-        useYn: faq.useYn,
-        createdAt: faq.createdAt.toISOString(),
-        updatedAt: faq.updatedAt?.toISOString()
-      })),
+      items: mappedFaqs,
       total: result.total,
       page: result.page,
       limit: result.limit,
@@ -94,14 +96,9 @@ export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListRe
  * API: GET /api/admin/faq/:faqId
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.FAQ.DETAIL}`]
  */
-export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailReq>, res: Response) => {
+export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailParams>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.ADMIN.FAQ.DETAIL}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'FAQ 상세 조회 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.ADMIN.FAQ.DETAIL, ADMIN_API_MAPPING as any, 'FAQ 상세 조회 (관리자용)');
 
     const { faqId } = req.params;
     const adminId = extractUserIdFromRequest(req);
@@ -156,12 +153,7 @@ export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailReq>, res:
  */
 export const createFaqForAdmin = async (req: Request<{}, {}, AdminFaqCreateReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.ADMIN.FAQ.CREATE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'FAQ 생성 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.ADMIN.FAQ.CREATE, ADMIN_API_MAPPING as any, 'FAQ 생성 (관리자용)');
 
     const faqData = req.body;
     const adminId = extractUserIdFromRequest(req);
@@ -177,11 +169,10 @@ export const createFaqForAdmin = async (req: Request<{}, {}, AdminFaqCreateReq>,
     const newFaq = await createFaq(faqData, adminId);
 
     const response: AdminFaqCreateRes = {
-      faqId: newFaq.faqId,
-      message: 'FAQ가 성공적으로 생성되었습니다.'
+      faqId: newFaq.faqId
     };
 
-    sendSuccess(res, response, response.message, 'ADMIN_FAQ_CREATED', { adminId, faqId: newFaq.faqId });
+    sendSuccess(res, response, undefined, 'ADMIN_FAQ_CREATED', { adminId, faqId: newFaq.faqId });
   } catch (error) {
     appLogger.error('관리자 FAQ 생성 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -204,12 +195,7 @@ export const createFaqForAdmin = async (req: Request<{}, {}, AdminFaqCreateReq>,
  */
 export const updateFaqForAdmin = async (req: Request<{ faqId: string }, {}, AdminFaqUpdateReq>, res: Response) => {
   try {
-    const apiKey = `PUT ${API_URLS.ADMIN.FAQ.UPDATE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'FAQ 수정 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('PUT', API_URLS.ADMIN.FAQ.UPDATE, ADMIN_API_MAPPING as any, 'FAQ 수정 (관리자용)');
 
     const { faqId } = req.params;
     const updateData = req.body;
@@ -225,12 +211,7 @@ export const updateFaqForAdmin = async (req: Request<{ faqId: string }, {}, Admi
 
     const updatedFaq = await updateFaq(parseInt(faqId), updateData, adminId);
 
-    const response: AdminFaqUpdateRes = {
-      faqId: updatedFaq.faqId,
-      message: 'FAQ가 성공적으로 수정되었습니다.'
-    };
-
-    sendSuccess(res, response, response.message, 'ADMIN_FAQ_UPDATED', { adminId, faqId });
+    sendSuccess(res, undefined, undefined, 'ADMIN_FAQ_UPDATED', { adminId, faqId });
   } catch (error) {
     appLogger.error('관리자 FAQ 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -253,12 +234,7 @@ export const updateFaqForAdmin = async (req: Request<{ faqId: string }, {}, Admi
  */
 export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Response) => {
   try {
-    const apiKey = `DELETE ${API_URLS.ADMIN.FAQ.DELETE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'FAQ 삭제 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('DELETE', API_URLS.ADMIN.FAQ.DELETE, ADMIN_API_MAPPING as any, 'FAQ 삭제 (관리자용)');
 
     const { faqId } = req.params;
     const adminId = extractUserIdFromRequest(req);
@@ -273,12 +249,7 @@ export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Re
 
     await deleteFaq(parseInt(faqId), adminId);
 
-    const response: AdminFaqDeleteRes = {
-      faqId: parseInt(faqId),
-      message: 'FAQ가 성공적으로 삭제되었습니다.'
-    };
-
-    sendSuccess(res, response, response.message, 'ADMIN_FAQ_DELETED', { adminId, faqId });
+    sendSuccess(res, undefined, undefined, 'ADMIN_FAQ_DELETED', { adminId, faqId });
   } catch (error) {
     appLogger.error('관리자 FAQ 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {

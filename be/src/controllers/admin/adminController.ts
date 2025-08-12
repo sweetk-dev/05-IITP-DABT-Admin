@@ -21,6 +21,7 @@ import {
   sendDatabaseError 
 } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   extractUserIdFromRequest,
   normalizeErrorMessage
@@ -33,12 +34,7 @@ import {
  */
 export const getAdminProfile = async (req: Request, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.ADMIN.PROFILE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '관리자 프로필 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.ADMIN.PROFILE, ADMIN_API_MAPPING as any, '관리자 프로필 조회');
     
     const adminId = extractUserIdFromRequest(req);
     
@@ -78,12 +74,7 @@ export const getAdminProfile = async (req: Request, res: Response) => {
  */
 export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdateReq>, res: Response) => {
   try {
-    const apiKey = `PUT ${API_URLS.ADMIN.PROFILE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '관리자 프로필 변경'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('PUT', API_URLS.ADMIN.PROFILE, ADMIN_API_MAPPING as any, '관리자 프로필 변경');
     
     const adminId = extractUserIdFromRequest(req);
     
@@ -116,7 +107,7 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
       affiliation: affiliation
     });
 
-    sendSuccess(res, { success: true }, '프로필이 성공적으로 업데이트되었습니다.', 'ADMIN_PROFILE_UPDATE', {
+    sendSuccess(res, undefined, undefined, 'ADMIN_PROFILE_UPDATE', {
       adminId: adminId,
       name: name,
       affiliation: affiliation
@@ -134,12 +125,7 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
  */
 export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChangeReq>, res: Response) => {
   try {
-    const apiKey = `PUT ${API_URLS.ADMIN.PASSWORD}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '관리자 비밀번호 변경'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('PUT', API_URLS.ADMIN.PASSWORD, ADMIN_API_MAPPING as any, '관리자 비밀번호 변경');
     
     const adminId = extractUserIdFromRequest(req);
     
@@ -183,7 +169,7 @@ export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChan
       adminId: adminId
     });
 
-    sendSuccess(res, { success: true }, '비밀번호가 성공적으로 변경되었습니다.', 'ADMIN_PASSWORD_CHANGE', {
+    sendSuccess(res, undefined, undefined, 'ADMIN_PASSWORD_CHANGE', {
       adminId: adminId
     });
   } catch (error) {

@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
 import { 
-  UserOpenApiListReq, 
-  UserOpenApiListRes, 
-  UserOpenApiDetailReq, 
+  UserOpenApiListRes,
+  UserOpenApiDetailParams,
   UserOpenApiDetailRes,
   UserOpenApiCreateReq, 
   UserOpenApiCreateRes, 
-  UserOpenApiDeleteReq, 
-  UserOpenApiDeleteRes,
+  UserOpenApiDeleteParams,
   UserOpenApiExtendReq, 
   UserOpenApiExtendRes,
   ErrorCode,
@@ -17,6 +15,7 @@ import {
   isValidApiKeyDesc,
   isValidDate
 } from '@iitp-dabt/common';
+import { logApiCall } from '../../utils/apiLogger';
 import { UserOpenApiService } from '../../services/user/userOpenApiService';
 import { 
   sendSuccess, 
@@ -36,14 +35,9 @@ import {
  * API: GET /api/user/open-api
  * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.OPEN_API.LIST}`]
  */
-export const getUserOpenApiList = async (req: Request<{}, {}, UserOpenApiListReq>, res: Response) => {
+export const getUserOpenApiList = async (req: Request, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.USER.OPEN_API.LIST}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 OpenAPI 인증키 목록 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.USER.OPEN_API.LIST, USER_API_MAPPING as any, '사용자 OpenAPI 인증키 목록 조회');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -51,10 +45,7 @@ export const getUserOpenApiList = async (req: Request<{}, {}, UserOpenApiListReq
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    // 기본 파라미터 검증 (현재는 특별한 파라미터가 없지만 향후 확장성을 위해)
-    const params = req.body;
-
-    const response = await UserOpenApiService.getUserOpenApiList(userId, params);
+    const response = await UserOpenApiService.getUserOpenApiList(userId, {});
 
     const result: UserOpenApiListRes = {
       authKeys: response.authKeys
@@ -79,14 +70,9 @@ export const getUserOpenApiList = async (req: Request<{}, {}, UserOpenApiListReq
  * API: GET /api/user/open-api/:keyId
  * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.OPEN_API.DETAIL}`]
  */
-export const getUserOpenApiDetail = async (req: Request<{ keyId: string }>, res: Response) => {
+export const getUserOpenApiDetail = async (req: Request<UserOpenApiDetailParams>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.USER.OPEN_API.DETAIL}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 OpenAPI 인증키 상세 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.USER.OPEN_API.DETAIL, USER_API_MAPPING as any, '사용자 OpenAPI 인증키 상세 조회');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -141,12 +127,7 @@ export const getUserOpenApiDetail = async (req: Request<{ keyId: string }>, res:
  */
 export const createUserOpenApi = async (req: Request<{}, {}, UserOpenApiCreateReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.USER.OPEN_API.CREATE}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 OpenAPI 인증키 생성'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.USER.OPEN_API.CREATE, USER_API_MAPPING as any, '사용자 OpenAPI 인증키 생성');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -165,7 +146,11 @@ export const createUserOpenApi = async (req: Request<{}, {}, UserOpenApiCreateRe
       return sendValidationError(res, 'keyName', '인증키 이름 형식이 올바르지 않습니다.');
     }
 
-    if (keyDesc && !isValidApiKeyDesc(keyDesc)) {
+    if (!keyDesc) {
+      return sendValidationError(res, 'keyDesc', '인증키 설명이 필요합니다.');
+    }
+
+    if (!isValidApiKeyDesc(keyDesc)) {
       return sendValidationError(res, 'keyDesc', '인증키 설명 형식이 올바르지 않습니다.');
     }
 
@@ -186,11 +171,10 @@ export const createUserOpenApi = async (req: Request<{}, {}, UserOpenApiCreateRe
 
     const result: UserOpenApiCreateRes = {
       keyId: response.keyId,
-      authKey: response.authKey,
-      message: response.message
+      authKey: response.authKey
     };
 
-    sendSuccess(res, result, result.message, 'USER_OPENAPI_CREATE', {
+    sendSuccess(res, result, undefined, 'USER_OPENAPI_CREATE', {
       userId: userId,
       keyName: keyName
     });
@@ -214,14 +198,9 @@ export const createUserOpenApi = async (req: Request<{}, {}, UserOpenApiCreateRe
  * API: DELETE /api/user/open-api/:keyId
  * 매핑: USER_API_MAPPING[`DELETE ${API_URLS.USER.OPEN_API.DELETE}`]
  */
-export const deleteUserOpenApi = async (req: Request<{ keyId: string }>, res: Response) => {
+export const deleteUserOpenApi = async (req: Request<UserOpenApiDeleteParams>, res: Response) => {
   try {
-    const apiKey = `DELETE ${API_URLS.USER.OPEN_API.DELETE}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 OpenAPI 인증키 삭제'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('DELETE', API_URLS.USER.OPEN_API.DELETE, USER_API_MAPPING as any, '사용자 OpenAPI 인증키 삭제');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -241,13 +220,9 @@ export const deleteUserOpenApi = async (req: Request<{ keyId: string }>, res: Re
       return sendValidationError(res, 'keyId', '유효하지 않은 인증키 ID입니다.');
     }
 
-    const response = await UserOpenApiService.deleteUserOpenApi(userId, keyId);
+    await UserOpenApiService.deleteUserOpenApi(userId, keyId);
 
-    const result: UserOpenApiDeleteRes = {
-      message: response.message
-    };
-
-    sendSuccess(res, result, result.message, 'USER_OPENAPI_DELETE', {
+    sendSuccess(res, undefined, undefined, 'USER_OPENAPI_DELETE', {
       userId: userId,
       keyId: keyId
     });
@@ -271,17 +246,15 @@ export const deleteUserOpenApi = async (req: Request<{ keyId: string }>, res: Re
 
 /**
  * 사용자 OpenAPI 인증키 기간 연장
- * API: PUT /api/user/open-api/:keyId/extend
- * 매핑: USER_API_MAPPING[`PUT ${API_URLS.USER.OPEN_API.EXTEND}`]
+ * API: POST /api/user/open-api/:keyId/extend
+ * 매핑: USER_API_MAPPING[`POST ${API_URLS.USER.OPEN_API.EXTEND}`]
  */
-export const extendUserOpenApi = async (req: Request<{ keyId: string }, {}, UserOpenApiExtendReq>, res: Response) => {
+export const extendUserOpenApi = async (
+  req: Request<UserOpenApiDeleteParams, {}, Pick<UserOpenApiExtendReq, 'extensionDays'>>,
+  res: Response
+) => {
   try {
-    const apiKey = `PUT ${API_URLS.USER.OPEN_API.EXTEND}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 OpenAPI 인증키 기간 연장'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.USER.OPEN_API.EXTEND, USER_API_MAPPING as any, '사용자 OpenAPI 인증키 기간 연장');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -310,14 +283,13 @@ export const extendUserOpenApi = async (req: Request<{ keyId: string }, {}, User
       return sendValidationError(res, 'extensionDays', '연장 일수는 90일 또는 365일이어야 합니다.');
     }
 
-    const response = await UserOpenApiService.extendUserOpenApi(userId, { keyId, extensionDays });
+    const response = await UserOpenApiService.extendUserOpenApi(userId, { keyId, extensionDays } as any);
 
     const result: UserOpenApiExtendRes = {
-      message: response.message,
       newEndDt: response.newEndDt
     };
 
-    sendSuccess(res, result, result.message, 'USER_OPENAPI_EXTEND', {
+    sendSuccess(res, result, undefined, 'USER_OPENAPI_EXTEND', {
       userId: userId,
       keyId: keyId,
       extensionDays: extensionDays

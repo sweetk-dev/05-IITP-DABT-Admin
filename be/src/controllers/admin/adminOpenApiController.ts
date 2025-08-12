@@ -6,23 +6,27 @@ import {
   getOpenApiDetail, 
   createOpenApi, 
   updateOpenApi, 
-  deleteOpenApi
+  deleteOpenApi,
+  extendOpenApiKey,
+  getOpenApiStats
 } from '../../services/admin/adminOpenApiService';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   extractUserIdFromRequest,
   normalizeErrorMessage
 } from '../../utils/commonUtils';
 import type {
-  AdminOpenApiListReq, 
-  AdminOpenApiListRes, 
-  AdminOpenApiDetailReq, 
+  AdminOpenApiListQuery,
+  AdminOpenApiListRes,
+  AdminOpenApiDetailParams,
   AdminOpenApiDetailRes,
   AdminOpenApiCreateReq,
   AdminOpenApiCreateRes,
   AdminOpenApiUpdateReq,
-  AdminOpenApiUpdateRes,
-  AdminOpenApiDeleteRes,
+  AdminOpenApiDeleteParams,
+  AdminOpenApiExtendReq,
+  AdminOpenApiExtendRes,
   AdminOpenApiStatsRes
 } from '@iitp-dabt/common';
 
@@ -31,16 +35,15 @@ import type {
  * API: GET /api/admin/open-api
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.OPEN_API.LIST}`]
  */
-export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenApiListReq>, res: Response) => {
+export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenApiListQuery>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.ADMIN.OPEN_API.LIST}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'OpenAPI 목록 조회 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.ADMIN.OPEN_API.LIST, ADMIN_API_MAPPING as any, 'OpenAPI 목록 조회 (관리자용)');
 
-    const { page = 1, limit = 10, search, status } = req.query;
+    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
+    const search = typeof (req.query as any).searchKeyword === 'string' ? (req.query as any).searchKeyword : undefined;
+    const status = typeof (req.query as any).activeYn === 'string' ? (req.query as any).activeYn : undefined;
+    
     const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
@@ -48,24 +51,31 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
     }
 
     const result = await getOpenApiList({
-      page: parseInt(page as string),
-      limit: parseInt(limit as string),
+      page,
+      limit,
       search,
       status
     });
 
     const response: AdminOpenApiListRes = {
-      openApis: result.openApis.map(api => ({
-        apiId: api.apiId,
+      items: result.openApis.map((api: any) => ({
+        keyId: api.keyId ?? api.apiId,
         userId: api.userId,
+        authKey: api.authKey || '',
+        activeYn: api.activeYn ?? (api.status ? (api.status === 'ACTIVE' ? 'Y' : 'N') : 'N'),
+        startDt: api.startDt?.toISOString?.() ?? (api.startDt ? new Date(api.startDt).toISOString() : undefined),
+        endDt: api.endDt?.toISOString?.() ?? (api.endDt ? new Date(api.endDt).toISOString() : undefined),
+        delYn: api.delYn ?? 'N',
         keyName: api.keyName,
         keyDesc: api.keyDesc,
-        startDt: api.startDt?.toISOString(),
-        endDt: api.endDt?.toISOString(),
-        status: api.status,
-        hitCnt: api.hitCnt,
-        createdAt: api.createdAt.toISOString(),
-        updatedAt: api.updatedAt?.toISOString()
+        activeAt: api.activeAt?.toISOString?.() ?? (api.status === 'ACTIVE' ? api.updatedAt?.toISOString?.() : undefined),
+        latestAccAt: api.latestAccAt?.toISOString?.(),
+        createdAt: api.createdAt?.toISOString?.() ?? new Date(api.createdAt).toISOString(),
+        updatedAt: api.updatedAt?.toISOString?.(),
+        deletedAt: api.deletedAt?.toISOString?.(),
+        createdBy: api.createdBy?.toString?.() || '',
+        updatedBy: api.updatedBy?.toString?.(),
+        deletedBy: api.deletedBy?.toString?.()
       })),
       total: result.total,
       page: result.page,
@@ -73,7 +83,7 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
       totalPages: Math.ceil(result.total / result.limit)
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_LIST_VIEW', { adminId, count: result.openApis.length }, true);
+    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_LIST_VIEW', { adminId, count: response.items.length }, true);
   } catch (error) {
     appLogger.error('관리자 OpenAPI 목록 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -94,47 +104,49 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
  * API: GET /api/admin/open-api/:apiId
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.OPEN_API.DETAIL}`]
  */
-export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailReq>, res: Response) => {
+export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailParams>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.ADMIN.OPEN_API.DETAIL}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'OpenAPI 상세 조회 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.ADMIN.OPEN_API.DETAIL, ADMIN_API_MAPPING as any, 'OpenAPI 상세 조회 (관리자용)');
 
-    const { apiId } = req.params;
+    const { keyId } = req.params;
     const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    if (!apiId) {
+    if (!keyId) {
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
     
-    const api = await getOpenApiDetail(parseInt(apiId));
+    const api = await getOpenApiDetail(parseInt(keyId));
     if (!api) {
       return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
     }
 
     const response: AdminOpenApiDetailRes = {
-      openApi: {
-        apiId: api.apiId,
+      authKey: {
+        keyId: (api as any).keyId ?? (api as any).apiId,
         userId: api.userId,
+        authKey: (api as any).authKey || '',
+        activeYn: (api as any).activeYn ?? ((api as any).status ? ((api as any).status === 'ACTIVE' ? 'Y' : 'N') : 'N'),
+        startDt: (api as any).startDt?.toISOString?.() ?? ((api as any).startDt ? new Date((api as any).startDt).toISOString() : undefined),
+        endDt: (api as any).endDt?.toISOString?.() ?? ((api as any).endDt ? new Date((api as any).endDt).toISOString() : undefined),
+        delYn: 'N',
         keyName: api.keyName,
         keyDesc: api.keyDesc,
-        startDt: api.startDt?.toISOString(),
-        endDt: api.endDt?.toISOString(),
-        status: api.status,
-        hitCnt: api.hitCnt,
-        createdAt: api.createdAt.toISOString(),
-        updatedAt: api.updatedAt?.toISOString()
+        activeAt: (api as any).activeAt?.toISOString?.() ?? ((api as any).status === 'ACTIVE' ? (api as any).updatedAt?.toISOString?.() : undefined),
+        latestAccAt: (api as any).latestAccAt?.toISOString?.(),
+        createdAt: (api as any).createdAt?.toISOString?.() ?? new Date(api.createdAt as any).toISOString(),
+        updatedAt: (api as any).updatedAt?.toISOString?.(),
+        deletedAt: undefined,
+        createdBy: (api as any).createdBy?.toString?.() || '',
+        updatedBy: (api as any).updatedBy?.toString?.(),
+        deletedBy: undefined
       }
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_DETAIL_VIEW', { adminId, apiId });
+    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_DETAIL_VIEW', { adminId, keyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 상세 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -157,12 +169,7 @@ export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailRe
  */
 export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCreateReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.ADMIN.OPEN_API.CREATE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'OpenAPI 생성 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.ADMIN.OPEN_API.CREATE, ADMIN_API_MAPPING as any, 'OpenAPI 생성 (관리자용)');
 
     const apiData = req.body;
     const adminId = extractUserIdFromRequest(req);
@@ -171,18 +178,18 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    if (!apiData.userId || !apiData.keyName || !apiData.extensionDays) {
-      return sendValidationError(res, 'general', '사용자 ID, 키 이름, 연장 일수는 필수입니다.');
+    if (!apiData.userId || !apiData.keyName || !apiData.keyDesc) {
+      return sendValidationError(res, 'general', '사용자 ID, 키 이름, 키 설명은 필수입니다.');
     }
 
     const newApi = await createOpenApi(apiData, adminId);
 
     const response: AdminOpenApiCreateRes = {
-      apiId: newApi.apiId,
-      message: 'OpenAPI가 성공적으로 생성되었습니다.'
+      keyId: (newApi as any).apiId ?? (newApi as any).keyId,
+      authKey: (newApi as any).authKey || ''
     };
 
-    sendSuccess(res, response, response.message, 'ADMIN_OPEN_API_CREATED', { adminId, apiId: newApi.apiId });
+    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_CREATED', { adminId, apiId: response.keyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 생성 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -203,16 +210,11 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
  * API: PUT /api/admin/open-api/:apiId
  * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.OPEN_API.UPDATE}`]
  */
-export const updateOpenApiForAdmin = async (req: Request<{ apiId: string }, {}, AdminOpenApiUpdateReq>, res: Response) => {
+export const updateOpenApiForAdmin = async (req: Request<{ keyId: string }, {}, AdminOpenApiUpdateReq>, res: Response) => {
   try {
-    const apiKey = `PUT ${API_URLS.ADMIN.OPEN_API.UPDATE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'OpenAPI 수정 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('PUT', API_URLS.ADMIN.OPEN_API.UPDATE, ADMIN_API_MAPPING as any, 'OpenAPI 수정 (관리자용)');
 
-    const { apiId } = req.params;
+    const { keyId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
     
@@ -220,18 +222,14 @@ export const updateOpenApiForAdmin = async (req: Request<{ apiId: string }, {}, 
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    if (!apiId) {
+    if (!keyId) {
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const updatedApi = await updateOpenApi(parseInt(apiId), updateData, adminId);
-
-    const response: AdminOpenApiUpdateRes = {
-      apiId: updatedApi.apiId,
-      message: 'OpenAPI가 성공적으로 수정되었습니다.'
-    };
-
-    sendSuccess(res, response, response.message, 'ADMIN_OPEN_API_UPDATED', { adminId, apiId });
+    const updatedApi = await updateOpenApi(parseInt(keyId), {
+      ...updateData
+    }, adminId);
+    sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_UPDATED', { adminId, keyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -252,34 +250,37 @@ export const updateOpenApiForAdmin = async (req: Request<{ apiId: string }, {}, 
  * API: DELETE /api/admin/open-api/:apiId
  * 매핑: ADMIN_API_MAPPING[`DELETE ${API_URLS.ADMIN.OPEN_API.DELETE}`]
  */
-export const deleteOpenApiForAdmin = async (req: Request<{ apiId: string }>, res: Response) => {
+export const deleteOpenApiForAdmin = async (
+  req: Request<{ keyId: string }, {}, AdminOpenApiDeleteParams>,
+  res: Response
+) => {
   try {
-    const apiKey = `DELETE ${API_URLS.ADMIN.OPEN_API.DELETE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'OpenAPI 삭제 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('DELETE', API_URLS.ADMIN.OPEN_API.DELETE, ADMIN_API_MAPPING as any, 'OpenAPI 삭제 (관리자용)');
 
-    const { apiId } = req.params;
+    const { keyId } = req.params;
     const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    if (!apiId) {
+    if (!keyId) {
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    await deleteOpenApi(parseInt(apiId), adminId);
+    const parsedKeyId = parseInt(keyId);
+    if (!parsedKeyId || Number.isNaN(parsedKeyId) || parsedKeyId <= 0) {
+      return sendValidationError(res, 'keyId', '유효하지 않은 인증키 ID입니다.');
+    }
 
-    const response: AdminOpenApiDeleteRes = {
-      apiId: parseInt(apiId),
-      message: 'OpenAPI가 성공적으로 삭제되었습니다.'
-    };
+    // Body로 keyId가 넘어오는 경우 DTO와의 정합성 확인 (선택적)
+    if (req.body && typeof req.body.keyId === 'number' && req.body.keyId !== parsedKeyId) {
+      return sendValidationError(res, 'keyId', '요청 경로와 본문의 keyId가 일치해야 합니다.');
+    }
 
-    sendSuccess(res, response, response.message, 'ADMIN_OPEN_API_DELETED', { adminId, apiId });
+    await deleteOpenApi(parsedKeyId, adminId);
+
+    sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_DELETED', { adminId, keyId: parsedKeyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -292,5 +293,98 @@ export const deleteOpenApiForAdmin = async (req: Request<{ apiId: string }>, res
       }
     }
     sendError(res, ErrorCode.OPEN_API_DELETE_FAILED);
+  }
+};
+
+/**
+ * OpenAPI 키 기간 연장 (관리자용)
+ * API: POST /api/admin/open-api/:keyId/extend
+ * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.OPEN_API.EXTEND}`]
+ */
+export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, AdminOpenApiExtendReq>, res: Response) => {
+  try {
+    logApiCall('POST', API_URLS.ADMIN.OPEN_API.EXTEND, ADMIN_API_MAPPING as any, 'OpenAPI 키 기간 연장 (관리자용)');
+
+    const { keyId } = req.params;
+    const extendData = req.body;
+    const adminId = extractUserIdFromRequest(req);
+    
+    if (!adminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    if (!keyId) {
+      return sendError(res, ErrorCode.INVALID_PARAMETER);
+    }
+
+    if (!extendData.extensionDays || extendData.extensionDays <= 0) {
+      return sendValidationError(res, 'extensionDays', '연장 일수는 1일 이상이어야 합니다.');
+    }
+
+    if (!extendData.updatedBy) {
+      return sendValidationError(res, 'updatedBy', '수정자 정보는 필수입니다.');
+    }
+
+    // OpenAPI 키 기간 연장 서비스 호출 (updatedBy는 adminId로 설정)
+    const result = await extendOpenApiKey(parseInt(keyId), extendData.extensionDays, adminId);
+
+    const response: AdminOpenApiExtendRes = {
+      newEndDt: (result as any).endDt?.toISOString?.() || ''
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_EXTENDED', { adminId, keyId, extensionDays: extendData.extensionDays });
+  } catch (error) {
+    appLogger.error('관리자 OpenAPI 키 기간 연장 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '연장', 'OpenAPI 키');
+      }
+    }
+    sendError(res, ErrorCode.OPEN_API_EXTENDED_FAILED);
+  }
+};
+
+/**
+ * OpenAPI 상태 조회 (관리자용)
+ * API: GET /api/admin/open-api/status
+ * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.OPEN_API.STATUS}`]
+ */
+export const statusOpenApiAdmin = async (req: Request, res: Response) => {
+  try {
+    logApiCall('GET', API_URLS.ADMIN.OPEN_API.STATUS, ADMIN_API_MAPPING as any, 'OpenAPI 상태 조회 (관리자용)');
+
+    const adminId = extractUserIdFromRequest(req);
+    
+    if (!adminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    // OpenAPI 상태 통계 조회 서비스 호출
+    const stats = await getOpenApiStats();
+
+    const response: AdminOpenApiStatsRes = {
+      total: stats.totalKeys,
+      active: stats.activeKeys,
+      expired: stats.expiredKeys,
+      inactive: stats.suspendedKeys
+    };
+
+    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_STATUS_VIEW', { adminId });
+  } catch (error) {
+    appLogger.error('관리자 OpenAPI 상태 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', 'OpenAPI 상태');
+      }
+    }
+    sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
   }
 };

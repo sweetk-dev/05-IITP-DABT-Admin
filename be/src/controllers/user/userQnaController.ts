@@ -3,20 +3,23 @@ import {
   ErrorCode,
   USER_API_MAPPING,
   API_URLS,
-  UserQnaListReq,
+  UserQnaListQuery,
   UserQnaListRes,
-  UserQnaDetailReq,
+  UserQnaDetailParams,
   UserQnaDetailRes,
   UserQnaCreateReq,
-  UserQnaCreateRes
+  UserQnaCreateRes,
+  UserQnaHomeRes
 } from '@iitp-dabt/common';
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { extractUserIdFromRequest } from '../../utils/commonUtils';
 import { 
   getUserQnaList, 
   getUserQnaDetail, 
-  createUserQna 
+  createUserQna, 
+  getUserQnaHome 
 } from '../../services/user/userQnaService';
 
 /**
@@ -24,14 +27,9 @@ import {
  * API: GET /api/user/qna
  * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.QNA.LIST}`]
  */
-export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListReq>, res: Response) => {
+export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListQuery>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.USER.QNA.LIST}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 Q&A 목록 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.USER.QNA.LIST, USER_API_MAPPING as any, '사용자 Q&A 목록 조회');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -39,12 +37,12 @@ export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListReq>
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    const params = req.query;
+    const params = req.query as any;
 
     const response = await getUserQnaList(userId, params);
     
     const result: UserQnaListRes = {
-      qnas: response.qnas,
+      items: response.qnas,
       total: response.total,
       page: response.page,
       limit: response.limit,
@@ -67,19 +65,29 @@ export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListReq>
   }
 };
 
+export const getQnaHomeForUser = async (req: Request, res: Response) => {
+  try {
+    logApiCall('GET', API_URLS.USER.QNA.HOME, USER_API_MAPPING as any, '사용자 Q&A 홈 조회');
+    const userId = extractUserIdFromRequest(req);
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+    const data = await getUserQnaHome(userId);
+    const response: UserQnaHomeRes = data;
+    sendSuccess(res, response, undefined, 'USER_QNA_HOME_VIEW', { userId, count: response.qnas.length });
+  } catch (error) {
+    sendError(res, ErrorCode.QNA_NOT_FOUND);
+  }
+};
+
 /**
  * 사용자 Q&A 상세 조회
  * API: GET /api/user/qna/:qnaId
  * 매핑: USER_API_MAPPING[`GET ${API_URLS.USER.QNA.DETAIL}`]
  */
-export const getQnaDetailForUser = async (req: Request<UserQnaDetailReq>, res: Response) => {
+export const getQnaDetailForUser = async (req: Request<UserQnaDetailParams>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.USER.QNA.DETAIL}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 Q&A 상세 조회'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.USER.QNA.DETAIL, USER_API_MAPPING as any, '사용자 Q&A 상세 조회');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -119,12 +127,7 @@ export const getQnaDetailForUser = async (req: Request<UserQnaDetailReq>, res: R
  */
 export const createQnaForUser = async (req: Request<{}, {}, UserQnaCreateReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.USER.QNA.CREATE}`;
-    const mapping = USER_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 Q&A 생성'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.USER.QNA.CREATE, USER_API_MAPPING as any, '사용자 Q&A 생성');
 
     const userId = extractUserIdFromRequest(req);
     
@@ -136,7 +139,7 @@ export const createQnaForUser = async (req: Request<{}, {}, UserQnaCreateReq>, r
 
     const result = await createUserQna(userId, { qnaType, title, content, secretYn, writerName });
 
-    sendSuccess(res, result, result.message, 'USER_QNA_CREATE', { 
+    sendSuccess(res, { qnaId: result.qnaId } as UserQnaCreateRes, undefined, 'USER_QNA_CREATE', { 
       userId, 
       qnaId: result.qnaId,
       qnaType,

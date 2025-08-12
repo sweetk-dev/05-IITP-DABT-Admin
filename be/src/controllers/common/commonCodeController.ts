@@ -11,6 +11,7 @@ import {
   deleteCommonCodeById,
 } from '../../services/common/commonCodeService';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   extractUserIdFromRequest,
   validateAndParseNumber,
@@ -45,13 +46,9 @@ import type {
  */
 export const getCommonCodes = async (req: Request<CommonCodeByGroupReq>, res: Response) => {
   try {
+    logApiCall('GET', API_URLS.COMMON_CODE.BASIC.BY_ID, COMMON_CODE_API_MAPPING as any, '코드 상세 조회 (사용자용)');
     // API 매핑 정보 로깅
-    const apiKey = `GET ${API_URLS.COMMON_CODE.BASIC.BY_GROUP}`;
-    const mapping = COMMON_CODE_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '그룹별 조회 (사용자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.COMMON_CODE.BASIC.BY_GROUP, COMMON_CODE_API_MAPPING as any, '그룹별 조회 (사용자용)');
 
     const { grpId } = req.params;
     
@@ -100,13 +97,9 @@ export const getCommonCodes = async (req: Request<CommonCodeByGroupReq>, res: Re
  */
 export const getCommonCodesDetail = async (req: Request<CommonCodeByGroupReq>, res: Response) => {
   try {
+    logApiCall('GET', API_URLS.COMMON_CODE.ADMIN.BY_ID, COMMON_CODE_API_MAPPING as any, '코드 상세 조회 (관리자용)');
     // API 매핑 정보 로깅
-    const apiKey = `GET ${API_URLS.COMMON_CODE.ADMIN.BY_GROUP}`;
-    const mapping = COMMON_CODE_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '그룹별 조회 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.COMMON_CODE.ADMIN.BY_GROUP, COMMON_CODE_API_MAPPING as any, '그룹별 조회 (관리자용)');
 
     const { grpId } = req.params;
     
@@ -146,6 +139,7 @@ export const getCommonCodesDetail = async (req: Request<CommonCodeByGroupReq>, r
  */
 export const getCommonCode = async (req: Request<CommonCodeByIdReq>, res: Response) => {
   try {
+    logApiCall('GET', API_URLS.COMMON_CODE.BASIC.BY_TYPE, COMMON_CODE_API_MAPPING as any, '타입별 조회 (사용자용)');
     const { grpId, codeId } = req.params;
     
     if (!grpId || !codeId) {
@@ -194,6 +188,7 @@ export const getCommonCode = async (req: Request<CommonCodeByIdReq>, res: Respon
  */
 export const getCommonCodeDetail = async (req: Request<CommonCodeByIdReq>, res: Response) => {
   try {
+    logApiCall('GET', API_URLS.COMMON_CODE.ADMIN.BY_TYPE, COMMON_CODE_API_MAPPING as any, '타입별 조회 (관리자용)');
     const { grpId, codeId } = req.params;
     
     if (!grpId || !codeId) {
@@ -227,6 +222,7 @@ export const getCommonCodeDetail = async (req: Request<CommonCodeByIdReq>, res: 
  */
 export const getCommonCodesByType = async (req: Request<CommonCodeByTypeReq>, res: Response) => {
   try {
+    logApiCall('GET', API_URLS.COMMON_CODE.BASIC.BY_PARENT, COMMON_CODE_API_MAPPING as any, '계층형 조회 (사용자용)');
     const { codeType } = req.params;
     
     if (!codeType || !['B', 'A', 'S'].includes(codeType)) {
@@ -262,6 +258,7 @@ export const getCommonCodesByType = async (req: Request<CommonCodeByTypeReq>, re
  */
 export const getCommonCodesByTypeDetail = async (req: Request<CommonCodeByTypeReq>, res: Response) => {
   try {
+    logApiCall('GET', API_URLS.COMMON_CODE.ADMIN.BY_PARENT, COMMON_CODE_API_MAPPING as any, '계층형 조회 (관리자용)');
     const { codeType } = req.params;
     
     if (!codeType || !['B', 'A', 'S'].includes(codeType)) {
@@ -291,6 +288,7 @@ export const getCommonCodesByTypeDetail = async (req: Request<CommonCodeByTypeRe
  */
 export const getCommonCodesByParent = async (req: Request<CommonCodeByParentReq>, res: Response) => {
   try {
+    logApiCall('POST', API_URLS.COMMON_CODE.CODE.CREATE, COMMON_CODE_API_MAPPING as any, '코드 생성 (관리자용)');
     const { grpId } = req.params;
     const { parentCodeId } = req.query;
     
@@ -327,6 +325,7 @@ export const getCommonCodesByParent = async (req: Request<CommonCodeByParentReq>
  */
 export const getCommonCodesByParentDetail = async (req: Request<CommonCodeByParentReq>, res: Response) => {
   try {
+    logApiCall('PUT', API_URLS.COMMON_CODE.CODE.UPDATE, COMMON_CODE_API_MAPPING as any, '코드 수정 (관리자용)');
     const { grpId } = req.params;
     const { parentCodeId } = req.query;
     
@@ -357,6 +356,7 @@ export const getCommonCodesByParentDetail = async (req: Request<CommonCodeByPare
  */
 export const createCommonCode = async (req: Request<{}, {}, CommonCodeCreateReq>, res: Response) => {
   try {
+    logApiCall('DELETE', API_URLS.COMMON_CODE.CODE.DELETE, COMMON_CODE_API_MAPPING as any, '코드 삭제 (관리자용)');
     const codeData = req.body;
     
     if (!codeData.grpId || !codeData.codeId || !codeData.codeNm || !codeData.codeType) {

@@ -5,6 +5,13 @@ import { PaginationReq, PaginationRes, API_URLS } from './api.js';
  * ADMIN API 매핑 테이블
  * API URL과 Request/Response 타입을 명시적으로 연결
  */
+/**
+ * ADMIN API 매핑 테이블 (params/query/body/res)
+ * - params: URL 경로 변수 타입. 없으면 생략
+ * - query: 쿼리스트링 타입. 없으면 생략
+ * - body: 요청 본문 타입. 없으면 생략 또는 'void' 사용 가능(본문 없음 의미)
+ * - res: 응답 데이터 타입. 'void'는 ApiResponse<void> 의미
+ */
 export const ADMIN_API_MAPPING = {
   // 프로필 관리
   [`GET ${API_URLS.ADMIN.PROFILE}`]: {
@@ -13,166 +20,178 @@ export const ADMIN_API_MAPPING = {
     description: '관리자 프로필 조회'
   },
   [`PUT ${API_URLS.ADMIN.PROFILE}`]: {
-    req: 'AdminProfileUpdateReq',
-    res: 'AdminProfileUpdateRes',
+    body: 'AdminProfileUpdateReq',
+    res: 'void',
     description: '관리자 프로필 업데이트'
   },
   
   // 비밀번호 관리
   [`PUT ${API_URLS.ADMIN.PASSWORD}`]: {
-    req: 'AdminPasswordChangeReq',
-    res: 'AdminPasswordChangeRes',
+    body: 'AdminPasswordChangeReq',
+    res: 'void',
     description: '관리자 비밀번호 변경'
   },
   
   // FAQ 관리
   [`GET ${API_URLS.ADMIN.FAQ.LIST}`]: {
-    req: 'AdminFaqListReq',
+    query: 'AdminFaqListQuery',
     res: 'AdminFaqListRes',
     description: '관리자 FAQ 목록 조회'
   },
   [`GET ${API_URLS.ADMIN.FAQ.DETAIL}`]: {
-    req: 'AdminFaqDetailReq',
+    params: 'AdminFaqDetailParams',
     res: 'AdminFaqDetailRes',
     description: '관리자 FAQ 상세 조회'
   },
   [`POST ${API_URLS.ADMIN.FAQ.CREATE}`]: {
-    req: 'AdminFaqCreateReq',
+    body: 'AdminFaqCreateReq',
     res: 'AdminFaqCreateRes',
     description: '관리자 FAQ 생성'
   },
   [`PUT ${API_URLS.ADMIN.FAQ.UPDATE}`]: {
-    req: 'AdminFaqUpdateReq',
-    res: 'AdminFaqUpdateRes',
+    body: 'AdminFaqUpdateReq',
+    res: 'void',
     description: '관리자 FAQ 업데이트'
   },
   [`DELETE ${API_URLS.ADMIN.FAQ.DELETE}`]: {
-    req: 'AdminFaqDeleteReq',
-    res: 'AdminFaqDeleteRes',
+    params: 'AdminFaqDetailParams',
+    res: 'void',
     description: '관리자 FAQ 삭제'
   },
   
   // QnA 관리
   [`GET ${API_URLS.ADMIN.QNA.LIST}`]: {
-    req: 'AdminQnaListReq',
+    query: 'AdminQnaListQuery',
     res: 'AdminQnaListRes',
     description: '관리자 QnA 목록 조회'
   },
   [`GET ${API_URLS.ADMIN.QNA.DETAIL}`]: {
-    req: 'AdminQnaDetailReq',
+    params: 'AdminQnaDetailParams',
     res: 'AdminQnaDetailRes',
     description: '관리자 QnA 상세 조회'
   },
   [`POST ${API_URLS.ADMIN.QNA.ANSWER}`]: {
-    req: 'AdminQnaAnswerReq',
-    res: 'AdminQnaAnswerRes',
+    params: 'AdminQnaDetailParams',
+    body: 'AdminQnaAnswerReq',
+    res: 'void',
     description: '관리자 QnA 답변'
   },
   [`PUT ${API_URLS.ADMIN.QNA.UPDATE}`]: {
-    req: 'AdminQnaUpdateReq',
-    res: 'AdminQnaUpdateRes',
+    params: 'AdminQnaDetailParams',
+    body: 'AdminQnaUpdateReq',
+    res: 'void',
     description: '관리자 QnA 업데이트'
   },
   [`DELETE ${API_URLS.ADMIN.QNA.DELETE}`]: {
-    req: 'AdminQnaDeleteReq',
-    res: 'AdminQnaDeleteRes',
+    params: 'AdminQnaDetailParams',
+    res: 'void',
     description: '관리자 QnA 삭제'
   },
   
   // 공지사항 관리
   [`GET ${API_URLS.ADMIN.NOTICE.LIST}`]: {
-    req: 'AdminNoticeListReq',
+    query: 'AdminNoticeListQuery',
     res: 'AdminNoticeListRes',
     description: '관리자 공지사항 목록 조회'
   },
   [`GET ${API_URLS.ADMIN.NOTICE.DETAIL}`]: {
-    req: 'AdminNoticeDetailReq',
+    params: 'AdminNoticeDetailParams',
     res: 'AdminNoticeDetailRes',
     description: '관리자 공지사항 상세 조회'
   },
   [`POST ${API_URLS.ADMIN.NOTICE.CREATE}`]: {
-    req: 'AdminNoticeCreateReq',
+    body: 'AdminNoticeCreateReq',
     res: 'AdminNoticeCreateRes',
     description: '관리자 공지사항 생성'
   },
   [`PUT ${API_URLS.ADMIN.NOTICE.UPDATE}`]: {
-    req: 'AdminNoticeUpdateReq',
-    res: 'AdminNoticeUpdateRes',
+    params: 'AdminNoticeDetailParams',
+    body: 'AdminNoticeUpdateReq',
+    res: 'void',
     description: '관리자 공지사항 업데이트'
   },
   [`DELETE ${API_URLS.ADMIN.NOTICE.DELETE}`]: {
-    req: 'AdminNoticeDeleteReq',
-    res: 'AdminNoticeDeleteRes',
+    params: 'AdminNoticeDetailParams',
+    res: 'void',
     description: '관리자 공지사항 삭제'
   },
   
   // Admin 계정 관리
   [`GET ${API_URLS.ADMIN.ACCOUNT.LIST}`]: {
-    req: 'AdminListReq',
+    query: 'AdminListReq',
     res: 'AdminListRes',
     description: '관리자 계정 목록 조회'
   },
   [`GET ${API_URLS.ADMIN.ACCOUNT.DETAIL}`]: {
-    req: 'AdminDetailReq',
+    params: 'AdminDetailReq',
     res: 'AdminDetailRes',
     description: '관리자 계정 상세 조회'
   },
   [`POST ${API_URLS.ADMIN.ACCOUNT.CREATE}`]: {
-    req: 'AdminCreateReq',
+    body: 'AdminCreateReq',
     res: 'AdminCreateRes',
     description: '관리자 계정 생성'
   },
   [`POST ${API_URLS.ADMIN.ACCOUNT.CHECK_EMAIL}`]: {
-    req: 'AdminCheckEmailReq',
+    body: 'AdminCheckEmailReq',
     res: 'AdminCheckEmailRes',
     description: '관리자 계정 이메일 중복 체크'
   },
   [`PUT ${API_URLS.ADMIN.ACCOUNT.UPDATE}`]: {
-    req: 'AdminUpdateReq',
-    res: 'AdminUpdateRes',
+    params: 'AdminDetailReq',
+    body: 'AdminUpdateReq',
+    res: 'void',
     description: '관리자 계정 업데이트'
   },
   [`DELETE ${API_URLS.ADMIN.ACCOUNT.DELETE}`]: {
-    req: 'AdminDeleteReq',
-    res: 'AdminDeleteRes',
+    params: 'AdminDetailReq',
+    res: 'void',
     description: '관리자 계정 삭제'
   },
   [`PUT ${API_URLS.ADMIN.ACCOUNT.PASSWORD_CHANGE}`]: {
-    req: 'AdminPasswordChangeReq',
-    res: 'AdminPasswordChangeRes',
+    params: 'AdminDetailReq',
+    body: 'AdminPasswordChangeReq',
+    res: 'void',
     description: '관리자 계정 비밀번호 변경'
   },
   
   // OpenAPI 관리
   [`GET ${API_URLS.ADMIN.OPEN_API.LIST}`]: {
-    req: 'AdminOpenApiListReq',
+    query: 'AdminOpenApiListQuery',
     res: 'AdminOpenApiListRes',
     description: '관리자 OpenAPI 키 목록 조회'
   },
   [`GET ${API_URLS.ADMIN.OPEN_API.DETAIL}`]: {
-    req: 'AdminOpenApiDetailReq',
+    params: 'AdminOpenApiDetailParams',
     res: 'AdminOpenApiDetailRes',
     description: '관리자 OpenAPI 키 상세 조회'
   },
   [`POST ${API_URLS.ADMIN.OPEN_API.CREATE}`]: {
-    req: 'AdminOpenApiCreateReq',
+    body: 'AdminOpenApiCreateReq',
     res: 'AdminOpenApiCreateRes',
     description: '관리자 OpenAPI 키 생성'
   },
   [`PUT ${API_URLS.ADMIN.OPEN_API.UPDATE}`]: {
-    req: 'AdminOpenApiUpdateReq',
-    res: 'AdminOpenApiUpdateRes',
+    params: 'AdminOpenApiUpdateParams',
+    body: 'AdminOpenApiUpdateReq',
+    res: 'void',
     description: '관리자 OpenAPI 키 업데이트'
   },
   [`DELETE ${API_URLS.ADMIN.OPEN_API.DELETE}`]: {
-    req: 'AdminOpenApiDeleteReq',
-    res: 'AdminOpenApiDeleteRes',
+    params: 'AdminOpenApiDeleteParams',
+    res: 'void',
     description: '관리자 OpenAPI 키 삭제'
   },
   [`POST ${API_URLS.ADMIN.OPEN_API.EXTEND}`]: {
-    req: 'AdminOpenApiExtendReq',
+    params: 'AdminOpenApiExtendParams',
+    body: 'AdminOpenApiExtendReq',
     res: 'AdminOpenApiExtendRes',
     description: '관리자 OpenAPI 키 연장'
+  },
+  [`GET ${API_URLS.ADMIN.OPEN_API.STATUS}`]: {
+    // no params/query/body
+    res: 'AdminOpenApiStatsRes',
+    description: '관리자 OpenAPI 상태(통계) 조회'
   }
 } as const;
 
@@ -208,10 +227,7 @@ export interface AdminProfileUpdateReq {
   affiliation?: string;
 }
 
-export interface AdminProfileUpdateRes {
-  success: boolean;
-  message: string;
-}
+// 프로필 업데이트 응답은 ApiResponse<void> 사용
 
 // Admin 비밀번호 변경
 export interface AdminPasswordChangeReq {
@@ -219,10 +235,7 @@ export interface AdminPasswordChangeReq {
   newPassword: string;
 }
 
-export interface AdminPasswordChangeRes {
-  success: boolean;
-  message: string;
-}
+// 비밀번호 변경 응답은 ApiResponse<void> 사용
 
 // Admin 계정 목록 조회
 export interface AdminListReq extends PaginationReq {
@@ -258,7 +271,6 @@ export interface AdminCreateReq {
 
 export interface AdminCreateRes {
   adminId: number;
-  message: string;
 }
 
 // Admin 계정 이메일 중복 체크
@@ -268,7 +280,6 @@ export interface AdminCheckEmailReq {
 
 export interface AdminCheckEmailRes {
   available: boolean;
-  message: string;
 }
 
 // Admin 계정 수정
@@ -282,20 +293,14 @@ export interface AdminUpdateReq {
   updatedBy?: string;
 }
 
-export interface AdminUpdateRes {
-  success: boolean;
-  message: string;
-}
+// 계정 업데이트 응답은 ApiResponse<void> 사용
 
 // Admin 계정 삭제
 export interface AdminDeleteReq {
   adminId: string;
 }
 
-export interface AdminDeleteRes {
-  success: boolean;
-  message: string;
-}
+// 계정 삭제 응답은 ApiResponse<void> 사용
 
 // Admin 계정 상태 변경
 export interface AdminStatusChangeReq {
@@ -303,10 +308,7 @@ export interface AdminStatusChangeReq {
   reason?: string;
 }
 
-export interface AdminStatusChangeRes {
-  success: boolean;
-  message: string;
-}
+// 계정 상태 변경 응답은 ApiResponse<void> 사용
 
 // Admin 계정 통계
 export interface AdminStatsRes {

@@ -5,6 +5,13 @@ import { PaginationReq, PaginationRes, API_URLS } from './api.js';
  * USER API 매핑 테이블
  * API URL과 Request/Response 타입을 명시적으로 연결
  */
+/**
+ * USER API 매핑 테이블 (params/query/body/res)
+ * - params: URL 경로 변수 타입. 없으면 생략
+ * - query: 쿼리스트링 타입. 없으면 생략
+ * - body: 요청 본문 타입. 없으면 생략 또는 'void' 사용 가능(본문 없음 의미)
+ * - res: 응답 데이터 타입. 'void'는 ApiResponse<void> 의미
+ */
 export const USER_API_MAPPING = {
   // 프로필 관리
   [`GET ${API_URLS.USER.PROFILE}`]: {
@@ -13,15 +20,15 @@ export const USER_API_MAPPING = {
     description: '사용자 프로필 조회'
   },
   [`PUT ${API_URLS.USER.PROFILE}`]: {
-    req: 'UserProfileUpdateReq',
-    res: 'UserProfileUpdateRes',
+    body: 'UserProfileUpdateReq',
+    res: 'void',
     description: '사용자 프로필 업데이트'
   },
   
   // 비밀번호 관리
   [`PUT ${API_URLS.USER.PASSWORD}`]: {
-    req: 'UserPasswordChangeReq',
-    res: 'UserPasswordChangeRes',
+    body: 'UserPasswordChangeReq',
+    res: 'void',
     description: '사용자 비밀번호 변경'
   },
   
@@ -41,12 +48,12 @@ export const USER_API_MAPPING = {
   
   // FAQ 관리
   [`GET ${API_URLS.USER.FAQ.LIST}`]: {
-    req: 'UserFaqListReq',
+    query: 'UserFaqListQuery',
     res: 'UserFaqListRes',
     description: '사용자 FAQ 목록 조회'
   },
   [`GET ${API_URLS.USER.FAQ.DETAIL}`]: {
-    req: 'UserFaqDetailReq',
+    params: 'UserFaqDetailParams',
     res: 'UserFaqDetailRes',
     description: '사용자 FAQ 상세 조회'
   },
@@ -58,12 +65,12 @@ export const USER_API_MAPPING = {
   
   // QnA 관리
   [`GET ${API_URLS.USER.QNA.LIST}`]: {
-    req: 'UserQnaListReq',
+    query: 'UserQnaListQuery',
     res: 'UserQnaListRes',
     description: '사용자 QnA 목록 조회'
   },
   [`GET ${API_URLS.USER.QNA.DETAIL}`]: {
-    req: 'UserQnaDetailReq',
+    params: 'UserQnaDetailParams',
     res: 'UserQnaDetailRes',
     description: '사용자 QnA 상세 조회'
   },
@@ -80,12 +87,12 @@ export const USER_API_MAPPING = {
   
   // 공지사항 관리
   [`GET ${API_URLS.USER.NOTICE.LIST}`]: {
-    req: 'UserNoticeListReq',
+    query: 'UserNoticeListQuery',
     res: 'UserNoticeListRes',
     description: '사용자 공지사항 목록 조회'
   },
   [`GET ${API_URLS.USER.NOTICE.DETAIL}`]: {
-    req: 'UserNoticeDetailReq',
+    params: 'UserNoticeDetailParams',
     res: 'UserNoticeDetailRes',
     description: '사용자 공지사항 상세 조회'
   },
@@ -97,27 +104,28 @@ export const USER_API_MAPPING = {
   
   // OpenAPI 관리
   [`GET ${API_URLS.USER.OPEN_API.LIST}`]: {
-    req: 'UserOpenApiListReq',
+    // no params/query/body
     res: 'UserOpenApiListRes',
     description: '사용자 OpenAPI 키 목록 조회'
   },
   [`GET ${API_URLS.USER.OPEN_API.DETAIL}`]: {
-    req: 'UserOpenApiDetailReq',
+    params: 'UserOpenApiDetailParams',
     res: 'UserOpenApiDetailRes',
     description: '사용자 OpenAPI 키 상세 조회'
   },
   [`POST ${API_URLS.USER.OPEN_API.CREATE}`]: {
-    req: 'UserOpenApiCreateReq',
+    body: 'UserOpenApiCreateReq',
     res: 'UserOpenApiCreateRes',
     description: '사용자 OpenAPI 키 생성'
   },
   [`DELETE ${API_URLS.USER.OPEN_API.DELETE}`]: {
-    req: 'UserOpenApiDeleteReq',
-    res: 'UserOpenApiDeleteRes',
+    params: 'UserOpenApiDeleteParams',
+    res: 'void',
     description: '사용자 OpenAPI 키 삭제'
   },
   [`POST ${API_URLS.USER.OPEN_API.EXTEND}`]: {
-    req: 'UserOpenApiExtendReq',
+    params: 'UserOpenApiExtendParams',
+    body: 'UserOpenApiExtendReq',
     res: 'UserOpenApiExtendRes',
     description: '사용자 OpenAPI 키 연장'
   }
@@ -162,10 +170,7 @@ export interface UserProfileUpdateReq {
   affiliation?: string;
 }
 
-export interface UserProfileUpdateRes {
-  success: boolean;
-  message: string;
-}
+// 사용자 프로필 업데이트 응답은 ApiResponse<void> 사용
 
 // 사용자 비밀번호 변경
 export interface UserPasswordChangeReq {
@@ -173,7 +178,4 @@ export interface UserPasswordChangeReq {
   newPassword: string;
 }
 
-export interface UserPasswordChangeRes {
-  success: boolean;
-  message: string;
-} 
+// 사용자 비밀번호 변경 응답은 ApiResponse<void> 사용

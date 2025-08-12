@@ -29,17 +29,15 @@ export interface AdminNoticeItem {
 }
 
 // 공지사항 목록 조회 (사용자용)
-export interface UserNoticeListReq extends PaginationReq {
+export interface UserNoticeListQuery extends PaginationReq {
   noticeType?: 'G' | 'S' | 'E';
   publicOnly?: boolean;
   includeExpired?: boolean;
 }
 
-export interface UserNoticeListRes extends PaginationRes<UserNoticeItem> {
-  notices: UserNoticeItem[];
-}
+export type UserNoticeListRes = PaginationRes<UserNoticeItem>;
 
-export interface UserNoticeDetailReq {
+export interface UserNoticeDetailParams {
   noticeId: string;
 }
 
@@ -53,18 +51,16 @@ export interface UserNoticeHomeRes {
 }
 
 // 공지사항 목록 조회 (관리자용)
-export interface AdminNoticeListReq extends PaginationReq {
+export interface AdminNoticeListQuery extends PaginationReq {
   noticeType?: 'G' | 'S' | 'E';
   publicYn?: 'Y' | 'N';
   pinnedYn?: 'Y' | 'N';
   search?: string;
 }
 
-export interface AdminNoticeListRes extends PaginationRes<AdminNoticeItem> {
-  notices: AdminNoticeItem[];
-}
+export type AdminNoticeListRes = PaginationRes<AdminNoticeItem>;
 
-export interface AdminNoticeDetailReq {
+export interface AdminNoticeDetailParams {
   noticeId: string;
 }
 
@@ -86,7 +82,6 @@ export interface AdminNoticeCreateReq {
 
 export interface AdminNoticeCreateRes {
   noticeId: number;
-  message: string;
 }
 
 // 공지사항 수정 (관리자용)
@@ -101,16 +96,10 @@ export interface AdminNoticeUpdateReq {
   updatedBy?: string;
 }
 
-export interface AdminNoticeUpdateRes {
-  success: boolean;
-  message: string;
-}
+// 업데이트 응답은 ApiResponse<void> 사용
 
 // 공지사항 삭제 (관리자용)
-export interface AdminNoticeDeleteRes {
-  success: boolean;
-  message: string;
-}
+// 삭제 응답은 ApiResponse<void> 사용
 
 // 공지사항 통계 (관리자용)
 export interface AdminNoticeStatsRes {

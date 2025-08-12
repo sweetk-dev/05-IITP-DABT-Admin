@@ -45,16 +45,14 @@ export interface AdminQnaDetailItem extends AdminQnaItem {
 }
 
 // Q&A 목록 조회 (사용자용)
-export interface UserQnaListReq extends PaginationReq {
+export interface UserQnaListQuery extends PaginationReq {
   qnaType?: string;
   search?: string;
 }
 
-export interface UserQnaListRes extends PaginationRes<UserQnaItem> {
-  qnas: UserQnaItem[];
-}
+export type UserQnaListRes = PaginationRes<UserQnaItem>;
 
-export interface UserQnaDetailReq {
+export interface UserQnaDetailParams {
   qnaId: string;
 }
 
@@ -73,7 +71,6 @@ export interface UserQnaCreateReq {
 
 export interface UserQnaCreateRes {
   qnaId: number;
-  message: string;
 }
 
 // 홈 화면용 Q&A 조회 (사용자용)
@@ -82,15 +79,13 @@ export interface UserQnaHomeRes {
 }
 
 // Q&A 목록 조회 (관리자용)
-export interface AdminQnaListReq extends PaginationReq {
+export interface AdminQnaListQuery extends PaginationReq {
   search?: string;
 }
 
-export interface AdminQnaListRes extends PaginationRes<AdminQnaItem> {
-  qnas: AdminQnaItem[];
-}
+export type AdminQnaListRes = PaginationRes<AdminQnaItem>;
 
-export interface AdminQnaDetailReq {
+export interface AdminQnaDetailParams {
   qnaId: string;
 }
 
@@ -104,10 +99,11 @@ export interface AdminQnaAnswerReq {
   answeredBy?: string;
 }
 
-export interface AdminQnaAnswerRes {
-  success: boolean;
-  message: string;
+export interface AdminQnaAnswerParams {
+  qnaId: string;
 }
+
+// 답변 응답은 ApiResponse<void> 사용
 
 // Q&A 수정 (관리자용)
 export interface AdminQnaUpdateReq {
@@ -116,13 +112,7 @@ export interface AdminQnaUpdateReq {
   updatedBy?: string;
 }
 
-export interface AdminQnaUpdateRes {
-  success: boolean;
-  message: string;
-}
+// 업데이트 응답은 ApiResponse<void> 사용
 
 // Q&A 삭제 (관리자용)
-export interface AdminQnaDeleteRes {
-  success: boolean;
-  message: string;
-} 
+// 삭제 응답은 ApiResponse<void> 사용

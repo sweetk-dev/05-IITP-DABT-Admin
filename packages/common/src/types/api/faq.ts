@@ -27,16 +27,14 @@ export interface AdminFaqItem {
 }
 
 // FAQ 목록 조회 (사용자용)
-export interface UserFaqListReq extends PaginationReq {
+export interface UserFaqListQuery extends PaginationReq {
   faqType?: string;
   search?: string;
 }
 
-export interface UserFaqListRes extends PaginationRes<UserFaqItem> {
-  faqs: UserFaqItem[];
-}
+export type UserFaqListRes = PaginationRes<UserFaqItem>;
 
-export interface UserFaqDetailReq {
+export interface UserFaqDetailParams {
   faqId: string;
 }
 
@@ -50,17 +48,15 @@ export interface UserFaqHomeRes {
 }
 
 // FAQ 목록 조회 (관리자용)
-export interface AdminFaqListReq extends PaginationReq {
+export interface AdminFaqListQuery extends PaginationReq {
   faqType?: string;
   search?: string;
   useYn?: string;
 }
 
-export interface AdminFaqListRes extends PaginationRes<AdminFaqItem> {
-  faqs: AdminFaqItem[];
-}
+export type AdminFaqListRes = PaginationRes<AdminFaqItem>;
 
-export interface AdminFaqDetailReq {
+export interface AdminFaqDetailParams {
   faqId: string;
 }
 
@@ -79,7 +75,6 @@ export interface AdminFaqCreateReq {
 
 export interface AdminFaqCreateRes {
   faqId: number;
-  message: string;
 }
 
 // FAQ 수정 (관리자용)
@@ -91,14 +86,8 @@ export interface AdminFaqUpdateReq {
   useYn?: string;
 }
 
-export interface AdminFaqUpdateRes {
-  success: boolean;
-  message: string;
-}
+// 업데이트 응답은 ApiResponse<void> 사용
 
 // FAQ 삭제 (관리자용)
-export interface AdminFaqDeleteRes {
-  success: boolean;
-  message: string;
-}
+// 삭제 응답은 ApiResponse<void> 사용
 

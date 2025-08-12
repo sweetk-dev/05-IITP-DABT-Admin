@@ -94,6 +94,7 @@ export const API_URLS = {
       UPDATE: '/openapi/keys/:keyId',
       DELETE: '/openapi/keys/:keyId',
       EXTEND: '/openapi/keys/:keyId/extend',
+      STATUS: '/openapi/status', 
     }
   },
   
@@ -269,6 +270,7 @@ export const FULL_API_URLS = {
       UPDATE: getAdminUrl(API_URLS.ADMIN.OPEN_API.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.OPEN_API.DELETE),
       EXTEND: getAdminUrl(API_URLS.ADMIN.OPEN_API.EXTEND),
+      STATUS: getAdminUrl(API_URLS.ADMIN.OPEN_API.STATUS),
     }
   },
   COMMON: {

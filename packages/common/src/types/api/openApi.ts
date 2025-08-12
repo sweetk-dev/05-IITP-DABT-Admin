@@ -1,7 +1,8 @@
 // OpenAPI 인증키 관련 DTO 정의
+import { PaginationReq, PaginationRes } from './api';
 
 // OpenAPI 인증키 엔티티 (전체 정보 - Admin용)
-export interface OpenApiAuthKey {
+export interface AdminOpenApiKeyItem {
   keyId: number;
   userId: number;
   authKey: string;
@@ -22,7 +23,7 @@ export interface OpenApiAuthKey {
 }
 
 // OpenAPI 인증키 엔티티 (제한된 정보 - User용)
-export interface UserOpenApiAuthKey {
+export interface UserOpenApiKeyItem {
   keyId: number;
   authKey: string;
   activeYn: string;
@@ -42,16 +43,16 @@ export interface UserOpenApiListReq {
 }
 
 export interface UserOpenApiListRes {
-  authKeys: UserOpenApiAuthKey[];
+  authKeys: UserOpenApiKeyItem[];
 }
 
 // 사용자 OpenAPI 인증키 상세 조회
-export interface UserOpenApiDetailReq {
+export interface UserOpenApiDetailParams {
   keyId: string;
 }
 
 export interface UserOpenApiDetailRes {
-  authKey: UserOpenApiAuthKey;
+  authKey: UserOpenApiKeyItem;
 }
 
 // 사용자 OpenAPI 인증키 생성
@@ -65,33 +66,32 @@ export interface UserOpenApiCreateReq {
 export interface UserOpenApiCreateRes {
   keyId: number;
   authKey: string;
-  message: string;
 }
 
 // 사용자 OpenAPI 인증키 삭제
-export interface UserOpenApiDeleteReq {
-  keyId: number;
+export interface UserOpenApiDeleteParams {
+  keyId: string;
 }
 
-export interface UserOpenApiDeleteRes {
-  message: string;
-}
+// 삭제 응답은 ApiResponse<void> 사용
 
 // 사용자 OpenAPI 인증키 기간 연장
+export interface UserOpenApiExtendParams {
+  keyId: string;
+}
+
 export interface UserOpenApiExtendReq {
-  keyId: number;
   extensionDays: number; // 90일 또는 365일
 }
 
 export interface UserOpenApiExtendRes {
-  message: string;
   newEndDt: string;
 }
 
 // ===== Admin용 OpenAPI 인증키 관련 DTO =====
 
 // Admin OpenAPI 인증키 목록 조회
-export interface AdminOpenApiListReq {
+export interface AdminOpenApiListQuery {
   page?: number;
   limit?: number;
   userId?: number;
@@ -99,20 +99,15 @@ export interface AdminOpenApiListReq {
   searchKeyword?: string;
 }
 
-export interface AdminOpenApiListRes {
-  authKeys: OpenApiAuthKey[];
-  total: number;
-  page: number;
-  limit: number;
-}
+export type AdminOpenApiListRes = PaginationRes<AdminOpenApiKeyItem>;
 
 // Admin OpenAPI 인증키 상세 조회
-export interface AdminOpenApiDetailReq {
+export interface AdminOpenApiDetailParams {
   keyId: string;
 }
 
 export interface AdminOpenApiDetailRes {
-  authKey: OpenApiAuthKey;
+  authKey: AdminOpenApiKeyItem;
 }
 
 // Admin OpenAPI 인증키 생성
@@ -128,12 +123,10 @@ export interface AdminOpenApiCreateReq {
 export interface AdminOpenApiCreateRes {
   keyId: number;
   authKey: string;
-  message: string;
 }
 
 // Admin OpenAPI 인증키 수정
 export interface AdminOpenApiUpdateReq {
-  keyId: number;
   keyName?: string;
   keyDesc?: string;
   startDt?: string;
@@ -142,36 +135,35 @@ export interface AdminOpenApiUpdateReq {
   updatedBy: string;
 }
 
-export interface AdminOpenApiUpdateRes {
-  message: string;
+export interface AdminOpenApiUpdateParams {
+  keyId: string;
 }
+
+// 업데이트 응답은 ApiResponse<void> 사용
 
 // Admin OpenAPI 인증키 삭제
-export interface AdminOpenApiDeleteReq {
-  keyId: number;
-  deletedBy: string;
+export interface AdminOpenApiDeleteParams {
+  keyId: string;
 }
 
-export interface AdminOpenApiDeleteRes {
-  message: string;
-}
+// 삭제 응답은 ApiResponse<void> 사용
 
 // Admin OpenAPI 인증키 기간 연장
+export interface AdminOpenApiExtendParams {
+  keyId: string;
+}
+
 export interface AdminOpenApiExtendReq {
-  keyId: number;
   extensionDays: number;
   updatedBy: string;
 }
 
 export interface AdminOpenApiExtendRes {
-  message: string;
   newEndDt: string;
 }
 
 // Admin OpenAPI 인증키 통계
-export interface AdminOpenApiStatsReq {
-  userId?: number;
-}
+// 상태 조회는 별도 요청 DTO 없음 (params/query/body 모두 없음)
 
 export interface AdminOpenApiStatsRes {
   total: number;

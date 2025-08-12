@@ -70,9 +70,6 @@ export enum ErrorCode {
   INVALID_EMAIL = 16002,
   INVALID_PASSWORD = 16003,
   USER_PASSWORD_TOO_WEAK = 16004,
-  USER_EMAIL_DUPLICATE = 16005,
-  USER_PASSWORD_INVALID = 16006,
-  USER_INACTIVE = 16007,
   
   // Admin 관련
   ADMIN_NOT_FOUND = 17000,
@@ -82,8 +79,6 @@ export enum ErrorCode {
   ADMIN_DELETE_FAILED = 17004,
   ADMIN_PASSWORD_CHANGE_FAILED = 17005,
   ADMIN_STATUS_CHANGE_FAILED = 17006,
-  ADMIN_PASSWORD_INVALID = 17007,
-  ADMIN_INACTIVE = 17008,
   
 
 
@@ -92,14 +87,17 @@ export enum ErrorCode {
   //// Service Bessiness Logic 에러 코드
   ///////////////////////
 
-  //Admim Account 관리 관련
+  //Account 관련
   ACCOUNT_NOT_FOUND = 20000,
   ACCOUNT_CREATE_FAILED = 20001,
   ACCOUNT_UPDATE_FAILED = 20002,
   ACCOUNT_DELETE_FAILED = 20003,
-  ACCOUNT_INACTIVE = 20004,
   ACCOUNT_ALREADY_EXISTS = 20005,
+  ACCOUNT_EMAIL_DUPLICATE = 20040,
   ACCOUNT_ADMIN_ROLE_NOT_FOUND = 20020,
+  ACCOUNT_INACTIVE = 20050,
+  ACCOUNT_PASSWORD_INVALID = 20051,
+  
 
   //Notice 관련
   NOTICE_NOT_FOUND = 21000, 
@@ -256,18 +254,7 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
     message: '비밀번호가 너무 약합니다.',
     statusCode: 400
   },
-  [ErrorCode.USER_EMAIL_DUPLICATE]: {
-    message: '이미 사용 중인 이메일입니다.',
-    statusCode: 409
-  },
-  [ErrorCode.USER_PASSWORD_INVALID]: {
-    message: '비밀번호가 올바르지 않습니다.',
-    statusCode: 400
-  },
-  [ErrorCode.USER_INACTIVE]: {
-    message: '사용자가 비활성화되었습니다.',
-    statusCode: 403
-  },
+
   
 
   // Admin 관련
@@ -298,14 +285,6 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
   [ErrorCode.ADMIN_STATUS_CHANGE_FAILED]: {
     message: '상태 변경에 실패했습니다.',
     statusCode: 500
-  },
-  [ErrorCode.ADMIN_PASSWORD_INVALID]: {
-    message: '비밀번호가 올바르지 않습니다.',
-    statusCode: 400
-  },
-  [ErrorCode.ADMIN_INACTIVE]: {
-    message: '관리자가 비활성화되었습니다.',
-    statusCode: 403
   },
 
 
@@ -462,7 +441,7 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
     statusCode: 404
   },
 
-  // Admim Account 관리 관련
+  // Account 관련
   [ErrorCode.ACCOUNT_NOT_FOUND]: {
     message: '계정을 찾을 수 없습니다.',
     statusCode: 404
@@ -479,18 +458,27 @@ export const ErrorMetaMap: Record<ErrorCode, ErrorMeta> = {
     message: '계정 삭제에 실패했습니다.',
     statusCode: 500
   },
-  [ErrorCode.ACCOUNT_INACTIVE]: {
-    message: '비활성화된 계정입니다.',
-    statusCode: 403
-  },
   [ErrorCode.ACCOUNT_ALREADY_EXISTS]: {
     message: '이미 존재하는 계정입니다.',
+    statusCode: 409
+  },
+  [ErrorCode.ACCOUNT_EMAIL_DUPLICATE]: {
+    message: '이미 사용 중인 이메일입니다.',
     statusCode: 409
   },
   [ErrorCode.ACCOUNT_ADMIN_ROLE_NOT_FOUND]: {
     message: '관리자 역할을 찾을 수 없습니다.',
     statusCode: 404
   },
+  [ErrorCode.ACCOUNT_INACTIVE]: {
+    message: '비활성화된 계정입니다.',
+    statusCode: 403
+  },
+  [ErrorCode.ACCOUNT_PASSWORD_INVALID]: {
+    message: '비밀번호가 올바르지 않습니다.',
+    statusCode: 400
+  },
+
 
   // Notice 관련
   [ErrorCode.NOTICE_NOT_FOUND]: {

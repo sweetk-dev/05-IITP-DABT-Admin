@@ -66,7 +66,7 @@ export const getUserFriendlyMessage = (errorCode: ErrorCode, originalMessage?: s
     case ErrorCode.USER_EMAIL_DUPLICATE:
       return '이미 사용 중인 이메일입니다.';
     
-    case ErrorCode.USER_EMAIL_INVALID_FORMAT:
+    case ErrorCode.EMAIL_INVALID_FORMAT:
       return '올바른 이메일 형식으로 입력해주세요.';
     
     case ErrorCode.USER_PASSWORD_TOO_WEAK:

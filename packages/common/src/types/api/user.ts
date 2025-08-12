@@ -58,7 +58,6 @@ export const USER_API_MAPPING = {
     description: '사용자 FAQ 상세 조회'
   },
   [`GET ${API_URLS.USER.FAQ.HOME}`]: {
-    req: 'UserFaqHomeReq',
     res: 'UserFaqHomeRes',
     description: '사용자 FAQ 홈 조회'
   },
@@ -80,7 +79,6 @@ export const USER_API_MAPPING = {
     description: '사용자 QnA 작성'
   },
   [`GET ${API_URLS.USER.QNA.HOME}`]: {
-    req: 'UserQnaHomeReq',
     res: 'UserQnaHomeRes',
     description: '사용자 QnA 홈 조회'
   },
@@ -97,7 +95,6 @@ export const USER_API_MAPPING = {
     description: '사용자 공지사항 상세 조회'
   },
   [`GET ${API_URLS.USER.NOTICE.HOME}`]: {
-    req: 'UserNoticeHomeReq',
     res: 'UserNoticeHomeRes',
     description: '사용자 공지사항 홈 조회'
   },

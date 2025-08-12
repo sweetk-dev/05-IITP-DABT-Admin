@@ -1,7 +1,8 @@
 import { 
-  UserFaqListReq, 
+  UserFaqListQuery, 
   UserFaqListRes, 
-  UserFaqDetailRes
+  UserFaqDetailRes,
+  UserFaqHomeRes
 } from '@iitp-dabt/common';
 import { 
   findFaqs,
@@ -13,7 +14,7 @@ import { appLogger } from '../../utils/logger';
 /**
  * 사용자 FAQ 목록 조회 (비즈니스 로직)
  */
-export const getUserFaqList = async (params: UserFaqListReq): Promise<UserFaqListRes> => {
+export const getUserFaqList = async (params: UserFaqListQuery): Promise<UserFaqListRes> => {
   try {
     const { page = 1, limit = 10 } = params;
     const offset = (page - 1) * limit;
@@ -28,7 +29,7 @@ export const getUserFaqList = async (params: UserFaqListReq): Promise<UserFaqLis
     appLogger.info('사용자 FAQ 목록 조회 서비스 호출', { params });
     
     return {
-      faqs: result.faqs.map(faq => ({
+      items: result.faqs.map(faq => ({
         faqId: faq.faqId,
         faqType: faq.faqType,
         question: faq.question,
@@ -83,3 +84,30 @@ export const getUserFaqDetail = async (faqId: number): Promise<UserFaqDetailRes>
     throw error;
   }
 }; 
+
+/**
+ * 사용자 FAQ 홈 조회 (상위 노출용)
+ */
+export const getUserFaqHome = async (): Promise<UserFaqHomeRes> => {
+  // 상단 노출 기준: sortOrder ASC, createdAt DESC, 최대 5개
+  const result = await findFaqs({
+    where: { delYn: 'N', useYn: 'Y' },
+    limit: 5,
+    offset: 0,
+    order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']]
+  });
+
+  return {
+    faqs: result.faqs.map(faq => ({
+      faqId: faq.faqId,
+      faqType: faq.faqType,
+      question: faq.question,
+      answer: faq.answer,
+      hitCnt: faq.hitCnt,
+      sortOrder: faq.sortOrder,
+      useYn: faq.useYn,
+      createdAt: faq.createdAt.toISOString(),
+      updatedAt: faq.updatedAt?.toISOString()
+    }))
+  };
+};

@@ -9,20 +9,18 @@ import {
   deleteQna 
 } from '../../services/admin/adminQnaService';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   extractUserIdFromRequest,
   normalizeErrorMessage
 } from '../../utils/commonUtils';
 import type {
-  AdminQnaListReq, 
-  AdminQnaListRes, 
-  AdminQnaDetailReq, 
+  AdminQnaListQuery,
+  AdminQnaListRes,
+  AdminQnaDetailParams,
   AdminQnaDetailRes,
   AdminQnaAnswerReq,
-  AdminQnaAnswerRes,
-  AdminQnaUpdateReq,
-  AdminQnaUpdateRes,
-  AdminQnaDeleteRes
+  AdminQnaUpdateReq
 } from '@iitp-dabt/common';
 
 /**
@@ -30,16 +28,15 @@ import type {
  * API: GET /api/admin/qna
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.QNA.LIST}`]
  */
-export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListReq>, res: Response) => {
+export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListQuery>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.ADMIN.QNA.LIST}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'QnA 목록 조회 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.ADMIN.QNA.LIST, ADMIN_API_MAPPING as any, 'QnA 목록 조회 (관리자용)');
 
-    const { page = 1, limit = 10, search, status } = req.query;
+    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
+    const search = typeof (req.query as any).search === 'string' ? (req.query as any).search : undefined;
+    const status = typeof (req.query as any).status === 'string' ? (req.query as any).status : undefined;
+    
     const adminId = extractUserIdFromRequest(req);
     
     if (!adminId) {
@@ -47,14 +44,14 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListRe
     }
 
     const result = await getQnaList({
-      page: parseInt(page as string),
-      limit: parseInt(limit as string),
+      page,
+      limit,
       search,
       status
     });
 
     const response: AdminQnaListRes = {
-      qnas: result.qnas.map(qna => ({
+      items: result.qnas.map(qna => ({
         qnaId: qna.qnaId,
         userId: qna.userId,
         qnaType: qna.qnaType,
@@ -94,14 +91,9 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListRe
  * API: GET /api/admin/qna/:qnaId
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.QNA.DETAIL}`]
  */
-export const getQnaDetailForAdmin = async (req: Request<AdminQnaDetailReq>, res: Response) => {
+export const getQnaDetailForAdmin = async (req: Request<AdminQnaDetailParams>, res: Response) => {
   try {
-    const apiKey = `GET ${API_URLS.ADMIN.QNA.DETAIL}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'QnA 상세 조회 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('GET', API_URLS.ADMIN.QNA.DETAIL, ADMIN_API_MAPPING as any, 'QnA 상세 조회 (관리자용)');
 
     const { qnaId } = req.params;
     const adminId = extractUserIdFromRequest(req);
@@ -159,12 +151,7 @@ export const getQnaDetailForAdmin = async (req: Request<AdminQnaDetailReq>, res:
  */
 export const answerQnaForAdmin = async (req: Request<{ qnaId: string }, {}, AdminQnaAnswerReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.ADMIN.QNA.ANSWER}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'QnA 답변 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.ADMIN.QNA.ANSWER, ADMIN_API_MAPPING as any, 'QnA 답변 (관리자용)');
 
     const { qnaId } = req.params;
     const { answer } = req.body;
@@ -182,14 +169,8 @@ export const answerQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
       return sendValidationError(res, 'answer', '답변 내용은 필수입니다.');
     }
 
-    const answeredQna = await answerQna(parseInt(qnaId), answer, adminId);
-
-    const response: AdminQnaAnswerRes = {
-      qnaId: answeredQna.qnaId,
-      message: 'QnA 답변이 성공적으로 등록되었습니다.'
-    };
-
-    sendSuccess(res, response, response.message, 'ADMIN_QNA_ANSWERED', { adminId, qnaId });
+    await answerQna(parseInt(qnaId), { answer }, adminId);
+    sendSuccess(res, undefined, undefined, 'ADMIN_QNA_ANSWERED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 답변 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -212,12 +193,7 @@ export const answerQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
  */
 export const updateQnaForAdmin = async (req: Request<{ qnaId: string }, {}, AdminQnaUpdateReq>, res: Response) => {
   try {
-    const apiKey = `PUT ${API_URLS.ADMIN.QNA.UPDATE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'QnA 수정 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('PUT', API_URLS.ADMIN.QNA.UPDATE, ADMIN_API_MAPPING as any, 'QnA 수정 (관리자용)');
 
     const { qnaId } = req.params;
     const updateData = req.body;
@@ -231,14 +207,8 @@ export const updateQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const updatedQna = await updateQna(parseInt(qnaId), updateData, adminId);
-
-    const response: AdminQnaUpdateRes = {
-      qnaId: updatedQna.qnaId,
-      message: 'QnA가 성공적으로 수정되었습니다.'
-    };
-
-    sendSuccess(res, response, response.message, 'ADMIN_QNA_UPDATED', { adminId, qnaId });
+    await updateQna(parseInt(qnaId), updateData, adminId);
+    sendSuccess(res, undefined, undefined, 'ADMIN_QNA_UPDATED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -261,12 +231,7 @@ export const updateQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
  */
 export const deleteQnaForAdmin = async (req: Request<{ qnaId: string }>, res: Response) => {
   try {
-    const apiKey = `DELETE ${API_URLS.ADMIN.QNA.DELETE}`;
-    const mapping = ADMIN_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || 'QnA 삭제 (관리자용)'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('DELETE', API_URLS.ADMIN.QNA.DELETE, ADMIN_API_MAPPING as any, 'QnA 삭제 (관리자용)');
 
     const { qnaId } = req.params;
     const adminId = extractUserIdFromRequest(req);
@@ -280,13 +245,7 @@ export const deleteQnaForAdmin = async (req: Request<{ qnaId: string }>, res: Re
     }
 
     await deleteQna(parseInt(qnaId), adminId);
-
-    const response: AdminQnaDeleteRes = {
-      qnaId: parseInt(qnaId),
-      message: 'QnA가 성공적으로 삭제되었습니다.'
-    };
-
-    sendSuccess(res, response, response.message, 'ADMIN_QNA_DELETED', { adminId, qnaId });
+    sendSuccess(res, undefined, undefined, 'ADMIN_QNA_DELETED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {

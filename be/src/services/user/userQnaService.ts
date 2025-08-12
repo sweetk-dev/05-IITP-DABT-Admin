@@ -1,9 +1,10 @@
 import { 
-  UserQnaListReq, 
+  UserQnaListQuery, 
   UserQnaListRes, 
   UserQnaDetailRes,
   UserQnaCreateReq,
-  UserQnaCreateRes
+  UserQnaCreateRes,
+  UserQnaHomeRes
 } from '@iitp-dabt/common';
 import { 
   findQnas,
@@ -15,7 +16,7 @@ import { appLogger } from '../../utils/logger';
 /**
  * 사용자 Q&A 목록 조회 (비즈니스 로직)
  */
-export const getUserQnaList = async (userId: number, params: UserQnaListReq): Promise<UserQnaListRes> => {
+export const getUserQnaList = async (userId: number, params: UserQnaListQuery): Promise<UserQnaListRes> => {
   try {
     const { page = 1, limit = 10 } = params;
     const offset = (page - 1) * limit;
@@ -109,11 +110,36 @@ export const createUserQna = async (userId: number, createData: UserQnaCreateReq
     
     // 임시 결과 반환
     return {
-      qnaId: 1,
-      message: 'Q&A가 등록되었습니다.'
+      qnaId: 1
     };
   } catch (error) {
     appLogger.error('사용자 Q&A 생성 서비스 오류', { error, userId, createData });
     throw error;
   }
 }; 
+
+export const getUserQnaHome = async (userId: number): Promise<UserQnaHomeRes> => {
+  const result = await findQnas({
+    where: { userId, delYn: 'N' },
+    limit: 5,
+    offset: 0,
+    order: [['createdAt', 'DESC']]
+  });
+
+  return {
+    qnas: result.qnas.map(qna => ({
+      qnaId: qna.qnaId,
+      userId: qna.userId,
+      qnaType: qna.qnaType,
+      title: qna.title,
+      content: qna.content,
+      secretYn: qna.secretYn,
+      status: qna.status,
+      writerName: qna.writerName,
+      createdAt: qna.createdAt.toISOString(),
+      answeredAt: qna.answeredAt?.toISOString(),
+      answeredBy: qna.answeredBy,
+      answerContent: qna.answerContent
+    }))
+  };
+};

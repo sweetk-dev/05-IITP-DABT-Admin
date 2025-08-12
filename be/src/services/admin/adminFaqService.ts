@@ -16,6 +16,13 @@ export interface FaqListParams {
   useYn?: string;
 }
 
+export interface FaqListResult {
+  faqs: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface FaqCreateData {
   faqType: string;
   question: string;
@@ -35,7 +42,7 @@ export interface FaqUpdateData {
 /**
  * FAQ 목록 조회 (관리자용)
  */
-export const getFaqList = async (params: FaqListParams) => {
+export const getFaqList = async (params: FaqListParams): Promise<FaqListResult> => {
   try {
     const { page, limit, faqType, search, useYn } = params;
     const offset = (page - 1) * limit;

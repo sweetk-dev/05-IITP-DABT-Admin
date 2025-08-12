@@ -3,6 +3,7 @@ import { ErrorCode, COMMON_CODE_GROUPS, AUTH_API_MAPPING, API_URLS } from '@iitp
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { loginAdmin, logout, refreshAdminToken } from '../../services/admin/adminAuthService';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { getAdminRoleCodeName } from '../../services/common/commonCodeService';
 import { 
   extractUserIdFromRequest,
@@ -29,12 +30,7 @@ import {
  */
 export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.AUTH.ADMIN.LOGIN}`;
-    const mapping = AUTH_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '관리자 로그인'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.AUTH.ADMIN.LOGIN, AUTH_API_MAPPING as any, '관리자 로그인');
     
     const { loginId, password } = req.body;
     const ipAddr = extractClientIP(req);
@@ -80,12 +76,7 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
  */
 export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.AUTH.ADMIN.LOGOUT}`;
-    const mapping = AUTH_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '관리자 로그아웃'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.AUTH.ADMIN.LOGOUT, AUTH_API_MAPPING as any, '관리자 로그아웃');
     
     const userId = extractUserIdFromRequest(req);
     const userType = extractUserTypeFromRequest(req);
@@ -104,12 +95,7 @@ export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Res
       
     const result = await logout(userId, userType, '관리자 로그아웃', ipAddr, userAgent);
 
-    const response: AdminLogoutRes = {
-      success: result.success,
-      message: result.message
-    };
-
-    sendSuccess(res, response, undefined, 'ADMIN_LOGOUT', { userId, userType });
+    sendSuccess(res, undefined, undefined, 'ADMIN_LOGOUT', { userId, userType });
   } catch (error) {
     appLogger.error('Error in adminLogout:', error);
     if (error instanceof Error) {
@@ -132,12 +118,7 @@ export const adminLogout = async (req: Request<{}, {}, AdminLogoutReq>, res: Res
  */
 export const adminRefresh = async (req: Request<{}, {}, AdminRefreshTokenReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.AUTH.ADMIN.REFRESH}`;
-    const mapping = AUTH_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '관리자 토큰 갱신'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.AUTH.ADMIN.REFRESH, AUTH_API_MAPPING as any, '관리자 토큰 갱신');
     
     const { refreshToken } = req.body;
 

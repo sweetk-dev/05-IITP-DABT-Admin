@@ -3,6 +3,7 @@ import { ErrorCode, AUTH_API_MAPPING, API_URLS } from '@iitp-dabt/common';
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { loginUser, logout, refreshUserToken } from '../../services/user/userAuthService';
 import { appLogger } from '../../utils/logger';
+import { logApiCall } from '../../utils/apiLogger';
 import { 
   extractUserIdFromRequest,
   extractUserTypeFromRequest,
@@ -27,12 +28,7 @@ import {
  */
 export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.AUTH.USER.LOGIN}`;
-    const mapping = AUTH_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 로그인'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.AUTH.USER.LOGIN, AUTH_API_MAPPING as any, '사용자 로그인');
     
     const { email, password } = req.body;
     const ipAddr = extractClientIP(req);
@@ -77,12 +73,7 @@ export const userLogin = async (req: Request<{}, {}, UserLoginReq>, res: Respons
  */
 export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.AUTH.USER.REFRESH}`;
-    const mapping = AUTH_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 토큰 갱신'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.AUTH.USER.REFRESH, AUTH_API_MAPPING as any, '사용자 토큰 갱신');
     
     const { refreshToken } = req.body;
     const ipAddr = extractClientIP(req);
@@ -122,12 +113,7 @@ export const userRefreshToken = async (req: Request<{}, {}, UserRefreshTokenReq>
  */
 export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Response) => {
   try {
-    const apiKey = `POST ${API_URLS.AUTH.USER.LOGOUT}`;
-    const mapping = AUTH_API_MAPPING[apiKey];
-    appLogger.info(`API 호출: ${mapping?.description || '사용자 로그아웃'}`, {
-      requestType: mapping?.req,
-      responseType: mapping?.res
-    });
+    logApiCall('POST', API_URLS.AUTH.USER.LOGOUT, AUTH_API_MAPPING as any, '사용자 로그아웃');
     
     const userId = extractUserIdFromRequest(req);
     const userType = extractUserTypeFromRequest(req);
@@ -145,12 +131,7 @@ export const userLogout = async (req: Request<{}, {}, UserLogoutReq>, res: Respo
 
     const result = await logout(userId, userType, '사용자 로그아웃', ipAddr, userAgent);
 
-    const response: UserLogoutRes = {
-      success: result.success,
-      message: result.message
-    };
-
-    sendSuccess(res, response, undefined, 'USER_LOGOUT', { userId, userType });
+    sendSuccess(res, undefined, undefined, 'USER_LOGOUT', { userId, userType });
   } catch (error) {
     appLogger.error('User logout error:', error);
     if (error instanceof Error) {

@@ -7,6 +7,7 @@ import {
   deleteAuthKey as deleteOpenApiAuthKeyRepo 
 } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
+import { generateAuthKey } from '../../utils/authKeyGenerator';
 
 export interface OpenApiListParams {
   page: number;
@@ -19,7 +20,8 @@ export interface OpenApiCreateData {
   userId: number;
   keyName: string;
   keyDesc?: string;
-  extensionDays: number;
+  startDt?: string;
+  endDt?: string;
 }
 
 export interface OpenApiUpdateData {
@@ -58,8 +60,8 @@ export const getOpenApiList = async (params: OpenApiListParams) => {
     });
 
     return {
-      openApis: result.rows,
-      total: result.count,
+      openApis: result.authKeys,
+      total: result.total,
       page,
       limit
     };
@@ -90,15 +92,19 @@ export const getOpenApiDetail = async (apiId: number) => {
  */
 export const createOpenApi = async (apiData: OpenApiCreateData, adminId: number) => {
   try {
-    const newApi = await createOpenApiAuthKeyRepo({
-      ...apiData,
-      createdBy: adminId,
-      updatedBy: adminId,
-      status: 'ACTIVE'
+    const authKey = generateAuthKey();
+    const newKey = await createOpenApiAuthKeyRepo({
+      userId: apiData.userId,
+      authKey,
+      keyName: apiData.keyName,
+      keyDesc: apiData.keyDesc || '',
+      startDt: apiData.startDt ? new Date(apiData.startDt) : undefined,
+      endDt: apiData.endDt ? new Date(apiData.endDt) : undefined,
+      createdBy: adminId.toString()
     });
 
-    appLogger.info('OpenAPI 생성 성공', { apiId: newApi.apiId, adminId });
-    return newApi;
+    appLogger.info('OpenAPI 생성 성공', { keyId: newKey.keyId, adminId });
+    return { keyId: newKey.keyId, authKey };
   } catch (error) {
     appLogger.error('OpenAPI 생성 중 오류 발생', { error, apiData, adminId });
     throw error;
@@ -112,7 +118,7 @@ export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData
   try {
     const updatedApi = await updateOpenApiAuthKeyRepo(apiId, {
       ...updateData,
-      updatedBy: adminId
+      updatedBy: adminId.toString()
     });
 
     if (!updatedApi) {
@@ -144,4 +150,78 @@ export const deleteOpenApi = async (apiId: number, adminId: number) => {
     appLogger.error('OpenAPI 삭제 중 오류 발생', { error, apiId, adminId });
     throw error;
   }
-}; 
+};
+
+/**
+ * OpenAPI 키 기간 연장 (관리자용)
+ */
+export const extendOpenApiKey = async (keyId: number, extensionDays: number, adminId: number) => {
+  try {
+    // 기존 키 조회
+    const existingKey = await findAuthKeyById(keyId);
+    if (!existingKey) {
+      throw new Error('OPEN_API_NOT_FOUND');
+    }
+
+    // 만료일 계산 (기존 만료일 + 연장 일수)
+    const currentEndDate = existingKey.endDt ? new Date(existingKey.endDt) : new Date();
+    const newEndDate = new Date(currentEndDate);
+    newEndDate.setDate(newEndDate.getDate() + extensionDays);
+
+    // 키 업데이트
+    const updatedKey = await updateOpenApiAuthKeyRepo(keyId, {
+      endDt: newEndDate,
+      updatedBy: adminId
+    });
+
+    if (!updatedKey) {
+      throw new Error('OPEN_API_UPDATE_FAILED');
+    }
+
+    appLogger.info('OpenAPI 키 기간 연장 성공', { keyId, extensionDays, adminId, newEndDate });
+    return updatedKey;
+  } catch (error) {
+    appLogger.error('OpenAPI 키 기간 연장 중 오류 발생', { error, keyId, extensionDays, adminId });
+    throw error;
+  }
+};
+
+/**
+ * OpenAPI 상태 통계 조회 (관리자용)
+ */
+export const getOpenApiStats = async () => {
+  try {
+    // 전체 키 수 조회
+    const totalKeys = await findAuthKeysByUserId(0, {
+      page: 1,
+      limit: 1000, // 충분히 큰 수로 설정
+      includeInactive: true
+    });
+
+    const allKeys = totalKeys.rows;
+    
+    // 상태별 통계 계산
+    const activeKeys = allKeys.filter(key => key.status === 'ACTIVE').length;
+    const expiredKeys = allKeys.filter(key => {
+      if (!key.endDt) return false;
+      return new Date(key.endDt) < new Date();
+    }).length;
+    const suspendedKeys = allKeys.filter(key => key.status === 'SUSPENDED').length;
+    
+    // 사용량 통계 (hitCnt 기준)
+    const totalUsage = allKeys.reduce((sum, key) => sum + (key.hitCnt || 0), 0);
+    const averageUsage = allKeys.length > 0 ? Math.round(totalUsage / allKeys.length) : 0;
+
+    return {
+      totalKeys: allKeys.length,
+      activeKeys,
+      expiredKeys,
+      suspendedKeys,
+      totalUsage,
+      averageUsage
+    };
+  } catch (error) {
+    appLogger.error('OpenAPI 상태 통계 조회 중 오류 발생', { error });
+    throw error;
+  }
+};

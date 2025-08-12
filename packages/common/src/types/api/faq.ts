@@ -102,14 +102,3 @@ export interface AdminFaqDeleteRes {
   message: string;
 }
 
-// FAQ 통계 (관리자용)
-export interface AdminFaqStatsRes {
-  totalFaqs: number;
-  activeFaqs: number;
-  totalHits: number;
-  topFaqs: Array<{
-    faqId: number;
-    question: string;
-    hitCnt: number;
-  }>;
-} 

@@ -1,14 +1,8 @@
 import { 
   UserOpenApiListReq, 
-  UserOpenApiListRes, 
-  UserOpenApiDetailReq, 
-  UserOpenApiDetailRes,
   UserOpenApiCreateReq, 
   UserOpenApiCreateRes, 
-  UserOpenApiDeleteReq, 
-  UserOpenApiDeleteRes,
-  UserOpenApiExtendReq, 
-  UserOpenApiExtendRes
+  UserOpenApiExtendReq
 } from '@iitp-dabt/common';
 import { 
   findAuthKeysByUserId,
@@ -24,7 +18,7 @@ export class UserOpenApiService {
   /**
    * 사용자 OpenAPI 인증키 목록 조회
    */
-  static async getUserOpenApiList(userId: number, params: UserOpenApiListReq): Promise<UserOpenApiListRes> {
+  static async getUserOpenApiList(userId: number, params: UserOpenApiListReq): Promise<{ authKeys: any[]; total: number; }> {
 
     const result = await findAuthKeysByUserId(userId, {
       page: 1,
@@ -33,26 +27,15 @@ export class UserOpenApiService {
     });
 
     return {
-      authKeys: result.authKeys.map(key => ({
-        keyId: key.keyId,
-        authKey: key.authKey,
-        activeYn: key.activeYn,
-        startDt: key.startDt?.toISOString().split('T')[0],
-        endDt: key.endDt?.toISOString().split('T')[0],
-        keyName: key.keyName,
-        keyDesc: key.keyDesc,
-        activeAt: key.activeAt?.toISOString(),
-        latestAccAt: key.latestAccAt?.toISOString(),
-        createdAt: key.createdAt.toISOString(),
-        updatedAt: key.updatedAt?.toISOString()
-      }))
+      authKeys: result.authKeys,
+      total: result.total
     };
   }
 
   /**
    * 사용자 OpenAPI 인증키 상세 조회
    */
-  static async getUserOpenApiDetail(userId: number, keyId: number): Promise<UserOpenApiDetailRes> {
+  static async getUserOpenApiDetail(userId: number, keyId: number): Promise<any> {
     const authKey = await findAuthKeyById(keyId);
     if (!authKey) {
       throw new Error('인증키를 찾을 수 없습니다.');
@@ -63,21 +46,7 @@ export class UserOpenApiService {
       throw new Error('접근 권한이 없습니다.');
     }
 
-    return {
-      authKey: {
-        keyId: authKey.keyId,
-        authKey: authKey.authKey,
-        activeYn: authKey.activeYn,
-        startDt: authKey.startDt?.toISOString().split('T')[0],
-        endDt: authKey.endDt?.toISOString().split('T')[0],
-        keyName: authKey.keyName,
-        keyDesc: authKey.keyDesc,
-        activeAt: authKey.activeAt?.toISOString(),
-        latestAccAt: authKey.latestAccAt?.toISOString(),
-        createdAt: authKey.createdAt.toISOString(),
-        updatedAt: authKey.updatedAt?.toISOString()
-      }
-    };
+    return authKey;
   }
 
   /**
@@ -115,7 +84,7 @@ export class UserOpenApiService {
   /**
    * 사용자 OpenAPI 인증키 삭제
    */
-  static async deleteUserOpenApi(userId: number, keyId: number): Promise<UserOpenApiDeleteRes> {
+  static async deleteUserOpenApi(userId: number, keyId: number): Promise<boolean> {
     const authKey = await findAuthKeyById(keyId);
     if (!authKey) {
       throw new Error('인증키를 찾을 수 없습니다.');
@@ -136,15 +105,13 @@ export class UserOpenApiService {
       keyId: keyId
     });
 
-    return {
-      message: '인증키가 성공적으로 삭제되었습니다.'
-    };
+    return true;
   }
 
   /**
    * 사용자 OpenAPI 인증키 기간 연장
    */
-  static async extendUserOpenApi(userId: number, extendData: UserOpenApiExtendReq): Promise<UserOpenApiExtendRes> {
+  static async extendUserOpenApi(userId: number, extendData: UserOpenApiExtendReq): Promise<{ newEndDt: string; }> {
     const { keyId, extensionDays } = extendData;
 
     const authKey = await findAuthKeyById(keyId);
@@ -172,9 +139,6 @@ export class UserOpenApiService {
       extensionDays: extensionDays
     });
 
-    return {
-      message: '인증키 기간이 성공적으로 연장되었습니다.',
-      newEndDt: newEndDt.toISOString().split('T')[0]
-    };
+    return { newEndDt: newEndDt.toISOString().split('T')[0] };
   }
 } 

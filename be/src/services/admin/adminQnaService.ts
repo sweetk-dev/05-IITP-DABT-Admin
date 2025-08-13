@@ -6,6 +6,7 @@ import {
   updateQna as updateQnaRepo, 
   deleteQna as deleteQnaRepo 
 } from '../../repositories/sysQnaRepository';
+import type { SysQna } from '../../models/sysQna';
 import { appLogger } from '../../utils/logger';
 
 export interface QnaListParams {
@@ -26,10 +27,17 @@ export interface QnaUpdateData {
   secretYn?: string;
 }
 
+export interface QnaListResult {
+  qnas: SysQna[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 /**
  * QnA 목록 조회 (관리자용)
  */
-export const getQnaList = async (params: QnaListParams) => {
+export const getQnaList = async (params: QnaListParams): Promise<QnaListResult> => {
   try {
     const { page, limit, search, status } = params;
     const offset = (page - 1) * limit;
@@ -56,10 +64,10 @@ export const getQnaList = async (params: QnaListParams) => {
     });
 
     return {
-      qnas: result.rows,
-      total: result.count,
-      page,
-      limit
+      qnas: result.qnas,
+      total: result.total,
+      page: result.page,
+      limit: result.limit
     };
   } catch (error) {
     appLogger.error('QnA 목록 조회 중 오류 발생', { error, params });
@@ -70,7 +78,7 @@ export const getQnaList = async (params: QnaListParams) => {
 /**
  * QnA 상세 조회 (관리자용)
  */
-export const getQnaDetail = async (qnaId: number) => {
+export const getQnaDetail = async (qnaId: number): Promise<SysQna> => {
   try {
     const qna = await findQnaById(qnaId);
     if (!qna) {
@@ -89,10 +97,8 @@ export const getQnaDetail = async (qnaId: number) => {
 export const answerQna = async (qnaId: number, answerData: QnaAnswerData, adminId: number) => {
   try {
     const answeredQna = await answerQnaRepo(qnaId, {
-      answer: answerData.answer,
-      answeredBy: adminId,
-      answeredAt: new Date(),
-      status: 'ANSWERED'
+      answerContent: answerData.answer,
+      answeredBy: adminId.toString()
     });
 
     if (!answeredQna) {
@@ -114,7 +120,7 @@ export const updateQna = async (qnaId: number, updateData: QnaUpdateData, adminI
   try {
     const updatedQna = await updateQnaRepo(qnaId, {
       ...updateData,
-      updatedBy: adminId
+      updatedBy: adminId.toString()
     });
 
     if (!updatedQna) {
@@ -134,7 +140,7 @@ export const updateQna = async (qnaId: number, updateData: QnaUpdateData, adminI
  */
 export const deleteQna = async (qnaId: number, adminId: number) => {
   try {
-    const deletedQna = await deleteQnaRepo(qnaId, adminId);
+    const deletedQna = await deleteQnaRepo(qnaId, adminId.toString());
 
     if (!deletedQna) {
       throw new Error('QNA_NOT_FOUND');

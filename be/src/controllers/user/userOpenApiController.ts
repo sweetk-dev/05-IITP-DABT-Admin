@@ -45,10 +45,21 @@ export const getUserOpenApiList = async (req: Request, res: Response) => {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    const response = await UserOpenApiService.getUserOpenApiList(userId, {});
-
+    const domain = await UserOpenApiService.getUserOpenApiList(userId, {});
     const result: UserOpenApiListRes = {
-      authKeys: response.authKeys
+      authKeys: domain.authKeys.map(k => ({
+        keyId: k.keyId,
+        authKey: k.authKey,
+        activeYn: k.activeYn,
+        startDt: k.startDt?.toISOString?.().split?.('T')?.[0] ?? (k.startDt ? new Date(k.startDt).toISOString().split('T')[0] : undefined),
+        endDt: k.endDt?.toISOString?.().split?.('T')?.[0] ?? (k.endDt ? new Date(k.endDt).toISOString().split('T')[0] : undefined),
+        keyName: k.keyName,
+        keyDesc: k.keyDesc,
+        activeAt: k.activeAt?.toISOString?.(),
+        latestAccAt: k.latestAccAt?.toISOString?.(),
+        createdAt: k.createdAt?.toISOString?.() ?? new Date(k.createdAt).toISOString(),
+        updatedAt: k.updatedAt?.toISOString?.()
+      }))
     };
 
     sendSuccess(res, result, undefined, 'USER_OPENAPI_LIST_VIEW', {
@@ -92,10 +103,21 @@ export const getUserOpenApiDetail = async (req: Request<UserOpenApiDetailParams>
       return sendValidationError(res, 'keyId', '유효하지 않은 인증키 ID입니다.');
     }
 
-    const response = await UserOpenApiService.getUserOpenApiDetail(userId, keyId);
-
+    const k: any = await UserOpenApiService.getUserOpenApiDetail(userId, keyId);
     const result: UserOpenApiDetailRes = {
-      authKey: response.authKey
+      authKey: {
+        keyId: k.keyId,
+        authKey: k.authKey,
+        activeYn: k.activeYn,
+        startDt: k.startDt?.toISOString?.().split?.('T')?.[0] ?? (k.startDt ? new Date(k.startDt).toISOString().split('T')[0] : undefined),
+        endDt: k.endDt?.toISOString?.().split?.('T')?.[0] ?? (k.endDt ? new Date(k.endDt).toISOString().split('T')[0] : undefined),
+        keyName: k.keyName,
+        keyDesc: k.keyDesc,
+        activeAt: k.activeAt?.toISOString?.(),
+        latestAccAt: k.latestAccAt?.toISOString?.(),
+        createdAt: k.createdAt?.toISOString?.() ?? new Date(k.createdAt).toISOString(),
+        updatedAt: k.updatedAt?.toISOString?.()
+      }
     };
 
     sendSuccess(res, result, undefined, 'USER_OPENAPI_DETAIL_VIEW', {
@@ -284,10 +306,7 @@ export const extendUserOpenApi = async (
     }
 
     const response = await UserOpenApiService.extendUserOpenApi(userId, { keyId, extensionDays } as any);
-
-    const result: UserOpenApiExtendRes = {
-      newEndDt: response.newEndDt
-    };
+    const result: UserOpenApiExtendRes = { newEndDt: response.newEndDt };
 
     sendSuccess(res, result, undefined, 'USER_OPENAPI_EXTEND', {
       userId: userId,

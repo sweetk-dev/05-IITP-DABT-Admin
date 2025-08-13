@@ -16,6 +16,7 @@ import {
   extractUserIdFromRequest,
   normalizeErrorMessage
 } from '../../utils/commonUtils';
+import { getNumberQuery, getStringQuery } from '../../utils/queryParsers';
 import type {
   AdminOpenApiListQuery,
   AdminOpenApiListRes,
@@ -40,10 +41,10 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
   try {
     logApiCall('GET', API_URLS.ADMIN.OPEN_API.LIST, ADMIN_API_MAPPING as any, 'OpenAPI 목록 조회 (관리자용)');
 
-    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
-    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
-    const search = typeof (req.query as any).searchKeyword === 'string' ? (req.query as any).searchKeyword : undefined;
-    const status = typeof (req.query as any).activeYn === 'string' ? (req.query as any).activeYn : undefined;
+    const page = getNumberQuery(req.query, 'page', 1)!;
+    const limit = getNumberQuery(req.query, 'limit', 10)!;
+    const search = getStringQuery(req.query, 'searchKeyword');
+    const status = getStringQuery(req.query, 'activeYn');
     
     const adminId = extractUserIdFromRequest(req);
     
@@ -59,7 +60,7 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
     });
 
     const response: AdminOpenApiListRes = {
-      items: result.openApis.map(toAdminOpenApiKeyItem as any),
+      items: result.openApis.map(toAdminOpenApiKeyItem),
       total: result.total,
       page: result.page,
       limit: result.limit,
@@ -107,7 +108,7 @@ export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailPa
       return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
     }
 
-    const response: AdminOpenApiDetailRes = { authKey: toAdminOpenApiKeyItem(api as any) };
+    const response: AdminOpenApiDetailRes = { authKey: toAdminOpenApiKeyItem(api) };
 
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_DETAIL_VIEW', { adminId, keyId });
   } catch (error) {
@@ -148,8 +149,8 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
     const newApi = await createOpenApi(apiData, adminId);
 
     const response: AdminOpenApiCreateRes = {
-      keyId: (newApi as any).apiId ?? (newApi as any).keyId,
-      authKey: (newApi as any).authKey || ''
+      keyId: newApi.keyId,
+      authKey: newApi.authKey
     };
 
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_CREATED', { adminId, apiId: response.keyId });
@@ -290,10 +291,7 @@ export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, Adm
 
     // OpenAPI 키 기간 연장 서비스 호출 (updatedBy는 adminId로 설정)
     const result = await extendOpenApiKey(parseInt(keyId), extendData.extensionDays, adminId);
-
-    const response: AdminOpenApiExtendRes = {
-      newEndDt: (result as any).endDt?.toISOString?.() || ''
-    };
+    const response: AdminOpenApiExtendRes = { newEndDt: result.endDt.toISOString() };
 
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_EXTENDED', { adminId, keyId, extensionDays: extendData.extensionDays });
   } catch (error) {

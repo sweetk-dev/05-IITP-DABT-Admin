@@ -14,6 +14,7 @@ import {
   extractUserIdFromRequest,
   normalizeErrorMessage
 } from '../../utils/commonUtils';
+import { getNumberQuery, getStringQuery } from '../../utils/queryParsers';
 import type {
   AdminQnaListQuery,
   AdminQnaListRes,
@@ -33,10 +34,10 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListQu
   try {
     logApiCall('GET', API_URLS.ADMIN.QNA.LIST, ADMIN_API_MAPPING as any, 'QnA 목록 조회 (관리자용)');
 
-    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
-    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
-    const search = typeof (req.query as any).search === 'string' ? (req.query as any).search : undefined;
-    const status = typeof (req.query as any).status === 'string' ? (req.query as any).status : undefined;
+    const page = getNumberQuery(req.query, 'page', 1)!;
+    const limit = getNumberQuery(req.query, 'limit', 10)!;
+    const search = getStringQuery(req.query, 'search');
+    const status = getStringQuery(req.query, 'status');
     
     const adminId = extractUserIdFromRequest(req);
     
@@ -96,7 +97,7 @@ export const getQnaDetailForAdmin = async (req: Request<AdminQnaDetailParams>, r
     }
     
     const qna = await getQnaDetail(parseInt(qnaId));
-    const response: AdminQnaDetailRes = { qna: toAdminQnaDetailItem(qna as any) };
+    const response: AdminQnaDetailRes = { qna: toAdminQnaDetailItem(qna) };
     sendSuccess(res, response, undefined, 'ADMIN_QNA_DETAIL_VIEW', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 상세 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });

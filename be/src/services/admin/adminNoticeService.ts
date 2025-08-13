@@ -36,7 +36,7 @@ export interface AdminNoticeCreateData {
   endDt?: string;
 }
 
-export const createNoticeAdmin = async (data: AdminNoticeCreateData, adminId: number) => {
+export const createNoticeAdmin = async (data: AdminNoticeCreateData, actorTag: string) => {
   const created = await SysNoticeRepository.createNotice({
     title: data.title,
     content: data.content,
@@ -46,7 +46,7 @@ export const createNoticeAdmin = async (data: AdminNoticeCreateData, adminId: nu
     postedAt: new Date(),
     startDt: data.startDt ? new Date(data.startDt) : undefined,
     endDt: data.endDt ? new Date(data.endDt) : undefined,
-    createdBy: adminId.toString()
+    createdBy: actorTag
   } as any);
   return created;
 };
@@ -61,12 +61,12 @@ export interface AdminNoticeUpdateData {
   endDt?: string;
 }
 
-export const updateNoticeAdmin = async (noticeId: number, data: AdminNoticeUpdateData, adminId: number) => {
+export const updateNoticeAdmin = async (noticeId: number, data: AdminNoticeUpdateData, actorTag: string) => {
   return SysNoticeRepository.updateNotice(noticeId, {
     ...data,
     startDt: data.startDt ? new Date(data.startDt) : undefined,
     endDt: data.endDt ? new Date(data.endDt) : undefined,
-    updatedBy: adminId.toString()
+    updatedBy: actorTag
   } as any);
 };
 

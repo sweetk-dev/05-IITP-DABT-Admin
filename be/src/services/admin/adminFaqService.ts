@@ -73,8 +73,8 @@ export const getFaqList = async (params: FaqListParams): Promise<FaqListResult> 
     });
 
     return {
-      faqs: result.rows,
-      total: result.count,
+      faqs: result.faqs,
+      total: result.total,
       page,
       limit
     };
@@ -103,18 +103,18 @@ export const getFaqDetail = async (faqId: number) => {
 /**
  * FAQ 생성 (관리자용)
  */
-export const createFaq = async (faqData: FaqCreateData, adminId: number) => {
+export const createFaq = async (faqData: FaqCreateData, actorTag: string) => {
   try {
     const newFaq = await createFaqRepo({
       ...faqData,
-      createdBy: adminId,
-      updatedBy: adminId
+      createdBy: actorTag,
+      updatedBy: actorTag
     });
 
-    appLogger.info('FAQ 생성 성공', { faqId: newFaq.faqId, adminId });
+    appLogger.info('FAQ 생성 성공', { faqId: newFaq.faqId, actorTag });
     return newFaq;
   } catch (error) {
-    appLogger.error('FAQ 생성 중 오류 발생', { error, faqData, adminId });
+    appLogger.error('FAQ 생성 중 오류 발생', { error, faqData, actorTag });
     throw error;
   }
 };
@@ -122,21 +122,22 @@ export const createFaq = async (faqData: FaqCreateData, adminId: number) => {
 /**
  * FAQ 수정 (관리자용)
  */
-export const updateFaq = async (faqId: number, updateData: FaqUpdateData, adminId: number) => {
+export const updateFaq = async (faqId: number, updateData: FaqUpdateData, actorTag: string) => {
   try {
     const updatedFaq = await updateFaqRepo(faqId, {
       ...updateData,
-      updatedBy: adminId
+      updatedBy: actorTag,
+      updatedAt: new Date()
     });
 
     if (!updatedFaq) {
       throw new Error('FAQ_NOT_FOUND');
     }
 
-    appLogger.info('FAQ 수정 성공', { faqId, adminId });
+    appLogger.info('FAQ 수정 성공', { faqId, actorTag });
     return updatedFaq;
   } catch (error) {
-    appLogger.error('FAQ 수정 중 오류 발생', { error, faqId, updateData, adminId });
+    appLogger.error('FAQ 수정 중 오류 발생', { error, faqId, updateData, actorTag });
     throw error;
   }
 };
@@ -144,15 +145,15 @@ export const updateFaq = async (faqId: number, updateData: FaqUpdateData, adminI
 /**
  * FAQ 삭제 (관리자용)
  */
-export const deleteFaq = async (faqId: number, adminId: number) => {
+export const deleteFaq = async (faqId: number, _actorTag: string) => {
   try {
     const ok = await deleteFaqRepo(faqId);
     if (!ok) throw new Error('FAQ_NOT_FOUND');
 
-    appLogger.info('FAQ 삭제 성공', { faqId, adminId });
+    appLogger.info('FAQ 삭제 성공', { faqId });
     return ok;
   } catch (error) {
-    appLogger.error('FAQ 삭제 중 오류 발생', { error, faqId, adminId });
+    appLogger.error('FAQ 삭제 중 오류 발생', { error, faqId });
     throw error;
   }
 };

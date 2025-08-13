@@ -50,8 +50,7 @@ export {
   getAdminFaqDetail,
   createAdminFaq,
   updateAdminFaq,
-  deleteAdminFaq,
-  getAdminFaqStats
+  deleteAdminFaq
 } from './faq';
 
 // QnA management

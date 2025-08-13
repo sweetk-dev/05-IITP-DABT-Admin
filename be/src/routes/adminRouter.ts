@@ -31,7 +31,7 @@ import {
   statusOpenApiAdmin
 } from '../controllers/admin/adminOpenApiController';
 import { routerMiddleware } from '../middleware';
-import { API_URLS } from '@iitp-dabt/common';
+import { API_URLS, type AdminFaqDetailParams, type AdminQnaDetailParams, type AdminNoticeDetailParams, type AdminOpenApiDetailParams, type AdminOpenApiUpdateParams, type AdminOpenApiDeleteParams, type AdminOpenApiExtendParams } from '@iitp-dabt/common';
 
 const router = express.Router();
 
@@ -42,32 +42,32 @@ router.put(API_URLS.ADMIN.PASSWORD, ...routerMiddleware.admin, changeAdminPasswo
 
 // FAQ 관리
 router.get(API_URLS.ADMIN.FAQ.LIST, ...routerMiddleware.admin, getFaqListForAdmin);
-router.get(API_URLS.ADMIN.FAQ.DETAIL, ...routerMiddleware.admin, getFaqDetailForAdmin);
+router.get<AdminFaqDetailParams>(API_URLS.ADMIN.FAQ.DETAIL, ...routerMiddleware.admin, getFaqDetailForAdmin as any);
 router.post(API_URLS.ADMIN.FAQ.CREATE, ...routerMiddleware.admin, createFaqForAdmin);
-router.put(API_URLS.ADMIN.FAQ.UPDATE, ...routerMiddleware.admin, updateFaqForAdmin);
-router.delete(API_URLS.ADMIN.FAQ.DELETE, ...routerMiddleware.admin, deleteFaqForAdmin);
+router.put<AdminFaqDetailParams>(API_URLS.ADMIN.FAQ.UPDATE, ...routerMiddleware.admin, updateFaqForAdmin as any);
+router.delete<AdminFaqDetailParams>(API_URLS.ADMIN.FAQ.DELETE, ...routerMiddleware.admin, deleteFaqForAdmin as any);
 
 // QnA 관리
 router.get(API_URLS.ADMIN.QNA.LIST, ...routerMiddleware.admin, getQnaListForAdmin);
-router.get(API_URLS.ADMIN.QNA.DETAIL, ...routerMiddleware.admin, getQnaDetailForAdmin);
-router.post(API_URLS.ADMIN.QNA.ANSWER, ...routerMiddleware.admin, answerQnaForAdmin);
-router.put(API_URLS.ADMIN.QNA.UPDATE, ...routerMiddleware.admin, updateQnaForAdmin);
-router.delete(API_URLS.ADMIN.QNA.DELETE, ...routerMiddleware.admin, deleteQnaForAdmin);
+router.get<AdminQnaDetailParams>(API_URLS.ADMIN.QNA.DETAIL, ...routerMiddleware.admin, getQnaDetailForAdmin as any);
+router.post<AdminQnaDetailParams>(API_URLS.ADMIN.QNA.ANSWER, ...routerMiddleware.admin, answerQnaForAdmin as any);
+router.put<AdminQnaDetailParams>(API_URLS.ADMIN.QNA.UPDATE, ...routerMiddleware.admin, updateQnaForAdmin as any);
+router.delete<AdminQnaDetailParams>(API_URLS.ADMIN.QNA.DELETE, ...routerMiddleware.admin, deleteQnaForAdmin as any);
 
 // Notice 관리
 router.get(API_URLS.ADMIN.NOTICE.LIST, ...routerMiddleware.admin, getNoticeListForAdmin);
-router.get(API_URLS.ADMIN.NOTICE.DETAIL, ...routerMiddleware.admin, getNoticeDetailForAdmin);
+router.get<AdminNoticeDetailParams>(API_URLS.ADMIN.NOTICE.DETAIL, ...routerMiddleware.admin, getNoticeDetailForAdmin as any);
 router.post(API_URLS.ADMIN.NOTICE.CREATE, ...routerMiddleware.admin, createNoticeForAdmin);
-router.put(API_URLS.ADMIN.NOTICE.UPDATE, ...routerMiddleware.admin, updateNoticeForAdmin);
-router.delete(API_URLS.ADMIN.NOTICE.DELETE, ...routerMiddleware.admin, deleteNoticeForAdmin);
+router.put<AdminNoticeDetailParams>(API_URLS.ADMIN.NOTICE.UPDATE, ...routerMiddleware.admin, updateNoticeForAdmin as any);
+router.delete<AdminNoticeDetailParams>(API_URLS.ADMIN.NOTICE.DELETE, ...routerMiddleware.admin, deleteNoticeForAdmin as any);
 
 // OpenAPI 관련
 router.get(API_URLS.ADMIN.OPEN_API.LIST, ...routerMiddleware.admin, getOpenApiListForAdmin);
-router.get(API_URLS.ADMIN.OPEN_API.DETAIL, ...routerMiddleware.admin, getOpenApiDetailForAdmin);
+router.get<AdminOpenApiDetailParams>(API_URLS.ADMIN.OPEN_API.DETAIL, ...routerMiddleware.admin, getOpenApiDetailForAdmin as any);
 router.post(API_URLS.ADMIN.OPEN_API.CREATE, ...routerMiddleware.admin, createOpenApiForAdmin);
-router.put(API_URLS.ADMIN.OPEN_API.UPDATE, ...routerMiddleware.admin, updateOpenApiForAdmin);
-router.delete(API_URLS.ADMIN.OPEN_API.DELETE, ...routerMiddleware.admin, deleteOpenApiForAdmin);
-router.post(API_URLS.ADMIN.OPEN_API.EXTEND, ...routerMiddleware.admin, extendOpenApiAdmin);
+router.put<AdminOpenApiUpdateParams>(API_URLS.ADMIN.OPEN_API.UPDATE, ...routerMiddleware.admin, updateOpenApiForAdmin as any);
+router.delete<AdminOpenApiDeleteParams>(API_URLS.ADMIN.OPEN_API.DELETE, ...routerMiddleware.admin, deleteOpenApiForAdmin as any);
+router.post<AdminOpenApiExtendParams>(API_URLS.ADMIN.OPEN_API.EXTEND, ...routerMiddleware.admin, extendOpenApiAdmin as any);
 router.get(API_URLS.ADMIN.OPEN_API.STATUS, ...routerMiddleware.admin, statusOpenApiAdmin);
 
 export default router; 

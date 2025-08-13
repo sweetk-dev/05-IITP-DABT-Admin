@@ -94,21 +94,21 @@ export const getQnaDetail = async (qnaId: number): Promise<SysQna> => {
 /**
  * QnA 답변 (관리자용)
  */
-export const answerQna = async (qnaId: number, answerData: QnaAnswerData, adminId: number) => {
+export const answerQna = async (qnaId: number, answerData: QnaAnswerData, actorTag: string) => {
   try {
     const answeredQna = await answerQnaRepo(qnaId, {
       answerContent: answerData.answer,
-      answeredBy: adminId.toString()
+      answeredBy: actorTag
     });
 
     if (!answeredQna) {
       throw new Error('QNA_NOT_FOUND');
     }
 
-    appLogger.info('QnA 답변 성공', { qnaId, adminId });
+    appLogger.info('QnA 답변 성공', { qnaId, actorTag });
     return answeredQna;
   } catch (error) {
-    appLogger.error('QnA 답변 중 오류 발생', { error, qnaId, answerData, adminId });
+    appLogger.error('QnA 답변 중 오류 발생', { error, qnaId, answerData, actorTag });
     throw error;
   }
 };
@@ -116,21 +116,22 @@ export const answerQna = async (qnaId: number, answerData: QnaAnswerData, adminI
 /**
  * QnA 수정 (관리자용)
  */
-export const updateQna = async (qnaId: number, updateData: QnaUpdateData, adminId: number) => {
+export const updateQna = async (qnaId: number, updateData: QnaUpdateData, actorTag: string) => {
   try {
     const updatedQna = await updateQnaRepo(qnaId, {
       ...updateData,
-      updatedBy: adminId.toString()
+      updatedBy: actorTag,
+      updatedAt: new Date()
     });
 
     if (!updatedQna) {
       throw new Error('QNA_NOT_FOUND');
     }
 
-    appLogger.info('QnA 수정 성공', { qnaId, adminId });
+    appLogger.info('QnA 수정 성공', { qnaId, actorTag });
     return updatedQna;
   } catch (error) {
-    appLogger.error('QnA 수정 중 오류 발생', { error, qnaId, updateData, adminId });
+    appLogger.error('QnA 수정 중 오류 발생', { error, qnaId, updateData, actorTag });
     throw error;
   }
 };
@@ -138,18 +139,18 @@ export const updateQna = async (qnaId: number, updateData: QnaUpdateData, adminI
 /**
  * QnA 삭제 (관리자용)
  */
-export const deleteQna = async (qnaId: number, adminId: number) => {
+export const deleteQna = async (qnaId: number, actorTag: string) => {
   try {
-    const deletedQna = await deleteQnaRepo(qnaId, adminId.toString());
+    const deletedQna = await deleteQnaRepo(qnaId, actorTag);
 
     if (!deletedQna) {
       throw new Error('QNA_NOT_FOUND');
     }
 
-    appLogger.info('QnA 삭제 성공', { qnaId, adminId });
+    appLogger.info('QnA 삭제 성공', { qnaId, actorTag });
     return deletedQna;
   } catch (error) {
-    appLogger.error('QnA 삭제 중 오류 발생', { error, qnaId, adminId });
+    appLogger.error('QnA 삭제 중 오류 발생', { error, qnaId, actorTag });
     throw error;
   }
 }; 

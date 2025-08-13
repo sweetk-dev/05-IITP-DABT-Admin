@@ -19,6 +19,7 @@ export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNotice
     const search = getStringQuery(req.query, 'search');
 
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
 
     const repoResult = await getNoticeListAdmin({
@@ -79,6 +80,7 @@ export const createNoticeForAdmin = async (req: Request<{}, {}, AdminNoticeCreat
     logApiCall('POST', API_URLS.ADMIN.NOTICE.CREATE, ADMIN_API_MAPPING as any, '공지사항 생성 (관리자용)');
 
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
 
     const { title, content, noticeType, pinnedYn, publicYn, startDt, endDt } = req.body as any;
@@ -94,7 +96,7 @@ export const createNoticeForAdmin = async (req: Request<{}, {}, AdminNoticeCreat
       publicYn,
       startDt,
       endDt
-    }, adminId);
+    }, actorTag);
 
     const response: AdminNoticeCreateRes = { noticeId: created.noticeId };
     sendSuccess(res, response, undefined, 'ADMIN_NOTICE_CREATED', { adminId, noticeId: created.noticeId });
@@ -113,11 +115,12 @@ export const updateNoticeForAdmin = async (req: Request<{ noticeId: string }, {}
     logApiCall('PUT', API_URLS.ADMIN.NOTICE.UPDATE, ADMIN_API_MAPPING as any, '공지사항 수정 (관리자용)');
 
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
     const { noticeId } = req.params;
     if (!noticeId) return sendError(res, ErrorCode.INVALID_PARAMETER);
 
-    const updated = await updateNoticeAdmin(parseInt(noticeId), req.body as any, adminId);
+    const updated = await updateNoticeAdmin(parseInt(noticeId), req.body as any, actorTag);
     if (!updated) return sendError(res, ErrorCode.NOTICE_NOT_FOUND);
 
     sendSuccess(res, undefined, undefined, 'ADMIN_NOTICE_UPDATED', { adminId, noticeId });

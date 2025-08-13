@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { getDecryptedEnv } from '../utils/decrypt';
 import { ErrorCode } from '@iitp-dabt/common';
@@ -13,7 +13,7 @@ interface JwtPayload {
   exp: number;
 }
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware: RequestHandler<any, any, any, any> = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -35,7 +35,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       // 토큰 정보를 request에 추가
       req.user = {
         userId: decoded.userId,
-        userType: decoded.userType
+        userType: decoded.userType,
+        actorTag: `${decoded.userType}:${decoded.userId}`
       };
 
       next();
@@ -72,7 +73,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 };
 
 // 관리자 전용 미들웨어
-export const adminAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const adminAuthMiddleware: RequestHandler<any, any, any, any> = async (req, res, next) => {
   try {
     await authMiddleware(req, res, (err) => {
       if (err) return next(err);

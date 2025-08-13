@@ -90,7 +90,7 @@ export const getOpenApiDetail = async (apiId: number) => {
 /**
  * OpenAPI 생성 (관리자용)
  */
-export const createOpenApi = async (apiData: OpenApiCreateData, adminId: number) => {
+export const createOpenApi = async (apiData: OpenApiCreateData, actorTag: string) => {
   try {
     const authKey = generateAuthKey();
     const newKey = await createOpenApiAuthKeyRepo({
@@ -100,13 +100,13 @@ export const createOpenApi = async (apiData: OpenApiCreateData, adminId: number)
       keyDesc: apiData.keyDesc || '',
       startDt: apiData.startDt ? new Date(apiData.startDt) : undefined,
       endDt: apiData.endDt ? new Date(apiData.endDt) : undefined,
-      createdBy: adminId.toString()
+      createdBy: actorTag
     });
 
-    appLogger.info('OpenAPI 생성 성공', { keyId: newKey.keyId, adminId });
+    appLogger.info('OpenAPI 생성 성공', { keyId: newKey.keyId, actorTag });
     return { keyId: newKey.keyId, authKey };
   } catch (error) {
-    appLogger.error('OpenAPI 생성 중 오류 발생', { error, apiData, adminId });
+    appLogger.error('OpenAPI 생성 중 오류 발생', { error, apiData, actorTag });
     throw error;
   }
 };
@@ -114,21 +114,21 @@ export const createOpenApi = async (apiData: OpenApiCreateData, adminId: number)
 /**
  * OpenAPI 수정 (관리자용)
  */
-export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData, adminId: number) => {
+export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData, actorTag: string) => {
   try {
     const updatedApi = await updateOpenApiAuthKeyRepo(apiId, {
       ...updateData,
-      updatedBy: adminId.toString()
+      updatedBy: actorTag
     });
 
     if (!updatedApi) {
       throw new Error('OPEN_API_NOT_FOUND');
     }
 
-    appLogger.info('OpenAPI 수정 성공', { apiId, adminId });
+    appLogger.info('OpenAPI 수정 성공', { apiId, actorTag });
     return updatedApi;
   } catch (error) {
-    appLogger.error('OpenAPI 수정 중 오류 발생', { error, apiId, updateData, adminId });
+    appLogger.error('OpenAPI 수정 중 오류 발생', { error, apiId, updateData, actorTag });
     throw error;
   }
 };
@@ -136,18 +136,18 @@ export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData
 /**
  * OpenAPI 삭제 (관리자용)
  */
-export const deleteOpenApi = async (apiId: number, adminId: number) => {
+export const deleteOpenApi = async (apiId: number, actorTag: string) => {
   try {
-    const deletedApi = await deleteOpenApiAuthKeyRepo(apiId, adminId);
+    const deletedApi = await deleteOpenApiAuthKeyRepo(apiId, actorTag);
 
     if (!deletedApi) {
       throw new Error('OPEN_API_NOT_FOUND');
     }
 
-    appLogger.info('OpenAPI 삭제 성공', { apiId, adminId });
+    appLogger.info('OpenAPI 삭제 성공', { apiId, actorTag });
     return deletedApi;
   } catch (error) {
-    appLogger.error('OpenAPI 삭제 중 오류 발생', { error, apiId, adminId });
+    appLogger.error('OpenAPI 삭제 중 오류 발생', { error, apiId, actorTag });
     throw error;
   }
 };
@@ -155,7 +155,7 @@ export const deleteOpenApi = async (apiId: number, adminId: number) => {
 /**
  * OpenAPI 키 기간 연장 (관리자용)
  */
-export const extendOpenApiKey = async (keyId: number, extensionDays: number, adminId: number) => {
+export const extendOpenApiKey = async (keyId: number, extensionDays: number, actorTag: string) => {
   try {
     // 기존 키 조회
     const existingKey = await findAuthKeyById(keyId);
@@ -171,17 +171,17 @@ export const extendOpenApiKey = async (keyId: number, extensionDays: number, adm
     // 키 업데이트
     const updatedOk = await updateOpenApiAuthKeyRepo(keyId, {
       endDt: newEndDate,
-      updatedBy: adminId.toString()
+      updatedBy: actorTag
     });
 
     if (!updatedOk) {
       throw new Error('OPEN_API_UPDATE_FAILED');
     }
 
-    appLogger.info('OpenAPI 키 기간 연장 성공', { keyId, extensionDays, adminId, newEndDate });
+    appLogger.info('OpenAPI 키 기간 연장 성공', { keyId, extensionDays, actorTag, newEndDate });
     return { endDt: newEndDate };
   } catch (error) {
-    appLogger.error('OpenAPI 키 기간 연장 중 오류 발생', { error, keyId, extensionDays, adminId });
+    appLogger.error('OpenAPI 키 기간 연장 중 오류 발생', { error, keyId, extensionDays, actorTag });
     throw error;
   }
 };
@@ -197,19 +197,18 @@ export const getOpenApiStats = async () => {
       limit: 1000, // 충분히 큰 수로 설정
       includeInactive: true
     });
-
-    const allKeys = totalKeys.rows;
+    const allKeys = totalKeys.authKeys;
     
     // 상태별 통계 계산
-    const activeKeys = allKeys.filter(key => key.status === 'ACTIVE').length;
-    const expiredKeys = allKeys.filter(key => {
+    const activeKeys = allKeys.filter((key) => key.activeYn === 'Y').length;
+    const expiredKeys = allKeys.filter((key) => {
       if (!key.endDt) return false;
       return new Date(key.endDt) < new Date();
     }).length;
-    const suspendedKeys = allKeys.filter(key => key.status === 'SUSPENDED').length;
+    const suspendedKeys = allKeys.filter((key) => key.activeYn === 'N').length;
     
     // 사용량 통계 (hitCnt 기준)
-    const totalUsage = allKeys.reduce((sum, key) => sum + (key.hitCnt || 0), 0);
+    const totalUsage = allKeys.reduce((sum: number, key: any) => sum + (key.hitCnt || 0), 0);
     const averageUsage = allKeys.length > 0 ? Math.round(totalUsage / allKeys.length) : 0;
 
     return {

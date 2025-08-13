@@ -4,6 +4,7 @@ import {
   UserOpenApiCreateRes, 
   UserOpenApiExtendReq
 } from '@iitp-dabt/common';
+import type { OpenApiAuthKeyAttributes } from '../../models/openApiAuthKey';
 import { 
   findAuthKeysByUserId,
   createAuthKey,
@@ -35,7 +36,7 @@ export class UserOpenApiService {
   /**
    * 사용자 OpenAPI 인증키 상세 조회
    */
-  static async getUserOpenApiDetail(userId: number, keyId: number): Promise<import('../models/openApiAuthKey').OpenApiAuthKeyAttributes> {
+  static async getUserOpenApiDetail(userId: number, keyId: number): Promise<OpenApiAuthKeyAttributes> {
     const authKey = await findAuthKeyById(keyId);
     if (!authKey) {
       throw new Error('인증키를 찾을 수 없습니다.');
@@ -65,7 +66,7 @@ export class UserOpenApiService {
       keyDesc: keyDesc,
       startDt: startDt ? new Date(startDt) : undefined,
       endDt: endDt ? new Date(endDt) : undefined,
-      createdBy: 'BY-USER'
+      createdBy: `U:${userId}`
     });
 
     appLogger.info('사용자 OpenAPI 인증키 생성 성공', {
@@ -94,7 +95,7 @@ export class UserOpenApiService {
       throw new Error('접근 권한이 없습니다.');
     }
 
-    const success = await deleteAuthKey(keyId, 'BY-USER');
+    const success = await deleteAuthKey(keyId, `U:${userId}`);
     if (!success) {
       throw new Error('인증키 삭제에 실패했습니다.');
     }
@@ -122,7 +123,7 @@ export class UserOpenApiService {
       throw new Error('접근 권한이 없습니다.');
     }
 
-    const success = await extendAuthKeyPeriod(keyId, extensionDays, 'BY-USER');
+    const success = await extendAuthKeyPeriod(keyId, extensionDays, `U:${userId}`);
     if (!success) {
       throw new Error('인증키 기간 연장에 실패했습니다.');
     }

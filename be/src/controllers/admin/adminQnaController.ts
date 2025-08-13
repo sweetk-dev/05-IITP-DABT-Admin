@@ -40,6 +40,7 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListQu
     const status = getStringQuery(req.query, 'status');
     
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -126,6 +127,7 @@ export const answerQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
     const { qnaId } = req.params;
     const { answer } = req.body;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -139,7 +141,7 @@ export const answerQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
       return sendValidationError(res, 'answer', '답변 내용은 필수입니다.');
     }
 
-    await answerQna(parseInt(qnaId), { answer }, adminId);
+    await answerQna(parseInt(qnaId), { answer }, actorTag);
     sendSuccess(res, undefined, undefined, 'ADMIN_QNA_ANSWERED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 답변 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
@@ -168,6 +170,7 @@ export const updateQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
     const { qnaId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -177,7 +180,7 @@ export const updateQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    await updateQna(parseInt(qnaId), updateData, adminId);
+    await updateQna(parseInt(qnaId), updateData, actorTag);
     sendSuccess(res, undefined, undefined, 'ADMIN_QNA_UPDATED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
@@ -205,6 +208,7 @@ export const deleteQnaForAdmin = async (req: Request<{ qnaId: string }>, res: Re
 
     const { qnaId } = req.params;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -214,7 +218,7 @@ export const deleteQnaForAdmin = async (req: Request<{ qnaId: string }>, res: Re
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    await deleteQna(parseInt(qnaId), adminId);
+    await deleteQna(parseInt(qnaId), actorTag);
     sendSuccess(res, undefined, undefined, 'ADMIN_QNA_DELETED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });

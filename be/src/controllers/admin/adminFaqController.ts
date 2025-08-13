@@ -92,6 +92,7 @@ export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailParams>, r
 
     const { faqId } = req.params;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -135,6 +136,7 @@ export const createFaqForAdmin = async (req: Request<{}, {}, AdminFaqCreateReq>,
 
     const faqData = req.body;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -144,7 +146,7 @@ export const createFaqForAdmin = async (req: Request<{}, {}, AdminFaqCreateReq>,
       return sendValidationError(res, 'general', '질문, 답변, FAQ 타입은 필수입니다.');
     }
 
-    const newFaq = await createFaq(faqData, adminId);
+    const newFaq = await createFaq(faqData, actorTag);
 
     const response: AdminFaqCreateRes = {
       faqId: newFaq.faqId
@@ -178,6 +180,7 @@ export const updateFaqForAdmin = async (req: Request<{ faqId: string }, {}, Admi
     const { faqId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -187,7 +190,7 @@ export const updateFaqForAdmin = async (req: Request<{ faqId: string }, {}, Admi
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const updatedFaq = await updateFaq(parseInt(faqId), updateData, adminId);
+    const updatedFaq = await updateFaq(parseInt(faqId), updateData, actorTag);
 
     sendSuccess(res, undefined, undefined, 'ADMIN_FAQ_UPDATED', { adminId, faqId });
   } catch (error) {
@@ -216,6 +219,7 @@ export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Re
 
     const { faqId } = req.params;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -225,7 +229,7 @@ export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Re
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    await deleteFaq(parseInt(faqId), adminId);
+    await deleteFaq(parseInt(faqId), actorTag);
 
     sendSuccess(res, undefined, undefined, 'ADMIN_FAQ_DELETED', { adminId, faqId });
   } catch (error) {

@@ -9,6 +9,7 @@ import {
   incrementHitCount
 } from '../../repositories/sysFaqRepository';
 import { appLogger } from '../../utils/logger';
+import { toUserFaqItem } from '../../mappers/faqMapper';
 
 /**
  * 사용자 FAQ 목록 조회 (비즈니스 로직)

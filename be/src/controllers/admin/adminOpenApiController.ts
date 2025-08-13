@@ -47,6 +47,7 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
     const status = getStringQuery(req.query, 'activeYn');
     
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -94,6 +95,7 @@ export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailPa
 
     const { keyId } = req.params;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -137,6 +139,7 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
 
     const apiData = req.body;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -146,7 +149,7 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
       return sendValidationError(res, 'general', '사용자 ID, 키 이름, 키 설명은 필수입니다.');
     }
 
-    const newApi = await createOpenApi(apiData, adminId);
+    const newApi = await createOpenApi(apiData, actorTag);
 
     const response: AdminOpenApiCreateRes = {
       keyId: newApi.keyId,
@@ -181,6 +184,7 @@ export const updateOpenApiForAdmin = async (req: Request<{ keyId: string }, {}, 
     const { keyId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -192,7 +196,7 @@ export const updateOpenApiForAdmin = async (req: Request<{ keyId: string }, {}, 
 
     const updatedApi = await updateOpenApi(parseInt(keyId), {
       ...updateData
-    }, adminId);
+    }, actorTag);
     sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_UPDATED', { adminId, keyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
@@ -223,6 +227,7 @@ export const deleteOpenApiForAdmin = async (
 
     const { keyId } = req.params;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -242,7 +247,7 @@ export const deleteOpenApiForAdmin = async (
       return sendValidationError(res, 'keyId', '요청 경로와 본문의 keyId가 일치해야 합니다.');
     }
 
-    await deleteOpenApi(parsedKeyId, adminId);
+    await deleteOpenApi(parsedKeyId, actorTag);
 
     sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_DELETED', { adminId, keyId: parsedKeyId });
   } catch (error) {
@@ -272,6 +277,7 @@ export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, Adm
     const { keyId } = req.params;
     const extendData = req.body;
     const adminId = extractUserIdFromRequest(req);
+    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -290,7 +296,7 @@ export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, Adm
     }
 
     // OpenAPI 키 기간 연장 서비스 호출 (updatedBy는 adminId로 설정)
-    const result = await extendOpenApiKey(parseInt(keyId), extendData.extensionDays, adminId);
+    const result = await extendOpenApiKey(parseInt(keyId), extendData.extensionDays, actorTag);
     const response: AdminOpenApiExtendRes = { newEndDt: result.endDt.toISOString() };
 
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_EXTENDED', { adminId, keyId, extensionDays: extendData.extensionDays });

@@ -15,7 +15,7 @@ export interface SysFaqAttributes {
   updatedBy?: string;
 }
 
-export interface SysFaqCreationAttributes extends Optional<SysFaqAttributes, 'faqId' | 'sortOrder' | 'hitCnt' | 'useYn' | 'updatedAt' | 'createdBy' | 'updatedBy'> {}
+export interface SysFaqCreationAttributes extends Optional<SysFaqAttributes, 'faqId' | 'sortOrder' | 'hitCnt' | 'useYn' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'> {}
 
 export class SysFaq extends Model<SysFaqAttributes, SysFaqCreationAttributes> implements SysFaqAttributes {
   public faqId!: number;

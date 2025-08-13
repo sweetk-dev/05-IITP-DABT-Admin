@@ -48,7 +48,7 @@ const specialUIMeta: Partial<Record<ErrorCode, Partial<ErrorUIMeta>>> = {
     showPopup: true,
     redirectTo: '/'
   },
-  [ErrorCode.ADMIN_INACTIVE]: {
+  [ErrorCode.ACCOUNT_INACTIVE]: {
     showPopup: true,
     redirectTo: '/login'
   }
@@ -63,7 +63,7 @@ export const getUserFriendlyMessage = (errorCode: ErrorCode, originalMessage?: s
     case ErrorCode.VALIDATION_ERROR:
       return originalMessage || '입력 정보를 확인해주세요.';
     
-    case ErrorCode.USER_EMAIL_DUPLICATE:
+    case ErrorCode. ACCOUNT_EMAIL_DUPLICATE :
       return '이미 사용 중인 이메일입니다.';
     
     case ErrorCode.EMAIL_INVALID_FORMAT:

@@ -53,7 +53,7 @@ export class UserService {
       password: hashedPassword,
       userName: name,
       affiliation: affiliation,
-      createdBy: 'BY-USER'
+      createdBy: 'S:REGISTER'
     });
 
     appLogger.info('사용자 회원가입 성공', {
@@ -104,7 +104,7 @@ export class UserService {
     await updateUser(userId, {
       userName: name,
       affiliation: affiliation,
-      updatedBy: 'BY-USER'
+      updatedBy: `U:${userId}`
     });
 
     appLogger.info('사용자 프로필 업데이트 성공', {
@@ -135,7 +135,7 @@ export class UserService {
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
     // 비밀번호 업데이트
-    await updatePassword(userId, hashedNewPassword, 'BY-USER');
+    await updatePassword(userId, hashedNewPassword, `U:${userId}`);
 
     appLogger.info('사용자 비밀번호 변경 성공', {
       userId: userId

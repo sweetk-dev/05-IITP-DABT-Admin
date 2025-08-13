@@ -6,7 +6,9 @@ declare global {
       user?: {
         userId: number;
         userType: UserType;
+        actorTag?: string;
       };
+      requestId?: string;
     }
   }
 } 

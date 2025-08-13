@@ -11,7 +11,7 @@ import {
   extendUserOpenApi 
 } from '../controllers/user/userOpenApiController';
 import { routerMiddleware } from '../middleware';
-import { API_URLS } from '@iitp-dabt/common';
+import { API_URLS, type UserFaqDetailParams, type UserNoticeDetailParams, type UserQnaDetailParams, type UserOpenApiDetailParams, type UserOpenApiDeleteParams } from '@iitp-dabt/common';
 
 const router = express.Router();
 
@@ -24,25 +24,25 @@ router.put(API_URLS.USER.PASSWORD, ...routerMiddleware.user, changePassword);
 
 // FAQ 관련 (공개 API)
 router.get(API_URLS.USER.FAQ.LIST, ...routerMiddleware.public, getFaqListForUser);
-router.get(API_URLS.USER.FAQ.DETAIL, ...routerMiddleware.public, getFaqDetailForUser);
+router.get<UserFaqDetailParams>(API_URLS.USER.FAQ.DETAIL, ...routerMiddleware.public, getFaqDetailForUser as any);
 router.get(API_URLS.USER.FAQ.HOME, ...routerMiddleware.public, getFaqHomeForUser);
 
 // Notice 관련 (공개 API)
 router.get(API_URLS.USER.NOTICE.LIST, ...routerMiddleware.public, getNoticeListForUser);
-router.get(API_URLS.USER.NOTICE.DETAIL, ...routerMiddleware.public, getNoticeDetailForUser);
+router.get<UserNoticeDetailParams>(API_URLS.USER.NOTICE.DETAIL, ...routerMiddleware.public, getNoticeDetailForUser as any);
 router.get(API_URLS.USER.NOTICE.HOME, ...routerMiddleware.public, getNoticeHomeForUser);
 
 // QnA 관련
 router.get(API_URLS.USER.QNA.LIST, ...routerMiddleware.user, getQnaListForUser);
-router.get(API_URLS.USER.QNA.DETAIL, ...routerMiddleware.user, getQnaDetailForUser);
+router.get<UserQnaDetailParams>(API_URLS.USER.QNA.DETAIL, ...routerMiddleware.user, getQnaDetailForUser as any);
 router.post(API_URLS.USER.QNA.CREATE, ...routerMiddleware.user, createQnaForUser);
 router.get(API_URLS.USER.QNA.HOME, ...routerMiddleware.user, getQnaHomeForUser);
 
 // OpenAPI 관련
 router.get(API_URLS.USER.OPEN_API.LIST, ...routerMiddleware.user, getUserOpenApiList);
-router.get(API_URLS.USER.OPEN_API.DETAIL, ...routerMiddleware.user, getUserOpenApiDetail);
+router.get<UserOpenApiDetailParams>(API_URLS.USER.OPEN_API.DETAIL, ...routerMiddleware.user, getUserOpenApiDetail as any);
 router.post(API_URLS.USER.OPEN_API.CREATE, ...routerMiddleware.user, createUserOpenApi);
-router.delete(API_URLS.USER.OPEN_API.DELETE, ...routerMiddleware.user, deleteUserOpenApi);
+router.delete<UserOpenApiDeleteParams>(API_URLS.USER.OPEN_API.DELETE, ...routerMiddleware.user, deleteUserOpenApi as any);
 router.post(API_URLS.USER.OPEN_API.EXTEND, ...routerMiddleware.user, extendUserOpenApi);
 
 export default router; 

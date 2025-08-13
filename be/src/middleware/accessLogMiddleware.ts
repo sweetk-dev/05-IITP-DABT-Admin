@@ -1,16 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { accessLogger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 
-interface RequestWithUser extends Request {
-  user?: {
-    userId: number;
-    userType: 'U' | 'A';
-  };
-  requestId?: string;
-}
-
-export const accessLogMiddleware = (req: RequestWithUser, res: Response, next: NextFunction) => {
+export const accessLogMiddleware: RequestHandler<any> = (req, res, next) => {
   const startTime = Date.now();
   const requestId = uuidv4();
   

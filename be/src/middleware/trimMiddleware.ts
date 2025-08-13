@@ -7,7 +7,7 @@ import { trimStringFieldsExcept } from '../utils/trimUtils';
  * @param excludeFields trim 처리에서 제외할 필드명 배열 (예: ['password'])
  */
 export function createTrimMiddleware(excludeFields: string[] = []) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request<any, any, any, any>, res: Response, next: NextFunction) => {
     // POST, PUT, PATCH 요청의 body만 trim 처리
     if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
       req.body = trimStringFieldsExcept(req.body, excludeFields);

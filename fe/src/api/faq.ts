@@ -12,8 +12,7 @@ import type {
   AdminFaqCreateRes,
   AdminFaqUpdateReq,
   AdminFaqUpdateRes,
-  AdminFaqDeleteRes,
-  AdminFaqStatsRes
+  AdminFaqDeleteRes
 } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 
@@ -110,9 +109,3 @@ export async function deleteAdminFaq(faqId: number): Promise<ApiResponse<AdminFa
   });
 }
 
-/**
- * FAQ 통계 조회 (관리자용)
- */
-export async function getAdminFaqStats(): Promise<ApiResponse<AdminFaqStatsRes>> {
-  return apiFetch<AdminFaqStatsRes>(FULL_API_URLS.ADMIN.FAQ.STATS);
-} 

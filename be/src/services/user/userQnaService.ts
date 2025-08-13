@@ -11,7 +11,7 @@ import {
   createQna
 } from '../../repositories/sysQnaRepository';
 import { appLogger } from '../../utils/logger';
-import { QnaSource } from '../../mappers/qnaMapper';
+import { QnaSource, toUserQnaItem } from '../../mappers/qnaMapper';
 
 /**
  * 사용자 Q&A 목록 조회 (비즈니스 로직)
@@ -70,23 +70,19 @@ export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<Q
  */
 export const createUserQna = async (userId: number, createData: UserQnaCreateReq): Promise<UserQnaCreateRes> => {
   try {
-    // TODO: 실제 DB 처리 구현 필요
-    // const qnaId = await createQna({
-    //   userId: userId,
-    //   qnaType: createData.qnaType,
-    //   title: createData.title,
-    //   content: createData.content,
-    //   secretYn: createData.secretYn || 'N',
-    //   writerName: createData.writerName || `User_${userId}`,
-    //   createdBy: userId.toString()
-    // });
-    
-    appLogger.info('사용자 Q&A 생성 서비스 호출', { userId, createData });
-    
-    // 임시 결과 반환
-    return {
-      qnaId: 1
-    };
+    const created = await createQna({
+      userId: userId,
+      qnaType: createData.qnaType,
+      title: createData.title,
+      content: createData.content,
+      secretYn: createData.secretYn || 'N',
+      writerName: createData.writerName || `User_${userId}`,
+      createdBy: `U:${userId}`
+    } as any);
+
+    appLogger.info('사용자 Q&A 생성 서비스 성공', { userId, qnaId: (created as any).qnaId });
+
+    return { qnaId: (created as any).qnaId };
   } catch (error) {
     appLogger.error('사용자 Q&A 생성 서비스 오류', { error, userId, createData });
     throw error;

@@ -51,6 +51,8 @@ export const getUserFaqDetail = async (faqId: number): Promise<SysFaq> => {
     
     // 조회수 증가
     await incrementHitCount(faqId);
+    // 메모리 상에서도 증가 반영
+    (faq as any).hitCnt = (faq as any).hitCnt + 1;
     
     appLogger.info('사용자 FAQ 상세 조회 서비스 호출', { faqId });
     

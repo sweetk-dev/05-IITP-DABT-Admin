@@ -12,7 +12,7 @@ import {
   createQna
 } from '../../repositories/sysQnaRepository';
 import { appLogger } from '../../utils/logger';
-import { toUserQnaItem } from '../../mappers/qnaMapper';
+import { QnaSource } from '../../mappers/qnaMapper';
 
 /**
  * 사용자 Q&A 목록 조회 (비즈니스 로직)
@@ -47,7 +47,7 @@ export const getUserQnaList = async (userId: number, params: UserQnaListQuery): 
 /**
  * 사용자 Q&A 상세 조회 (비즈니스 로직)
  */
-export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<UserQnaDetailRes> => {
+export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<QnaSource> => {
   try {
     const qna = await findQnaById(qnaId);
     if (!qna || qna.userId !== userId) {
@@ -56,7 +56,7 @@ export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<U
     
     appLogger.info('사용자 Q&A 상세 조회 서비스 호출', { userId, qnaId });
     
-    return { qna } as any;
+    return qna as any;
   } catch (error) {
     appLogger.error('사용자 Q&A 상세 조회 서비스 오류', { error, userId, qnaId });
     throw error;

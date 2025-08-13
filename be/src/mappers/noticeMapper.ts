@@ -1,5 +1,5 @@
 import type { AdminNoticeItem, UserNoticeItem } from '@iitp-dabt/common';
-import type { SysNotice } from '../models/sysNotice';
+import type { SysNoticeAttributes } from '../models/sysNotice';
 
 function toIsoString(value?: Date | string | number): string | undefined {
   if (!value) return undefined;
@@ -7,33 +7,38 @@ function toIsoString(value?: Date | string | number): string | undefined {
   return d.toISOString();
 }
 
-export function toAdminNoticeItem(n: SysNotice): AdminNoticeItem {
-  const createdOrPosted = (n as any).createdAt || (n as any).postedAt;
+type NoticeSource = Pick<
+  SysNoticeAttributes,
+  'noticeId' | 'title' | 'content' | 'noticeType' | 'pinnedYn' | 'publicYn' | 'postedAt' | 'startDt' | 'endDt' | 'createdBy' | 'updatedBy' | 'createdAt' | 'updatedAt'
+>;
+
+export function toAdminNoticeItem(n: NoticeSource): AdminNoticeItem {
+  const createdOrPosted = (n as any).createdAt || n.postedAt;
   return {
-    noticeId: (n as any).noticeId,
-    title: (n as any).title,
-    content: (n as any).content,
-    noticeType: (n as any).noticeType,
-    pinnedYn: (n as any).pinnedYn,
-    publicYn: (n as any).publicYn,
-    postedAt: toIsoString((n as any).postedAt)!,
-    startDt: toIsoString((n as any).startDt),
-    endDt: toIsoString((n as any).endDt),
-    createdBy: (n as any).createdBy,
-    updatedBy: (n as any).updatedBy,
+    noticeId: n.noticeId,
+    title: n.title,
+    content: n.content,
+    noticeType: n.noticeType,
+    pinnedYn: n.pinnedYn,
+    publicYn: n.publicYn,
+    postedAt: toIsoString(n.postedAt)!,
+    startDt: toIsoString(n.startDt),
+    endDt: toIsoString(n.endDt),
+    createdBy: n.createdBy,
+    updatedBy: n.updatedBy,
     createdAt: toIsoString(createdOrPosted)!,
-    updatedAt: toIsoString((n as any).updatedAt)
+    updatedAt: toIsoString(n.updatedAt)
   };
 }
 
-export function toUserNoticeItem(n: SysNotice): UserNoticeItem {
+export function toUserNoticeItem(n: NoticeSource): UserNoticeItem {
   return {
-    noticeId: (n as any).noticeId,
-    title: (n as any).title,
-    content: (n as any).content,
-    noticeType: (n as any).noticeType,
-    pinnedYn: (n as any).pinnedYn,
-    postedAt: toIsoString((n as any).postedAt)!
+    noticeId: n.noticeId,
+    title: n.title,
+    content: n.content,
+    noticeType: n.noticeType,
+    pinnedYn: n.pinnedYn,
+    postedAt: toIsoString(n.postedAt)!
   };
 }
 

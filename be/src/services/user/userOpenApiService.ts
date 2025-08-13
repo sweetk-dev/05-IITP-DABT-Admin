@@ -35,7 +35,7 @@ export class UserOpenApiService {
   /**
    * 사용자 OpenAPI 인증키 상세 조회
    */
-  static async getUserOpenApiDetail(userId: number, keyId: number): Promise<any> {
+  static async getUserOpenApiDetail(userId: number, keyId: number): Promise<import('../models/openApiAuthKey').OpenApiAuthKeyAttributes> {
     const authKey = await findAuthKeyById(keyId);
     if (!authKey) {
       throw new Error('인증키를 찾을 수 없습니다.');
@@ -111,8 +111,7 @@ export class UserOpenApiService {
   /**
    * 사용자 OpenAPI 인증키 기간 연장
    */
-  static async extendUserOpenApi(userId: number, extendData: UserOpenApiExtendReq): Promise<{ newEndDt: string; }> {
-    const { keyId, extensionDays } = extendData;
+  static async extendUserOpenApi(userId: number, keyId: number, extensionDays: number): Promise<{ newEndDt: string; }> {
 
     const authKey = await findAuthKeyById(keyId);
     if (!authKey) {

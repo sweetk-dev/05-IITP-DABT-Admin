@@ -22,8 +22,8 @@ export const version = async (req: Request, res: Response) => {
             const result: CommonVersionRes = buildInfo;
             sendSuccess(res, result, undefined, 'VERSION_INFO_RETRIEVED');
         } else {
-            const result: CommonVersionRes = { error: 'Build info not found' };
-            sendSuccess(res, result, undefined, 'VERSION_INFO_NOT_FOUND');
+            // 빌드 정보가 없으면 데이터 없이 성공 처리 (로그 이벤트만 남김)
+            sendSuccess(res, undefined, undefined, 'VERSION_INFO_NOT_FOUND');
         }
     } catch (error) {
         appLogger.error('Error in version:', error);

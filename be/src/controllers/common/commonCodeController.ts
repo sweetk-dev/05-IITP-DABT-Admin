@@ -10,6 +10,7 @@ import {
   updateCommonCodeById,
   deleteCommonCodeById,
 } from '../../services/common/commonCodeService';
+import { toUserCommonCode, toAdminCommonCodeDetail } from '../../mappers/commonCodeMapper';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
 import { 
@@ -59,18 +60,7 @@ export const getCommonCodes = async (req: Request<CommonCodeByGroupReq>, res: Re
     const codes = await getCommonCodesByGroupId(grpId);
     
     // 사용자용 응답 - 관리 정보 제외
-    const userCodes = codes.map(code => ({
-      grpId: code.grpId,
-      grpNm: code.grpNm,
-      codeId: code.codeId,
-      codeNm: code.codeNm,
-      parentGrpId: code.parentGrpId,
-      parentCodeId: code.parentCodeId,
-      codeType: code.codeType,
-      codeLvl: code.codeLvl,
-      sortOrder: code.sortOrder,
-      codeDes: code.codeDes
-    }));
+    const userCodes = codes.map(toUserCommonCode);
     
     const result: CommonCodeByGroupRes = { codes: userCodes };
     sendSuccess(res, result, undefined, 'COMMON_CODES_RETRIEVED', { grpId, count: userCodes.length }, true); // isListResponse: true
@@ -110,12 +100,7 @@ export const getCommonCodesDetail = async (req: Request<CommonCodeByGroupReq>, r
     const codes = await getCommonCodesByGroupId(grpId);
     
     // 관리자용 응답 - Date를 string으로 변환
-    const detailCodes = codes.map(code => ({
-      ...code,
-      createdAt: code.createdAt?.toISOString(),
-      updatedAt: code.updatedAt?.toISOString(),
-      deletedAt: code.deletedAt?.toISOString()
-    }));
+    const detailCodes = codes.map(toAdminCommonCodeDetail);
     
     const result: CommonCodeByGroupDetailRes = { codes: detailCodes };
     sendSuccess(res, result, undefined, 'COMMON_CODES_DETAIL_RETRIEVED', { grpId, count: detailCodes.length }, true); // isListResponse: true
@@ -153,18 +138,7 @@ export const getCommonCode = async (req: Request<CommonCodeByIdReq>, res: Respon
     }
 
     // 사용자용 응답 - 관리 정보 제외
-    const userCode = {
-      grpId: code.grpId,
-      grpNm: code.grpNm,
-      codeId: code.codeId,
-      codeNm: code.codeNm,
-      parentGrpId: code.parentGrpId,
-      parentCodeId: code.parentCodeId,
-      codeType: code.codeType,
-      codeLvl: code.codeLvl,
-      sortOrder: code.sortOrder,
-      codeDes: code.codeDes
-    };
+    const userCode = toUserCommonCode(code);
 
     const result: CommonCodeByIdRes = { code: userCode };
     sendSuccess(res, result, undefined, 'COMMON_CODE_RETRIEVED', { grpId, codeId });
@@ -202,12 +176,7 @@ export const getCommonCodeDetail = async (req: Request<CommonCodeByIdReq>, res: 
     }
 
     // 관리자용 응답 - Date를 string으로 변환
-    const detailCode = {
-      ...code,
-      createdAt: code.createdAt?.toISOString(),
-      updatedAt: code.updatedAt?.toISOString(),
-      deletedAt: code.deletedAt?.toISOString()
-    };
+    const detailCode = toAdminCommonCodeDetail(code);
 
     const result: CommonCodeByIdDetailRes = { code: detailCode };
     sendSuccess(res, result, undefined, 'COMMON_CODE_DETAIL_RETRIEVED', { grpId, codeId });
@@ -232,18 +201,7 @@ export const getCommonCodesByType = async (req: Request<CommonCodeByTypeReq>, re
     const codes = await getCommonCodesByTypeService(codeType as 'B' | 'A' | 'S');
     
     // 사용자용 응답 - 관리 정보 제외
-    const userCodes = codes.map(code => ({
-      grpId: code.grpId,
-      grpNm: code.grpNm,
-      codeId: code.codeId,
-      codeNm: code.codeNm,
-      parentGrpId: code.parentGrpId,
-      parentCodeId: code.parentCodeId,
-      codeType: code.codeType,
-      codeLvl: code.codeLvl,
-      sortOrder: code.sortOrder,
-      codeDes: code.codeDes
-    }));
+    const userCodes = codes.map(toUserCommonCode);
     
     const result: CommonCodeByTypeRes = { codes: userCodes };
     sendSuccess(res, result, undefined, 'COMMON_CODES_BY_TYPE_RETRIEVED', { codeType, count: userCodes.length });
@@ -268,12 +226,7 @@ export const getCommonCodesByTypeDetail = async (req: Request<CommonCodeByTypeRe
     const codes = await getCommonCodesByTypeService(codeType as 'B' | 'A' | 'S');
     
     // 관리자용 응답 - Date를 string으로 변환
-    const detailCodes = codes.map(code => ({
-      ...code,
-      createdAt: code.createdAt?.toISOString(),
-      updatedAt: code.updatedAt?.toISOString(),
-      deletedAt: code.deletedAt?.toISOString()
-    }));
+    const detailCodes = codes.map(toAdminCommonCodeDetail);
     
     const result: CommonCodeByTypeDetailRes = { codes: detailCodes };
     sendSuccess(res, result, undefined, 'COMMON_CODES_BY_TYPE_DETAIL_RETRIEVED', { codeType, count: detailCodes.length });
@@ -374,11 +327,29 @@ export const createCommonCode = async (req: Request<{}, {}, CommonCodeCreateReq>
     };
     
     const result: CommonCodeCreateRes = { 
-      grpId: newCode.grpId, 
-      codeId: newCode.codeId, 
-      message: '공통 코드가 성공적으로 생성되었습니다.' 
+      code: {
+        grpId: newCode.grpId,
+        grpNm: newCode.grpNm,
+        codeId: newCode.codeId,
+        codeNm: newCode.codeNm,
+        parentGrpId: newCode.parentGrpId,
+        parentCodeId: newCode.parentCodeId,
+        codeType: newCode.codeType as any,
+        codeLvl: newCode.codeLvl,
+        sortOrder: newCode.sortOrder,
+        useYn: (newCode as any).useYn,
+        delYn: (newCode as any).delYn,
+        codeDes: newCode.codeDes,
+        memo: (newCode as any).memo,
+        createdAt: newCode.createdAt?.toISOString(),
+        updatedAt: newCode.updatedAt?.toISOString(),
+        deletedAt: (newCode as any).deletedAt?.toISOString(),
+        createdBy: (newCode as any).createdBy,
+        updatedBy: (newCode as any).updatedBy,
+        deletedBy: (newCode as any).deletedBy
+      }
     };
-    sendSuccess(res, result, result.message, 'COMMON_CODE_CREATED', { grpId: newCode.grpId, codeId: newCode.codeId });
+    sendSuccess(res, result, undefined, 'COMMON_CODE_CREATED', { grpId: newCode.grpId, codeId: newCode.codeId });
   } catch (error) {
     appLogger.error('Error in createCommonCode:', error);
     if (error instanceof Error) {
@@ -407,12 +378,8 @@ export const updateCommonCode = async (req: Request<{ grpId: string; codeId: str
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const result: CommonCodeUpdateRes = { 
-      grpId, 
-      codeId, 
-      message: '공통 코드가 성공적으로 수정되었습니다.' 
-    };
-    sendSuccess(res, result, result.message, 'COMMON_CODE_UPDATED', { grpId, codeId });
+    const result: CommonCodeUpdateRes = { affectedCount };
+    sendSuccess(res, result, undefined, 'COMMON_CODE_UPDATED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in updateCommonCode:', error);
     if (error instanceof Error) {
@@ -440,12 +407,8 @@ export const deleteCommonCode = async (req: Request<{ grpId: string; codeId: str
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const result: CommonCodeDeleteRes = { 
-      grpId, 
-      codeId, 
-      message: '공통 코드가 성공적으로 삭제되었습니다.' 
-    };
-    sendSuccess(res, result, result.message, 'COMMON_CODE_DELETED', { grpId, codeId });
+    const result: CommonCodeDeleteRes = { affectedCount };
+    sendSuccess(res, result,undefined, 'COMMON_CODE_DELETED', { grpId, codeId });
   } catch (error) {
     appLogger.error('Error in deleteCommonCode:', error);
     if (error instanceof Error) {

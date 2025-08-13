@@ -5,19 +5,20 @@ import { logApiCall } from '../../utils/apiLogger';
 import { normalizeErrorMessage } from '../../utils/commonUtils';
 import { getUserNoticeList, getUserNoticeDetail, getUserNoticeHome } from '../../services/user/userNoticeService';
 import { toUserNoticeItem } from '../../mappers/noticeMapper';
+import { getNumberQuery, getStringQuery, getBooleanQuery } from '../../utils/queryParsers';
 
 export const getNoticeListForUser = async (req: Request<{}, {}, {}, UserNoticeListQuery>, res: Response) => {
   try {
     logApiCall('GET', API_URLS.USER.NOTICE.LIST, USER_API_MAPPING as any, '사용자 공지 목록 조회');
-    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
-    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
-    const noticeType = typeof (req.query as any).noticeType === 'string' ? (req.query as any).noticeType as any : undefined;
-    const publicOnly = typeof (req.query as any).publicOnly === 'string' ? (req.query as any).publicOnly === 'true' : true;
-    const includeExpired = typeof (req.query as any).includeExpired === 'string' ? (req.query as any).includeExpired === 'true' : false;
+    const page = getNumberQuery(req.query, 'page', 1)!;
+    const limit = getNumberQuery(req.query, 'limit', 10)!;
+    const noticeType = getStringQuery(req.query, 'noticeType') as any;
+    const publicOnly = getBooleanQuery(req.query, 'publicOnly', true)!;
+    const includeExpired = getBooleanQuery(req.query, 'includeExpired', false)!;
 
     const repo = await getUserNoticeList({ page, limit, noticeType, publicOnly, includeExpired });
     const response: UserNoticeListRes = {
-      items: repo.notices.map(toUserNoticeItem as any),
+      items: repo.notices.map(toUserNoticeItem),
       total: repo.total,
       page: repo.page,
       limit: repo.limit,
@@ -41,7 +42,7 @@ export const getNoticeDetailForUser = async (req: Request<UserNoticeDetailParams
     if (!noticeId) return sendError(res, ErrorCode.INVALID_PARAMETER);
     const n = await getUserNoticeDetail(parseInt(noticeId));
     if (!n) return sendError(res, ErrorCode.NOTICE_NOT_FOUND);
-    const response: UserNoticeDetailRes = { notice: toUserNoticeItem(n as any) };
+    const response: UserNoticeDetailRes = { notice: toUserNoticeItem(n) };
     sendSuccess(res, response, undefined, 'USER_NOTICE_DETAIL_VIEW', { noticeId });
   } catch (error) {
     if (error instanceof Error) {

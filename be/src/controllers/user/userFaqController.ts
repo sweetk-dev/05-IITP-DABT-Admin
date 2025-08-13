@@ -28,10 +28,10 @@ export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListQuer
   try {
     logApiCall('GET', API_URLS.USER.FAQ.LIST, USER_API_MAPPING as any, '사용자 FAQ 목록 조회');
 
-    const params = req.query as any;
+    const params = req.query;
     const domain = await getUserFaqList(params);
     const result: UserFaqListRes = {
-      items: domain.faqs.map(toUserFaqItem as any),
+      items: domain.faqs.map(toUserFaqItem),
       total: domain.total,
       page: domain.page,
       limit: domain.limit,
@@ -67,7 +67,7 @@ export const getFaqDetailForUser = async (req: Request<UserFaqDetailParams>, res
     const keyId = parseInt(faqId);
 
     const domain = await getUserFaqDetail(keyId);
-    const result: UserFaqDetailRes = { faq: toUserFaqItem({ ...(domain as any), hitCnt: (domain as any).hitCnt + 1 } as any) } as any;
+    const result: UserFaqDetailRes = { faq: toUserFaqItem(domain as any) } as any;
 
     sendSuccess(res, result, undefined, 'USER_FAQ_DETAIL_VIEW', { faqId });
   } catch (error) {

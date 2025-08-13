@@ -40,13 +40,13 @@ export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListQuer
 
     const params = req.query as any;
 
-    const domain = await getUserQnaList(userId, params as any);
+    const domain = await getUserQnaList(userId, params);
     const result: UserQnaListRes = {
-      items: (domain as any).qnas.map(toUserQnaItem as any),
-      total: (domain as any).total,
-      page: (domain as any).page,
-      limit: (domain as any).limit,
-      totalPages: (domain as any).totalPages
+      items: domain.qnas.map(toUserQnaItem),
+      total: domain.total,
+      page: domain.page,
+      limit: domain.limit,
+      totalPages: domain.totalPages
     };
 
     sendSuccess(res, result, undefined, 'USER_QNA_LIST_VIEW', { userId }, true); // isListResponse: true
@@ -98,7 +98,7 @@ export const getQnaDetailForUser = async (req: Request<UserQnaDetailParams>, res
     const { qnaId } = req.params;
     const keyId = parseInt(qnaId);
 
-    const qna = await getUserQnaDetail(userId, keyId) as any;
+    const qna = await getUserQnaDetail(userId, keyId);
     const result: UserQnaDetailRes = { qna: toUserQnaItem(qna) } as any;
 
     sendSuccess(res, result, undefined, 'USER_QNA_DETAIL_VIEW', { userId, qnaId });

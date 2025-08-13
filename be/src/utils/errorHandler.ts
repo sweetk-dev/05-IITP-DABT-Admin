@@ -79,7 +79,8 @@ export const sendSuccess = (
       url: req.url,
       method: req.method,
       userId: req.user?.userId,
-      userType: req.user?.userType
+      userType: req.user?.userType,
+      ...(message && { message })
     });
   }
 
@@ -94,22 +95,19 @@ export const sendSuccess = (
       // 200 OK + 빈 배열 또는 빈 객체
       res.status(200).json({
         success: true,
-        data: Array.isArray(data) ? [] : {},
-        ...(message && { message })
+        data: Array.isArray(data) ? [] : {}
       });
     } else {
       // 204 No Content (단건 조회에서 데이터가 없는 경우)
       res.status(204).json({
-        success: true,
-        ...(message && { message })
+        success: true
       });
     }
   } else {
     // 정상 데이터 응답
     res.status(200).json({
       success: true,
-      data,
-      ...(message && { message })
+      data
     });
   }
 };

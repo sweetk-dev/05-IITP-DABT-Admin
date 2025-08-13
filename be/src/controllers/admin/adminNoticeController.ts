@@ -5,17 +5,18 @@ import { logApiCall } from '../../utils/apiLogger';
 import { extractUserIdFromRequest, normalizeErrorMessage } from '../../utils/commonUtils';
 import { getNoticeListAdmin, getNoticeDetailAdmin, createNoticeAdmin, updateNoticeAdmin, deleteNoticeAdmin } from '../../services/admin/adminNoticeService';
 import { toAdminNoticeItem } from '../../mappers/noticeMapper';
+import { getNumberQuery, getStringQuery, getBooleanQuery } from '../../utils/queryParsers';
 
 export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNoticeListQuery>, res: Response) => {
   try {
     logApiCall('GET', API_URLS.ADMIN.NOTICE.LIST, ADMIN_API_MAPPING as any, '공지사항 목록 조회 (관리자용)');
 
-    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
-    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
-    const noticeType = typeof (req.query as any).noticeType === 'string' ? (req.query as any).noticeType as any : undefined;
-    const publicYn = typeof (req.query as any).publicYn === 'string' ? (req.query as any).publicYn as any : undefined;
-    const pinnedYn = typeof (req.query as any).pinnedYn === 'string' ? (req.query as any).pinnedYn as any : undefined;
-    const search = typeof (req.query as any).search === 'string' ? (req.query as any).search : undefined;
+    const page = getNumberQuery(req.query, 'page', 1)!;
+    const limit = getNumberQuery(req.query, 'limit', 10)!;
+    const noticeType = getStringQuery(req.query, 'noticeType') as any;
+    const publicYn = getStringQuery(req.query, 'publicYn') as any;
+    const pinnedYn = getStringQuery(req.query, 'pinnedYn') as any;
+    const search = getStringQuery(req.query, 'search');
 
     const adminId = extractUserIdFromRequest(req);
     if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -30,7 +31,7 @@ export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNotice
     });
 
     const response: AdminNoticeListRes = {
-      items: repoResult.notices.map(toAdminNoticeItem as any),
+      items: repoResult.notices.map(toAdminNoticeItem),
       total: repoResult.total,
       page: repoResult.page,
       limit: repoResult.limit,
@@ -60,7 +61,7 @@ export const getNoticeDetailForAdmin = async (req: Request<AdminNoticeDetailPara
     const n = await getNoticeDetailAdmin(parseInt(noticeId));
     if (!n) return sendError(res, ErrorCode.NOTICE_NOT_FOUND);
 
-    const response: AdminNoticeDetailRes = { notice: toAdminNoticeItem(n as any) };
+    const response: AdminNoticeDetailRes = { notice: toAdminNoticeItem(n) };
 
     sendSuccess(res, response, undefined, 'ADMIN_NOTICE_DETAIL_VIEW', { adminId, noticeId });
   } catch (error) {

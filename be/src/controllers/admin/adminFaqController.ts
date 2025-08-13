@@ -14,6 +14,7 @@ import {
   extractUserIdFromRequest,
   normalizeErrorMessage
 } from '../../utils/commonUtils';
+import { getNumberQuery, getStringQuery } from '../../utils/queryParsers';
 import type {
   AdminFaqListQuery,
   AdminFaqListRes,
@@ -36,11 +37,11 @@ export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListQu
   try {
     logApiCall('GET', API_URLS.ADMIN.FAQ.LIST, ADMIN_API_MAPPING as any, 'FAQ 목록 조회 (관리자용)');
 
-    const page = typeof req.query.page === 'string' ? parseInt(req.query.page) || 1 : 1;
-    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit) || 10 : 10;
-    const faqType = typeof req.query.faqType === 'string' ? req.query.faqType : undefined;
-    const search = typeof req.query.search === 'string' ? req.query.search : undefined;
-    const useYn = typeof req.query.useYn === 'string' ? req.query.useYn : undefined;
+    const page = getNumberQuery(req.query, 'page', 1)!;
+    const limit = getNumberQuery(req.query, 'limit', 10)!;
+    const faqType = getStringQuery(req.query, 'faqType');
+    const search = getStringQuery(req.query, 'search');
+    const useYn = getStringQuery(req.query, 'useYn');
     
     adminId = extractUserIdFromRequest(req);
     
@@ -57,7 +58,7 @@ export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListQu
     });
 
     const response: AdminFaqListRes = {
-      items: result.faqs.map(toAdminFaqItem as any),
+      items: result.faqs.map(toAdminFaqItem),
       total: result.total,
       page: result.page,
       limit: result.limit,
@@ -105,7 +106,7 @@ export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailParams>, r
       return sendError(res, ErrorCode.FAQ_NOT_FOUND);
     }
 
-    const response: AdminFaqDetailRes = { faq: toAdminFaqItem(faq as any) };
+    const response: AdminFaqDetailRes = { faq: toAdminFaqItem(faq) };
 
     sendSuccess(res, response, undefined, 'ADMIN_FAQ_DETAIL_VIEW', { adminId, faqId });
   } catch (error) {

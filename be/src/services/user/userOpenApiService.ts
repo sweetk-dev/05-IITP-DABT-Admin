@@ -76,8 +76,7 @@ export class UserOpenApiService {
 
     return {
       keyId: newKey.keyId,
-      authKey: authKey,
-      message: '인증키가 성공적으로 생성되었습니다.'
+      authKey: authKey
     };
   }
 

@@ -8,7 +8,6 @@ export interface UserQnaItem {
   title: string;
   content: string;
   secretYn: string;
-  status: string;
   writerName: string;
   createdAt: string;
   answeredAt?: string;
@@ -22,7 +21,6 @@ export interface AdminQnaItem {
   title: string;
   content: string;
   secretYn: string;
-  status: string;
   writerName: string;
   createdAt: string;
   answeredAt?: string;

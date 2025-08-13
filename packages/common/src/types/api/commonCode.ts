@@ -304,17 +304,7 @@ export interface CommonCodeByParentDetailRes {
   codes: CommonCodeDetail[];
 }
 
-// 공통 코드 통계 정보
-export interface CommonCodeStats {
-  grpId: string;
-  grpNm: string;
-  count: number;
-}
 
-// 공통 코드 통계 조회 응답
-export interface CommonCodeStatsRes {
-  stats: CommonCodeStats[];
-}
 
 // 공통 코드 생성 응답
 export interface CommonCodeCreateRes {

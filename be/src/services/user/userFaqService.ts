@@ -45,7 +45,7 @@ export const getUserFaqList = async (params: UserFaqListQuery): Promise<{ faqs: 
 export const getUserFaqDetail = async (faqId: number): Promise<SysFaq> => {
   try {
     const faq = await findFaqById(faqId);
-    if (!faq || faq.delYn === 'Y' || faq.useYn !== 'Y') {
+    if (!faq || faq.useYn !== 'Y') {
       throw new Error('FAQ를 찾을 수 없습니다.');
     }
     

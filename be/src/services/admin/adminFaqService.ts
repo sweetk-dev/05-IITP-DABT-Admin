@@ -5,7 +5,7 @@ import {
   createFaq as createFaqRepo, 
   updateFaq as updateFaqRepo, 
   deleteFaq as deleteFaqRepo 
-} from '../../repositories/faqRepository';
+} from '../../repositories/sysFaqRepository';
 import { appLogger } from '../../utils/logger';
 
 export interface FaqListParams {
@@ -146,14 +146,11 @@ export const updateFaq = async (faqId: number, updateData: FaqUpdateData, adminI
  */
 export const deleteFaq = async (faqId: number, adminId: number) => {
   try {
-    const deletedFaq = await deleteFaqRepo(faqId, adminId);
-
-    if (!deletedFaq) {
-      throw new Error('FAQ_NOT_FOUND');
-    }
+    const ok = await deleteFaqRepo(faqId);
+    if (!ok) throw new Error('FAQ_NOT_FOUND');
 
     appLogger.info('FAQ 삭제 성공', { faqId, adminId });
-    return deletedFaq;
+    return ok;
   } catch (error) {
     appLogger.error('FAQ 삭제 중 오류 발생', { error, faqId, adminId });
     throw error;

@@ -65,24 +65,9 @@ export async function updateFaq(faqId: number, updateData: Partial<SysFaqCreatio
 /**
  * FAQ 삭제
  */
-export async function deleteFaq(faqId: number, deletedBy?: string): Promise<SysFaq | null> {
-  const faq = await findFaqById(faqId);
-  if (!faq) {
-    return null;
-  }
-
-  const [affectedCount] = await SysFaq.update({
-    delYn: 'Y',
-    deletedBy,
-    deletedAt: new Date()
-  }, {
-    where: { faqId }
-  });
-
-  if (affectedCount > 0) {
-    return findFaqById(faqId);
-  }
-  return null;
+export async function deleteFaq(faqId: number): Promise<boolean> {
+  const deletedCount = await SysFaq.destroy({ where: { faqId } });
+  return deletedCount > 0;
 }
 
 /**

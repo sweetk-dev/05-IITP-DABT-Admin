@@ -4,6 +4,7 @@ import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '
 import { logApiCall } from '../../utils/apiLogger';
 import { normalizeErrorMessage } from '../../utils/commonUtils';
 import { getUserNoticeList, getUserNoticeDetail, getUserNoticeHome } from '../../services/user/userNoticeService';
+import { toUserNoticeItem } from '../../mappers/noticeMapper';
 
 export const getNoticeListForUser = async (req: Request<{}, {}, {}, UserNoticeListQuery>, res: Response) => {
   try {
@@ -16,14 +17,7 @@ export const getNoticeListForUser = async (req: Request<{}, {}, {}, UserNoticeLi
 
     const repo = await getUserNoticeList({ page, limit, noticeType, publicOnly, includeExpired });
     const response: UserNoticeListRes = {
-      items: repo.notices.map((n: any) => ({
-        noticeId: n.noticeId,
-        title: n.title,
-        content: n.content,
-        noticeType: n.noticeType,
-        pinnedYn: n.pinnedYn,
-        postedAt: (n.postedAt instanceof Date ? n.postedAt : new Date(n.postedAt)).toISOString(),
-      })),
+      items: repo.notices.map(toUserNoticeItem as any),
       total: repo.total,
       page: repo.page,
       limit: repo.limit,
@@ -47,16 +41,7 @@ export const getNoticeDetailForUser = async (req: Request<UserNoticeDetailParams
     if (!noticeId) return sendError(res, ErrorCode.INVALID_PARAMETER);
     const n = await getUserNoticeDetail(parseInt(noticeId));
     if (!n) return sendError(res, ErrorCode.NOTICE_NOT_FOUND);
-    const response: UserNoticeDetailRes = {
-      notice: {
-        noticeId: n.noticeId,
-        title: n.title,
-        content: n.content,
-        noticeType: n.noticeType as any,
-        pinnedYn: n.pinnedYn as any,
-        postedAt: (n.postedAt instanceof Date ? n.postedAt : new Date(n.postedAt)).toISOString(),
-      }
-    };
+    const response: UserNoticeDetailRes = { notice: toUserNoticeItem(n as any) };
     sendSuccess(res, response, undefined, 'USER_NOTICE_DETAIL_VIEW', { noticeId });
   } catch (error) {
     if (error instanceof Error) {

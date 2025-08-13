@@ -29,6 +29,7 @@ import type {
   AdminOpenApiExtendRes,
   AdminOpenApiStatsRes
 } from '@iitp-dabt/common';
+import { toAdminOpenApiKeyItem } from '../../mappers/openApiMapper';
 
 /**
  * OpenAPI 목록 조회 (관리자용)
@@ -58,25 +59,7 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
     });
 
     const response: AdminOpenApiListRes = {
-      items: result.openApis.map((api: any) => ({
-        keyId: api.keyId ?? api.apiId,
-        userId: api.userId,
-        authKey: api.authKey || '',
-        activeYn: api.activeYn ?? (api.status ? (api.status === 'ACTIVE' ? 'Y' : 'N') : 'N'),
-        startDt: api.startDt?.toISOString?.() ?? (api.startDt ? new Date(api.startDt).toISOString() : undefined),
-        endDt: api.endDt?.toISOString?.() ?? (api.endDt ? new Date(api.endDt).toISOString() : undefined),
-        delYn: api.delYn ?? 'N',
-        keyName: api.keyName,
-        keyDesc: api.keyDesc,
-        activeAt: api.activeAt?.toISOString?.() ?? (api.status === 'ACTIVE' ? api.updatedAt?.toISOString?.() : undefined),
-        latestAccAt: api.latestAccAt?.toISOString?.(),
-        createdAt: api.createdAt?.toISOString?.() ?? new Date(api.createdAt).toISOString(),
-        updatedAt: api.updatedAt?.toISOString?.(),
-        deletedAt: api.deletedAt?.toISOString?.(),
-        createdBy: api.createdBy?.toString?.() || '',
-        updatedBy: api.updatedBy?.toString?.(),
-        deletedBy: api.deletedBy?.toString?.()
-      })),
+      items: result.openApis.map(toAdminOpenApiKeyItem as any),
       total: result.total,
       page: result.page,
       limit: result.limit,
@@ -124,27 +107,7 @@ export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailPa
       return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
     }
 
-    const response: AdminOpenApiDetailRes = {
-      authKey: {
-        keyId: (api as any).keyId ?? (api as any).apiId,
-        userId: api.userId,
-        authKey: (api as any).authKey || '',
-        activeYn: (api as any).activeYn ?? ((api as any).status ? ((api as any).status === 'ACTIVE' ? 'Y' : 'N') : 'N'),
-        startDt: (api as any).startDt?.toISOString?.() ?? ((api as any).startDt ? new Date((api as any).startDt).toISOString() : undefined),
-        endDt: (api as any).endDt?.toISOString?.() ?? ((api as any).endDt ? new Date((api as any).endDt).toISOString() : undefined),
-        delYn: 'N',
-        keyName: api.keyName,
-        keyDesc: api.keyDesc,
-        activeAt: (api as any).activeAt?.toISOString?.() ?? ((api as any).status === 'ACTIVE' ? (api as any).updatedAt?.toISOString?.() : undefined),
-        latestAccAt: (api as any).latestAccAt?.toISOString?.(),
-        createdAt: (api as any).createdAt?.toISOString?.() ?? new Date(api.createdAt as any).toISOString(),
-        updatedAt: (api as any).updatedAt?.toISOString?.(),
-        deletedAt: undefined,
-        createdBy: (api as any).createdBy?.toString?.() || '',
-        updatedBy: (api as any).updatedBy?.toString?.(),
-        deletedBy: undefined
-      }
-    };
+    const response: AdminOpenApiDetailRes = { authKey: toAdminOpenApiKeyItem(api as any) };
 
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_DETAIL_VIEW', { adminId, keyId });
   } catch (error) {

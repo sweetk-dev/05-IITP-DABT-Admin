@@ -23,6 +23,7 @@ import type {
   AdminFaqCreateRes,
   AdminFaqUpdateReq
 } from '@iitp-dabt/common';
+import { toAdminFaqItem } from '../../mappers/faqMapper';
 
 /**
  * FAQ 목록 조회 (관리자용)
@@ -55,20 +56,8 @@ export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListQu
       useYn
     });
 
-    const mappedFaqs = result.faqs.map(faq => ({
-      faqId: faq.faqId,
-      faqType: faq.faqType,
-      question: faq.question,
-      answer: faq.answer,
-      hitCnt: faq.hitCnt,
-      sortOrder: faq.sortOrder,
-      useYn: faq.useYn,
-      createdAt: faq.createdAt.toISOString(),
-      updatedAt: faq.updatedAt?.toISOString()
-    }));
-
     const response: AdminFaqListRes = {
-      items: mappedFaqs,
+      items: result.faqs.map(toAdminFaqItem as any),
       total: result.total,
       page: result.page,
       limit: result.limit,
@@ -116,19 +105,7 @@ export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailParams>, r
       return sendError(res, ErrorCode.FAQ_NOT_FOUND);
     }
 
-    const response: AdminFaqDetailRes = {
-      faq: {
-        faqId: faq.faqId,
-        faqType: faq.faqType,
-        question: faq.question,
-        answer: faq.answer,
-        hitCnt: faq.hitCnt,
-        sortOrder: faq.sortOrder,
-        useYn: faq.useYn,
-        createdAt: faq.createdAt.toISOString(),
-        updatedAt: faq.updatedAt?.toISOString()
-      }
-    };
+    const response: AdminFaqDetailRes = { faq: toAdminFaqItem(faq as any) };
 
     sendSuccess(res, response, undefined, 'ADMIN_FAQ_DETAIL_VIEW', { adminId, faqId });
   } catch (error) {

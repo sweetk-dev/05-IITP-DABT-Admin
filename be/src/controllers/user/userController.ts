@@ -143,7 +143,7 @@ export const register = async (req: Request<{}, {}, UserRegisterReq>, res: Respo
         return sendError(res, ErrorCode.EMAIL_INVALID_FORMAT);
       }
       if (errorMsg.includes('이미 사용 중인 이메일')) {
-        return sendError(res, ErrorCode.USER_EMAIL_DUPLICATE);
+        return sendError(res, ErrorCode. ACCOUNT_EMAIL_DUPLICATE );
       }
       if (errorMsg.includes('비밀번호가 너무 약')) {
         return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);
@@ -292,7 +292,7 @@ export const changePassword = async (req: Request<{}, {}, UserPasswordChangeReq>
         return sendError(res, ErrorCode.USER_NOT_FOUND);
       }
       if (errorMsg.includes('현재 비밀번호가 올바르지 않습니다')) {
-        return sendError(res, ErrorCode.USER_PASSWORD_INVALID);
+        return sendError(res, ErrorCode.ACCOUNT_PASSWORD_INVALID);
       }
       if (errorMsg.includes('새 비밀번호가 너무 약')) {
         return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);

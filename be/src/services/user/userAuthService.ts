@@ -60,7 +60,7 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
         ipAddr,
         userAgent
       });
-      throw new Error('USER_PASSWORD_INVALID');
+      throw new Error('ACCOUNT_PASSWORD_INVALID');
     }
 
     // 계정 상태 확인
@@ -75,7 +75,7 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
         ipAddr,
         userAgent
       });
-      throw new Error('USER_INACTIVE');
+      throw new Error('ACCOUNT_INACTIVE');
     }
 
     // JWT 토큰 생성
@@ -122,10 +122,10 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
       switch (error.message) {
         case 'USER_NOT_FOUND':
           throw new Error(ErrorCode.USER_NOT_FOUND.toString());
-        case 'USER_PASSWORD_INVALID':
-          throw new Error(ErrorCode.USER_PASSWORD_INVALID.toString());
-        case 'USER_INACTIVE':
-          throw new Error(ErrorCode.USER_INACTIVE.toString());
+        case 'ACCOUNT_PASSWORD_INVALID':
+          throw new Error(ErrorCode.ACCOUNT_PASSWORD_INVALID.toString());
+        case 'ACCOUNT_INACTIVE':
+          throw new Error(ErrorCode.ACCOUNT_INACTIVE.toString());
         case 'JWT_SECRET_NOT_CONFIGURED':
           throw new Error(ErrorCode.UNKNOWN_ERROR.toString());
       }

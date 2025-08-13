@@ -74,7 +74,7 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
         ipAddr,
         userAgent
       });
-      throw new Error('ADMIN_INACTIVE');
+      throw new Error('ACCOUNT_INACTIVE');
     }
 
     // Access Token과 Refresh Token 생성
@@ -116,9 +116,9 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
         case 'ADMIN_NOT_FOUND':
           throw new Error(ErrorCode.ADMIN_NOT_FOUND.toString());
         case 'ADMIN_PASSWORD_INVALID':
-          throw new Error(ErrorCode.ADMIN_PASSWORD_INVALID.toString());
-        case 'ADMIN_INACTIVE':
-          throw new Error(ErrorCode.ADMIN_INACTIVE.toString());
+          throw new Error(ErrorCode.ACCOUNT_PASSWORD_INVALID.toString());
+        case 'ACCOUNT_INACTIVE':
+          throw new Error(ErrorCode.ACCOUNT_INACTIVE.toString());
         case 'JWT_SECRET_NOT_CONFIGURED':
           throw new Error(ErrorCode.UNKNOWN_ERROR.toString());
       }

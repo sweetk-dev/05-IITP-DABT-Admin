@@ -17,6 +17,7 @@ import {
   getUserFaqDetail,
   getUserFaqHome 
 } from '../../services/user/userFaqService';
+import { toUserFaqItem } from '../../mappers/faqMapper';
 
 /**
  * 사용자 FAQ 목록 조회
@@ -28,10 +29,14 @@ export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListQuer
     logApiCall('GET', API_URLS.USER.FAQ.LIST, USER_API_MAPPING as any, '사용자 FAQ 목록 조회');
 
     const params = req.query as any;
-
-    const response = await getUserFaqList(params);
-    
-    const result: UserFaqListRes = response;
+    const domain = await getUserFaqList(params);
+    const result: UserFaqListRes = {
+      items: domain.faqs.map(toUserFaqItem as any),
+      total: domain.total,
+      page: domain.page,
+      limit: domain.limit,
+      totalPages: Math.ceil(domain.total / domain.limit)
+    };
 
     sendSuccess(res, result, undefined, 'USER_FAQ_LIST_VIEW', undefined, true); // isListResponse: true
   } catch (error) {
@@ -61,11 +66,8 @@ export const getFaqDetailForUser = async (req: Request<UserFaqDetailParams>, res
     const { faqId } = req.params;
     const keyId = parseInt(faqId);
 
-    const response = await getUserFaqDetail(keyId);
-    
-    const result: UserFaqDetailRes = {
-      faq: response.faq
-    };
+    const domain = await getUserFaqDetail(keyId);
+    const result: UserFaqDetailRes = { faq: toUserFaqItem({ ...(domain as any), hitCnt: (domain as any).hitCnt + 1 } as any) } as any;
 
     sendSuccess(res, result, undefined, 'USER_FAQ_DETAIL_VIEW', { faqId });
   } catch (error) {

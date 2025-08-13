@@ -22,6 +22,7 @@ import type {
   AdminQnaAnswerReq,
   AdminQnaUpdateReq
 } from '@iitp-dabt/common';
+import { toAdminQnaItem, toAdminQnaDetailItem } from '../../mappers/qnaMapper';
 
 /**
  * QnA 목록 조회 (관리자용)
@@ -51,26 +52,14 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListQu
     });
 
     const response: AdminQnaListRes = {
-      items: result.qnas.map(qna => ({
-        qnaId: qna.qnaId,
-        userId: qna.userId,
-        qnaType: qna.qnaType,
-        title: qna.title,
-        content: qna.content,
-        secretYn: qna.secretYn,
-        status: qna.status,
-        writerName: qna.writerName || '',
-        createdAt: qna.createdAt.toISOString(),
-        answeredAt: qna.answeredAt?.toISOString(),
-        answeredBy: qna.answeredBy
-      })),
+      items: result.qnas.map(toAdminQnaItem),
       total: result.total,
       page: result.page,
       limit: result.limit,
       totalPages: Math.ceil(result.total / result.limit)
     };
 
-    sendSuccess(res, response, undefined, 'ADMIN_QNA_LIST_VIEW', { adminId, count: result.qnas.length }, true);
+    sendSuccess(res, response, undefined, 'ADMIN_QNA_LIST_VIEW', { adminId, count: response.items.length }, true);
   } catch (error) {
     appLogger.error('관리자 QnA 목록 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {
@@ -107,27 +96,7 @@ export const getQnaDetailForAdmin = async (req: Request<AdminQnaDetailParams>, r
     }
     
     const qna = await getQnaDetail(parseInt(qnaId));
-    if (!qna) {
-      return sendError(res, ErrorCode.QNA_NOT_FOUND);
-    }
-
-    const response: AdminQnaDetailRes = {
-      qna: {
-        qnaId: qna.qnaId,
-        userId: qna.userId,
-        qnaType: qna.qnaType,
-        title: qna.title,
-        content: qna.content,
-        secretYn: qna.secretYn,
-        status: qna.status,
-        writerName: qna.writerName || '',
-        createdAt: qna.createdAt.toISOString(),
-        answeredAt: qna.answeredAt?.toISOString(),
-        answeredBy: qna.answeredBy,
-        answer: qna.answer
-      }
-    };
-
+    const response: AdminQnaDetailRes = { qna: toAdminQnaDetailItem(qna as any) };
     sendSuccess(res, response, undefined, 'ADMIN_QNA_DETAIL_VIEW', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 상세 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });

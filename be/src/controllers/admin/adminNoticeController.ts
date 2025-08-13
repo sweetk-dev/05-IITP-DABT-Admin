@@ -4,6 +4,7 @@ import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '
 import { logApiCall } from '../../utils/apiLogger';
 import { extractUserIdFromRequest, normalizeErrorMessage } from '../../utils/commonUtils';
 import { getNoticeListAdmin, getNoticeDetailAdmin, createNoticeAdmin, updateNoticeAdmin, deleteNoticeAdmin } from '../../services/admin/adminNoticeService';
+import { toAdminNoticeItem } from '../../mappers/noticeMapper';
 
 export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNoticeListQuery>, res: Response) => {
   try {
@@ -29,21 +30,7 @@ export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNotice
     });
 
     const response: AdminNoticeListRes = {
-      items: repoResult.notices.map((n: any) => ({
-        noticeId: n.noticeId,
-        title: n.title,
-        content: n.content,
-        noticeType: n.noticeType,
-        pinnedYn: n.pinnedYn,
-        publicYn: n.publicYn,
-        postedAt: (n.postedAt instanceof Date ? n.postedAt : new Date(n.postedAt)).toISOString(),
-        startDt: n.startDt ? new Date(n.startDt).toISOString() : undefined,
-        endDt: n.endDt ? new Date(n.endDt).toISOString() : undefined,
-        createdBy: n.createdBy,
-        updatedBy: n.updatedBy,
-        createdAt: (n.createdAt instanceof Date ? n.createdAt : new Date(n.createdAt)).toISOString(),
-        updatedAt: n.updatedAt ? (n.updatedAt instanceof Date ? n.updatedAt : new Date(n.updatedAt)).toISOString() : undefined,
-      })),
+      items: repoResult.notices.map(toAdminNoticeItem as any),
       total: repoResult.total,
       page: repoResult.page,
       limit: repoResult.limit,
@@ -73,23 +60,7 @@ export const getNoticeDetailForAdmin = async (req: Request<AdminNoticeDetailPara
     const n = await getNoticeDetailAdmin(parseInt(noticeId));
     if (!n) return sendError(res, ErrorCode.NOTICE_NOT_FOUND);
 
-    const response: AdminNoticeDetailRes = {
-      notice: {
-        noticeId: n.noticeId,
-        title: n.title,
-        content: n.content,
-        noticeType: n.noticeType as any,
-        pinnedYn: n.pinnedYn as any,
-        publicYn: (n as any).publicYn,
-        postedAt: (n.postedAt instanceof Date ? n.postedAt : new Date(n.postedAt)).toISOString(),
-        startDt: n.startDt ? new Date(n.startDt).toISOString() : undefined,
-        endDt: n.endDt ? new Date(n.endDt).toISOString() : undefined,
-        createdBy: (n as any).createdBy,
-        updatedBy: (n as any).updatedBy,
-        createdAt: (n.createdAt instanceof Date ? n.createdAt : new Date(n.createdAt)).toISOString(),
-        updatedAt: n.updatedAt ? (n.updatedAt instanceof Date ? n.updatedAt : new Date(n.updatedAt)).toISOString() : undefined,
-      }
-    };
+    const response: AdminNoticeDetailRes = { notice: toAdminNoticeItem(n as any) };
 
     sendSuccess(res, response, undefined, 'ADMIN_NOTICE_DETAIL_VIEW', { adminId, noticeId });
   } catch (error) {

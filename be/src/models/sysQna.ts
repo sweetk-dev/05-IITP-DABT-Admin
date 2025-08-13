@@ -8,6 +8,7 @@ export interface SysQnaAttributes {
   title: string;
   content: string;
   secretYn: string;
+  delYn?: 'Y' | 'N';
   writerName?: string;
   answerContent?: string;
   answeredBy?: string;
@@ -29,6 +30,7 @@ export class SysQna extends Model<SysQnaAttributes, SysQnaCreationAttributes> im
   public title!: string;
   public content!: string;
   public secretYn!: string;
+  public delYn?: 'Y' | 'N';
   public writerName?: string;
   public answerContent?: string;
   public answeredBy?: string;
@@ -79,6 +81,13 @@ export function initSysQna(sequelize: Sequelize) {
         defaultValue: 'N',
         field: 'secret_yn',
         comment: '비공개 여부 (Y: 비공개, N: 공개)',
+      },
+      delYn: {
+        type: DataTypes.CHAR(1),
+        allowNull: false,
+        defaultValue: 'N',
+        field: 'del_yn',
+        comment: '삭제여부 (Y: 삭제)',
       },
       writerName: {
         type: DataTypes.STRING(90),

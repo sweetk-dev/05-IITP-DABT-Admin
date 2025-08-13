@@ -1,6 +1,5 @@
 import { 
   UserQnaListQuery, 
-  UserQnaListRes, 
   UserQnaDetailRes,
   UserQnaCreateReq,
   UserQnaCreateRes,
@@ -17,7 +16,10 @@ import { QnaSource } from '../../mappers/qnaMapper';
 /**
  * 사용자 Q&A 목록 조회 (비즈니스 로직)
  */
-export const getUserQnaList = async (userId: number, params: UserQnaListQuery): Promise<UserQnaListRes> => {
+export const getUserQnaList = async (
+  userId: number,
+  params: UserQnaListQuery
+): Promise<{ qnas: QnaSource[]; total: number; page: number; limit: number; totalPages: number }> => {
   try {
     const { page = 1, limit = 10 } = params;
     const offset = (page - 1) * limit;
@@ -32,12 +34,12 @@ export const getUserQnaList = async (userId: number, params: UserQnaListQuery): 
     appLogger.info('사용자 Q&A 목록 조회 서비스 호출', { userId, params });
     
     return {
-      qnas: result.qnas,
+      qnas: result.qnas as any,
       total: result.total,
       page: result.page,
       limit: result.limit,
       totalPages: Math.ceil(result.total / result.limit)
-    } as any;
+    };
   } catch (error) {
     appLogger.error('사용자 Q&A 목록 조회 서비스 오류', { error, userId });
     throw error;

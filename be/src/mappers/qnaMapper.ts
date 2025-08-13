@@ -1,5 +1,5 @@
 import type { AdminQnaItem, AdminQnaDetailItem, UserQnaItem } from '@iitp-dabt/common';
-import type { SysQna } from '../models/sysQna';
+import type { SysQnaAttributes } from '../models/sysQna';
 
 function toIsoString(value?: Date | string | number): string | undefined {
   if (!value) return undefined;
@@ -7,45 +7,65 @@ function toIsoString(value?: Date | string | number): string | undefined {
   return d.toISOString();
 }
 
-export function toAdminQnaItem(qna: SysQna): AdminQnaItem {
+export type QnaSource = Pick<
+  SysQnaAttributes,
+  | 'qnaId'
+  | 'userId'
+  | 'qnaType'
+  | 'title'
+  | 'content'
+  | 'secretYn'
+  | 'writerName'
+  | 'answeredBy'
+  | 'answeredAt'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'deletedAt'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'deletedBy'
+> & {
+  status?: string;
+  answerContent?: string;
+};
+
+export function toAdminQnaItem(qna: QnaSource): AdminQnaItem {
   return {
-    qnaId: (qna as any).qnaId,
-    userId: (qna as any).userId,
-    qnaType: (qna as any).qnaType,
-    title: (qna as any).title,
-    content: (qna as any).content,
-    secretYn: (qna as any).secretYn,
-    status: (qna as any).status,
-    writerName: (qna as any).writerName || '',
-    createdAt: toIsoString((qna as any).createdAt)!,
-    answeredAt: toIsoString((qna as any).answeredAt),
-    answeredBy: (qna as any).answeredBy ? Number((qna as any).answeredBy) : undefined,
-    updatedAt: toIsoString((qna as any).updatedAt),
-    deletedAt: toIsoString((qna as any).deletedAt),
-    createdBy: (qna as any).createdBy,
-    updatedBy: (qna as any).updatedBy,
-    deletedBy: (qna as any).deletedBy
+    qnaId: qna.qnaId!,
+    userId: qna.userId,
+    qnaType: qna.qnaType,
+    title: qna.title,
+    content: qna.content,
+    secretYn: qna.secretYn,
+    writerName: qna.writerName || '',
+    createdAt: toIsoString(qna.createdAt)!,
+    answeredAt: toIsoString(qna.answeredAt),
+    answeredBy: qna.answeredBy ? Number(qna.answeredBy) : undefined,
+    updatedAt: toIsoString(qna.updatedAt),
+    deletedAt: toIsoString(qna.deletedAt),
+    createdBy: qna.createdBy,
+    updatedBy: qna.updatedBy,
+    deletedBy: qna.deletedBy
   };
 }
 
-export function toAdminQnaDetailItem(qna: SysQna): AdminQnaDetailItem {
+export function toAdminQnaDetailItem(qna: QnaSource): AdminQnaDetailItem {
   return {
     ...toAdminQnaItem(qna),
-    answerContent: (qna as any).answerContent
+    answerContent: qna.answerContent
   };
 }
 
-export function toUserQnaItem(qna: SysQna): UserQnaItem {
+export function toUserQnaItem(qna: QnaSource): UserQnaItem {
   return {
-    qnaId: (qna as any).qnaId,
-    qnaType: (qna as any).qnaType,
-    title: (qna as any).title,
-    content: (qna as any).content,
-    secretYn: (qna as any).secretYn,
-    status: (qna as any).status,
-    writerName: (qna as any).writerName,
-    createdAt: toIsoString((qna as any).createdAt)!,
-    answeredAt: toIsoString((qna as any).answeredAt)
+    qnaId: qna.qnaId!,
+    qnaType: qna.qnaType,
+    title: qna.title,
+    content: qna.content,
+    secretYn: qna.secretYn,
+    writerName: qna.writerName!,
+    createdAt: toIsoString(qna.createdAt)!,
+    answeredAt: toIsoString(qna.answeredAt)
   };
 }
 

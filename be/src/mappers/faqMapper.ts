@@ -1,5 +1,5 @@
 import type { AdminFaqItem, UserFaqItem } from '@iitp-dabt/common';
-import type { SysFaq } from '../models/sysFaq';
+import type { SysFaqAttributes } from '../models/sysFaq';
 
 function toIsoString(value?: Date | string | number): string | undefined {
   if (!value) return undefined;
@@ -7,30 +7,35 @@ function toIsoString(value?: Date | string | number): string | undefined {
   return d.toISOString();
 }
 
-export function toAdminFaqItem(faq: SysFaq): AdminFaqItem {
+export type FaqSource = Pick<
+  SysFaqAttributes,
+  'faqId' | 'faqType' | 'question' | 'answer' | 'hitCnt' | 'sortOrder' | 'useYn' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
+>;
+
+export function toAdminFaqItem(faq: FaqSource): AdminFaqItem {
   return {
-    faqId: (faq as any).faqId,
-    faqType: (faq as any).faqType,
-    question: (faq as any).question,
-    answer: (faq as any).answer,
-    hitCnt: (faq as any).hitCnt,
-    sortOrder: (faq as any).sortOrder,
-    useYn: (faq as any).useYn,
-    createdAt: toIsoString((faq as any).createdAt)!,
-    updatedAt: toIsoString((faq as any).updatedAt),
-    createdBy: (faq as any).createdBy,
-    updatedBy: (faq as any).updatedBy
+    faqId: faq.faqId!,
+    faqType: faq.faqType,
+    question: faq.question,
+    answer: faq.answer,
+    hitCnt: faq.hitCnt,
+    sortOrder: faq.sortOrder,
+    useYn: faq.useYn,
+    createdAt: toIsoString(faq.createdAt)!,
+    updatedAt: toIsoString(faq.updatedAt),
+    createdBy: faq.createdBy,
+    updatedBy: faq.updatedBy
   };
 }
 
-export function toUserFaqItem(faq: SysFaq): UserFaqItem {
+export function toUserFaqItem(faq: FaqSource): UserFaqItem {
   return {
-    faqId: (faq as any).faqId,
-    faqType: (faq as any).faqType,
-    question: (faq as any).question,
-    answer: (faq as any).answer,
-    hitCnt: (faq as any).hitCnt,
-    sortOrder: (faq as any).sortOrder
+    faqId: faq.faqId!,
+    faqType: faq.faqType,
+    question: faq.question,
+    answer: faq.answer,
+    hitCnt: faq.hitCnt,
+    sortOrder: faq.sortOrder
   };
 }
 

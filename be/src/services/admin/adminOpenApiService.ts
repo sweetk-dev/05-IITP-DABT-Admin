@@ -169,17 +169,17 @@ export const extendOpenApiKey = async (keyId: number, extensionDays: number, adm
     newEndDate.setDate(newEndDate.getDate() + extensionDays);
 
     // 키 업데이트
-    const updatedKey = await updateOpenApiAuthKeyRepo(keyId, {
+    const updatedOk = await updateOpenApiAuthKeyRepo(keyId, {
       endDt: newEndDate,
-      updatedBy: adminId
+      updatedBy: adminId.toString()
     });
 
-    if (!updatedKey) {
+    if (!updatedOk) {
       throw new Error('OPEN_API_UPDATE_FAILED');
     }
 
     appLogger.info('OpenAPI 키 기간 연장 성공', { keyId, extensionDays, adminId, newEndDate });
-    return updatedKey;
+    return { endDt: newEndDate };
   } catch (error) {
     appLogger.error('OpenAPI 키 기간 연장 중 오류 발생', { error, keyId, extensionDays, adminId });
     throw error;

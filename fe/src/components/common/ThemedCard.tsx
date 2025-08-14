@@ -1,26 +1,28 @@
 import { Paper } from '@mui/material';
 import type { PaperProps } from '@mui/material';
-import { themeStyles } from '../../theme';
-import type { ThemeType } from '../../theme';
+import { useTheme } from '@mui/material/styles';
 
 interface ThemedCardProps extends PaperProps {
-  theme: ThemeType;
   children: React.ReactNode;
 }
 
 export default function ThemedCard({ 
-  theme, 
   children, 
   sx, 
   ...props 
 }: ThemedCardProps) {
+  const muiTheme = useTheme();
+  const { theme: _ignoredTheme, ...restProps } = (props as any) || {};
   return (
     <Paper
       sx={{
-        ...themeStyles.card(theme),
+        backgroundColor: muiTheme.palette.background.paper,
+        border: `1px solid ${muiTheme.palette.divider}`,
+        boxShadow: muiTheme.shadows[1],
+        borderRadius: 3,
         ...sx
       }}
-      {...props}
+      {...restProps}
     >
       {children}
     </Paper>

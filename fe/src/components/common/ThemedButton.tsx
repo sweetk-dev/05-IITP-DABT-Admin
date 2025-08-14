@@ -1,59 +1,48 @@
 import { Button } from '@mui/material';
 import type { ButtonProps } from '@mui/material';
-import { themeStyles, getThemeColors } from '../../theme';
-import type { ThemeType } from '../../theme';
+import { useTheme } from '@mui/material/styles';
 
 interface ThemedButtonProps extends Omit<ButtonProps, 'variant'> {
-  theme: ThemeType;
   variant?: 'primary' | 'outlined' | 'secondary' | 'text' | 'softText';
   children: React.ReactNode;
 }
 
 export default function ThemedButton({ 
-  theme, 
   variant = 'primary', 
   children, 
   sx, 
   ...props 
 }: ThemedButtonProps) {
-  const colors = getThemeColors(theme);
+  const muiTheme = useTheme();
+  const palette = muiTheme.palette;
+  // Strip any accidentally passed `theme` prop to avoid overriding MUI theme context
+  const { theme: _ignoredTheme, ...restProps } = (props as any) || {};
   
   const getButtonStyle = () => {
     switch (variant) {
       case 'primary':
         return {
-          ...themeStyles.primaryButton(theme),
-          color: theme === 'user' ? colors.text : '#f8f9fa' // User 테마는 #0461a0, Admin은 흰색
+          bgcolor: palette.primary.main,
+          color: muiTheme.palette.getContrastText(palette.primary.main),
+          fontWeight: 'bold'
         };
       case 'outlined':
         return {
-          ...themeStyles.outlinedButton(theme),
-          color: colors.text // 모든 테마에서 colors.text 사용
+          borderColor: palette.primary.main,
+          color: palette.primary.main,
+          fontWeight: 'bold'
         };
       case 'secondary':
         return {
-          bgcolor: themeStyles.outlinedButton(theme).borderColor,
-          color: 'white',
-          '&:hover': {
-            bgcolor: themeStyles.outlinedButton(theme).borderColor,
-            opacity: 0.9
-          }
+          bgcolor: palette.secondary.main,
+          color: muiTheme.palette.getContrastText(palette.secondary.main)
         };
       case 'text':
-        return {
-          ...themeStyles.textButton(theme),
-          color: colors.text // 모든 테마에서 colors.text 사용
-        };
+        return { color: palette.primary.main, fontWeight: 'bold' };
       case 'softText':
-        return {
-          ...themeStyles.softTextButton(theme),
-          color: colors.text // 모든 테마에서 colors.text 사용
-        };
+        return { color: palette.primary.main, opacity: 0.9 };
       default:
-        return {
-          ...themeStyles.primaryButton(theme),
-          color: theme === 'user' ? colors.text : '#f8f9fa' // User 테마는 #0461a0, Admin은 흰색
-        };
+        return { bgcolor: palette.primary.main, color: muiTheme.palette.getContrastText(palette.primary.main) };
     }
   };
 
@@ -64,7 +53,7 @@ export default function ThemedButton({
         ...getButtonStyle(),
         ...sx
       }}
-      {...props}
+      {...restProps}
     >
       {children}
     </Button>

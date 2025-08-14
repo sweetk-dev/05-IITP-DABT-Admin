@@ -1,100 +1,16 @@
 :root {
-  --appbar-height: 64px;
-  --footer-height: 56px;
-  --admin-menu-height: 56px;
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --appbar-height: 74px;
+  --footer-height-px: 0px;
+  --admin-menu-height-px: 0px;
+  /* Global content width and height policies */
+  --content-max-width: 1600px;
+  --footer-height-cap: 120px; /* cap for effective footer space in content height calc */
+  --content-max-height: calc(100dvh - var(--appbar-height) - var(--footer-height-px));
+  --main-height-offset: 0px; /* extra vertical room beyond viewport if needed */
+  /* Backward-compat fallback */
+  --content-extra-height: 240px;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-/* 스크롤 시 상단바 고정 및 컨텐츠 영역 보호 */
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--appbar-height) + 32px);
-  overflow-x: hidden;
-}
-
-body {
-  margin: 0;
-  /* Material UI 레이아웃을 위해 flex와 place-items 제거 */
-  /* display: flex; */
-  /* place-items: center; */
-  min-width: 320px;
-  min-height: 100vh;
-  /* 스크롤바가 생겼을 때 레이아웃 시프트 방지 */
-  overflow-x: hidden;
-  /* 상단바 보호 */
-  padding-top: 0;
-  margin-top: 0;
-}
-
-/* 고정된 상단바가 컨텐츠를 가리지 않도록 보장 */
-#root {
-  padding-top: 0;
-  margin-top: 0;
-}
-
-/* 상단바 고정 보장 */
-.MuiAppBar-root {
-  position: fixed !important;
-  z-index: 9999 !important;
-}
-
-/* 컨텐츠 영역이 상단바를 침범하지 않도록 보장 */
-main, .MuiBox-root {
-  position: relative !important;
-  z-index: 1 !important;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+#root { min-height: 100vh; }

@@ -1,4 +1,6 @@
 import { AppBar as MuiAppBar, Toolbar, Box, Typography } from '@mui/material';
+import { useEffect, useRef } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Logo, HomeIconButton, DashboardIconButton } from './AppBarCommon';
 import { logoutUser, logoutAdmin } from '../api';
@@ -6,7 +8,6 @@ import { getUserName, getUserType, getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
 import { AccountCircle } from '@mui/icons-material';
 import ThemedButton from './common/ThemedButton';
-import { getThemeColors } from '../theme';
 import AdminMenuBar from './AdminMenuBar';
 
 const SERVICE_NAME = 'IITP DABT';
@@ -40,15 +41,23 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
 
   // 테마 결정
   const themeType = type === 'admin' || type === 'admin-login' ? 'admin' : 'user';
-  const colors = getThemeColors(themeType);
+  const muiTheme = useTheme();
+  const colors = {
+    text: muiTheme.palette.text.primary,
+    textSecondary: muiTheme.palette.text.secondary,
+  } as const;
 
   // 공통 AppBar 스타일 정의
   const commonAppBarStyles = {
-    background: themeType === 'admin' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 247, 237, 0.95)', // 테마별 배경색
+    background: 'rgba(255, 255, 255, 0.92)',
     backdropFilter: 'blur(10px)', // 블러 효과
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)', // 그림자 효과
-    zIndex: 9999,
-    minHeight: 'var(--appbar-height)',
+    zIndex: 1200,
+    position: 'sticky',
+    top: 0,
+    minHeight: 'var(--appbar-height, 74px)',
+    // expose px height for layout calc
+    '--header-height-px': '64px',
     // 상단바 아래 그라데이션 라인 추가
     '&::after': {
       content: '""',
@@ -65,10 +74,28 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
     }
   };
 
+  // 헤더 실제 높이를 관찰하여 CSS 변수로 노출
+  const appBarRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const root = document.documentElement;
+    const updateHeaderHeight = () => {
+      const height = appBarRef.current?.offsetHeight || 64;
+      root.style.setProperty('--header-height-px', `${height}px`);
+    };
+    updateHeaderHeight();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateHeaderHeight) : null;
+    if (ro && appBarRef.current) ro.observe(appBarRef.current);
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => {
+      window.removeEventListener('resize', updateHeaderHeight);
+      if (ro && appBarRef.current) ro.unobserve(appBarRef.current);
+    };
+  }, [type]);
+
   // 공통 툴바 스타일 정의
   const commonToolbarStyles = {
-    minHeight: 'var(--appbar-height) !important',
-    px: { xs: '10%', md: '10%' },
+    minHeight: 'var(--appbar-height, 74px) !important',
+    px: { xs: 2, sm: 3, md: 4 },
     justifyContent: 'space-between'
   };
 
@@ -102,10 +129,11 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
     return (
       <MuiAppBar
         id="appbar-auth"
-        position="fixed"
+        position="sticky"
         color="default"
         elevation={0}
         sx={commonAppBarStyles}
+        ref={appBarRef}
       >
         <Toolbar id="appbar-auth-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
@@ -121,10 +149,11 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
     return (
       <MuiAppBar
         id="appbar-admin-login"
-        position="fixed"
+        position="sticky"
         color="default"
         elevation={0}
         sx={commonAppBarStyles}
+        ref={appBarRef}
       >
         <Toolbar id="appbar-admin-login-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
@@ -140,10 +169,11 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       <>
         <MuiAppBar
           id="appbar-admin"
-          position="fixed"
+          position="sticky"
           color="default"
           elevation={0}
           sx={commonAppBarStyles}
+          ref={appBarRef}
         >
           <Toolbar id="appbar-admin-toolbar" sx={commonToolbarStyles}>
             <AppBarRow
@@ -165,8 +195,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                     variant="text"
                     startIcon={<AccountCircle />} 
                     sx={{ 
-                      ml: 2,
-                      color: colors.text
+                      ml: 2
                     }}
                     onClick={handleProfileClick}
                   >
@@ -184,8 +213,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                     theme={themeType}
                     variant="text"
                     sx={{ 
-                      ml: 2,
-                      color: colors.text
+                      ml: 2
                     }} 
                     onClick={handleAdminLogout}
                   >
@@ -205,10 +233,11 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
     return (
       <MuiAppBar
         id="appbar-public"
-        position="fixed"
+        position="sticky"
         color="default"
         elevation={0}
         sx={commonAppBarStyles}
+        ref={appBarRef}
       >
         <Toolbar id="appbar-public-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
@@ -224,8 +253,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                     fontSize: '1rem',
                     borderRadius: 2,
                     px: 2.5,
-                    py: 0.75,
-                    color: colors.text
+                    py: 0.75
                   }}
                   onClick={() => navigate('/login')}
                 >
@@ -240,8 +268,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                     fontSize: '1rem',
                     borderRadius: 2,
                     px: 2.5,
-                    py: 0.75,
-                    color: colors.text
+                    py: 0.75
                   }}
                   onClick={() => navigate('/register')}
                 >
@@ -260,10 +287,11 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
     <>
       <MuiAppBar
         id="appbar-user"
-        position="fixed"
+        position="sticky"
         color="default"
         elevation={0}
         sx={commonAppBarStyles}
+        ref={appBarRef}
       >
         <Toolbar id="appbar-user-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
@@ -278,8 +306,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                   variant="text"
                   startIcon={<AccountCircle />} 
                   sx={{ 
-                    ml: 2,
-                    color: colors.text
+                    ml: 2
                   }} 
                   onClick={handleProfileClick}
                 >
@@ -294,8 +321,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                   theme={themeType}
                   variant="text"
                   sx={{ 
-                    ml: 2,
-                    color: colors.text
+                    ml: 2
                   }} 
                   onClick={handleUserLogout}
                 >

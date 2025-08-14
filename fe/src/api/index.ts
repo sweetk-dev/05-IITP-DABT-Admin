@@ -25,7 +25,6 @@ export {
   getCommonCodesByTypeDetail,
   getCommonCodesByParent,
   getCommonCodesByParentDetail,
-  getCommonCodeStats,
   createCommonCode,
   updateCommonCode,
   deleteCommonCode
@@ -77,9 +76,7 @@ export {
   checkAdminEmail,
   updateAdminAccount,
   deleteAdminAccount,
-  changeAdminAccountPassword,
-  changeAdminAccountStatus,
-  getAdminAccountStats
+  changeAdminAccountPassword
 } from './account';
 
 // Common utilities

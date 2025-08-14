@@ -1,10 +1,17 @@
-import { apiFetch, publicApiFetch, enhanceApiResponse } from './api';
+import { apiFetch, publicApiFetch, buildUrl } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type {
-  UserNoticeListReq,
+  UserNoticeListQuery as UserNoticeListReq,
   UserNoticeListRes,
   UserNoticeDetailRes,
-  UserNoticeHomeRes
+  UserNoticeHomeRes,
+  AdminNoticeListQuery as AdminNoticeListReq,
+  AdminNoticeListRes,
+  AdminNoticeDetailRes,
+  AdminNoticeCreateReq,
+  AdminNoticeCreateRes,
+  AdminNoticeUpdateReq,
+  // Update/Delete 는 void
 } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 
@@ -12,11 +19,8 @@ import type { ApiResponse } from '../types/api';
  * 공지사항 목록 조회 (사용자용)
  */
 export async function getUserNoticeList(params: UserNoticeListReq): Promise<ApiResponse<UserNoticeListRes>> {
-  const response = await apiFetch<UserNoticeListRes>(FULL_API_URLS.USER.NOTICE.LIST, {
-    method: 'POST',
-    body: JSON.stringify(params)
-  });
-  return enhanceApiResponse(response);
+  const url = buildUrl(FULL_API_URLS.USER.NOTICE.LIST, params as any);
+  return apiFetch<UserNoticeListRes>(url, { method: 'GET' });
 }
 
 /**
@@ -24,14 +28,44 @@ export async function getUserNoticeList(params: UserNoticeListReq): Promise<ApiR
  */
 export async function getUserNoticeDetail(noticeId: number): Promise<ApiResponse<UserNoticeDetailRes>> {
   const url = FULL_API_URLS.USER.NOTICE.DETAIL.replace(':noticeId', noticeId.toString());
-  const response = await apiFetch<UserNoticeDetailRes>(url);
-  return enhanceApiResponse(response);
+  return apiFetch<UserNoticeDetailRes>(url, { method: 'GET' });
 }
 
 /**
  * 홈 화면용 공지사항 조회 (최신 5개)
  */
 export async function getHomeNoticeList(): Promise<ApiResponse<UserNoticeHomeRes>> {
-  const response = await publicApiFetch<UserNoticeHomeRes>(FULL_API_URLS.USER.NOTICE.HOME);
-  return enhanceApiResponse(response);
-} 
+  return publicApiFetch<UserNoticeHomeRes>(FULL_API_URLS.USER.NOTICE.HOME, { method: 'GET' });
+}
+
+// ===== 관리자용 공지 API =====
+
+export async function getAdminNoticeList(params: AdminNoticeListReq): Promise<ApiResponse<AdminNoticeListRes>> {
+  const url = buildUrl(FULL_API_URLS.ADMIN.NOTICE.LIST, params as any);
+  return apiFetch<AdminNoticeListRes>(url, { method: 'GET' });
+}
+
+export async function getAdminNoticeDetail(noticeId: number): Promise<ApiResponse<AdminNoticeDetailRes>> {
+  const url = FULL_API_URLS.ADMIN.NOTICE.DETAIL.replace(':noticeId', noticeId.toString());
+  return apiFetch<AdminNoticeDetailRes>(url, { method: 'GET' });
+}
+
+export async function createAdminNotice(data: AdminNoticeCreateReq): Promise<ApiResponse<AdminNoticeCreateRes>> {
+  return apiFetch<AdminNoticeCreateRes>(FULL_API_URLS.ADMIN.NOTICE.CREATE, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+}
+
+export async function updateAdminNotice(noticeId: number, data: AdminNoticeUpdateReq): Promise<ApiResponse<void>> {
+  const url = FULL_API_URLS.ADMIN.NOTICE.UPDATE.replace(':noticeId', noticeId.toString());
+  return apiFetch<void>(url, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  });
+}
+
+export async function deleteAdminNotice(noticeId: number): Promise<ApiResponse<void>> {
+  const url = FULL_API_URLS.ADMIN.NOTICE.DELETE.replace(':noticeId', noticeId.toString());
+  return apiFetch<void>(url, { method: 'DELETE' });
+}

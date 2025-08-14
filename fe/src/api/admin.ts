@@ -10,9 +10,9 @@ import type {
   AdminRefreshTokenRes,
   AdminProfileRes,
   AdminProfileUpdateReq,
-  AdminProfileUpdateRes,
+  // 프로필 업데이트는 void
   AdminPasswordChangeReq,
-  AdminPasswordChangeRes
+  // 비밀번호 변경은 void
 } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 import { enhanceApiResponse } from '../utils/apiResponseHandler';
@@ -66,30 +66,27 @@ export async function refreshAdminToken(params: AdminRefreshTokenReq): Promise<A
  * 관리자 프로필 조회
  */
 export async function getAdminProfile(): Promise<ApiResponse<AdminProfileRes>> {
-  const response = await apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE.DETAIL);
-  return enhanceApiResponse(response);
+  return apiFetch<AdminProfileRes>(FULL_API_URLS.ADMIN.PROFILE.DETAIL, { method: 'GET' });
 }
 
 /**
  * 관리자 프로필 업데이트
  */
-export async function updateAdminProfile(params: AdminProfileUpdateReq): Promise<ApiResponse<AdminProfileUpdateRes>> {
-  const response = await apiFetch<AdminProfileUpdateRes>(FULL_API_URLS.ADMIN.PROFILE.UPDATE, {
-    method: 'POST',
+export async function updateAdminProfile(params: AdminProfileUpdateReq): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.PROFILE.UPDATE, {
+    method: 'PUT',
     body: JSON.stringify(params),
   });
-  return enhanceApiResponse(response);
 }
 
 /**
  * 관리자 비밀번호 변경
  */
-export async function changeAdminPassword(params: AdminPasswordChangeReq): Promise<ApiResponse<AdminPasswordChangeRes>> {
-  const response = await apiFetch<AdminPasswordChangeRes>(FULL_API_URLS.ADMIN.PASSWORD.UPDATE, {
-    method: 'POST',
+export async function changeAdminPassword(params: AdminPasswordChangeReq): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.PASSWORD.UPDATE, {
+    method: 'PUT',
     body: JSON.stringify(params),
   });
-  return enhanceApiResponse(response);
 }
 
 // TODO: Admin FAQ, QnA, Account 관리 API 함수들 추가 예정

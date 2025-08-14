@@ -1,29 +1,24 @@
-import { apiFetch, publicApiFetch } from './api';
+import { apiFetch, buildUrl } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type { 
   UserOpenApiListReq,
   UserOpenApiListRes,
-  UserOpenApiDetailReq,
   UserOpenApiDetailRes,
   UserOpenApiCreateReq,
   UserOpenApiCreateRes,
-  UserOpenApiDeleteReq,
-  UserOpenApiDeleteRes,
+  // delete는 params만 사용, res는 void
   UserOpenApiExtendReq,
   UserOpenApiExtendRes,
-  AdminOpenApiListReq,
+  AdminOpenApiListQuery,
   AdminOpenApiListRes,
-  AdminOpenApiDetailReq,
   AdminOpenApiDetailRes,
   AdminOpenApiCreateReq,
   AdminOpenApiCreateRes,
   AdminOpenApiUpdateReq,
-  AdminOpenApiUpdateRes,
-  AdminOpenApiDeleteReq,
-  AdminOpenApiDeleteRes,
+  // UPDATE/DELETE 는 void
+  // delete는 params만 사용, res는 void
   AdminOpenApiExtendReq,
   AdminOpenApiExtendRes,
-  AdminOpenApiStatsReq,
   AdminOpenApiStatsRes,
   ApiResponse
 } from '@iitp-dabt/common';
@@ -62,9 +57,9 @@ export async function createUserOpenApi(params: UserOpenApiCreateReq): Promise<A
 /**
  * 사용자 OpenAPI 인증키 삭제
  */
-export async function deleteUserOpenApi(keyId: number): Promise<ApiResponse<UserOpenApiDeleteRes>> {
+export async function deleteUserOpenApi(keyId: number): Promise<ApiResponse<void>> {
   const url = FULL_API_URLS.USER.OPEN_API.DELETE.replace(':keyId', keyId.toString());
-  return apiFetch<UserOpenApiDeleteRes>(url, {
+  return apiFetch<void>(url, {
     method: 'DELETE',
   });
 }
@@ -73,10 +68,11 @@ export async function deleteUserOpenApi(keyId: number): Promise<ApiResponse<User
  * 사용자 OpenAPI 인증키 기간 연장
  */
 export async function extendUserOpenApi(params: UserOpenApiExtendReq): Promise<ApiResponse<UserOpenApiExtendRes>> {
-  const url = FULL_API_URLS.USER.OPEN_API.EXTEND.replace(':keyId', params.keyId.toString());
+  // params: { keyId: number; extensionDays: number } 형태로 받아서 매핑 분리
+  const url = FULL_API_URLS.USER.OPEN_API.EXTEND.replace(':keyId', (params as any).keyId.toString());
   return apiFetch<UserOpenApiExtendRes>(url, {
-    method: 'PUT',
-    body: JSON.stringify({ extensionDays: params.extensionDays }),
+    method: 'POST',
+    body: JSON.stringify({ extensionDays: (params as any).extensionDays }),
   });
 }
 
@@ -85,15 +81,14 @@ export async function extendUserOpenApi(params: UserOpenApiExtendReq): Promise<A
 /**
  * 관리자 OpenAPI 인증키 목록 조회
  */
-export async function getAdminOpenApiList(params: AdminOpenApiListReq): Promise<ApiResponse<AdminOpenApiListRes>> {
-  const searchParams = new URLSearchParams();
-  if (params.page) searchParams.append('page', params.page.toString());
-  if (params.limit) searchParams.append('limit', params.limit.toString());
-  if (params.userId) searchParams.append('userId', params.userId.toString());
-  if (params.activeYn) searchParams.append('activeYn', params.activeYn);
-  if (params.searchKeyword) searchParams.append('searchKeyword', params.searchKeyword);
-
-  const url = `${FULL_API_URLS.ADMIN.OPEN_API.LIST}?${searchParams.toString()}`;
+export async function getAdminOpenApiList(params: AdminOpenApiListQuery): Promise<ApiResponse<AdminOpenApiListRes>> {
+  const url = buildUrl(FULL_API_URLS.ADMIN.OPEN_API.LIST, {
+    page: params.page,
+    limit: params.limit,
+    userId: params.userId,
+    activeYn: params.activeYn,
+    searchKeyword: params.searchKeyword
+  });
   return apiFetch<AdminOpenApiListRes>(url, {
     method: 'GET',
   });
@@ -122,47 +117,42 @@ export async function createAdminOpenApi(params: AdminOpenApiCreateReq): Promise
 /**
  * 관리자 OpenAPI 인증키 수정
  */
-export async function updateAdminOpenApi(params: AdminOpenApiUpdateReq): Promise<ApiResponse<AdminOpenApiUpdateRes>> {
-  const url = FULL_API_URLS.ADMIN.OPEN_API.UPDATE.replace(':keyId', params.keyId.toString());
-  return apiFetch<AdminOpenApiUpdateRes>(url, {
+export async function updateAdminOpenApi(keyId: number, body: AdminOpenApiUpdateReq): Promise<ApiResponse<void>> {
+  const url = FULL_API_URLS.ADMIN.OPEN_API.UPDATE.replace(':keyId', keyId.toString());
+  return apiFetch<void>(url, {
     method: 'PUT',
-    body: JSON.stringify(params),
+    body: JSON.stringify(body),
   });
 }
 
 /**
  * 관리자 OpenAPI 인증키 삭제
  */
-export async function deleteAdminOpenApi(params: AdminOpenApiDeleteReq): Promise<ApiResponse<AdminOpenApiDeleteRes>> {
-  const url = FULL_API_URLS.ADMIN.OPEN_API.DELETE.replace(':keyId', params.keyId.toString());
-  return apiFetch<AdminOpenApiDeleteRes>(url, {
-    method: 'DELETE',
-    body: JSON.stringify({ deletedBy: params.deletedBy }),
+export async function deleteAdminOpenApi(keyId: number): Promise<ApiResponse<void>> {
+  const url = FULL_API_URLS.ADMIN.OPEN_API.DELETE.replace(':keyId', keyId.toString());
+  return apiFetch<void>(url, {
+    method: 'DELETE'
   });
 }
 
 /**
  * 관리자 OpenAPI 인증키 기간 연장
  */
-export async function extendAdminOpenApi(params: AdminOpenApiExtendReq): Promise<ApiResponse<AdminOpenApiExtendRes>> {
-  const url = FULL_API_URLS.ADMIN.OPEN_API.EXTEND.replace(':keyId', params.keyId.toString());
+export async function extendAdminOpenApi(keyId: number, body: AdminOpenApiExtendReq): Promise<ApiResponse<AdminOpenApiExtendRes>> {
+  const url = FULL_API_URLS.ADMIN.OPEN_API.EXTEND.replace(':keyId', keyId.toString());
   return apiFetch<AdminOpenApiExtendRes>(url, {
-    method: 'PUT',
-    body: JSON.stringify({ 
-      extensionDays: params.extensionDays,
-      updatedBy: params.updatedBy 
-    }),
+    method: 'POST',
+    body: JSON.stringify({ extensionDays: body.extensionDays })
   });
 }
 
 /**
  * 관리자 OpenAPI 인증키 통계 조회
  */
-export async function getAdminOpenApiStats(params: AdminOpenApiStatsReq): Promise<ApiResponse<AdminOpenApiStatsRes>> {
+export async function getAdminOpenApiStats(userId?: number): Promise<ApiResponse<AdminOpenApiStatsRes>> {
   const searchParams = new URLSearchParams();
-  if (params.userId) searchParams.append('userId', params.userId.toString());
-
-  const url = `${FULL_API_URLS.ADMIN.OPEN_API.STATS}?${searchParams.toString()}`;
+  if (userId) searchParams.append('userId', userId.toString());
+  const url = `${FULL_API_URLS.ADMIN.OPEN_API.STATUS}?${searchParams.toString()}`;
   return apiFetch<AdminOpenApiStatsRes>(url, {
     method: 'GET',
   });

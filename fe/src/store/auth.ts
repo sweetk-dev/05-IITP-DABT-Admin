@@ -100,8 +100,8 @@ export function isAuthenticated(): boolean {
   const accessToken = getAccessToken();
   const refreshToken = getRefreshToken();
   
-  const result = (accessToken && !isTokenExpired(accessToken)) || 
-                 (refreshToken && !isTokenExpired(refreshToken));
+  const result = (!!accessToken && !isTokenExpired(accessToken)) || 
+                 (!!refreshToken && !isTokenExpired(refreshToken));
   
   return result;
 }

@@ -4,7 +4,8 @@ import { getUserType } from '../store/user';
 import { ROUTES } from '../routes';
 import { API_BASE_URL, API_TIMEOUT } from '../config';
 import type { ApiResponse } from '../types/api';
-export { enhanceApiResponse } from '../utils/apiResponseHandler';
+import { enhanceApiResponse } from '../utils/apiResponseHandler';
+export { enhanceApiResponse };
 
 // 사용자 친화적 에러 메시지 생성
 function createUserFriendlyMessage(data: any): string {
@@ -65,38 +66,38 @@ export async function publicApiFetch<T = any>(
     const data = await res.json();
     
     if (!res.ok) {
-      return { 
+      return enhanceApiResponse<T>({ 
         success: false, 
         errorMessage: createUserFriendlyMessage(data), 
         errorCode: data?.errorCode 
-      };
+      });
     }
     
     // 204 No Content 처리
     if (res.status === 204) {
-      return { 
+      return enhanceApiResponse<T>({ 
         success: true, 
         data: undefined 
-      };
+      });
     }
     
-    return data;
+    return enhanceApiResponse<T>(data);
   } catch (e: any) {
     clearTimeout(id);
     
     if (e.name === 'AbortError') {
-      return { 
+      return enhanceApiResponse<T>({ 
         success: false, 
         errorMessage: '요청 시간이 초과되었습니다.',
         errorCode: ErrorCode.REQUEST_TIMEOUT
-      };
+      });
     }
     
-    return { 
+    return enhanceApiResponse<T>({ 
       success: false, 
       errorMessage: '네트워크 오류가 발생했습니다.',
       errorCode: ErrorCode.NETWORK_ERROR
-    };
+    });
   }
 }
 
@@ -140,30 +141,30 @@ export async function apiFetch<T = any>(
         } else {
           window.location.href = ROUTES.PUBLIC.LOGIN;
         }
-        return { 
+        return enhanceApiResponse<T>({ 
           success: false, 
           errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',
           errorCode: ErrorCode.UNAUTHORIZED
-        };
+        });
       }
       
-      return { 
+      return enhanceApiResponse<T>({ 
         success: false, 
         errorMessage: createUserFriendlyMessage(data), 
         errorCode: data?.errorCode 
-      };
+      });
     }
     
-    return data;
+    return enhanceApiResponse<T>(data);
   } catch (e: any) {
     clearTimeout(id);
     
     if (e.name === 'AbortError') {
-      return { 
+      return enhanceApiResponse<T>({ 
         success: false, 
         errorMessage: '요청 시간이 초과되었습니다.',
         errorCode: ErrorCode.REQUEST_TIMEOUT
-      };
+      });
     }
     
     // 토큰 갱신 실패 시 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
@@ -175,17 +176,33 @@ export async function apiFetch<T = any>(
       } else {
         window.location.href = ROUTES.PUBLIC.LOGIN;
       }
-      return { 
+      return enhanceApiResponse<T>({ 
         success: false, 
         errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',
         errorCode: ErrorCode.UNAUTHORIZED
-      };
+      });
     }
     
-    return { 
+    return enhanceApiResponse<T>({ 
       success: false, 
       errorMessage: '네트워크 오류가 발생했습니다.',
       errorCode: ErrorCode.NETWORK_ERROR
-    };
+    });
   }
 } 
+
+// 공통 URL 빌더 (undefined/null 제거, 배열 지원)
+export function buildUrl(basePath: string, query?: Record<string, any>): string {
+  if (!query || Object.keys(query).length === 0) return basePath;
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    if (Array.isArray(value)) {
+      value.forEach(v => params.append(key, String(v)));
+    } else {
+      params.append(key, String(value));
+    }
+  });
+  const qs = params.toString();
+  return qs ? `${basePath}?${qs}` : basePath;
+}

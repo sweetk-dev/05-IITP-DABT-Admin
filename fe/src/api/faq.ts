@@ -1,18 +1,17 @@
-import { apiFetch, publicApiFetch, enhanceApiResponse } from './api';
+import { apiFetch, publicApiFetch, enhanceApiResponse, buildUrl } from './api';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import type {
-  UserFaqListReq,
+  UserFaqListQuery as UserFaqListReq,
   UserFaqListRes,
   UserFaqDetailRes,
   UserFaqHomeRes,
-  AdminFaqListReq,
+  AdminFaqListQuery as AdminFaqListReq,
   AdminFaqListRes,
   AdminFaqDetailRes,
   AdminFaqCreateReq,
   AdminFaqCreateRes,
   AdminFaqUpdateReq,
-  AdminFaqUpdateRes,
-  AdminFaqDeleteRes
+  // Update/Delete 는 void
 } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 
@@ -20,11 +19,8 @@ import type { ApiResponse } from '../types/api';
  * FAQ 목록 조회 (사용자용)
  */
 export async function getUserFaqList(params: UserFaqListReq): Promise<ApiResponse<UserFaqListRes>> {
-  const response = await apiFetch<UserFaqListRes>(FULL_API_URLS.USER.FAQ.LIST, {
-    method: 'POST',
-    body: JSON.stringify(params)
-  });
-  return enhanceApiResponse(response);
+  const url = buildUrl(FULL_API_URLS.USER.FAQ.LIST, params as any);
+  return apiFetch<UserFaqListRes>(url, { method: 'GET' });
 }
 
 /**
@@ -32,16 +28,14 @@ export async function getUserFaqList(params: UserFaqListReq): Promise<ApiRespons
  */
 export async function getUserFaqDetail(faqId: number): Promise<ApiResponse<UserFaqDetailRes>> {
   const url = FULL_API_URLS.USER.FAQ.DETAIL.replace(':faqId', faqId.toString());
-  const response = await apiFetch<UserFaqDetailRes>(url);
-  return enhanceApiResponse(response);
+  return apiFetch<UserFaqDetailRes>(url, { method: 'GET' });
 }
 
 /**
  * 홈 화면용 FAQ 조회 (조회수 높은 5개)
  */
 export async function getHomeFaqList(): Promise<ApiResponse<UserFaqHomeRes>> {
-  const response = await publicApiFetch<UserFaqHomeRes>(FULL_API_URLS.USER.FAQ.HOME);
-  return enhanceApiResponse(response);
+  return publicApiFetch<UserFaqHomeRes>(FULL_API_URLS.USER.FAQ.HOME, { method: 'GET' });
 }
 
 /**
@@ -64,10 +58,8 @@ export async function getUserFaqListByType(faqType: string, params: Omit<UserFaq
  * FAQ 목록 조회 (관리자용)
  */
 export async function getAdminFaqList(params: AdminFaqListReq): Promise<ApiResponse<AdminFaqListRes>> {
-  return apiFetch<AdminFaqListRes>(FULL_API_URLS.ADMIN.FAQ.LIST, {
-    method: 'POST',
-    body: JSON.stringify(params)
-  });
+  const url = buildUrl(FULL_API_URLS.ADMIN.FAQ.LIST, params as any);
+  return apiFetch<AdminFaqListRes>(url, { method: 'GET' });
 }
 
 /**
@@ -75,7 +67,7 @@ export async function getAdminFaqList(params: AdminFaqListReq): Promise<ApiRespo
  */
 export async function getAdminFaqDetail(faqId: number): Promise<ApiResponse<AdminFaqDetailRes>> {
   const url = FULL_API_URLS.ADMIN.FAQ.DETAIL.replace(':faqId', faqId.toString());
-  return apiFetch<AdminFaqDetailRes>(url);
+  return apiFetch<AdminFaqDetailRes>(url, { method: 'GET' });
 }
 
 /**
@@ -91,9 +83,9 @@ export async function createAdminFaq(data: AdminFaqCreateReq): Promise<ApiRespon
 /**
  * FAQ 수정 (관리자용)
  */
-export async function updateAdminFaq(faqId: number, data: AdminFaqUpdateReq): Promise<ApiResponse<AdminFaqUpdateRes>> {
+export async function updateAdminFaq(faqId: number, data: AdminFaqUpdateReq): Promise<ApiResponse<void>> {
   const url = FULL_API_URLS.ADMIN.FAQ.UPDATE.replace(':faqId', faqId.toString());
-  return apiFetch<AdminFaqUpdateRes>(url, {
+  return apiFetch<void>(url, {
     method: 'PUT',
     body: JSON.stringify(data)
   });
@@ -102,9 +94,9 @@ export async function updateAdminFaq(faqId: number, data: AdminFaqUpdateReq): Pr
 /**
  * FAQ 삭제 (관리자용)
  */
-export async function deleteAdminFaq(faqId: number): Promise<ApiResponse<AdminFaqDeleteRes>> {
+export async function deleteAdminFaq(faqId: number): Promise<ApiResponse<void>> {
   const url = FULL_API_URLS.ADMIN.FAQ.DELETE.replace(':faqId', faqId.toString());
-  return apiFetch<AdminFaqDeleteRes>(url, {
+  return apiFetch<void>(url, {
     method: 'DELETE'
   });
 }

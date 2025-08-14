@@ -20,12 +20,14 @@ export let JWT_CONFIG = {
 export async function updateJwtConfig(): Promise<void> {
   try {
     const { getJwtConfig } = await import('../api/common');
-    const config = await getJwtConfig();
-    JWT_CONFIG = {
-      accessTokenExpiresIn: config.accessTokenExpiresIn,
-      refreshTokenExpiresIn: config.refreshTokenExpiresIn,
-      issuer: config.issuer,
-    };
+    const res = await getJwtConfig();
+    if (res.success && res.data) {
+      JWT_CONFIG = {
+        accessTokenExpiresIn: res.data.accessTokenExpiresIn,
+        refreshTokenExpiresIn: res.data.refreshTokenExpiresIn,
+        issuer: res.data.issuer,
+      };
+    }
   } catch (error) {
     console.warn('Failed to fetch JWT config from server, using defaults:', error);
   }

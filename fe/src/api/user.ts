@@ -10,9 +10,9 @@ import type {
   UserRefreshTokenRes,
   UserProfileRes,
   UserProfileUpdateReq,
-  UserProfileUpdateRes,
+  // 프로필 업데이트는 ApiResponse<void>
   UserPasswordChangeReq,
-  UserPasswordChangeRes,
+  // 비밀번호 변경은 ApiResponse<void>
   UserRegisterReq,
   UserRegisterRes,
   UserCheckEmailReq,
@@ -25,7 +25,7 @@ import { enhanceApiResponse } from '../utils/apiResponseHandler';
  * 사용자 로그인
  */
 export async function loginUser(params: UserLoginReq): Promise<ApiResponse<UserLoginRes>> {
-  const response = await publicApiFetch<UserLoginRes>(FULL_API_URLS.AUTH.USER_LOGIN, {
+  const response = await publicApiFetch<UserLoginRes>(FULL_API_URLS.AUTH.USER.LOGIN, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -70,7 +70,7 @@ export async function registerUser(params: UserRegisterReq): Promise<ApiResponse
  * 사용자 토큰 갱신
  */
 export async function refreshUserToken(params: UserRefreshTokenReq): Promise<ApiResponse<UserRefreshTokenRes>> {
-  const response = await apiFetch<UserRefreshTokenRes>(FULL_API_URLS.AUTH.USER_REFRESH, {
+  const response = await apiFetch<UserRefreshTokenRes>(FULL_API_URLS.AUTH.USER.REFRESH, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -81,37 +81,34 @@ export async function refreshUserToken(params: UserRefreshTokenReq): Promise<Api
  * 사용자 프로필 조회
  */
 export async function getUserProfile(): Promise<ApiResponse<UserProfileRes>> {
-  const response = await apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE.GET);
-  return enhanceApiResponse(response);
+  return apiFetch<UserProfileRes>(FULL_API_URLS.USER.PROFILE.DETAIL, { method: 'GET' });
 }
 
 /**
  * 사용자 프로필 업데이트
  */
-export async function updateUserProfile(params: UserProfileUpdateReq): Promise<ApiResponse<UserProfileUpdateRes>> {
-  const response = await apiFetch<UserProfileUpdateRes>(FULL_API_URLS.USER.PROFILE.POST, {
-    method: 'POST',
+export async function updateUserProfile(params: UserProfileUpdateReq): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.USER.PROFILE.UPDATE, {
+    method: 'PUT',
     body: JSON.stringify(params),
   });
-  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 비밀번호 변경
  */
-export async function changeUserPassword(params: UserPasswordChangeReq): Promise<ApiResponse<UserPasswordChangeRes>> {
-  const response = await apiFetch<UserPasswordChangeRes>(FULL_API_URLS.USER.PASSWORD.POST, {
-    method: 'POST',
+export async function changeUserPassword(params: UserPasswordChangeReq): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.USER.PASSWORD.UPDATE, {
+    method: 'PUT',
     body: JSON.stringify(params),
   });
-  return enhanceApiResponse(response);
 }
 
 /**
  * 사용자 로그아웃
  */
 export async function logoutUser(params: UserLogoutReq): Promise<ApiResponse<UserLogoutRes>> {
-  const response = await apiFetch<UserLogoutRes>(FULL_API_URLS.AUTH.USER_LOGOUT, {
+  const response = await apiFetch<UserLogoutRes>(FULL_API_URLS.AUTH.USER.LOGOUT, {
     method: 'POST',
     body: JSON.stringify(params),
   });

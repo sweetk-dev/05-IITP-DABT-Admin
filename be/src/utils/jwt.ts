@@ -1,10 +1,12 @@
-import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { getDecryptedEnv } from './decrypt';
 
-// 환경 변수에서 JWT 설정 로드
-const JWT_SECRET = process.env.JWT_SECRET!;
-const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
-const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
-const ISSUER = process.env.JWT_ISSUER || 'iitp-dabt-api';
+// 환경 변수에서 JWT 설정 로드 (암호화된 환경변수 지원)
+const JWT_SECRET = getDecryptedEnv('JWT_SECRET') || process.env.JWT_SECRET || '';
+const ACCESS_TOKEN_EXPIRES_IN = getDecryptedEnv('ACCESS_TOKEN_EXPIRES_IN') || process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
+const REFRESH_TOKEN_EXPIRES_IN = getDecryptedEnv('REFRESH_TOKEN_EXPIRES_IN') || process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+const ISSUER = getDecryptedEnv('JWT_ISSUER') || process.env.JWT_ISSUER || 'iitp-dabt-api';
+const ALGORITHM: jwt.Algorithm = 'HS256';
 
 // JWT 토큰 페이로드 인터페이스
 export interface TokenPayload {
@@ -39,6 +41,7 @@ export function generateAccessToken(payload: Omit<TokenPayload, 'exp' | 'iat'>):
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN as any,
     issuer: ISSUER,
+    algorithm: ALGORITHM,
   });
 }
 
@@ -51,6 +54,7 @@ export function generateRefreshToken(payload: Omit<TokenPayload, 'exp' | 'iat'>)
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN as any,
     issuer: ISSUER,
+    algorithm: ALGORITHM,
   });
 }
 
@@ -61,7 +65,11 @@ export function generateRefreshToken(payload: Omit<TokenPayload, 'exp' | 'iat'>)
  */
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    return jwt.verify(token, JWT_SECRET, {
+      algorithms: [ALGORITHM],
+      issuer: ISSUER,
+      clockTolerance: 5, // seconds
+    }) as TokenPayload;
   } catch (error) {
     return null;
   }

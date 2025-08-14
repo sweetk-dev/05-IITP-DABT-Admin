@@ -24,7 +24,7 @@ export function usePasswordValidation(options: UsePasswordValidationOptions = {}
     isValid: false
   });
 
-  // 비밀번호 실시간 검증
+  // 비밀번호 실시간 검증 (공통 validation 결과를 그대로 사용)
   useEffect(() => {
     let passwordError = '';
     if (state.password) {

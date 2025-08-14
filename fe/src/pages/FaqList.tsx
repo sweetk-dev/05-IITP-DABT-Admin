@@ -3,19 +3,22 @@ import { Box, Typography, Stack, Chip, Accordion, AccordionSummary, AccordionDet
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import ThemedCard from '../components/common/ThemedCard';
-import PageTitle from '../components/common/PageTitle';
-import ThemedButton from '../components/common/ThemedButton';
+// import PageTitle from '../components/common/PageTitle';
+// import ThemedButton from '../components/common/ThemedButton';
+import ListHeader from '../components/common/ListHeader';
+import { useQuerySync } from '../hooks/useQuerySync';
 import EmptyState from '../components/common/EmptyState';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/common/Pagination';
 import SelectField from '../components/common/SelectField';
-import { ArrowBack, ExpandMore } from '@mui/icons-material';
+import { ExpandMore } from '@mui/icons-material';
 import { PAGINATION } from '../constants/pagination';
 import { SPACING } from '../constants/spacing';
 import { useDataFetching } from '../hooks/useDataFetching';
 import { usePagination } from '../hooks/usePagination';
 import { getUserFaqList, getUserFaqListByType, getCommonCodesByGroupId } from '../api';
 import type { UserFaqItem } from '@iitp-dabt/common';
+import { useErrorHandler, type UseErrorHandlerResult } from '../hooks/useErrorHandler';
 
 export default function FaqList() {
   const navigate = useNavigate();
@@ -28,6 +31,8 @@ export default function FaqList() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   
   const pagination = usePagination({ initialLimit: PAGINATION.DEFAULT_PAGE_SIZE });
+  const { query, setQuery } = useQuerySync({ page: 1, limit: pagination.pageSize, faqType: 'ALL', search: '' });
+  const errorHandler: UseErrorHandlerResult = useErrorHandler();
 
   const { data: faqTypeCodes, isLoading: faqTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('faq_type'), autoFetch: true });
 
@@ -39,27 +44,33 @@ export default function FaqList() {
   }, [faqTypeCodes]);
 
   const { data: faqData, isLoading, isEmpty, isError } = useDataFetching({
-    fetchFunction: () => (faqType === 'ALL' ? getUserFaqList({ page: pagination.currentPage, limit: pagination.pageSize }) : getUserFaqListByType(faqType, { page: pagination.currentPage, limit: pagination.pageSize })),
-    dependencies: [pagination.currentPage, pagination.pageSize, faqType],
-    autoFetch: true
+    fetchFunction: () => (faqType === 'ALL' ? getUserFaqList({ page: pagination.currentPage, limit: pagination.pageSize, search: query.search || undefined }) : getUserFaqListByType(faqType, { page: pagination.currentPage, limit: pagination.pageSize })),
+    dependencies: [pagination.currentPage, pagination.pageSize, faqType, query.search],
+    autoFetch: true,
+    onError: (msg) => errorHandler.setInlineError(msg)
   });
 
   useEffect(() => { if (faqData) pagination.handlePageSizeChange(faqData.limit); }, [faqData]);
 
-  const handlePageChange = (page: number) => pagination.handlePageChange(page);
-  const handleFaqTypeChange = (newFaqType: string) => { setFaqType(newFaqType); setExpandedFaq(null); pagination.handlePageChange(1); };
+  const handlePageChange = (page: number) => { pagination.handlePageChange(page); setQuery({ page }, { replace: true }); };
+  const handleFaqTypeChange = (newFaqType: string) => { setFaqType(newFaqType); setQuery({ faqType: newFaqType, page: 1 }); setExpandedFaq(null); pagination.handlePageChange(1); };
   const handleFaqExpand = (faqId: number) => setExpandedFaq(expandedFaq === faqId ? null : faqId);
 
   return (
     <Box id="faq-list-page" sx={{ minHeight: '100vh', background: muiTheme.palette.background.default, py: SPACING.LARGE }}>
       <Box id="faq-list-container" sx={{ mx: 'auto', px: { xs: SPACING.MEDIUM, md: SPACING.LARGE } }}>
         {/* 헤더 */}
-        <Box sx={{ mb: SPACING.LARGE }}>
-          <ThemedButton variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')} sx={{ mb: SPACING.MEDIUM }}>
-            홈으로
-          </ThemedButton>
-          <PageTitle title="FAQ" />
-        </Box>
+        <ListHeader
+          title="FAQ"
+          onBack={() => navigate('/')}
+          searchPlaceholder="질문/답변 검색"
+          searchValue={query.search || ''}
+          onSearchChange={(v) => setQuery({ search: v, page: 1 })}
+          filters={[{ label: '유형', value: faqType, options: faqTypeOptions.map(o => ({ value: o.value, label: o.label })), onChange: (v: string) => handleFaqTypeChange(v || 'ALL') }]}
+          totalCount={faqData?.total}
+        />
+
+        {errorHandler.InlineError}
 
         {/* FAQ 타입 선택 */}
         <ThemedCard sx={{ mb: SPACING.LARGE }}>
@@ -106,8 +117,14 @@ export default function FaqList() {
                 ))}
               </Stack>
 
-              {faqData && faqData.totalPages > 1 && (
-                <Pagination currentPage={pagination.currentPage} totalPages={faqData.totalPages} onPageChange={handlePageChange} />
+              {faqData && faqData.totalPages > 0 && (
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={faqData.totalPages}
+                  onPageChange={handlePageChange}
+                  pageSize={pagination.pageSize}
+                  onPageSizeChange={(size) => { pagination.handlePageSizeChange(size); setQuery({ limit: size, page: 1 }); }}
+                />
               )}
             </>
           )}

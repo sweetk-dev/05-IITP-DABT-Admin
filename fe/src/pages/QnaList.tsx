@@ -9,6 +9,9 @@ import EmptyState from '../components/common/EmptyState';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/common/Pagination';
 import SelectField from '../components/common/SelectField';
+import ListHeader from '../components/common/ListHeader';
+import { useQuerySync } from '../hooks/useQuerySync';
+import { useErrorHandler, type UseErrorHandlerResult } from '../hooks/useErrorHandler';
 import { ArrowBack } from '@mui/icons-material';
 import { PAGINATION } from '../constants/pagination';
 import { SPACING } from '../constants/spacing';
@@ -34,6 +37,18 @@ export default function QnaList() {
   ]);
   
   const pagination = usePagination({ initialLimit: PAGINATION.DEFAULT_PAGE_SIZE });
+  const { query, setQuery } = useQuerySync({ page: 1, limit: pagination.pageSize, qnaType: 'ALL', search: '', status: '' });
+  const errorHandler: UseErrorHandlerResult = useErrorHandler();
+
+  // sync query → pagination/state
+  useEffect(() => {
+    const qp = Number(query.page) || 1;
+    if (qp !== pagination.currentPage) pagination.handlePageChange(qp);
+    const ql = Number(query.limit) || PAGINATION.DEFAULT_PAGE_SIZE;
+    if (ql !== pagination.pageSize) pagination.handlePageSizeChange(ql);
+    if ((query.qnaType || 'ALL') !== qnaType) setQnaType((query.qnaType as string) || 'ALL');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.page, query.limit, query.qnaType]);
 
   const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('QNA_TYPE'), autoFetch: true });
 
@@ -45,15 +60,16 @@ export default function QnaList() {
   }, [qnaTypeCodes]);
 
   const { data: qnaData, isLoading, isEmpty, isError } = useDataFetching({
-    fetchFunction: () => (qnaType === 'ALL' ? getUserQnaList({ page: pagination.currentPage, limit: pagination.pageSize }) : getUserQnaListByType(qnaType, { page: pagination.currentPage, limit: pagination.pageSize })),
-    dependencies: [pagination.currentPage, pagination.pageSize, qnaType],
-    autoFetch: true
+    fetchFunction: () => (qnaType === 'ALL' ? getUserQnaList({ page: pagination.currentPage, limit: pagination.pageSize, search: query.search || undefined }) : getUserQnaListByType(qnaType, { page: pagination.currentPage, limit: pagination.pageSize })),
+    dependencies: [pagination.currentPage, pagination.pageSize, qnaType, query.search],
+    autoFetch: true,
+    onError: (msg) => errorHandler.setInlineError(msg)
   });
 
   useEffect(() => { if (qnaData) pagination.handlePageSizeChange(qnaData.limit); }, [qnaData]);
 
-  const handlePageChange = (page: number) => { pagination.handlePageChange(page); };
-  const handleQnaTypeChange = (newQnaType: string) => { setQnaType(newQnaType); pagination.handlePageChange(1); };
+  const handlePageChange = (page: number) => { pagination.handlePageChange(page); setQuery({ page }, { replace: true }); };
+  const handleQnaTypeChange = (newQnaType: string) => { setQnaType(newQnaType); setQuery({ qnaType: newQnaType, page: 1 }); pagination.handlePageChange(1); };
   const handleQnaClick = (qnaId: number) => { navigate(`/qna/${qnaId}`); };
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -63,13 +79,18 @@ export default function QnaList() {
   return (
     <Box id="qna-list-page" sx={{ minHeight: '100vh', background: colors.background, py: SPACING.LARGE }}>
       <Box id="qna-list-container" sx={{ mx: 'auto', px: { xs: SPACING.MEDIUM, md: SPACING.LARGE } }}>
+        {errorHandler.InlineError}
+
         {/* 헤더 */}
-        <Box sx={{ mb: SPACING.LARGE }}>
-          <ThemedButton variant="outlined" startIcon={<ArrowBack />} onClick={() => navigate('/')} sx={{ mb: SPACING.MEDIUM }}>
-            홈으로
-          </ThemedButton>
-          <PageTitle title="Q&A" />
-        </Box>
+        <ListHeader
+          title="Q&A"
+          onBack={() => navigate('/')}
+          searchPlaceholder="제목/내용 검색"
+          searchValue={query.search || ''}
+          onSearchChange={(v) => setQuery({ search: v, page: 1 })}
+          filters={[{ label: '유형', value: qnaType, options: qnaTypeOptions, onChange: (v: string) => handleQnaTypeChange(v || 'ALL') }]}
+          totalCount={qnaData?.total}
+        />
 
         {/* Q&A 타입 선택 */}
         <ThemedCard sx={{ mb: SPACING.LARGE }}>
@@ -107,8 +128,14 @@ export default function QnaList() {
                 ))}
               </Stack>
 
-              {qnaData && qnaData.totalPages > 1 && (
-                <Pagination currentPage={pagination.currentPage} totalPages={qnaData.totalPages} onPageChange={handlePageChange} />
+              {qnaData && qnaData.totalPages > 0 && (
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={qnaData.totalPages}
+                  onPageChange={handlePageChange}
+                  pageSize={pagination.pageSize}
+                  onPageSizeChange={(size) => { pagination.handlePageSizeChange(size); setQuery({ limit: size, page: 1 }); }}
+                />
               )}
             </>
           )}

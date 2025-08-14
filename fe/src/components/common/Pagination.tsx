@@ -1,10 +1,13 @@
-import { Box, Pagination as MuiPagination } from '@mui/material';
+import { Box, Pagination as MuiPagination, Select, MenuItem, Typography, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  onPageSizeChange?: (size: number) => void;
   showFirstButton?: boolean;
   showLastButton?: boolean;
 }
@@ -13,6 +16,9 @@ export default function Pagination({
   currentPage,
   totalPages,
   onPageChange,
+  pageSize,
+  pageSizeOptions = [10, 20, 50],
+  onPageSizeChange,
   showFirstButton = true,
   showLastButton = true
 }: PaginationProps) {
@@ -23,15 +29,8 @@ export default function Pagination({
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        py: 3,
-        px: 2
-      }}
-    >
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between" sx={{ py: 2, px: 2 }}>
+      <Box />
       <MuiPagination
         page={currentPage}
         count={totalPages}
@@ -59,6 +58,14 @@ export default function Pagination({
           }
         }}
       />
-    </Box>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>페이지 크기</Typography>
+        <Select size="small" value={pageSize ?? pageSizeOptions[0]} onChange={(e) => onPageSizeChange && onPageSizeChange(Number(e.target.value))}>
+          {pageSizeOptions.map(opt => (
+            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+          ))}
+        </Select>
+      </Stack>
+    </Stack>
   );
 } 

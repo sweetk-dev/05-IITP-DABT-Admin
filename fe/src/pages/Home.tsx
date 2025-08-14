@@ -1,5 +1,5 @@
 import { Box, Typography, Stack, Divider } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 // theme colors come from MUI palette
 import ThemedButton from '../components/common/ThemedButton';
@@ -7,7 +7,7 @@ import ThemedCard from '../components/common/ThemedCard';
 import EmptyState from '../components/common/EmptyState';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { ArrowForward } from '@mui/icons-material';
-import { OPPEN_API_DOC_URL} from '../config';
+import { OPEN_API_DOC_URL } from '../config';
 import { PAGINATION } from '../constants/pagination';
 import { SPACING } from '../constants/spacing';
 import { useDataFetching } from '../hooks/useDataFetching';
@@ -19,7 +19,7 @@ export default function Home() {
   const theme = 'user';
   const muiTheme = useTheme();
   const palette = muiTheme.palette;
-  const openApiDocUrl = OPPEN_API_DOC_URL;
+  const openApiDocUrl = OPEN_API_DOC_URL;
   
   // 공지사항 데이터 페칭
   const {
@@ -96,21 +96,24 @@ export default function Home() {
       sx={{
         // P가 이상하면 4로 수정 현재는 3임 
         minWidth: { xs: '100%', md: 0 }, 
-        maxWidth: { xs: '100%', md: 360 },
+        maxWidth: { xs: '100%', md: '100%' },
         background: 'transparent',
         position: 'relative',
         isolation: 'isolate'
       }}
     >
-      <ThemedButton
+          <ThemedButton
         variant="primary"
         className="home-notice-button"
         onClick={() => handleSectionClick('notice')}
         endIcon={<ArrowForward />}
         sx={{
           width: '100%',
-          mb: 2,
-          fontSize: '1rem',
+              mb: 2,
+              fontSize: { xs: '1.06rem', md: '1.12rem' },
+              fontWeight: 700,
+              py: { xs: 1.25, md: 1.5 },
+              minHeight: { xs: 44, md: 52 },
           position: 'relative',
           isolation: 'isolate',
           '& .MuiButton-endIcon': {
@@ -126,12 +129,12 @@ export default function Home() {
       </ThemedButton>
       
       {/* 컨텐츠 영역 테두리 */}
-      <Box 
+          <Box 
         sx={{ 
           border: `3px solid ${palette.divider}`,
           borderRadius: 3,
           p: 3,
-          background: 'transparent',
+          backgroundColor: 'background.paper',
           flex: 1,
           minHeight: 200,
           boxShadow: 1
@@ -209,11 +212,11 @@ export default function Home() {
       sx={{
         // P가 이상하면 4로 수정 현재는 3임 
         minWidth: { xs: '100%', md: 0 }, 
-        maxWidth: { xs: '100%', md: 360 },
+        maxWidth: { xs: '100%', md: '100%' },
         background: 'transparent'
       }}
     >
-      <ThemedButton
+          <ThemedButton
         variant="primary"
         className="home-faq-button"
         onClick={() => handleSectionClick('faq')}
@@ -221,7 +224,10 @@ export default function Home() {
         sx={{
           width: '100%',
           mb: SPACING.MEDIUM,
-          fontSize: '1rem',
+              fontSize: { xs: '1.06rem', md: '1.12rem' },
+              fontWeight: 700,
+              py: { xs: 1.25, md: 1.5 },
+              minHeight: { xs: 44, md: 52 },
           position: 'relative',
           '& .MuiButton-endIcon': {
             position: 'absolute !important',
@@ -235,12 +241,12 @@ export default function Home() {
       </ThemedButton>
       
       {/* 컨텐츠 영역 테두리 */}
-      <Box 
+          <Box 
         sx={{ 
           border: `3px solid ${palette.divider}`,
           borderRadius: 3,
           p: SPACING.LARGE,
-          background: 'transparent',
+          backgroundColor: 'background.paper',
           flex: 1,
           minHeight: 200,
           boxShadow: 1
@@ -308,11 +314,11 @@ export default function Home() {
       sx={{
         // P가 이상하면 4로 수정 현재는 3임 
         minWidth: { xs: '100%', md: 0 }, 
-        maxWidth: { xs: '100%', md: 360 },
+        maxWidth: { xs: '100%', md: '100%' },
         background: 'transparent'
       }}
     >
-      <ThemedButton
+          <ThemedButton
         variant="primary"
         className="home-qna-button"
         onClick={() => handleSectionClick('qna')}
@@ -320,7 +326,10 @@ export default function Home() {
         sx={{
           width: '100%',
           mb: SPACING.MEDIUM,
-          fontSize: '1rem',
+              fontSize: { xs: '1.06rem', md: '1.12rem' },
+              fontWeight: 700,
+              py: { xs: 1.25, md: 1.5 },
+              minHeight: { xs: 44, md: 52 },
           position: 'relative',
           '& .MuiButton-endIcon': {
             position: 'absolute !important',
@@ -334,12 +343,12 @@ export default function Home() {
       </ThemedButton>
       
       {/* 컨텐츠 영역 테두리 */}
-      <Box 
+          <Box 
         sx={{ 
           border: `3px solid ${palette.divider}`,
           borderRadius: 3,
           p: SPACING.LARGE,
-          background: 'transparent',
+          backgroundColor: 'background.paper',
           flex: 1,
           minHeight: 200,
           boxShadow: 1
@@ -433,10 +442,10 @@ export default function Home() {
         }}
       >
         {/* 서비스 소개 */}
-        <ThemedCard 
+      <ThemedCard 
           className="home-intro-section"
           sx={{ 
-            width: { xs: '100%', md: '95%' }, 
+            width: { xs: '100%', md: '100%' }, 
             mx: 'auto',
             mb: { xs: 4, md: 6 },
             position: 'relative',
@@ -480,7 +489,7 @@ export default function Home() {
 
         {/* Open API 문서 바로가기 버튼 */}
         <Box id="home-openapi-button-row" sx={{ 
-          width: { xs: '100%', md: '95%' }, 
+          width: { xs: '100%', md: '100%' }, 
           mx: 'auto', 
           mb:  SPACING.MEDIUM,
           display: 'flex',
@@ -508,7 +517,7 @@ export default function Home() {
         <ThemedCard 
           className="home-3section"
           sx={{ 
-            width: { xs: '100%', md: '95%' }, 
+            width: { xs: '100%', md: '100%' }, 
             mx: 'auto',
             position: 'relative',
             isolation: 'isolate'
@@ -520,14 +529,15 @@ export default function Home() {
             divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'transparent' }} />}
             spacing={0}
             sx={{
-            background: palette.secondary.main,
+            background: alpha(palette.secondary.main, 0.06),
               borderRadius: 3,
-            boxShadow: 0,
+              boxShadow: 0,
               minHeight: { xs: 600, md: 700 },
               width: '100%',
               justifyContent: 'center',
               alignItems: 'stretch',
               flexWrap: { xs: 'wrap', md: 'nowrap' },
+              p: { xs: 2, md: 3 }
             }}
           >
             {renderNoticeSection()}

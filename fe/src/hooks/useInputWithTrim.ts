@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 /**
  * 입력 필드의 trim 처리를 위한 공통 Hook
@@ -9,10 +9,17 @@ import { useState, useCallback } from 'react';
 export function useInputWithTrim(initialValue = '') {
   const [value, setValue] = useState(initialValue);
   const [displayValue, setDisplayValue] = useState(initialValue);
+  const composingRef = useRef(false);
+  
+  const handleComposition = useCallback((type: 'start' | 'end') => {
+    composingRef.current = type === 'start';
+  }, []);
   
   const handleChange = useCallback((newValue: string) => {
     setDisplayValue(newValue); // 화면에는 그대로 표시
-    setValue(newValue); // 내부 상태는 그대로 저장
+    if (!composingRef.current) {
+      setValue(newValue); // 조합 중이 아닐 때만 내부 상태 반영
+    }
   }, []);
   
   const getTrimmedValue = useCallback(() => value.trim(), [value]);
@@ -30,7 +37,9 @@ export function useInputWithTrim(initialValue = '') {
     // 편의를 위한 props 객체
     inputProps: {
       value: displayValue,
-      onChange: (e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value)
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value),
+      onCompositionStart: () => handleComposition('start'),
+      onCompositionEnd: (e: React.CompositionEvent<HTMLInputElement>) => { handleComposition('end'); setValue((e.target as HTMLInputElement).value); }
     }
   };
 }

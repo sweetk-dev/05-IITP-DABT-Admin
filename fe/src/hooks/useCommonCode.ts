@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { 
   getCommonCodesByGroupId, 
   getCommonCodesByGroupIdDetail
@@ -12,17 +12,22 @@ import type {
 /**
  * 공통 코드를 관리하는 React Hook (사용자용)
  */
+const MEMORY_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export function useCommonCode() {
   const [codes, setCodes] = useState<Record<string, CommonCode[]>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<Record<string, string>>({});
+  const timestampsRef = useRef<Record<string, number>>({});
 
   /**
    * 그룹 ID로 공통 코드 조회 (사용자용)
    */
   const fetchCodesByGroup = useCallback(async (grpId: string) => {
-    if (codes[grpId]) {
-      return codes[grpId]; // 이미 로드된 경우 캐시된 데이터 반환
+    const now = Date.now();
+    const ts = timestampsRef.current[grpId] || 0;
+    if (codes[grpId] && now - ts < MEMORY_TTL_MS) {
+      return codes[grpId]; // TTL 내 캐시 반환
     }
 
     setLoading(prev => ({ ...prev, [grpId]: true }));
@@ -32,6 +37,7 @@ export function useCommonCode() {
       const response = await getCommonCodesByGroupId(grpId);
       if (response.success && response.data) {
         setCodes(prev => ({ ...prev, [grpId]: response.data!.codes }));
+        timestampsRef.current[grpId] = Date.now();
         return response.data.codes;
       } else {
         throw new Error(response.errorMessage || 'Failed to fetch common codes');

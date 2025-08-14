@@ -30,7 +30,7 @@ export default function CommonDialog({
   const primary = muiTheme.palette.primary.main;
   const line = `linear-gradient(90deg, ${alpha(primary, 0.6)}, ${alpha(primary, 0.2)}, ${alpha(primary, 0.6)})`;
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: 3 } }}>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 3 } }}>
       {title && (
         <DialogTitle sx={{ fontWeight: 800, pb: 1.5 }}>
           {title}

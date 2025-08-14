@@ -1,11 +1,20 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorCode } from '@iitp-dabt/common';
 import { getUserType } from '../store/user';
 import { ROUTES } from '../routes';
+import ErrorAlert from '../components/ErrorAlert';
+import { createElement, type ReactElement } from 'react';
 
-export const useErrorHandler = () => {
+export interface UseErrorHandlerResult {
+  handleError: (error: any) => { errorCode: string | number; errorMessage: string; handled: true };
+  InlineError: ReactElement | null;
+  setInlineError: (msg: string | null) => void;
+}
+
+export const useErrorHandler = (): UseErrorHandlerResult => {
   const navigate = useNavigate();
+  const [inlineError, setInlineError] = useState<string | null>(null);
   
   // 임시 더미 logout 함수 (나중에 실제 useAuth로 교체)
   const logout = useCallback(() => {
@@ -34,9 +43,9 @@ export const useErrorHandler = () => {
         }
       }
 
-      // 에러 메시지 표시
+      // 에러 메시지 표시 - 인라인
       const errorMessage = errorData.errorMessage || '오류가 발생했습니다.';
-      alert(errorMessage);
+      setInlineError(errorMessage);
 
       return {
         errorCode,
@@ -46,7 +55,7 @@ export const useErrorHandler = () => {
     }
 
     // 네트워크 에러나 기타 에러
-    alert('알 수 없는 오류가 발생했습니다.');
+    setInlineError('알 수 없는 오류가 발생했습니다.');
 
     return {
       errorCode: ErrorCode.UNKNOWN_ERROR,
@@ -55,5 +64,13 @@ export const useErrorHandler = () => {
     };
   }, [navigate, logout]);
 
-  return { handleError };
+  const InlineError = inlineError
+    ? createElement(ErrorAlert as any, {
+        error: inlineError,
+        onClose: () => setInlineError(null),
+        title: '오류'
+      })
+    : null;
+
+  return { handleError, InlineError, setInlineError };
 }; 

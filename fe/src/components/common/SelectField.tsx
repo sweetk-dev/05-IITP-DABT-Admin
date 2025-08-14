@@ -1,6 +1,6 @@
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
-import { getThemeColors } from '../../theme';
+import { useTheme } from '@mui/material/styles';
 
 interface SelectOption {
   value: string;
@@ -28,7 +28,13 @@ export default function SelectField({
   disabled = false,
   size = 'medium'
 }: SelectFieldProps) {
-  const colors = getThemeColors(theme);
+  const muiTheme = useTheme();
+  const colors = {
+    border: muiTheme.palette.divider,
+    primary: muiTheme.palette.primary.main,
+    text: muiTheme.palette.text.primary,
+    textSecondary: muiTheme.palette.text.secondary,
+  } as const;
 
   const handleChange = (event: SelectChangeEvent<string>) => {
     onChange(event.target.value);

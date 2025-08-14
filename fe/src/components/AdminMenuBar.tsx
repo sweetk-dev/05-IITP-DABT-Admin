@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -13,7 +13,7 @@ import {
 } from '@mui/icons-material';
 import { getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
-import { getThemeColors } from '../theme';
+import { useTheme } from '@mui/material/styles';
 
 interface MenuItem {
   id: string;
@@ -81,7 +81,13 @@ export default function AdminMenuBar() {
   const location = useLocation();
   const adminRole = getAdminRole();
   const isSAdmin = adminRole === 'S-ADMIN';
-  const colors = getThemeColors('admin');
+  const muiTheme = useTheme();
+  const colors = {
+    primary: muiTheme.palette.primary.main,
+    secondary: muiTheme.palette.secondary.main,
+    text: muiTheme.palette.text.primary,
+  } as const;
+  const barRef = useRef<HTMLDivElement | null>(null);
 
   // 현재 활성화된 메뉴 아이템 찾기
   const getActiveMenuId = () => {
@@ -99,21 +105,38 @@ export default function AdminMenuBar() {
     !item.requiresSAdmin || isSAdmin
   );
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const updateMenuHeight = () => {
+      const h = barRef.current?.offsetHeight || 0;
+      root.style.setProperty('--admin-menu-height-px', `${h}px`);
+    };
+    updateMenuHeight();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateMenuHeight) : null;
+    if (ro && barRef.current) ro.observe(barRef.current);
+    window.addEventListener('resize', updateMenuHeight);
+    return () => {
+      window.removeEventListener('resize', updateMenuHeight);
+      if (ro && barRef.current) ro.unobserve(barRef.current);
+    };
+  }, [location.pathname]);
+
   return (
     <Box
       id="admin-menu-bar"
       sx={{
-        position: 'fixed',
-        top: 'var(--appbar-height)',
+        position: 'sticky',
+        top: 64,
         left: 0,
         right: 0,
-        zIndex: 9998,
+        zIndex: 1100,
         background: 'rgba(255, 255, 255, 0.98)',
         backdropFilter: 'blur(8px)',
         borderBottom: `2px solid ${colors.primary}40`,
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         transition: 'all 0.3s ease'
       }}
+      ref={barRef}
     >
       <Box
         sx={{

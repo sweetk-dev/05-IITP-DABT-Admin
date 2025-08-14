@@ -1,6 +1,7 @@
 import { Box, Typography, Stack, Divider } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import { getThemeColors } from '../theme';
+// theme colors come from MUI palette
 import ThemedButton from '../components/common/ThemedButton';
 import ThemedCard from '../components/common/ThemedCard';
 import EmptyState from '../components/common/EmptyState';
@@ -16,7 +17,8 @@ import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common
 export default function Home() {
   const navigate = useNavigate();
   const theme = 'user';
-  const colors = getThemeColors(theme);
+  const muiTheme = useTheme();
+  const palette = muiTheme.palette;
   const openApiDocUrl = OPPEN_API_DOC_URL;
   
   // 공지사항 데이터 페칭
@@ -83,7 +85,7 @@ export default function Home() {
 
   const renderNoticeSection = () => (
     <Box
-      id="notice-section"
+      id="home-notice-section"
       className="home-notice-section"
       flex={1}
       display="flex"
@@ -101,7 +103,6 @@ export default function Home() {
       }}
     >
       <ThemedButton
-        theme={theme}
         variant="primary"
         className="home-notice-button"
         onClick={() => handleSectionClick('notice')}
@@ -127,27 +128,21 @@ export default function Home() {
       {/* 컨텐츠 영역 테두리 */}
       <Box 
         sx={{ 
-          border: `3px solid ${colors.border}`,
+          border: `3px solid ${palette.divider}`,
           borderRadius: 3,
           p: 3,
           background: 'transparent',
           flex: 1,
           minHeight: 200,
-          boxShadow: `0 2px 8px ${colors.border}30`
+          boxShadow: 1
         }}
       >
         {noticesLoading ? (
           <LoadingSpinner loading={true} />
         ) : noticesError ? (
-          <EmptyState 
-            message="공지사항을 불러오는 중 오류가 발생했습니다." 
-            theme={theme}
-          />
+          <EmptyState message="공지사항을 불러오는 중 오류가 발생했습니다." />
         ) : noticesEmpty ? (
-          <EmptyState 
-            message="등록된 공지사항이 없습니다." 
-            theme={theme}
-          />
+          <EmptyState message="등록된 공지사항이 없습니다." />
         ) : (
           <Stack spacing={1.5}>
             {notices?.notices?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((notice: UserNoticeItem) => (
@@ -159,16 +154,16 @@ export default function Home() {
                   borderRadius: 2,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease-in-out',
-                  border: `1px solid ${colors.border}`,
+                  border: `1px solid ${palette.divider}`,
                   backgroundColor: 'transparent',
                   '&:hover': {
-                    backgroundColor: `${colors.primary}15`,
-                    borderColor: colors.primary,
+                    backgroundColor: 'action.hover',
+                    borderColor: palette.primary.main,
                     transform: 'translateY(-1px)',
-                    boxShadow: `0 4px 12px ${colors.primary}20`,
+                    boxShadow: 2,
                     '& .content-text': {
                       textDecoration: 'underline',
-                      textDecorationColor: colors.text,
+                      textDecorationColor: palette.text.primary,
                       textDecorationThickness: '2px'
                     }
                   }
@@ -178,7 +173,7 @@ export default function Home() {
                   variant="body2" 
                   className="content-text"
                   sx={{ 
-                    color: colors.textSecondary,
+                    color: palette.text.secondary,
                     transition: 'all 0.2s ease-in-out',
                     mb: 0.5
                   }}
@@ -188,7 +183,7 @@ export default function Home() {
                 <Typography 
                   variant="caption" 
                   sx={{ 
-                    color: colors.textSecondary,
+                    color: palette.text.secondary,
                     opacity: 0.7
                   }}
                 >
@@ -204,7 +199,7 @@ export default function Home() {
 
   const renderFaqSection = () => (
     <Box
-      id="faq-section"
+      id="home-faq-section"
       flex={1}
       display="flex"
       flexDirection="column"
@@ -219,7 +214,6 @@ export default function Home() {
       }}
     >
       <ThemedButton
-        theme={theme}
         variant="primary"
         className="home-faq-button"
         onClick={() => handleSectionClick('faq')}
@@ -243,27 +237,21 @@ export default function Home() {
       {/* 컨텐츠 영역 테두리 */}
       <Box 
         sx={{ 
-          border: `3px solid ${colors.border}`,
+          border: `3px solid ${palette.divider}`,
           borderRadius: 3,
           p: SPACING.LARGE,
           background: 'transparent',
           flex: 1,
           minHeight: 200,
-          boxShadow: `0 2px 8px ${colors.border}30`
+          boxShadow: 1
         }}
       >
         {faqsLoading ? (
           <LoadingSpinner loading={true} />
         ) : faqsError ? (
-          <EmptyState 
-            message="FAQ를 불러오는 중 오류가 발생했습니다." 
-            theme={theme}
-          />
+          <EmptyState message="FAQ를 불러오는 중 오류가 발생했습니다." />
         ) : faqsEmpty ? (
-          <EmptyState 
-            message="등록된 FAQ가 없습니다." 
-            theme={theme}
-          />
+          <EmptyState message="등록된 FAQ가 없습니다." />
         ) : (
           <Stack spacing={1.5}>
             {faqs?.faqs?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((faq: UserFaqItem) => (
@@ -275,16 +263,16 @@ export default function Home() {
                   borderRadius: 2,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease-in-out',
-                  border: `1px solid ${colors.border}`,
+                  border: `1px solid ${palette.divider}`,
                   backgroundColor: 'transparent',
                   '&:hover': {
-                    backgroundColor: `${colors.primary}15`,
-                    borderColor: colors.primary,
+                    backgroundColor: 'action.hover',
+                    borderColor: palette.primary.main,
                     transform: 'translateY(-1px)',
-                    boxShadow: `0 4px 12px ${colors.primary}20`,
+                    boxShadow: 2,
                     '& .content-text': {
                       textDecoration: 'underline',
-                      textDecorationColor: colors.text,
+                      textDecorationColor: palette.text.primary,
                       textDecorationThickness: '2px'
                     }
                   }
@@ -294,7 +282,7 @@ export default function Home() {
                   variant="body2" 
                   className="content-text"
                   sx={{ 
-                    color: colors.textSecondary,
+                    color: palette.text.secondary,
                     transition: 'all 0.2s ease-in-out'
                   }}
                 >
@@ -310,7 +298,7 @@ export default function Home() {
 
   const renderQnaSection = () => (
     <Box
-      id="qna-section"
+      id="home-qna-section"
       flex={1}
       display="flex"
       flexDirection="column"
@@ -325,7 +313,6 @@ export default function Home() {
       }}
     >
       <ThemedButton
-        theme={theme}
         variant="primary"
         className="home-qna-button"
         onClick={() => handleSectionClick('qna')}
@@ -349,27 +336,21 @@ export default function Home() {
       {/* 컨텐츠 영역 테두리 */}
       <Box 
         sx={{ 
-          border: `3px solid ${colors.border}`,
+          border: `3px solid ${palette.divider}`,
           borderRadius: 3,
           p: SPACING.LARGE,
           background: 'transparent',
           flex: 1,
           minHeight: 200,
-          boxShadow: `0 2px 8px ${colors.border}30`
+          boxShadow: 1
         }}
       >
         {qnasLoading ? (
           <LoadingSpinner loading={true} />
         ) : qnasError ? (
-          <EmptyState 
-            message="Q&A를 불러오는 중 오류가 발생했습니다." 
-            theme={theme}
-          />
+          <EmptyState message="Q&A를 불러오는 중 오류가 발생했습니다." />
         ) : qnasEmpty ? (
-          <EmptyState 
-            message="등록된 Q&A가 없습니다." 
-            theme={theme}
-          />
+          <EmptyState message="등록된 Q&A가 없습니다." />
         ) : (
           <Stack spacing={1.5}>
             {qnas?.qnas?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: UserQnaItem) => (
@@ -381,16 +362,16 @@ export default function Home() {
                   borderRadius: 2,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease-in-out',
-                  border: `1px solid ${colors.border}`,
+                  border: `1px solid ${palette.divider}`,
                   backgroundColor: 'transparent',
                   '&:hover': {
-                    backgroundColor: `${colors.primary}15`,
-                    borderColor: colors.primary,
+                    backgroundColor: 'action.hover',
+                    borderColor: palette.primary.main,
                     transform: 'translateY(-1px)',
-                    boxShadow: `0 4px 12px ${colors.primary}20`,
+                    boxShadow: 2,
                     '& .content-text': {
                       textDecoration: 'underline',
-                      textDecorationColor: colors.text,
+                      textDecorationColor: palette.text.primary,
                       textDecorationThickness: '2px'
                     }
                   }
@@ -400,7 +381,7 @@ export default function Home() {
                   variant="body2" 
                   className="content-text"
                   sx={{ 
-                    color: colors.textSecondary,
+                    color: palette.text.secondary,
                     transition: 'all 0.2s ease-in-out',
                     mb: 0.5
                   }}
@@ -410,7 +391,7 @@ export default function Home() {
                 <Typography 
                   variant="caption" 
                   sx={{ 
-                    color: colors.textSecondary,
+                    color: palette.text.secondary,
                     opacity: 0.7
                   }}
                 >
@@ -426,6 +407,7 @@ export default function Home() {
   
   return (
     <Box 
+      id="home-page-container"
       className="home-page-container"
       sx={{ 
         minHeight: '100%',
@@ -440,9 +422,10 @@ export default function Home() {
         className="home-main-section"
         sx={{ 
           width: '100%', 
-          maxWidth: 1200, 
+          maxWidth: '100%', 
           mx: 'auto',
-          background: colors.background,
+          
+          background: palette.background.default,
           py: { xs: 4, md: 8 },
           pb: { xs: 'calc(var(--footer-height, 56px) + 20px)', md: 'calc(var(--footer-height, 56px) + 40px)' },
           position: 'relative',
@@ -451,7 +434,6 @@ export default function Home() {
       >
         {/* 서비스 소개 */}
         <ThemedCard 
-          theme={theme} 
           className="home-intro-section"
           sx={{ 
             width: { xs: '100%', md: '95%' }, 
@@ -463,10 +445,10 @@ export default function Home() {
         >
           {/* P가 이상하면 4로 수정 현재는 3임 */}
           <Box sx={{ 
-            background: colors.primary, 
+            background: palette.primary.main, 
             borderRadius: 3, 
             p: SPACING.LARGE, 
-            boxShadow: `0 4px 12px ${colors.primary}20`,
+            boxShadow: 1,
             position: 'relative',
             isolation: 'isolate'
           }}>
@@ -476,7 +458,7 @@ export default function Home() {
               align="center" 
               gutterBottom 
               sx={{ 
-                color: colors.text,
+                color: muiTheme.palette.getContrastText(palette.primary.main),
                 position: 'relative',
                 isolation: 'isolate'
               }}
@@ -486,7 +468,7 @@ export default function Home() {
             <Typography 
               align="center" 
               sx={{ 
-                color: colors.text,
+                color: muiTheme.palette.getContrastText(palette.primary.main),
                 position: 'relative',
                 isolation: 'isolate'
               }}
@@ -497,7 +479,7 @@ export default function Home() {
         </ThemedCard>
 
         {/* Open API 문서 바로가기 버튼 */}
-        <Box sx={{ 
+        <Box id="home-openapi-button-row" sx={{ 
           width: { xs: '100%', md: '95%' }, 
           mx: 'auto', 
           mb:  SPACING.MEDIUM,
@@ -507,7 +489,6 @@ export default function Home() {
           isolation: 'isolate'
         }}>
           <ThemedButton
-            theme={theme}
             variant="outlined"
             onClick={() => window.open(openApiDocUrl, '_blank')}
             className="home-api-button"
@@ -525,7 +506,6 @@ export default function Home() {
         
         {/* 3구역(공지/FAQ/Q&A) */}
         <ThemedCard 
-          theme={theme} 
           className="home-3section"
           sx={{ 
             width: { xs: '100%', md: '95%' }, 
@@ -540,9 +520,9 @@ export default function Home() {
             divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'transparent' }} />}
             spacing={0}
             sx={{
-              background: colors.secondary,
+            background: palette.secondary.main,
               borderRadius: 3,
-              boxShadow: 1,
+            boxShadow: 0,
               minHeight: { xs: 600, md: 700 },
               width: '100%',
               justifyContent: 'center',

@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { isAuthenticated, validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
+import { validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
 import { ROUTES } from '../routes';
 
 // 인증 보호 라우트 컴포넌트 (일반 사용자용)

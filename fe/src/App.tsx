@@ -15,6 +15,7 @@ import NoticeDetail from './pages/NoticeDetail';
 import FaqList from './pages/FaqList';
 import QnaList from './pages/QnaList';
 import QnaDetail from './pages/QnaDetail';
+import ThemePreview from './pages/ThemePreview';
 import Layout from './components/Layout';
 import { PrivateRoute, AdminProtectedRoute } from './components/ProtectedRoute';
 
@@ -59,6 +60,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             {/* 공개 페이지 (로그인 불필요) */}
             <Route index element={<Home />} />
+            <Route path={ROUTES.PUBLIC.THEME_PREVIEW} element={<ThemePreview />} />
             <Route path={ROUTES.PUBLIC.NOTICE} element={<NoticeList />} />
             <Route path={ROUTES.PUBLIC.NOTICE_DETAIL} element={<NoticeDetail />} />
             <Route path={ROUTES.PUBLIC.FAQ} element={<FaqList />} />

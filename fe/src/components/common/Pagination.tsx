@@ -1,11 +1,10 @@
 import { Box, Pagination as MuiPagination } from '@mui/material';
-import { getThemeColors } from '../../theme';
+import { useTheme } from '@mui/material/styles';
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  theme?: 'user' | 'admin';
   showFirstButton?: boolean;
   showLastButton?: boolean;
 }
@@ -14,11 +13,10 @@ export default function Pagination({
   currentPage,
   totalPages,
   onPageChange,
-  theme = 'user',
   showFirstButton = true,
   showLastButton = true
 }: PaginationProps) {
-  const colors = getThemeColors(theme);
+  const muiTheme = useTheme();
 
   if (totalPages <= 1) {
     return null;
@@ -43,19 +41,19 @@ export default function Pagination({
         size="large"
         sx={{
           '& .MuiPaginationItem-root': {
-            color: colors.textSecondary,
-            borderColor: colors.border,
+            color: muiTheme.palette.text.secondary,
+            borderColor: muiTheme.palette.divider,
             '&:hover': {
-              backgroundColor: `${colors.primary}15`,
-              borderColor: colors.primary
+              backgroundColor: muiTheme.palette.action.hover,
+              borderColor: muiTheme.palette.primary.main
             }
           },
           '& .MuiPaginationItem-root.Mui-selected': {
-            backgroundColor: colors.primary,
-            color: colors.text,
-            borderColor: colors.primary,
+            backgroundColor: muiTheme.palette.primary.main,
+            color: muiTheme.palette.getContrastText(muiTheme.palette.primary.main),
+            borderColor: muiTheme.palette.primary.main,
             '&:hover': {
-              backgroundColor: colors.primary,
+              backgroundColor: muiTheme.palette.primary.main,
               opacity: 0.9
             }
           }

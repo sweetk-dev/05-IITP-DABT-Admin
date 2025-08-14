@@ -1,4 +1,6 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Box } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles';
 import ThemedButton from './common/ThemedButton';
 
 export interface CommonDialogProps {
@@ -24,13 +26,21 @@ export default function CommonDialog({
   cancelText = '취소',
   theme = 'user',
 }: CommonDialogProps) {
+  const muiTheme = useTheme();
+  const primary = muiTheme.palette.primary.main;
+  const line = `linear-gradient(90deg, ${alpha(primary, 0.6)}, ${alpha(primary, 0.2)}, ${alpha(primary, 0.6)})`;
   return (
-    <Dialog open={open} onClose={onClose}>
-      {title && <DialogTitle>{title}</DialogTitle>}
-      <DialogContent>
-        <Typography>{message}</Typography>
+    <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: 3 } }}>
+      {title && (
+        <DialogTitle sx={{ fontWeight: 800, pb: 1.5 }}>
+          {title}
+          <Box sx={{ mt: 1, height: 2, background: line, borderRadius: 1 }} />
+        </DialogTitle>
+      )}
+      <DialogContent sx={{ pt: 2 }}>
+        <Typography sx={{ color: 'text.secondary' }}>{message}</Typography>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
         {showCancel && (
           <ThemedButton 
             theme={theme}

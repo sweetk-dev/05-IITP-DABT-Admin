@@ -1,166 +1,98 @@
-import { Typography, Box, Container } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import { useLocation, Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import AppBar from './AppBar';
+import { CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { createAppTheme } from '../theme/mui';
 import { isAuthenticated, validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
 import { ROUTES } from '../routes';
+import Footer from './Footer';
 
-// 따뜻한 색상 팔레트
-const bgMain = '#FFF7ED'; // 연한 베이지
-const footerBg = '#2D3142'; // 네이비에 가까운 보라
-const footerText = '#fff';
-
-// 서비스 이름 (AppBar와 동일하게)
-const SERVICE_NAME = 'IITP DABT';
-
-// 공개 페이지 목록 (로그인 없이 접근 가능)
 const PUBLIC_PAGES = [
-  ROUTES.PUBLIC.HOME, 
-  ROUTES.PUBLIC.NOTICE, 
-  ROUTES.PUBLIC.FAQ, 
-  ROUTES.PUBLIC.QNA, 
-  ROUTES.PUBLIC.LOGIN, 
-  ROUTES.PUBLIC.REGISTER, 
-  ROUTES.ADMIN.LOGIN
+	ROUTES.PUBLIC.HOME, 
+	ROUTES.PUBLIC.NOTICE, 
+	ROUTES.PUBLIC.FAQ, 
+	ROUTES.PUBLIC.QNA, 
+	ROUTES.PUBLIC.LOGIN, 
+	ROUTES.PUBLIC.REGISTER, 
+	ROUTES.ADMIN.LOGIN
 ];
 
-function Footer() {
-  return (
-    <Box
-      component="footer"
-      sx={{
-        bgcolor: footerBg,
-        color: footerText,
-        py: 3,
-        mt: 'auto',
-        textAlign: 'center',
-        position: 'relative',
-      }}
-    >
-      {/* Footer 고정 로고 - Footer 내부 오른쪽 상단 */}
-      <Box
-        className="footer-logo-container"
-        sx={{
-          position: 'absolute !important',
-          top: '-120px !important', 
-          right: '5% !important',
-          zIndex: 1000,
-          pointerEvents: 'none',
-          transform: 'none !important',
-        }}
-      >
-        <img
-          className="footer-logo-image"
-          src="/iitp_cms_logo_img_2.png"
-          alt="IITP Logo"
-          style={{ 
-            width: 240, 
-            maxWidth: '40vw', 
-            height: 'auto',
-            opacity: 0.95,
-            position: 'relative',
-            left: 'auto',
-            right: 'auto',
-            transform: 'none'
-          }}
-        />
-      </Box>
-      
-      <Container maxWidth="lg">
-        <Typography variant="body2" sx={{ opacity: 0.8 }}>
-          © 2025 {SERVICE_NAME}. All rights reserved.
-        </Typography>
-        <Typography variant="caption" sx={{ opacity: 0.6, display: 'block', mt: 1 }}>
-          장애인 자립 생활 지원 플랫폼 Open Api 센터
-        </Typography>
-      </Container>
-    </Box>
-  );
-}
-
 export default function Layout() {
-  const location = useLocation();
-  const isLoggedIn = isAuthenticated();
-  const isUserLoggedIn = isUserAuthenticated();
-  const isAdminLoggedIn = isAdminAuthenticated();
-  
-  console.log('[Layout]', {
-    pathname: location.pathname,
-    isLoggedIn,
-    isUserLoggedIn,
-    isAdminLoggedIn,
-    isAuthenticated: isAuthenticated(),
-    isUserAuthenticated: isUserAuthenticated(),
-    isAdminAuthenticated: isAdminAuthenticated()
-  });
-  
-  // 토큰 유효성 검사 및 정리 (컴포넌트 마운트 시)
-  useEffect(() => {
-    validateAndCleanTokens();
-  }, []);
+	const location = useLocation();
+	const isLoggedIn = isAuthenticated();
+	const isUserLoggedIn = isUserAuthenticated();
+	const isAdminLoggedIn = isAdminAuthenticated();
+	
+	console.log('[Layout]', {
+		pathname: location.pathname,
+		isLoggedIn,
+		isUserLoggedIn,
+		isAdminLoggedIn,
+		isAuthenticated: isAuthenticated(),
+		isUserAuthenticated: isUserAuthenticated(),
+		isAdminAuthenticated: isAdminAuthenticated()
+	});
+	
+	useEffect(() => {
+		validateAndCleanTokens();
+	}, []);
 
-  let appBarType: 'user' | 'public' | 'auth' | 'admin-login' | 'admin' = 'user';
+	let appBarType: 'user' | 'public' | 'auth' | 'admin-login' | 'admin' = 'user';
 
-  // 어드민 로그인 화면
-  if (location.pathname === ROUTES.ADMIN.LOGIN) {
-    appBarType = 'admin-login';
-  }
-  // 어드민 로그인 후 (모든 /admin/* 경로, 단 /admin/login 제외)
-  else if (location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN) {
-    appBarType = 'admin';
-  }
-  // 로그인/회원가입 화면
-  else if (location.pathname === ROUTES.PUBLIC.LOGIN || location.pathname === ROUTES.PUBLIC.REGISTER) {
-    appBarType = 'auth';
-  }
-  // 공개페이지(공지, FAQ, QnA 등) - 로그인 전
-  else if (PUBLIC_PAGES.some(page => location.pathname === page || location.pathname.startsWith(page + '/')) && !isLoggedIn) {
-    appBarType = 'public';
-  }
-  // 공개페이지(공지, FAQ, QnA 등) - 로그인 후, 또는 일반 유저 페이지
-  else {
-    appBarType = 'user';
-  }
+	if (location.pathname === ROUTES.ADMIN.LOGIN) {
+		appBarType = 'admin-login';
+	} else if (location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN) {
+		appBarType = 'admin';
+	} else if (location.pathname === ROUTES.PUBLIC.LOGIN || location.pathname === ROUTES.PUBLIC.REGISTER) {
+		appBarType = 'auth';
+	} else if (PUBLIC_PAGES.some(page => location.pathname === page || location.pathname.startsWith(page + '/')) && !isLoggedIn) {
+		appBarType = 'public';
+	} else {
+		appBarType = 'user';
+	}
 
-  console.log('[Layout] AppBar type determined:', appBarType);
+	console.log('[Layout] AppBar type determined:', appBarType);
 
-  return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      background: bgMain,
-    }}>
-      {/* AppBar는 자체적으로 position fixed를 사용 */}
-      <AppBar type={appBarType} />
-      
-      {/* 컨텐츠 영역 - 상단바 높이만큼 여백 확보 */}
-      <Box sx={{ 
-        flex: 1,
-        pt: location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN
-          ? 'calc(var(--appbar-height, 64px) + var(--admin-menu-height, 56px) + 32px)'
-          : 'calc(var(--appbar-height, 64px) + 32px)',
-        pb: '48px',
-        minHeight: location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN
-          ? 'calc(100vh - var(--appbar-height, 64px) - var(--admin-menu-height, 56px) - var(--footer-height, 56px))'
-          : 'calc(100vh - var(--appbar-height, 64px) - var(--footer-height, 56px))',
-        overflow: 'hidden',
-        position: 'relative',
-        zIndex: 1
-      }}>
-        <Box sx={{
-          height: '100%',
-          overflow: 'auto',
-          paddingTop: 0,
-          scrollPaddingTop: location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN
-            ? 'calc(var(--appbar-height, 64px) + var(--admin-menu-height, 56px) + 32px)'
-            : 'calc(var(--appbar-height, 64px) + 32px)'
-        }}>
-          <Outlet />
-        </Box>
-      </Box>
-      
-      <Footer />
-    </Box>
-  );
+	// Apply compact density; default to 70%, can switch to 60% if needed after preview
+	const appTheme = createAppTheme(
+		appBarType === 'admin' || appBarType === 'admin-login' ? 'admin' : 'user',
+		'compact70'
+	);
+
+	return (
+		<ThemeProvider theme={appTheme}>
+			<CssBaseline />
+			<Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+				<AppBar type={appBarType} />
+				<Box
+					component="main"
+					id="main-content"
+					sx={{
+						flex: 1,
+					// Use a capped footer height to avoid over-shrinking content on tall screens before measurement settles
+					'--content-max-height': 'calc(100dvh - var(--header-height-px, 0px) - var(--admin-menu-height-px, 0px) - min(var(--footer-height-px, 0px), var(--footer-height-cap, 120px)))',
+						minHeight: 'calc(100dvh - var(--header-height-px, 64px) - var(--admin-menu-height-px, 0px) - var(--footer-height-px, 0px) + var(--main-height-offset, 0px))'
+					}}
+				>
+					<Container id="layout-content-container" maxWidth={false} sx={{ py: { xs: 2, md: 4 }, maxWidth: 'var(--content-max-width, 1600px)', mx: 'auto', minHeight: 'var(--content-max-height)' }}>
+						<Outlet />
+					</Container>
+				</Box>
+				<Box ref={(el: HTMLDivElement | null) => {
+					if (!el) return;
+					const root = document.documentElement;
+					const updateFooter = () => {
+						root.style.setProperty('--footer-height-px', `${el.offsetHeight || 0}px`);
+					};
+					updateFooter();
+					const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateFooter) : null;
+					if (ro) ro.observe(el);
+				}}>
+					<Footer />
+				</Box>
+			</Box>
+		</ThemeProvider>
+	);
 } 

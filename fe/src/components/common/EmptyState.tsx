@@ -1,19 +1,17 @@
 import { Box, Typography } from '@mui/material';
 import { InfoOutlined } from '@mui/icons-material';
-import { getThemeColors } from '../../theme';
+import { useTheme } from '@mui/material/styles';
 
 interface EmptyStateProps {
   message?: string;
-  theme?: 'user' | 'admin';
   icon?: React.ReactNode;
 }
 
 export default function EmptyState({ 
   message = '데이터가 없습니다.', 
-  theme = 'user',
   icon 
 }: EmptyStateProps) {
-  const colors = getThemeColors(theme);
+  const muiTheme = useTheme();
 
   return (
     <Box
@@ -29,19 +27,12 @@ export default function EmptyState({
       }}
     >
       {icon || (
-        <InfoOutlined
-          sx={{
-            fontSize: 48,
-            color: colors.textSecondary,
-            mb: 2,
-            opacity: 0.6
-          }}
-        />
+        <InfoOutlined sx={{ fontSize: 48, color: muiTheme.palette.text.secondary, mb: 2, opacity: 0.6 }} />
       )}
       <Typography
         variant="body1"
         sx={{
-          color: colors.textSecondary,
+          color: muiTheme.palette.text.secondary,
           opacity: 0.8,
           fontWeight: 500
         }}

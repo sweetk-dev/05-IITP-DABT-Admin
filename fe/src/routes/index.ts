@@ -7,6 +7,7 @@ export const ROUTES = {
   // 공개 페이지 (로그인 불필요)
   PUBLIC: {
     HOME: '/',
+    THEME_PREVIEW: '/theme-preview',
     LOGIN: '/login',
     REGISTER: '/register',
     NOTICE: '/notice',

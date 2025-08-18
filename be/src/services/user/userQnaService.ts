@@ -21,15 +21,20 @@ export const getUserQnaList = async (
   params: UserQnaListQuery
 ): Promise<{ qnas: QnaSource[]; total: number; page: number; limit: number; totalPages: number }> => {
   try {
-    const { page = 1, limit = 10 } = params;
+    const { page = 1, limit = 10, sort } = params as any;
     const offset = (page - 1) * limit;
+
+    // 정렬: 기본 createdAt DESC, 조회수순은 hit_cnt DESC, createdAt DESC
+    const order = sort === 'hit-desc'
+      ? [["hit_cnt" as any, 'DESC'], ['createdAt' as any, 'DESC']]
+      : [['createdAt' as any, 'DESC']];
 
     const result = await findQnas({
       // 공개 목록: 사용자 전체 공개 QnA를 노출 (secretYn='N')
       where: { delYn: 'N', secretYn: 'N' },
       limit,
       offset,
-      order: [['createdAt', 'DESC']]
+      order
     });
     
     appLogger.info('사용자 Q&A 목록 조회 서비스 호출', { userId, params });
@@ -59,6 +64,11 @@ export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<Q
     }
     if (qna.secretYn === 'Y' && qna.userId !== userId) {
       throw new Error('Q&A를 찾을 수 없거나 접근 권한이 없습니다.');
+    }
+    // 조회수 증가: 공개 QnA만, 본문 열람 시 1회 증가 (간단 버전)
+    if (qna.secretYn === 'N') {
+      const current = (qna as any).hitCnt || 0;
+      await qna.update({ hitCnt: current + 1, updatedAt: new Date() });
     }
     
     appLogger.info('사용자 Q&A 상세 조회 서비스 호출', { userId, qnaId });

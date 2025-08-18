@@ -2,23 +2,23 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, Stack, Chip, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import ThemedCard from '../components/common/ThemedCard';
+import ThemedCard from '../../components/common/ThemedCard';
 // import PageTitle from '../components/common/PageTitle';
 // import ThemedButton from '../components/common/ThemedButton';
-import ListHeader from '../components/common/ListHeader';
-import { useQuerySync } from '../hooks/useQuerySync';
-import EmptyState from '../components/common/EmptyState';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Pagination from '../components/common/Pagination';
-import SelectField from '../components/common/SelectField';
+import ListHeader from '../../components/common/ListHeader';
+import { useQuerySync } from '../../hooks/useQuerySync';
+import EmptyState from '../../components/common/EmptyState';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import Pagination from '../../components/common/Pagination';
+import SelectField from '../../components/common/SelectField';
 import { ExpandMore } from '@mui/icons-material';
-import { PAGINATION } from '../constants/pagination';
-import { SPACING } from '../constants/spacing';
-import { useDataFetching } from '../hooks/useDataFetching';
-import { usePagination } from '../hooks/usePagination';
-import { getUserFaqList, getUserFaqListByType, getCommonCodesByGroupId } from '../api';
+import { PAGINATION } from '../../constants/pagination';
+import { SPACING } from '../../constants/spacing';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { usePagination } from '../../hooks/usePagination';
+import { getUserFaqList, getUserFaqListByType, getCommonCodesByGroupId } from '../../api';
 import type { UserFaqItem } from '@iitp-dabt/common';
-import { useErrorHandler, type UseErrorHandlerResult } from '../hooks/useErrorHandler';
+import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
 
 export default function FaqList() {
   const navigate = useNavigate();
@@ -73,19 +73,19 @@ export default function FaqList() {
         {errorHandler.InlineError}
 
         {/* FAQ 타입 선택 */}
-        <ThemedCard sx={{ mb: SPACING.LARGE }}>
-          <Box sx={{ p: SPACING.LARGE }}>
-            <Typography variant="h6" sx={{ color: muiTheme.palette.text.primary, mb: SPACING.MEDIUM, fontWeight: 500 }}>
+        <ThemedCard id="faq-type-card" sx={{ mb: SPACING.LARGE }}>
+          <Box id="faq-type-card-body" sx={{ p: SPACING.LARGE }}>
+            <Typography id="faq-type-title" variant="h6" sx={{ color: muiTheme.palette.text.primary, mb: SPACING.MEDIUM, fontWeight: 500 }}>
               FAQ 유형 선택
             </Typography>
-            <SelectField value={faqType} onChange={handleFaqTypeChange} options={faqTypeOptions} label="FAQ 유형" disabled={faqTypeLoading} />
+            <SelectField id="faq-type-select" value={faqType} onChange={handleFaqTypeChange} options={faqTypeOptions} label="FAQ 유형" disabled={faqTypeLoading} />
           </Box>
         </ThemedCard>
 
         {/* FAQ 목록 */}
-        <ThemedCard>
+        <ThemedCard id="faq-list-card">
           {isLoading ? (
-            <Box sx={{ position: 'relative', minHeight: 400 }}>
+            <Box id="faq-list-loading" sx={{ position: 'relative', minHeight: 400 }}>
               <LoadingSpinner loading={true} />
             </Box>
           ) : isError ? (
@@ -94,22 +94,22 @@ export default function FaqList() {
             <EmptyState message="등록된 FAQ가 없습니다." />
           ) : (
             <>
-              <Stack spacing={1}>
+              <Stack id="faq-list-stack" spacing={1}>
                 {faqData?.items.map((faq: UserFaqItem) => (
-                  <Accordion key={faq.faqId} expanded={expandedFaq === faq.faqId} onChange={() => handleFaqExpand(faq.faqId)} sx={{ '&:before': { display: 'none' }, border: `1px solid ${muiTheme.palette.divider}`, borderRadius: 2, mb: 1, '&.Mui-expanded': { borderColor: muiTheme.palette.primary.main, boxShadow: muiTheme.shadows[2] } }}>
-                    <AccordionSummary expandIcon={<ExpandMore />} sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center' } }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Chip label={faqTypeOptions.find(opt => opt.value === faq.faqType)?.label ?? faq.faqType} color="primary" size="small" sx={{ mr: 2 }} />
-                        <Typography variant="h6" sx={{ color: muiTheme.palette.text.primary, fontWeight: 500, flex: 1 }}>
+                  <Accordion id={`faq-item-${faq.faqId}`} key={faq.faqId} expanded={expandedFaq === faq.faqId} onChange={() => handleFaqExpand(faq.faqId)} sx={{ '&:before': { display: 'none' }, border: `1px solid ${muiTheme.palette.divider}`, borderRadius: 2, mb: 1, '&.Mui-expanded': { borderColor: muiTheme.palette.primary.main, boxShadow: muiTheme.shadows[2] } }}>
+                    <AccordionSummary id={`faq-item-summary-${faq.faqId}`} expandIcon={<ExpandMore />} sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center' } }}>
+                      <Box id={`faq-item-header-${faq.faqId}`} sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        <Chip id={`faq-item-type-${faq.faqId}`} label={faqTypeOptions.find(opt => opt.value === faq.faqType)?.label ?? faq.faqType} color="primary" size="small" sx={{ mr: 2 }} />
+                        <Typography id={`faq-item-question-${faq.faqId}`} variant="h6" sx={{ color: muiTheme.palette.text.primary, fontWeight: 500, flex: 1 }}>
                           Q. {faq.question}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: muiTheme.palette.text.secondary, ml: 2 }}>
+                        <Typography id={`faq-item-hit-${faq.faqId}`} variant="caption" sx={{ color: muiTheme.palette.text.secondary, ml: 2 }}>
                           조회수: {faq.hitCnt}
                         </Typography>
                       </Box>
                     </AccordionSummary>
-                    <AccordionDetails sx={{ backgroundColor: 'action.hover', borderTop: `1px solid ${muiTheme.palette.divider}` }}>
-                      <Typography variant="body1" sx={{ color: muiTheme.palette.text.primary, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                    <AccordionDetails id={`faq-item-details-${faq.faqId}`} sx={{ backgroundColor: 'action.hover', borderTop: `1px solid ${muiTheme.palette.divider}` }}>
+                      <Typography id={`faq-item-answer-${faq.faqId}`} variant="body1" sx={{ color: muiTheme.palette.text.primary, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
                         {faq.answer}
                       </Typography>
                     </AccordionDetails>

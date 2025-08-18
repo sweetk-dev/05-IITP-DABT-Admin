@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate, useParams } from 'react-router-dom';
-import ThemedCard from '../components/common/ThemedCard';
-import PageTitle from '../components/common/PageTitle';
-import ThemedButton from '../components/common/ThemedButton';
-import EmptyState from '../components/common/EmptyState';
-import LoadingSpinner from '../components/LoadingSpinner';
+import ThemedCard from '../../components/common/ThemedCard';
+import PageTitle from '../../components/common/PageTitle';
+import ThemedButton from '../../components/common/ThemedButton';
+import EmptyState from '../../components/common/EmptyState';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { ArrowBack, NavigateBefore, NavigateNext } from '@mui/icons-material';
-import { useDataFetching } from '../hooks/useDataFetching';
-import { getUserQnaDetail, getUserQnaList } from '../api';
-import { SPACING } from '../constants/spacing';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { getUserQnaDetail, getUserQnaList } from '../../api';
+import { SPACING } from '../../constants/spacing';
 import type { UserQnaItem } from '@iitp-dabt/common';
 
 export default function QnaDetail() {

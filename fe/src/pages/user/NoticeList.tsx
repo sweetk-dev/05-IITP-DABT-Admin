@@ -2,22 +2,22 @@ import { useEffect } from 'react';
 import { Box, Typography, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import ThemedCard from '../components/common/ThemedCard';
+import ThemedCard from '../../components/common/ThemedCard';
 // import PageTitle from '../components/common/PageTitle';
 // import ThemedButton from '../components/common/ThemedButton';
-import EmptyState from '../components/common/EmptyState';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Pagination from '../components/common/Pagination';
+import EmptyState from '../../components/common/EmptyState';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import Pagination from '../../components/common/Pagination';
 // import { ArrowBack } from '@mui/icons-material';
-import { PAGINATION } from '../constants/pagination';
-import { SPACING } from '../constants/spacing';
-import { useDataFetching } from '../hooks/useDataFetching';
-import { usePagination } from '../hooks/usePagination';
-import { getUserNoticeList } from '../api';
-import ListHeader from '../components/common/ListHeader';
-import ListItemCard from '../components/common/ListItemCard';
-import { useQuerySync } from '../hooks/useQuerySync';
-import { useErrorHandler, type UseErrorHandlerResult } from '../hooks/useErrorHandler';
+import { PAGINATION } from '../../constants/pagination';
+import { SPACING } from '../../constants/spacing';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { usePagination } from '../../hooks/usePagination';
+import { getUserNoticeList } from '../../api';
+import ListHeader from '../../components/common/ListHeader';
+import ListItemCard from '../../components/common/ListItemCard';
+import { useQuerySync } from '../../hooks/useQuerySync';
+import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
 
 interface NoticeItem { noticeId: number; title: string; content: string; noticeType: string; postedAt: string; pinnedYn?: 'Y' | 'N'; }
 
@@ -83,9 +83,9 @@ export default function NoticeList() {
         {errorHandler.InlineError}
 
         {/* 공지사항 목록 */}
-        <ThemedCard>
+        <ThemedCard id="notice-list-card">
           {isLoading ? (
-            <Box sx={{ position: 'relative', minHeight: 400 }}>
+            <Box id="notice-list-loading" sx={{ position: 'relative', minHeight: 400 }}>
               <LoadingSpinner loading={true} />
             </Box>
           ) : isError ? (
@@ -94,16 +94,16 @@ export default function NoticeList() {
             <EmptyState message="등록된 공지사항이 없습니다." />
           ) : (
             <>
-              <Stack spacing={SPACING.MEDIUM}>
+              <Stack id="notice-list-stack" spacing={SPACING.MEDIUM}>
                 {noticeData?.items.map((notice: NoticeItem) => (
-                  <ListItemCard key={notice.noticeId} onClick={() => handleNoticeClick(notice.noticeId)}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
+                  <ListItemCard id={`notice-item-${notice.noticeId}`} key={notice.noticeId} onClick={() => handleNoticeClick(notice.noticeId)}>
+                    <Box id={`notice-item-header-${notice.noticeId}`} sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
                       <Chip label={getNoticeTypeLabel(notice.noticeType)} color={getNoticeTypeColor(notice.noticeType) as any} size="small" sx={{ mr: SPACING.MEDIUM }} />
                       {notice.pinnedYn === 'Y' && <Chip label="고정" color="warning" size="small" sx={{ mr: SPACING.MEDIUM }} />}
-                      <Typography variant="caption" sx={{ color: colors.textSecondary, ml: 'auto' }}>{formatDate(notice.postedAt)}</Typography>
+                      <Typography id={`notice-item-date-${notice.noticeId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto' }}>{formatDate(notice.postedAt)}</Typography>
                     </Box>
-                    <Typography variant="subtitle1" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.SMALL }}>{notice.title}</Typography>
-                    <Typography variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }}>{notice.content}</Typography>
+                    <Typography id={`notice-item-title-${notice.noticeId}`} variant="subtitle1" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.SMALL }}>{notice.title}</Typography>
+                    <Typography id={`notice-item-content-${notice.noticeId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }}>{notice.content}</Typography>
                   </ListItemCard>
                 ))}
               </Stack>

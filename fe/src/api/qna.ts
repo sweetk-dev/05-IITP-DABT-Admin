@@ -23,7 +23,7 @@ import type { ApiResponse } from '../types/api';
  */
 export async function getUserQnaList(params: UserQnaListReq): Promise<ApiResponse<UserQnaListRes>> {
   const url = buildUrl(FULL_API_URLS.USER.QNA.LIST, params as any);
-  return apiFetch<UserQnaListRes>(url, { method: 'GET' });
+  return publicApiFetch<UserQnaListRes>(url, { method: 'GET' });
 }
 
 /**
@@ -31,7 +31,7 @@ export async function getUserQnaList(params: UserQnaListReq): Promise<ApiRespons
  */
 export async function getUserQnaDetail(qnaId: number): Promise<ApiResponse<UserQnaDetailRes>> {
   const url = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
-  return apiFetch<UserQnaDetailRes>(url, { method: 'GET' });
+  return publicApiFetch<UserQnaDetailRes>(url, { method: 'GET' });
 }
 
 /**
@@ -60,7 +60,7 @@ export async function getUserQnaListByType(qnaType: string, params: Omit<UserQna
     ...params,
     qnaType: qnaType === 'ALL' ? undefined : qnaType
   } as any);
-  return apiFetch<UserQnaListRes>(url, { method: 'GET' });
+  return publicApiFetch<UserQnaListRes>(url, { method: 'GET' });
 }
 
 // ===== 관리자용 API 함수들 =====

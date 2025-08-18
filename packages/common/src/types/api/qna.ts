@@ -9,6 +9,7 @@ export interface UserQnaItem {
   content: string;
   secretYn: string;
   writerName: string;
+  answeredYn: string;
   createdAt: string;
   answeredAt?: string;
 }
@@ -22,6 +23,7 @@ export interface AdminQnaItem {
   content: string;
   secretYn: string;
   writerName: string;
+  answeredYn: string;
   createdAt: string;
   answeredAt?: string;
   answeredBy?: number;

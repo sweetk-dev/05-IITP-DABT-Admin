@@ -17,7 +17,10 @@ export async function findFaqs(options: {
 }> {
   const limit = options.limit || 10;
   const offset = options.offset || 0;
-  const order = options.order || [['sortOrder', 'ASC'], ['createdAt', 'DESC']];
+  const order = options.order || [
+    [SysFaq.sequelize!.col('sort_order'), 'ASC'],
+    [SysFaq.sequelize!.col('created_at'), 'DESC']
+  ];
 
   const { count, rows } = await SysFaq.findAndCountAll({
     where: options.where || {},

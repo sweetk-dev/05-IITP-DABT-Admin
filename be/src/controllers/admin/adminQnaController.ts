@@ -73,7 +73,7 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListQu
         return sendDatabaseError(res, '조회', 'QnA 목록');
       }
     }
-    sendError(res, ErrorCode.QNA_NOT_FOUND);
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 

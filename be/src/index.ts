@@ -56,6 +56,14 @@ async function startServer() {
     await sequelize.authenticate();
     appLogger.info('Database connection established successfully');
     
+    // 선택적 스키마 동기화 (개발 편의용)
+    if (process.env.DB_AUTO_SYNC === 'true') {
+      const alter = process.env.DB_SYNC_ALTER === 'true';
+      appLogger.warn(`[Sequelize] Auto sync enabled (alter=${alter}). This is intended for development only.`);
+      await sequelize.sync({ alter });
+      appLogger.info('[Sequelize] Models synchronized with the database');
+    }
+    
     // 서버 시작
     app.listen(30000, () => appLogger.info('Server started'));
     

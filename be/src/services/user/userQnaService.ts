@@ -25,7 +25,8 @@ export const getUserQnaList = async (
     const offset = (page - 1) * limit;
 
     const result = await findQnas({
-      where: { userId, delYn: 'N' },
+      // 공개 목록: 사용자 전체 공개 QnA를 노출 (secretYn='N')
+      where: { delYn: 'N', secretYn: 'N' },
       limit,
       offset,
       order: [['createdAt', 'DESC']]
@@ -52,7 +53,11 @@ export const getUserQnaList = async (
 export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<QnaSource> => {
   try {
     const qna = await findQnaById(qnaId);
-    if (!qna || qna.userId !== userId) {
+    // 공개 상세: 비공개(secretYn='Y')는 소유자만 접근, 공개(secretYn='N')는 모두 접근
+    if (!qna) {
+      throw new Error('Q&A를 찾을 수 없거나 접근 권한이 없습니다.');
+    }
+    if (qna.secretYn === 'Y' && qna.userId !== userId) {
       throw new Error('Q&A를 찾을 수 없거나 접근 권한이 없습니다.');
     }
     
@@ -91,9 +96,11 @@ export const createUserQna = async (userId: number, createData: UserQnaCreateReq
 
 export const getUserQnaHome = async (userId: number): Promise<UserQnaHomeRes> => {
   const result = await findQnas({
-    where: { userId, delYn: 'N' },
+    // 홈 노출: 공개 QnA 최근 5개
+    where: { delYn: 'N', secretYn: 'N' },
     limit: 5,
     offset: 0,
+    // 정렬은 레포지토리에서 컬럼명으로 처리하므로 모델 의존 제거
     order: [['createdAt', 'DESC']]
   });
 

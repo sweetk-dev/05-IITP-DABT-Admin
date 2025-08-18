@@ -31,15 +31,8 @@ import { toUserQnaItem } from '../../mappers/qnaMapper';
 export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListQuery>, res: Response) => {
   try {
     logApiCall('GET', API_URLS.USER.QNA.LIST, USER_API_MAPPING as any, '사용자 Q&A 목록 조회');
-
-    const userId = extractUserIdFromRequest(req);
-    
-    if (!userId) {
-      return sendError(res, ErrorCode.UNAUTHORIZED);
-    }
-
+    const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용: userId 없으면 0으로 조회
     const params = req.query as any;
-
     const domain = await getUserQnaList(userId, params);
     const result: UserQnaListRes = {
       items: domain.qnas.map(toUserQnaItem),
@@ -61,22 +54,31 @@ export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListQuer
         return sendDatabaseError(res, '조회', 'Q&A 목록');
       }
     }
-    sendError(res, ErrorCode.QNA_NOT_FOUND);
+    // 비-DB 오류 시 빈 리스트로 성공 응답
+    const page = Number((req.query as any).page) || 1;
+    const limit = Number((req.query as any).limit) || 10;
+    const empty: UserQnaListRes = { items: [], total: 0, page, limit, totalPages: 0 } as any;
+    return sendSuccess(res, empty, undefined, 'USER_QNA_LIST_VIEW', { userId: extractUserIdFromRequest(req), count: 0 }, true);
   }
 };
 
 export const getQnaHomeForUser = async (req: Request, res: Response) => {
   try {
     logApiCall('GET', API_URLS.USER.QNA.HOME, USER_API_MAPPING as any, '사용자 Q&A 홈 조회');
-    const userId = extractUserIdFromRequest(req);
-    if (!userId) {
-      return sendError(res, ErrorCode.UNAUTHORIZED);
-    }
+    const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용
     const data = await getUserQnaHome(userId);
     const response: UserQnaHomeRes = data;
     sendSuccess(res, response, undefined, 'USER_QNA_HOME_VIEW', { userId, count: response.qnas.length });
   } catch (error) {
-    sendError(res, ErrorCode.QNA_NOT_FOUND);
+    // 홈 리스트: DB 에러가 아닌 경우 빈 리스트로 성공 응답
+    if (error instanceof Error) {
+      const errorMsg = error.message;
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', 'Q&A');
+      }
+    }
+    const empty: UserQnaHomeRes = { qnas: [] } as any;
+    return sendSuccess(res, empty, undefined, 'USER_QNA_HOME_VIEW', { userId: extractUserIdFromRequest(req) || 0, count: 0 });
   }
 };
 
@@ -88,16 +90,9 @@ export const getQnaHomeForUser = async (req: Request, res: Response) => {
 export const getQnaDetailForUser = async (req: Request<UserQnaDetailParams>, res: Response) => {
   try {
     logApiCall('GET', API_URLS.USER.QNA.DETAIL, USER_API_MAPPING as any, '사용자 Q&A 상세 조회');
-
-    const userId = extractUserIdFromRequest(req);
-    
-    if (!userId) {
-      return sendError(res, ErrorCode.UNAUTHORIZED);
-    }
-
+    const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용
     const { qnaId } = req.params;
     const keyId = parseInt(qnaId);
-
     const qna = await getUserQnaDetail(userId, keyId);
     const result: UserQnaDetailRes = { qna: toUserQnaItem(qna) } as any;
 

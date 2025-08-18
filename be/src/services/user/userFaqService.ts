@@ -20,7 +20,7 @@ export const getUserFaqList = async (params: UserFaqListQuery): Promise<{ faqs: 
     const offset = (page - 1) * limit;
 
     const result = await findFaqs({
-      where: { delYn: 'N', useYn: 'Y' },
+      where: { useYn: 'Y' },
       limit,
       offset,
       order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']]
@@ -70,7 +70,7 @@ export const getUserFaqDetail = async (faqId: number): Promise<SysFaq> => {
 export const getUserFaqHome = async (): Promise<UserFaqHomeRes> => {
   // 상단 노출 기준: sortOrder ASC, createdAt DESC, 최대 5개
   const result = await findFaqs({
-    where: { delYn: 'N', useYn: 'Y' },
+    where: { useYn: 'Y' },
     limit: 5,
     offset: 0,
     order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']]

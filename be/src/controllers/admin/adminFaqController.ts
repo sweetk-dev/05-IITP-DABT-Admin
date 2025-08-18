@@ -77,7 +77,7 @@ export const getFaqListForAdmin = async (req: Request<{}, {}, {}, AdminFaqListQu
         return sendDatabaseError(res, '조회', 'FAQ 목록');
       }
     }
-    sendError(res, ErrorCode.FAQ_NOT_FOUND);
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { Add as AddIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
 import ThemedButton from '../../components/common/ThemedButton';
 import { useNavigate } from 'react-router-dom';
 import ThemedCard from '../../components/common/ThemedCard';
@@ -38,7 +39,7 @@ export default function QnaList() {
   ]);
   
   const pagination = usePagination({ initialLimit: PAGINATION.DEFAULT_PAGE_SIZE });
-  const { query, setQuery } = useQuerySync({ page: 1, limit: pagination.pageSize, qnaType: 'ALL', search: '', status: '' });
+  const { query, setQuery } = useQuerySync({ page: 1, limit: pagination.pageSize, qnaType: 'ALL', search: '', status: '', sort: 'createdAt-desc' });
   const errorHandler: UseErrorHandlerResult = useErrorHandler();
 
   // sync query → pagination/state
@@ -62,8 +63,10 @@ export default function QnaList() {
   }, [qnaTypeCodes]);
 
   const { data: qnaData, isLoading, isEmpty, isError } = useDataFetching({
-    fetchFunction: () => (qnaType === 'ALL' ? getUserQnaList({ page: pagination.currentPage, limit: pagination.pageSize, search: query.search || undefined }) : getUserQnaListByType(qnaType, { page: pagination.currentPage, limit: pagination.pageSize })),
-    dependencies: [pagination.currentPage, pagination.pageSize, qnaType, query.search],
+    fetchFunction: () => (qnaType === 'ALL'
+      ? getUserQnaList({ page: pagination.currentPage, limit: pagination.pageSize, search: (query.search as any) || undefined, sort: (query.sort as any) || 'createdAt-desc' })
+      : getUserQnaListByType(qnaType, { page: pagination.currentPage, limit: pagination.pageSize })),
+    dependencies: [pagination.currentPage, pagination.pageSize, qnaType, query.search, query.sort],
     autoFetch: true,
     onError: (msg) => errorHandler.setInlineError(msg)
   });
@@ -100,11 +103,26 @@ export default function QnaList() {
           searchPlaceholder="제목/내용 검색"
           searchValue={query.search || ''}
           onSearchChange={(v) => setQuery({ search: v, page: 1 })}
-          filters={[{ label: '유형', value: qnaType, options: qnaTypeOptions, onChange: (v: string) => handleQnaTypeChange(v || 'ALL') }]}
+          filters={[
+            { label: '유형', value: qnaType, options: qnaTypeOptions, onChange: (v: string) => handleQnaTypeChange(v || 'ALL') },
+            { label: '정렬', value: (query.sort as string) || 'createdAt-desc', options: [
+              { value: 'createdAt-desc', label: '등록순(최신)' },
+              { value: 'hit-desc', label: '조회수순' }
+            ], onChange: (v: string) => setQuery({ sort: v || 'createdAt-desc', page: 1 }) }
+          ]}
           totalCount={qnaData?.total}
         />
         <Box id="qna-create-button-row" sx={{ display: 'flex', justifyContent: 'flex-end', mb: SPACING.MEDIUM }}>
-          <ThemedButton id="qna-create-button" variant="primary" onClick={handleCreateQna}>문의하기</ThemedButton>
+          <ThemedButton
+            id="qna-create-button"
+            variant="primary"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={handleCreateQna}
+            buttonSize="cta"
+          >
+            문의하기
+          </ThemedButton>
         </Box>
 
         {/* Q&A 타입 선택 */}
@@ -133,10 +151,27 @@ export default function QnaList() {
                 {qnaData?.items.map((qna: UserQnaItem) => (
                   <Box id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna.qnaId)} sx={{ p: 3, borderRadius: 2, cursor: 'pointer', transition: 'all 0.2s ease-in-out', border: `1px solid ${colors.border}`, backgroundColor: 'transparent', '&:hover': { backgroundColor: `${colors.primary}15`, borderColor: colors.primary, transform: 'translateY(-1px)', boxShadow: `0 4px 12px ${colors.primary}20` } }}>
                     <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
-                      {/* 공개 여부 필드는 타입에 없으므로 생략 또는 별도 매핑 필요 */}
+                      {/* 상태 → 비공개 → 유형 */}
+                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '완료' : '대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 1.5, mb: 1 }} />
+                      {qna.secretYn === 'Y' && (
+                        <span id={`qna-item-private-${qna.qnaId}`} style={{ marginRight: 8, marginBottom: 4 }}>
+                          {/* 공통 상태 뱃지 사용: private */}
+                          {/* inline import를 피하기 위해 심플 아이콘만 */}
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: 'middle', opacity: 0.7 }}>
+                            <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/><path d="M7 9V7a5 5 0 1 1 10 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2 0h6V7a3 3 0 1 0-6 0v2Z" fill="currentColor"/>
+                          </svg>
+                        </span>
+                      )}
                       <Chip id={`qna-item-type-${qna.qnaId}`} label={getQnaTypeLabel(qna.qnaType)} color="primary" size="small" sx={{ mr: 2, mb: 1 }} />
-                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 2, mb: 1 }} />
-                      <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1 }}>{formatDate(qna.createdAt)}</Typography>
+                      <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {formatDate(qna.createdAt)}
+                        {typeof (qna as any).hitCnt === 'number' && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, marginLeft: 8 }}>
+                            <VisibilityIcon sx={{ fontSize: 16, opacity: 0.7 }} />
+                            {(qna as any).hitCnt}
+                          </span>
+                        )}
+                      </Typography>
                     </Box>
                     <Typography id={`qna-item-title-${qna.qnaId}`} variant="h6" sx={{ color: colors.text, fontWeight: 500, mb: 1 }}>{qna.title}</Typography>
                     <Typography id={`qna-item-content-${qna.qnaId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', mb: 1 }}>{qna.content}</Typography>

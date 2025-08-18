@@ -8,8 +8,7 @@ import {
   List, 
   ListItem, 
   ListItemText, 
-  Chip,
-  Alert
+  Chip
 } from '@mui/material';
 import { 
   QuestionAnswer as QnaIcon, 
@@ -31,6 +30,7 @@ import { SPACING } from '../../constants/spacing';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
+import EmptyState from '../../components/common/EmptyState';
 import { getThemeColors } from '../../theme';
 import { useDataFetching } from '../../hooks/useDataFetching';
 
@@ -49,7 +49,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
   const {
     data: qnaList,
     isLoading: qnaLoading,
-    isError: qnaError,
+    isError: qnaIsError,
     // refetch: refetchQna
   } = useDataFetching({
     fetchFunction: () => getUserQnaList({
@@ -63,7 +63,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
   const {
     data: openApiList,
     isLoading: openApiLoading,
-    isError: openApiError,
+    isError: openApiIsError,
     // refetch: refetchOpenApi
   } = useDataFetching({
     fetchFunction: () => getUserOpenApiList({
@@ -74,7 +74,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
   });
 
   const loading = qnaLoading || openApiLoading;
-  const error = qnaError || openApiError;
+  const errorMessage = qnaIsError ? 'QnA를 불러오는 중 오류가 발생했습니다.' : (openApiIsError ? 'OpenAPI를 불러오는 중 오류가 발생했습니다.' : '');
 
 
 
@@ -100,9 +100,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
         <PageHeader title="대시보드" />
       </Box>
 
-      {error && (
+      {errorMessage && (
         <Box sx={{ mb: SPACING.ERROR_ALERT_BOTTOM }}>
-          <ErrorAlert error={error.toString()} />
+          <ErrorAlert error={errorMessage} />
         </Box>
       )}
 
@@ -160,9 +160,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                   ))}
                 </List>
               ) : (
-                <Alert severity="info">
-                  현재 답변 대기 중인 문의가 없습니다.
-                </Alert>
+                <EmptyState message="현재 답변 대기 중인 문의가 없습니다." minHeight={400} />
               )}
             </CardContent>
           </ThemedCard>
@@ -207,9 +205,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                   ))}
                 </List>
               ) : (
-                <Alert severity="info">
-                  발행된 인증키가 없습니다.
-                </Alert>
+                <EmptyState message="발행된 인증키가 없습니다." minHeight={400} />
               )}
             </CardContent>
           </ThemedCard>

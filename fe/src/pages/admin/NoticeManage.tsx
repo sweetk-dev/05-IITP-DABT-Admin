@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Add as AddIcon } from '@mui/icons-material';
 import { Box, CardContent, Typography, Stack } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
@@ -59,7 +60,7 @@ export default function AdminNoticeList() {
 
   return (
     <Box id="admin-notice-list-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-notice-list-header" title="공지사항 관리" actionsRight={<ThemedButton variant="primary" onClick={()=>navigate(ROUTES.ADMIN.NOTICES.CREATE)} buttonSize="cta">등록</ThemedButton>} search={{ value: search, onChange: (v)=>{ setSearch(v); setQuery({ search: v, page: 1, limit, sort }, { replace: true }); }, placeholder: '제목/내용 검색' }} filters={[{ label: '정렬', value: sort, options: [
+      <PageHeader id="admin-notice-list-header" title="공지사항 관리" actionsRight={<ThemedButton variant="primary" size="small" startIcon={<AddIcon />} onClick={()=>navigate(ROUTES.ADMIN.NOTICES.CREATE)} buttonSize="cta">등록</ThemedButton>} search={{ value: search, onChange: (v)=>{ setSearch(v); setQuery({ search: v, page: 1, limit, sort }, { replace: true }); }, placeholder: '제목/내용 검색' }} filters={[{ label: '정렬', value: sort, options: [
         { value: 'name-asc', label: '이름순' },
         { value: 'postedAt-desc', label: '생성순(최신)' },
         { value: 'updatedAt-desc', label: '업데이트순(최신)' },

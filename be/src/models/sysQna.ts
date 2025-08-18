@@ -8,6 +8,7 @@ export interface SysQnaAttributes {
   title: string;
   content: string;
   secretYn: string;
+  hitCnt?: number;
   answeredYn?: string;
   delYn?: 'Y' | 'N';
   writerName?: string;
@@ -31,6 +32,7 @@ export class SysQna extends Model<SysQnaAttributes, SysQnaCreationAttributes> im
   public title!: string;
   public content!: string;
   public secretYn!: 'Y' | 'N';
+  public hitCnt?: number;
   public answeredYn?: 'Y' | 'N';
   public delYn?: 'Y' | 'N';
   public writerName?: string;
@@ -76,6 +78,13 @@ export function initSysQna(sequelize: Sequelize) {
         type: DataTypes.STRING(6000),
         allowNull: false,
         comment: '질문 내용',
+      },
+      hitCnt: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        field: 'hit_cnt',
+        comment: '조회수'
       },
       secretYn: {
         type: DataTypes.CHAR(1),

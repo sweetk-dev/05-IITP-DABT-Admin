@@ -69,6 +69,7 @@ export function initOpenApiAuthKey(sequelize: Sequelize) {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
+        field: 'key_id',
         comment: 'system id, 고유 식별자 (자동 증가)',
       },
       userId: {

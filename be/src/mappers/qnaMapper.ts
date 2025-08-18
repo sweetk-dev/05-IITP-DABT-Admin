@@ -15,6 +15,7 @@ export type QnaSource = Pick<
   | 'title'
   | 'content'
   | 'secretYn'
+  | 'answeredYn'
   | 'writerName'
   | 'answeredBy'
   | 'answeredAt'
@@ -25,7 +26,6 @@ export type QnaSource = Pick<
   | 'updatedBy'
   | 'deletedBy'
 > & {
-  status?: string;
   answerContent?: string;
 };
 
@@ -37,6 +37,7 @@ export function toAdminQnaItem(qna: QnaSource): AdminQnaItem {
     title: qna.title,
     content: qna.content,
     secretYn: qna.secretYn,
+    answeredYn: qna.answeredYn || 'N',
     writerName: qna.writerName || '',
     createdAt: toIsoString(qna.createdAt)!,
     answeredAt: toIsoString(qna.answeredAt),
@@ -63,6 +64,7 @@ export function toUserQnaItem(qna: QnaSource): UserQnaItem {
     title: qna.title,
     content: qna.content,
     secretYn: qna.secretYn,
+    answeredYn: qna.answeredYn || 'N',
     writerName: qna.writerName!,
     createdAt: toIsoString(qna.createdAt)!,
     answeredAt: toIsoString(qna.answeredAt)

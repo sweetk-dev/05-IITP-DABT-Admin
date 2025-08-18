@@ -95,7 +95,9 @@ export async function answerQna(qnaId: number, answerData: {
   const [affectedCount] = await SysQna.update({
     answerContent: answerData.answerContent,
     answeredBy: answerData.answeredBy,
-    answeredAt: new Date()
+    answeredAt: new Date(),
+    updatedAt: new Date(),
+    answeredYn: 'Y'
   }, {
     where: { qnaId }
   });

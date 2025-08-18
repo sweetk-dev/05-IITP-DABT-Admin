@@ -119,53 +119,57 @@ export default function NoticeDetail() {
         </Box>
 
         {/* 공지사항 상세 */}
-        <ThemedCard>
+        <ThemedCard id="notice-detail-card">
           {isLoading ? (
-            <Box sx={{ position: 'relative', minHeight: 400 }}>
+            <Box id="notice-detail-loading" sx={{ position: 'relative', minHeight: 400 }}>
               <LoadingSpinner loading={true} />
             </Box>
           ) : isError ? (
-            <EmptyState message="공지사항을 불러오는 중 오류가 발생했습니다." />
+            <Box id="notice-detail-error">
+              <EmptyState message="공지사항을 불러오는 중 오류가 발생했습니다." />
+            </Box>
           ) : isEmpty ? (
-            <EmptyState message="공지사항을 찾을 수 없습니다." />
+            <Box id="notice-detail-empty">
+              <EmptyState message="공지사항을 찾을 수 없습니다." />
+            </Box>
           ) : notice ? (
-            <Box sx={{ p: SPACING.LARGE }}>
+            <Box id="notice-detail-body" sx={{ p: SPACING.LARGE }}>
               {/* 헤더 정보 */}
-              <Box sx={{ mb: SPACING.LARGE }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.MEDIUM }}>
-                  <Chip label={getNoticeTypeLabel((notice as any).noticeType)} color={getNoticeTypeColor((notice as any).noticeType) as any} size="medium" sx={{ mr: SPACING.MEDIUM }} />
+              <Box id="notice-detail-header" sx={{ mb: SPACING.LARGE }}>
+                <Box id="notice-detail-header-row" sx={{ display: 'flex', alignItems: 'center', mb: SPACING.MEDIUM }}>
+                  <Chip id="notice-detail-type" label={getNoticeTypeLabel((notice as any).noticeType)} color={getNoticeTypeColor((notice as any).noticeType) as any} size="medium" sx={{ mr: SPACING.MEDIUM }} />
                   {(notice as any).pinnedYn === 'Y' && (
-                    <Chip label="고정" color="warning" size="medium" sx={{ mr: SPACING.MEDIUM }} />
+                    <Chip id="notice-detail-pinned" label="고정" color="warning" size="medium" sx={{ mr: SPACING.MEDIUM }} />
                   )}
-                  <Typography variant="body2" sx={{ color: colors.textSecondary, ml: 'auto' }}>
+                  <Typography id="notice-detail-posted-at" variant="body2" sx={{ color: colors.textSecondary, ml: 'auto' }}>
                     {formatDate((notice as any).postedAt)}
                   </Typography>
                 </Box>
-                <Typography variant="h4" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.MEDIUM }}>
+                <Typography id="notice-detail-title" variant="h4" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.MEDIUM }}>
                   {(notice as any).title}
                 </Typography>
               </Box>
 
-              <Divider sx={{ mb: SPACING.LARGE }} />
+              <Divider id="notice-detail-divider" sx={{ mb: SPACING.LARGE }} />
 
               {/* 내용 */}
-              <Box sx={{ mb: SPACING.LARGE }}>
-                <Typography variant="body1" sx={{ color: colors.text, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+              <Box id="notice-detail-content" sx={{ mb: SPACING.LARGE }}>
+                <Typography id="notice-detail-content-text" variant="body1" sx={{ color: colors.text, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
                   {(notice as any).content}
                 </Typography>
               </Box>
 
               {/* 네비게이션 버튼 */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: SPACING.LARGE, borderTop: `1px solid ${colors.border}` }}>
-                <ThemedButton variant="outlined" startIcon={<NavigateBefore />} onClick={handlePreviousNotice} disabled={!hasPrevious}>
+              <Box id="notice-detail-nav" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: SPACING.LARGE, borderTop: `1px solid ${colors.border}` }}>
+                <ThemedButton id="notice-detail-prev-btn" variant="outlined" startIcon={<NavigateBefore />} onClick={handlePreviousNotice} disabled={!hasPrevious}>
                   이전글
                 </ThemedButton>
 
-                <ThemedButton variant="outlined" onClick={handleBackToList}>
+                <ThemedButton id="notice-detail-list-btn" variant="outlined" onClick={handleBackToList}>
                   목록
                 </ThemedButton>
 
-                <ThemedButton variant="outlined" endIcon={<NavigateNext />} onClick={handleNextNotice} disabled={!hasNext}>
+                <ThemedButton id="notice-detail-next-btn" variant="outlined" endIcon={<NavigateNext />} onClick={handleNextNotice} disabled={!hasNext}>
                   다음글
                 </ThemedButton>
               </Box>

@@ -104,14 +104,16 @@ export default function QnaList() {
           totalCount={qnaData?.total}
         />
         <Box id="qna-create-button-row" sx={{ display: 'flex', justifyContent: 'flex-end', mb: SPACING.MEDIUM }}>
-          <ThemedButton id="qna-create-button" variant="contained" onClick={handleCreateQna}>질문 등록하기</ThemedButton>
+          <ThemedButton id="qna-create-button" variant="primary" onClick={handleCreateQna}>질문 등록하기</ThemedButton>
         </Box>
 
         {/* Q&A 타입 선택 */}
-        <ThemedCard sx={{ mb: SPACING.LARGE }}>
-          <Box sx={{ p: SPACING.LARGE }}>
-            <Typography variant="h6" sx={{ color: colors.text, mb: SPACING.MEDIUM, fontWeight: 500 }}>Q&A 유형 선택</Typography>
-            <SelectField value={qnaType} onChange={handleQnaTypeChange} options={qnaTypeOptions} label="Q&A 유형" disabled={qnaTypeLoading} />
+        <ThemedCard id="qna-type-card" sx={{ mb: SPACING.LARGE }}>
+          <Box id="qna-type-card-body" sx={{ p: SPACING.LARGE }}>
+            <Typography id="qna-type-title" variant="h6" sx={{ color: colors.text, mb: SPACING.MEDIUM, fontWeight: 500 }}>Q&A 유형 선택</Typography>
+            <Box id="qna-type-select">
+              <SelectField value={qnaType} onChange={handleQnaTypeChange} options={qnaTypeOptions} label="Q&A 유형" disabled={qnaTypeLoading} />
+            </Box>
           </Box>
         </ThemedCard>
 

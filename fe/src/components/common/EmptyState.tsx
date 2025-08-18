@@ -5,11 +5,13 @@ import { useTheme } from '@mui/material/styles';
 interface EmptyStateProps {
   message?: string;
   icon?: React.ReactNode;
+  minHeight?: number; // 컨텐츠 영역 최소 높이 (기본값 상향)
 }
 
 export default function EmptyState({ 
   message = '데이터가 없습니다.', 
-  icon 
+  icon,
+  minHeight = 600
 }: EmptyStateProps) {
   const muiTheme = useTheme();
 
@@ -23,7 +25,7 @@ export default function EmptyState({
         py: 8,
         px: 4,
         textAlign: 'center',
-        minHeight: 200
+        minHeight
       }}
     >
       {icon || (
@@ -34,7 +36,8 @@ export default function EmptyState({
         sx={{
           color: muiTheme.palette.text.secondary,
           opacity: 0.8,
-          fontWeight: 500
+          fontWeight: 600,
+          fontSize: { xs: 18, md: 20 }
         }}
       >
         {message}

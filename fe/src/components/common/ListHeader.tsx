@@ -41,9 +41,21 @@ export default function ListHeader({ title, onBack, searchPlaceholder, searchVal
         <Box sx={{ position: 'absolute', right: 0, bottom: 6 }}>
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" justifyContent="flex-end">
             {filters.map(f => (
-              <TextField key={f.label} select SelectProps={{ native: true }} size="small" label={f.label} value={f.value} onChange={e => f.onChange(e.target.value)}>
+              <TextField
+                key={f.label}
+                select
+                SelectProps={{ native: true }}
+                size="small"
+                label={f.label}
+                value={f.value}
+                onChange={e => f.onChange(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ minWidth: 160, '& .MuiInputLabel-root': { fontSize: 12 }, '& select': { paddingRight: '24px' } }}
+              >
                 <option value="">전체</option>
-                {f.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                {f.options.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
               </TextField>
             ))}
             {onSearchChange && (

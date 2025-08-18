@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box, Container, Stack, Typography, Divider, ToggleButtonGroup, ToggleButton, Paper } from '@mui/material';
+import StatusChip from '../components/common/StatusChip';
 import ThemedButton from '../components/common/ThemedButton';
 import ThemedCard from '../components/common/ThemedCard';
 import PageHeader from '../components/common/PageHeader';
@@ -327,6 +328,15 @@ export default function ThemePreview() {
             <ThemedCard sx={{ p: 2, flex: 1, position: 'relative' }}>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Empty State</Typography>
               <EmptyState message="표시할 데이터가 없습니다." />
+            </ThemedCard>
+
+            <ThemedCard sx={{ p: 2, flex: 1 }}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Status Chips (QnA)</Typography>
+              <Stack direction="row" spacing={1}>
+                <StatusChip kind="answered" />
+                <StatusChip kind="pending" />
+                <StatusChip kind="private" />
+              </Stack>
             </ThemedCard>
           </Stack>
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Add as AddIcon } from '@mui/icons-material';
 import { Box, CardContent, Typography, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
@@ -69,7 +70,7 @@ export default function AdminFaqList() {
         id="admin-faq-list-header"
         title="FAQ 관리"
         actionsRight={
-          <ThemedButton id="admin-faq-create-btn" variant="primary" onClick={() => navigate(ROUTES.ADMIN.FAQ.CREATE)} buttonSize="cta">등록</ThemedButton>
+          <ThemedButton id="admin-faq-create-btn" variant="primary" size="small" startIcon={<AddIcon />} onClick={() => navigate(ROUTES.ADMIN.FAQ.CREATE)} buttonSize="cta">등록</ThemedButton>
         }
         search={{ value: search, onChange: (v)=>{ setSearch(v); setQuery({ search: v, page: 1, limit, sort }, { replace: true }); }, placeholder: '제목/내용 검색' }}
         filters={[{ label: '정렬', value: sort, options: [

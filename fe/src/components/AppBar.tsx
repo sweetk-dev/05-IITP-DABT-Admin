@@ -137,8 +137,8 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       >
         <Toolbar id="appbar-auth-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
-            left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
-            right={<HomeIconButton theme={themeType} />}
+            left={<Logo serviceName={SERVICE_NAME} />}
+            right={<HomeIconButton />}
           />
         </Toolbar>
       </MuiAppBar>
@@ -157,7 +157,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       >
         <Toolbar id="appbar-admin-login-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
-            left={<Logo serviceName={SERVICE_NAME + ' - Admin'} theme={themeType} />}
+            left={<Logo serviceName={SERVICE_NAME + ' - Admin'} />}
           />
         </Toolbar>
       </MuiAppBar>
@@ -183,15 +183,14 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                   onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)} 
                   sx={{ cursor: 'pointer' }}
                 >
-                  <Logo serviceName={SERVICE_NAME + ' - Admin'} theme={themeType} />
+                  <Logo serviceName={SERVICE_NAME + ' - Admin'} />
                 </Box>
               }
               right={
                 <>
-                  <HomeIconButton to={ROUTES.ADMIN.DASHBOARD} theme={themeType} />
+                  <HomeIconButton to={ROUTES.ADMIN.DASHBOARD} />
                   <ThemedButton 
                     id="appbar-admin-profile-btn"
-                    theme={themeType}
                     variant="text"
                     startIcon={<AccountCircle />} 
                     sx={{ 
@@ -210,7 +209,6 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                   </ThemedButton>
                   <ThemedButton 
                     id="appbar-admin-logout-btn"
-                    theme={themeType}
                     variant="text"
                     sx={{ 
                       ml: 2
@@ -241,12 +239,11 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       >
         <Toolbar id="appbar-public-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
-            left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
+            left={<Logo serviceName={SERVICE_NAME} />}
             right={
               <>
                 <ThemedButton
                   id="appbar-public-login-btn"
-                  theme={themeType}
                   variant="primary"
                   sx={{
                     ml: 1,
@@ -261,7 +258,6 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                 </ThemedButton>
                 <ThemedButton
                   id="appbar-public-register-btn"
-                  theme={themeType}
                   variant="outlined"
                   sx={{
                     ml: 1,
@@ -295,14 +291,13 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
       >
         <Toolbar id="appbar-user-toolbar" sx={commonToolbarStyles}>
           <AppBarRow
-            left={<Logo serviceName={SERVICE_NAME} theme={themeType} />}
+            left={<Logo serviceName={SERVICE_NAME} />}
             right={
               <>
-                <HomeIconButton to="/" theme={themeType} />
-                <DashboardIconButton to={ROUTES.USER.DASHBOARD} theme={themeType} />
+                <HomeIconButton to="/" />
+                <DashboardIconButton to={ROUTES.USER.DASHBOARD} />
                 <ThemedButton 
                   id="appbar-user-profile-btn"
-                  theme={themeType}
                   variant="text"
                   startIcon={<AccountCircle />} 
                   sx={{ 
@@ -318,7 +313,6 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
                 </ThemedButton>
                 <ThemedButton 
                   id="appbar-user-logout-btn"
-                  theme={themeType}
                   variant="text"
                   sx={{ 
                     ml: 2

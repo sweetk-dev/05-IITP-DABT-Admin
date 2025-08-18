@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Stack, Chip, Divider } from '@mui/material';
+import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate, useParams } from 'react-router-dom';
 import ThemedCard from '../components/common/ThemedCard';
@@ -11,7 +11,7 @@ import { ArrowBack, NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { useDataFetching } from '../hooks/useDataFetching';
 import { getUserQnaDetail, getUserQnaList } from '../api';
 import { SPACING } from '../constants/spacing';
-import type { QnaItem } from '../types/api';
+import type { UserQnaItem } from '@iitp-dabt/common';
 
 export default function QnaDetail() {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default function QnaDetail() {
     background: muiTheme.palette.background.default,
   } as const;
 
-  const [allQnas, setAllQnas] = useState<QnaItem[]>([]);
+  const [allQnas, setAllQnas] = useState<UserQnaItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
   const { data: qna, isLoading, isEmpty, isError } = useDataFetching({ fetchFunction: () => getUserQnaDetail(Number(qnaId)), dependencies: [qnaId], autoFetch: !!qnaId });

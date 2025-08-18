@@ -16,7 +16,7 @@ import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common
 
 export default function Home() {
   const navigate = useNavigate();
-  const theme = 'user';
+  
   const muiTheme = useTheme();
   const palette = muiTheme.palette;
   const openApiDocUrl = OPEN_API_DOC_URL;

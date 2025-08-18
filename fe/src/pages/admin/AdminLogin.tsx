@@ -5,14 +5,16 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { loginAdmin } from '../../api';
 import { ROUTES } from '../../routes';
-import { getThemeColors } from '../../theme';
+import { useTheme } from '@mui/material/styles';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const theme = 'admin' as const;
-  const colors = getThemeColors(theme);
+  const muiTheme = useTheme();
+  const colors = {
+    background: muiTheme.palette.background.default,
+  } as const;
 
   const handleAdminLogin = async (loginId: string, password: string) => {
     setLoading(true);
@@ -23,7 +25,7 @@ export default function AdminLogin() {
       
       // handleApiResponse를 사용하여 에러 코드별 자동 처리
       handleApiResponse(res, 
-        (data) => {
+        () => {
           // 관리자 로그인 성공 시 관리자 대시보드로 이동
           window.location.href = ROUTES.ADMIN.DASHBOARD;
         },

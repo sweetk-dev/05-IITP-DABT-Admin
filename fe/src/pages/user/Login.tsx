@@ -24,7 +24,7 @@ export default function Login() {
       
       // handleApiResponse를 사용하여 에러 코드별 자동 처리
       handleApiResponse(res, 
-        (data) => {
+        () => {
           // 로그인 성공 시 대시보드로 이동
           window.location.href = ROUTES.USER.DASHBOARD;
         },

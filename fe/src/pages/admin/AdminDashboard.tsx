@@ -14,13 +14,13 @@ export default function AdminDashboard() {
   return (
     <Box id="admin-dashboard-page" sx={{ p: SPACING.LARGE }}>
       <Box sx={{ mb: SPACING.TITLE_BOTTOM }}>
-        <PageTitle title="관리자 대시보드" theme="admin" />
+        <PageTitle title="관리자 대시보드" />
       </Box>
 
       <Grid container spacing={SPACING.LARGE}>
         {/* 통계 카드 */}
         <Grid item xs={12} sm={6} md={3}>
-          <ThemedCard theme="admin" sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
+          <ThemedCard sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ color: colors.text }}>
               총 사용자
             </Typography>
@@ -34,7 +34,7 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <ThemedCard theme="admin" sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
+          <ThemedCard sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ color: colors.text }}>
               FAQ 게시물
             </Typography>
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <ThemedCard theme="admin" sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
+          <ThemedCard sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ color: colors.text }}>
               Q&A 문의
             </Typography>
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <ThemedCard theme="admin" sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
+          <ThemedCard sx={{ p: SPACING.LARGE, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ color: colors.text }}>
               오늘 방문자
             </Typography>
@@ -77,14 +77,14 @@ export default function AdminDashboard() {
 
         {/* 관리 메뉴 */}
         <Grid item xs={12}>
-          <ThemedCard theme="admin" sx={{ p: SPACING.LARGE }}>
+          <ThemedCard sx={{ p: SPACING.LARGE }}>
             <Typography variant="h6" sx={{ mb: SPACING.MEDIUM }}>
               관리 메뉴
             </Typography>
             <Grid container spacing={SPACING.MEDIUM}>
               <Grid item>
                 <ThemedButton 
-                  theme="admin"
+                  
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.FAQ.LIST)}
                   id="admin-dashboard-faq-btn"
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
               </Grid>
               <Grid item>
                 <ThemedButton 
-                  theme="admin"
+                  
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.QNA.LIST)}
                   id="admin-dashboard-qna-btn"
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
               </Grid>
               <Grid item>
                 <ThemedButton 
-                  theme="admin"
+                  
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.USERS.LIST)}
                   id="admin-dashboard-users-btn"
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
               </Grid>
               <Grid item>
                 <ThemedButton 
-                  theme="admin"
+                  
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.SETTINGS)}
                   id="admin-dashboard-settings-btn"
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
 
         {/* 최근 활동 */}
         <Grid item xs={12} md={6}>
-          <ThemedCard theme="admin" sx={{ p: SPACING.LARGE }}>
+          <ThemedCard sx={{ p: SPACING.LARGE }}>
             <Typography variant="h6" sx={{ mb: SPACING.MEDIUM }}>
               최근 활동
             </Typography>
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
 
         {/* 시스템 상태 */}
         <Grid item xs={12} md={6}>
-          <ThemedCard theme="admin" sx={{ p: SPACING.LARGE }}>
+          <ThemedCard sx={{ p: SPACING.LARGE }}>
             <Typography variant="h6" sx={{ mb: SPACING.MEDIUM }}>
               시스템 상태
             </Typography>

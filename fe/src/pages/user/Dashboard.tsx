@@ -50,7 +50,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
     data: qnaList,
     isLoading: qnaLoading,
     isError: qnaError,
-    refetch: refetchQna
+    // refetch: refetchQna
   } = useDataFetching({
     fetchFunction: () => getUserQnaList({
       page: 1,
@@ -64,7 +64,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
     data: openApiList,
     isLoading: openApiLoading,
     isError: openApiError,
-    refetch: refetchOpenApi
+    // refetch: refetchOpenApi
   } = useDataFetching({
     fetchFunction: () => getUserOpenApiList({
       page: 1,
@@ -97,7 +97,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
   return (
     <Box id={id} sx={{ p: SPACING.LARGE }}>
       <Box sx={{ mb: SPACING.TITLE_BOTTOM }}>
-        <PageTitle title="대시보드" theme={theme} />
+        <PageTitle title="대시보드" />
       </Box>
 
       {error && (
@@ -109,7 +109,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
       <Grid container spacing={SPACING.LARGE}>
         {/* 내 QnA 섹션 */}
         <Grid item xs={12} md={6}>
-          <ThemedCard theme={theme}>
+          <ThemedCard>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
                 <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
@@ -119,7 +119,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                 <Box>
                   <ThemedButton
                     id="create-qna-btn"
-                    theme={theme}
+                    
                     variant="primary"
                     size="small"
                     startIcon={<AddIcon />}
@@ -130,7 +130,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                   </ThemedButton>
                   <ThemedButton
                     id="qna-history-btn"
-                    theme={theme}
+                    
                     variant="outlined"
                     size="small"
                     startIcon={<HistoryIcon />}
@@ -141,9 +141,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                 </Box>
               </Box>
 
-              {qnaList?.qnas && qnaList.qnas.length > 0 ? (
+              {qnaList?.items && qnaList.items.length > 0 ? (
                 <List>
-                  {qnaList.qnas.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
+                  {qnaList.items.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
                     <ListItem key={qna.qnaId} divider>
                       <ListItemText
                         primary={qna.title}
@@ -168,7 +168,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
 
         {/* API 인증키 관리 섹션 */}
         <Grid item xs={12} md={6}>
-          <ThemedCard theme={theme}>
+          <ThemedCard>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
                 <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
@@ -177,7 +177,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                 </Typography>
                 <ThemedButton
                   id="openapi-management-btn"
-                  theme={theme}
+                  
                   variant="outlined"
                   size="small"
                   startIcon={<SettingsIcon />}

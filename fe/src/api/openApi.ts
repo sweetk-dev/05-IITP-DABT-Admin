@@ -6,7 +6,7 @@ import type {
   UserOpenApiDetailRes,
   UserOpenApiCreateReq,
   UserOpenApiCreateRes,
-  // delete는 params만 사용, res는 void
+  UserOpenApiExtendParams,
   UserOpenApiExtendReq,
   UserOpenApiExtendRes,
   AdminOpenApiListQuery,
@@ -67,12 +67,11 @@ export async function deleteUserOpenApi(keyId: number): Promise<ApiResponse<void
 /**
  * 사용자 OpenAPI 인증키 기간 연장
  */
-export async function extendUserOpenApi(params: UserOpenApiExtendReq): Promise<ApiResponse<UserOpenApiExtendRes>> {
-  // params: { keyId: number; extensionDays: number } 형태로 받아서 매핑 분리
-  const url = FULL_API_URLS.USER.OPEN_API.EXTEND.replace(':keyId', (params as any).keyId.toString());
+export async function extendUserOpenApi(params: UserOpenApiExtendParams, body: UserOpenApiExtendReq): Promise<ApiResponse<UserOpenApiExtendRes>> {
+  const url = FULL_API_URLS.USER.OPEN_API.EXTEND.replace(':keyId', params.keyId.toString());
   return apiFetch<UserOpenApiExtendRes>(url, {
     method: 'POST',
-    body: JSON.stringify({ extensionDays: (params as any).extensionDays }),
+    body: JSON.stringify(body),
   });
 }
 

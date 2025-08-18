@@ -82,7 +82,7 @@ export default function AdminProfile() {
         onCloseError={() => setError(undefined)}
         showRole={true}
         showLoginId={true}
-        theme="admin"
+        
       />
     );
   }
@@ -98,7 +98,7 @@ export default function AdminProfile() {
       onCloseError={() => setError(undefined)}
       showRole={true}
       showLoginId={true}
-      theme="admin"
+      
     />
   );
 } 

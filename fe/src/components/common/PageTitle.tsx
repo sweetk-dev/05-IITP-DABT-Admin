@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 
 interface PageTitleProps {
   title: string;
+  theme?: 'user' | 'admin'; // accept and ignore legacy prop
 }
 
 export default function PageTitle({ title }: PageTitleProps) {

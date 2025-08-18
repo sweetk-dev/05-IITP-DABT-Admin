@@ -32,9 +32,16 @@ export {
 
 // Notice management
 export {
+  // User Notice
   getUserNoticeList,
   getUserNoticeDetail,
-  getHomeNoticeList
+  getHomeNoticeList,
+  // Admin Notice
+  getAdminNoticeList,
+  getAdminNoticeDetail,
+  createAdminNotice,
+  updateAdminNotice,
+  deleteAdminNotice
 } from './notice';
 
 // FAQ management

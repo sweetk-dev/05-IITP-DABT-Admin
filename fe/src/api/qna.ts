@@ -88,7 +88,7 @@ export async function answerAdminQna(qnaId: number, data: AdminQnaAnswerReq): Pr
   const url = FULL_API_URLS.ADMIN.QNA.ANSWER.replace(':qnaId', qnaId.toString());
   return apiFetch<void>(url, {
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify({ answer: (data as any).answer ?? (data as any).answerContent })
   });
 }
 

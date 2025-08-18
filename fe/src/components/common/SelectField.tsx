@@ -8,6 +8,7 @@ interface SelectOption {
 }
 
 interface SelectFieldProps {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
   options: SelectOption[];
@@ -19,6 +20,7 @@ interface SelectFieldProps {
 }
 
 export default function SelectField({
+  id,
   value,
   onChange,
   options,
@@ -41,6 +43,7 @@ export default function SelectField({
 
   return (
     <FormControl
+      id={id}
       fullWidth={fullWidth}
       disabled={disabled}
       size={size}

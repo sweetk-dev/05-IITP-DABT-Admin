@@ -25,6 +25,8 @@ export default function Layout() {
 	const isUserLoggedIn = isUserAuthenticated();
 	const isAdminLoggedIn = isAdminAuthenticated();
 	
+	//TODO:: Remove console logs in production
+	// This is for debugging purposes to see the current authentication state and path
 	console.log('[Layout]', {
 		pathname: location.pathname,
 		isLoggedIn,

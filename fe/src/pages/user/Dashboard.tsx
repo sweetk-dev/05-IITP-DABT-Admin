@@ -28,7 +28,7 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
-import PageTitle from '../../components/common/PageTitle';
+import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import { getThemeColors } from '../../theme';
@@ -97,7 +97,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
   return (
     <Box id={id} sx={{ p: SPACING.LARGE }}>
       <Box sx={{ mb: SPACING.TITLE_BOTTOM }}>
-        <PageTitle title="대시보드" />
+        <PageHeader title="대시보드" />
       </Box>
 
       {error && (
@@ -125,6 +125,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                     startIcon={<AddIcon />}
                     onClick={handleCreateQna}
                     sx={{ mr: 1 }}
+                    buttonSize="cta"
                   >
                     문의하기
                   </ThemedButton>
@@ -135,6 +136,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                     size="small"
                     startIcon={<HistoryIcon />}
                     onClick={handleQnaHistory}
+                    buttonSize="cta"
                   >
                     내 문의 내역
                   </ThemedButton>
@@ -182,6 +184,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                   size="small"
                   startIcon={<SettingsIcon />}
                   onClick={handleOpenApiManagement}
+                  buttonSize="cta"
                 >
                   인증키 관리
                 </ThemedButton>

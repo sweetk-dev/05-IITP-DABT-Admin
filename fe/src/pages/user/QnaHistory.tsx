@@ -13,16 +13,13 @@ import {
   Alert,
   Divider
 } from '@mui/material';
-import { 
-  ArrowBack as ArrowBackIcon
-} from '@mui/icons-material';
 import { getUserQnaList, getUserQnaDetail } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 // import ErrorAlert from '../../components/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import { ROUTES } from '../../routes';
 import { PAGINATION } from '../../constants/pagination';
-import PageTitle from '../../components/common/PageTitle';
+import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 // import { getThemeColors } from '../../theme';
@@ -125,18 +122,8 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 
   return (
     <Box id={id} sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <ThemedButton
-          id="back-btn"
-          
-          variant="text"
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mr: 2 }}
-        >
-          뒤로가기
-        </ThemedButton>
-        <PageTitle title="내 문의 내역" />
+      <Box id="qna-history-header">
+        <PageHeader title="내 문의 내역" onBack={handleBack} />
       </Box>
 
       <ThemedCard>

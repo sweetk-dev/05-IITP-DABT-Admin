@@ -4,7 +4,7 @@ import { ROUTES } from '../../routes';
 import { SPACING } from '../../constants/spacing';
 import ThemedButton from '../../components/common/ThemedButton';
 import ThemedCard from '../../components/common/ThemedCard';
-import PageTitle from '../../components/common/PageTitle';
+import PageHeader from '../../components/common/PageHeader';
 import { getThemeColors } from '../../theme';
 
 export default function AdminDashboard() {
@@ -14,7 +14,7 @@ export default function AdminDashboard() {
   return (
     <Box id="admin-dashboard-page" sx={{ p: SPACING.LARGE }}>
       <Box sx={{ mb: SPACING.TITLE_BOTTOM }}>
-        <PageTitle title="관리자 대시보드" />
+        <PageHeader title="관리자 대시보드" />
       </Box>
 
       <Grid container spacing={SPACING.LARGE}>
@@ -88,6 +88,7 @@ export default function AdminDashboard() {
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.FAQ.LIST)}
                   id="admin-dashboard-faq-btn"
+                  buttonSize="cta"
                 >
                   FAQ 관리
                 </ThemedButton>
@@ -98,6 +99,7 @@ export default function AdminDashboard() {
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.QNA.LIST)}
                   id="admin-dashboard-qna-btn"
+                  buttonSize="cta"
                 >
                   Q&A 관리
                 </ThemedButton>
@@ -108,6 +110,7 @@ export default function AdminDashboard() {
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.USERS.LIST)}
                   id="admin-dashboard-users-btn"
+                  buttonSize="cta"
                 >
                   사용자 관리
                 </ThemedButton>
@@ -118,6 +121,7 @@ export default function AdminDashboard() {
                   variant="primary" 
                   onClick={() => navigate(ROUTES.ADMIN.SETTINGS)}
                   id="admin-dashboard-settings-btn"
+                  buttonSize="cta"
                 >
                   시스템 설정
                 </ThemedButton>

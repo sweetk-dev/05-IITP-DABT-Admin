@@ -3,7 +3,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box, Container, Stack, Typography, Divider, ToggleButtonGroup, ToggleButton, Paper } from '@mui/material';
 import ThemedButton from '../components/common/ThemedButton';
 import ThemedCard from '../components/common/ThemedCard';
-import PageTitle from '../components/common/PageTitle';
+import PageHeader from '../components/common/PageHeader';
 import SelectField from '../components/common/SelectField';
 import Pagination from '../components/common/Pagination';
 import EmptyState from '../components/common/EmptyState';
@@ -295,7 +295,7 @@ export default function ThemePreview() {
 
           <Divider sx={{ my: 3 }} />
 
-          <PageTitle title={role === 'admin' ? 'Admin Sample Page' : 'User Sample Page'} />
+          <PageHeader title={role === 'admin' ? 'Admin Sample Page' : 'User Sample Page'} />
 
           <Stack id="theme-preview-sample-row-1" direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ mb: 3 }}>
             <ThemedCard sx={{ p: 2, flex: 1 }}>
@@ -332,7 +332,7 @@ export default function ThemePreview() {
 
           <Divider sx={{ my: 3 }} />
 
-          <PageTitle title="Alerts & Dialogs" />
+          <PageHeader title="Alerts & Dialogs" />
 
           <ThemedCard id="theme-preview-alerts-card" sx={{ p: 2, mb: 2 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>

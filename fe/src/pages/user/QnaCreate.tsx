@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   CardContent,
@@ -12,15 +12,15 @@ import {
   Switch,
   Alert
 } from '@mui/material';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { createUserQna } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
 import { SPACING } from '../../constants/spacing';
-import PageTitle from '../../components/common/PageTitle';
+import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
+import ByteLimitHelper from '../../components/common/ByteLimitHelper';
 // import { getThemeColors } from '../../theme';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
@@ -30,6 +30,7 @@ interface QnaCreateProps {
 
 export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     qnaType: '',
     title: '',
@@ -40,10 +41,15 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  
-  // 테마 설정 (사용자 페이지는 'user' 테마)
-  // const theme: 'user' | 'admin' = 'user';
-  // const colors = getThemeColors(theme);
+
+  // Bytes helpers
+  const getBytes = (value: string) => new TextEncoder().encode(value || '').length;
+  const titleBytes = useMemo(() => getBytes(formData.title), [formData.title]);
+  const contentBytes = useMemo(() => getBytes(formData.content), [formData.content]);
+  const TITLE_MAX = 600;
+  const CONTENT_MAX = 6000;
+  const isTitleOver = titleBytes > TITLE_MAX;
+  const isContentOver = contentBytes > CONTENT_MAX;
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -54,9 +60,13 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.qnaType || !formData.title || !formData.content) {
       setError('필수 항목을 모두 입력해주세요.');
+      return;
+    }
+    if (isTitleOver || isContentOver) {
+      setError('입력 용량을 초과했습니다. 제목(최대 600바이트), 내용(최대 6000바이트)을 확인해 주세요.');
       return;
     }
 
@@ -92,7 +102,14 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
   };
 
   const handleBack = () => {
-    navigate(ROUTES.USER.DASHBOARD);
+    const from = (location.state as any)?.from as string | undefined;
+    if (from) {
+      navigate(from, { replace: true });
+    } else if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(ROUTES.USER.DASHBOARD);
+    }
   };
 
   if (loading) {
@@ -101,18 +118,8 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
 
   return (
     <Box id={id} sx={{ p: SPACING.LARGE }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.LARGE }}>
-        <ThemedButton
-          id="back-btn"
-          
-          variant="text"
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mr: SPACING.MEDIUM }}
-        >
-          뒤로가기
-        </ThemedButton>
-        <PageTitle title="문의하기" />
+      <Box id="qna-create-header">
+        <PageHeader title="문의하기" onBack={handleBack} />
       </Box>
 
       {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
@@ -150,9 +157,11 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               required
-              sx={{ mb: SPACING.MEDIUM }}
+              sx={{ mb: 0.5 }}
               inputProps={{ maxLength: 200 }}
+              error={isTitleOver}
             />
+            <ByteLimitHelper id="qna-title-bytes" currentBytes={titleBytes} maxBytes={TITLE_MAX} />
 
             <TextField
               id="qna-content"
@@ -162,10 +171,12 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
               onChange={(e) => handleInputChange('content', e.target.value)}
               required
               multiline
-              rows={6}
-              sx={{ mb: SPACING.MEDIUM }}
-              inputProps={{ maxLength: 2000 }}
+              minRows={12}
+              sx={{ mb: 0.5 }}
+              inputProps={{ maxLength: 20000 }}
+              error={isContentOver}
             />
+            <ByteLimitHelper id="qna-content-bytes" currentBytes={contentBytes} maxBytes={CONTENT_MAX} />
 
             <TextField
               id="qna-writer-name"
@@ -192,7 +203,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
             <Box sx={{ display: 'flex', gap: SPACING.MEDIUM, justifyContent: 'flex-end' }}>
               <ThemedButton
                 id="cancel-btn"
-                
+                buttonSize="cta"
                 variant="outlined"
                 onClick={handleBack}
               >
@@ -200,7 +211,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
               </ThemedButton>
               <ThemedButton
                 id="submit-btn"
-                
+                buttonSize="cta"
                 variant="primary"
                 type="submit"
                 disabled={loading}

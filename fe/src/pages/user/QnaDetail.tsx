@@ -3,15 +3,15 @@ import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate, useParams } from 'react-router-dom';
 import ThemedCard from '../../components/common/ThemedCard';
-import PageTitle from '../../components/common/PageTitle';
 import ThemedButton from '../../components/common/ThemedButton';
 import EmptyState from '../../components/common/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { ArrowBack, NavigateBefore, NavigateNext } from '@mui/icons-material';
+import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getUserQnaDetail, getUserQnaList } from '../../api';
 import { SPACING } from '../../constants/spacing';
 import type { UserQnaItem } from '@iitp-dabt/common';
+import PageHeader from '../../components/common/PageHeader';
 
 export default function QnaDetail() {
   const navigate = useNavigate();
@@ -57,11 +57,8 @@ export default function QnaDetail() {
     <Box id="qna-detail-page" sx={{ minHeight: '100vh', background: colors.background, py: SPACING.LARGE }}>
       <Box id="qna-detail-container" sx={{ mx: 'auto', px: { xs: SPACING.MEDIUM, md: SPACING.LARGE } }}>
         {/* 헤더 */}
-        <Box sx={{ mb: SPACING.LARGE }}>
-          <ThemedButton variant="outlined" startIcon={<ArrowBack />} onClick={handleBackToList} sx={{ mb: SPACING.MEDIUM }}>
-            목록으로
-          </ThemedButton>
-          <PageTitle title="Q&A" />
+        <Box id="qna-detail-header">
+          <PageHeader title="Q&A" onBack={handleBackToList} />
         </Box>
 
         {/* Q&A 상세 */}

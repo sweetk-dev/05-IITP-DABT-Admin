@@ -14,24 +14,22 @@ import {
   Divider
 } from '@mui/material';
 import { 
-  ArrowBack as ArrowBackIcon,
-  ExpandMore as ExpandMoreIcon,
-  QuestionAnswer as QnaIcon
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 import { getUserQnaList, getUserQnaDetail } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import ErrorAlert from '../../components/ErrorAlert';
+// import ErrorAlert from '../../components/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
 import { ROUTES } from '../../routes';
 import { PAGINATION } from '../../constants/pagination';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
-import { getThemeColors } from '../../theme';
+// import { getThemeColors } from '../../theme';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
-import type { UserQnaListRes, UserQnaDetailRes } from '@iitp-dabt/common';
+import type { UserQnaDetailRes } from '@iitp-dabt/common';
 
 interface QnaHistoryProps {
   id?: string;
@@ -43,8 +41,8 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
   const [qnaDetails, setQnaDetails] = useState<Record<number, UserQnaDetailRes>>({});
   
   // 테마 설정 (사용자 페이지는 'user' 테마)
-  const theme: 'user' | 'admin' = 'user';
-  const colors = getThemeColors(theme);
+  // const theme: 'user' | 'admin' = 'user';
+  // const colors = getThemeColors(theme);
 
   // Pagination 훅 사용
   const pagination = usePagination({
@@ -57,7 +55,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
     isLoading: loading,
     isEmpty,
     isError,
-    refetch
+    // refetch
   } = useDataFetching({
     fetchFunction: () => getUserQnaList({
       page: pagination.currentPage,
@@ -130,7 +128,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <ThemedButton
           id="back-btn"
-          theme={theme}
+          
           variant="text"
           startIcon={<ArrowBackIcon />}
           onClick={handleBack}
@@ -138,10 +136,10 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
         >
           뒤로가기
         </ThemedButton>
-        <PageTitle title="내 문의 내역" theme={theme} />
+        <PageTitle title="내 문의 내역" />
       </Box>
 
-      <ThemedCard theme={theme}>
+      <ThemedCard>
         {loading ? (
           <Box sx={{ position: 'relative', minHeight: 400 }}>
             <LoadingSpinner loading={true} />
@@ -160,9 +158,9 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
           </CardContent>
         ) : (
           <CardContent>
-            {qnaList?.qnas && qnaList.qnas.length > 0 && (
+            {qnaList?.items && qnaList.items.length > 0 && (
             <List>
-              {qnaList.qnas.map((qna, index) => (
+              {qnaList.items.map((qna: any, index: number) => (
                 <React.Fragment key={qna.qnaId}>
                   <ListItem>
                     <ListItemText
@@ -191,7 +189,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
                     />
                     <ThemedButton
                       id={`expand-qna-${qna.qnaId}`}
-                      theme={theme}
+                      
                       variant="outlined"
                       size="small"
                       onClick={() => handleQnaExpand(qna.qnaId)}
@@ -232,7 +230,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
                     </Accordion>
                   )}
                   
-                  {index < qnaList.qnas.length - 1 && <Divider />}
+                  {index < qnaList.items.length - 1 && <Divider />}
                 </React.Fragment>
               ))}
             </List>
@@ -245,7 +243,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
                   currentPage={pagination.currentPage}
                   totalPages={qnaList.totalPages}
                   onPageChange={handlePageChange}
-                  theme={theme}
+                  
                 />
               </Box>
             )}

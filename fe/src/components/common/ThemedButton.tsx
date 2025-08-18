@@ -5,6 +5,8 @@ import { useTheme } from '@mui/material/styles';
 interface ThemedButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'primary' | 'outlined' | 'secondary' | 'text' | 'softText';
   children: React.ReactNode;
+  // Accept and ignore legacy theme prop to avoid TS errors at call-sites
+  theme?: 'user' | 'admin';
 }
 
 export default function ThemedButton({ 

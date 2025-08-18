@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles';
 
 interface ThemedCardProps extends PaperProps {
   children: React.ReactNode;
+  theme?: 'user' | 'admin'; // accept and ignore legacy prop
 }
 
 export default function ThemedCard({ 

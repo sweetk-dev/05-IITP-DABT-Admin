@@ -153,7 +153,7 @@ export default function LoginForm({
       
       <ThemedButton 
         id={isAdmin ? "admin-login-submit-btn" : "login-submit-btn"}
-        theme={theme}
+        
         variant="primary"
         fullWidth 
         sx={{
@@ -170,7 +170,7 @@ export default function LoginForm({
       {showRegisterButton && !isAdmin && (
         <ThemedButton 
           id="login-register-btn" 
-          theme={theme}
+          
           variant="text"
           fullWidth 
           sx={{

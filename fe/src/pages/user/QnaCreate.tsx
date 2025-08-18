@@ -21,7 +21,7 @@ import { SPACING } from '../../constants/spacing';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
-import { getThemeColors } from '../../theme';
+// import { getThemeColors } from '../../theme';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 interface QnaCreateProps {
@@ -42,8 +42,8 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
   const [success, setSuccess] = useState(false);
   
   // 테마 설정 (사용자 페이지는 'user' 테마)
-  const theme: 'user' | 'admin' = 'user';
-  const colors = getThemeColors(theme);
+  // const theme: 'user' | 'admin' = 'user';
+  // const colors = getThemeColors(theme);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -74,7 +74,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
 
       // handleApiResponse를 사용하여 에러 코드별 자동 처리
       handleApiResponse(response, 
-        (data) => {
+        () => {
           setSuccess(true);
           setTimeout(() => {
             navigate(ROUTES.USER.DASHBOARD);
@@ -104,7 +104,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.LARGE }}>
         <ThemedButton
           id="back-btn"
-          theme={theme}
+          
           variant="text"
           startIcon={<ArrowBackIcon />}
           onClick={handleBack}
@@ -112,7 +112,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
         >
           뒤로가기
         </ThemedButton>
-        <PageTitle title="문의하기" theme={theme} />
+        <PageTitle title="문의하기" />
       </Box>
 
       {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
@@ -122,7 +122,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
         </Alert>
       )}
 
-      <ThemedCard theme={theme}>
+      <ThemedCard>
         <CardContent>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: SPACING.MEDIUM }}>
             <FormControl fullWidth sx={{ mb: SPACING.MEDIUM }}>
@@ -192,7 +192,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
             <Box sx={{ display: 'flex', gap: SPACING.MEDIUM, justifyContent: 'flex-end' }}>
               <ThemedButton
                 id="cancel-btn"
-                theme={theme}
+                
                 variant="outlined"
                 onClick={handleBack}
               >
@@ -200,7 +200,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
               </ThemedButton>
               <ThemedButton
                 id="submit-btn"
-                theme={theme}
+                
                 variant="primary"
                 type="submit"
                 disabled={loading}

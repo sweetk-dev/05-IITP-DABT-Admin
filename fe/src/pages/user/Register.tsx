@@ -236,7 +236,7 @@ export default function Register() {
           </Box>
           <ThemedButton
             id="register-email-check-btn"
-            theme={userTheme}
+            
             variant="outlined"
             sx={{ 
               height: 56, 
@@ -338,7 +338,7 @@ export default function Register() {
         {success && <Typography color="primary" align="center" mt={2}>회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.</Typography>}
         <ThemedButton 
           id="register-submit-btn" 
-          theme={userTheme}
+          
           variant="primary"
           fullWidth 
           sx={{ 
@@ -353,7 +353,7 @@ export default function Register() {
         </ThemedButton>
         <ThemedButton 
           id="register-login-btn" 
-          theme={userTheme}
+          
           variant="softText"
           fullWidth 
           sx={{ 

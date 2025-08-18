@@ -201,7 +201,7 @@ export default function ProfileForm({
         backgroundOpacity={0.7}
         color="primary"
       />
-      <PageTitle title={title} theme={theme} />
+      <PageTitle title={title} />
       
       {error && (
         <Alert 
@@ -216,7 +216,7 @@ export default function ProfileForm({
       <Grid container spacing={4}>
         {/* 프로필 이미지 및 기본 정보 */}
         <Grid item xs={12} md={4}>
-          <ThemedCard theme={theme} sx={{ p: 4, textAlign: 'center', height: 'fit-content' }}>
+          <ThemedCard sx={{ p: 4, textAlign: 'center', height: 'fit-content' }}>
             <Avatar
               sx={{
                 width: 120,
@@ -269,7 +269,7 @@ export default function ProfileForm({
               {!isEditing ? (
                 <>
                   <ThemedButton
-                    theme={theme}
+                    
                     variant="primary"
                     startIcon={<EditIcon />}
                     onClick={handleStartEdit}
@@ -279,7 +279,7 @@ export default function ProfileForm({
                     정보 변경
                   </ThemedButton>
                   <ThemedButton
-                    theme={theme}
+                    
                     variant="outlined"
                     startIcon={<LockIcon />}
                     onClick={() => setPasswordModalOpen(true)}
@@ -292,7 +292,7 @@ export default function ProfileForm({
               ) : (
                 <>
                   <ThemedButton
-                    theme={theme}
+                    
                     variant="primary"
                     startIcon={<SaveIcon />}
                     onClick={handleSaveProfile}
@@ -303,7 +303,7 @@ export default function ProfileForm({
                     {saving ? <CircularProgress size={20} sx={{ color: 'white' }} /> : '저장'}
                   </ThemedButton>
                   <ThemedButton
-                    theme={theme}
+                    
                     variant="outlined"
                     startIcon={<CancelIcon />}
                     onClick={handleCancelEdit}
@@ -321,7 +321,7 @@ export default function ProfileForm({
 
         {/* 상세 정보 */}
         <Grid item xs={12} md={8}>
-          <ThemedCard theme={theme} sx={{ p: 4 }}>
+          <ThemedCard sx={{ p: 4 }}>
             <Typography 
               variant="h6" 
               gutterBottom 
@@ -490,7 +490,7 @@ export default function ProfileForm({
         </DialogContent>
         <DialogActions>
           <ThemedButton 
-            theme={theme}
+            
             variant="outlined"
             onClick={() => setPasswordModalOpen(false)} 
             disabled={changingPassword}
@@ -498,7 +498,7 @@ export default function ProfileForm({
             취소
           </ThemedButton>
           <ThemedButton 
-            theme={theme}
+            
             variant="primary"
             onClick={handleChangePassword} 
             disabled={changingPassword || !passwordValidation.isValid}

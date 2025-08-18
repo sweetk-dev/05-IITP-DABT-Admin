@@ -18,7 +18,7 @@ export function useDataFetching<T>({
 }: UseDataFetchingOptions<T>) {
   const [state, setState] = useState<DataState<T>>({ status: 'loading' });
   const fetchFnRef = useRef(fetchFunction);
-  const retryRef = useRef(0);
+  // const retryRef = useRef(0);
 
   // Keep latest fetch function without changing stable callbacks
   useEffect(() => {
@@ -57,12 +57,12 @@ export function useDataFetching<T>({
 
   useEffect(() => {
     if (!autoFetch) return;
-    let cancelled = false;
+    // let cancelled = false;
     const run = async () => {
       await fetchData();
     };
     run();
-    return () => { cancelled = true; };
+    return () => { /* noop */ };
   }, [autoFetch, fetchData, ...dependencies]);
 
   const refetch = useCallback(() => {

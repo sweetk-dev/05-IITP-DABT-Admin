@@ -24,7 +24,7 @@ export default function CommonDialog({
   showCancel = false,
   confirmText = '확인',
   cancelText = '취소',
-  theme = 'user',
+  // theme is accepted for legacy compatibility but not used
 }: CommonDialogProps) {
   const muiTheme = useTheme();
   const primary = muiTheme.palette.primary.main;
@@ -43,7 +43,6 @@ export default function CommonDialog({
       <DialogActions sx={{ px: 3, pb: 2 }}>
         {showCancel && (
           <ThemedButton 
-            theme={theme}
             variant="text" 
             onClick={onClose}
           >
@@ -51,7 +50,6 @@ export default function CommonDialog({
           </ThemedButton>
         )}
         <ThemedButton 
-          theme={theme}
           variant="primary" 
           onClick={onConfirm || onClose}
           autoFocus

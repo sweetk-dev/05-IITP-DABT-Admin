@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -36,22 +36,18 @@ import {
 } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
-import Pagination from '../../components/common/Pagination';
 import { ROUTES } from '../../routes';
-import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import PageTitle from '../../components/common/PageTitle';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
-import { getThemeColors } from '../../theme';
+import { useTheme } from '@mui/material/styles';
 import { useDataFetching } from '../../hooks/useDataFetching';
-import { usePagination } from '../../hooks/usePagination';
 import type { 
   UserOpenApiCreateReq, 
   UserOpenApiExtendReq, 
-  UserOpenApiListRes,
-  UserOpenApiAuthKey 
+  UserOpenApiListRes
 } from '@iitp-dabt/common';
 
 
@@ -80,8 +76,8 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
   });
   
   // 테마 설정 (사용자 페이지는 'user' 테마)
-  const theme: 'user' | 'admin' = 'user';
-  const colors = getThemeColors(theme);
+  const muiTheme = useTheme();
+  const colors = { text: muiTheme.palette.text.primary, error: muiTheme.palette.error.main } as const;
 
   // 데이터 페칭 훅 사용
   const {
@@ -95,14 +91,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     autoFetch: true
   });
 
-  // 임시: 페이지네이션 정보 (실제 UI 확인 후 정리 예정)
-  const tempPagination = {
-    currentPage: 1,
-    pageSize: 10,
-    totalPages: 1,
-    handlePageChange: (page: number) => {},
-    handlePageSizeChange: (size: number) => {}
-  };
+  // 페이지네이션은 추후 API 연동 시 적용 예정
 
   const handleCreateKey = async () => {
     if (!createForm.keyName || !createForm.keyDesc) {
@@ -140,11 +129,10 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     if (!selectedKeyId) return;
 
     const requestData: UserOpenApiExtendReq = {
-      keyId: selectedKeyId,
       extensionDays: extendForm.extensionDays
     };
 
-    const response = await extendUserOpenApi(requestData);
+    const response = await extendUserOpenApi({ keyId: String(selectedKeyId) } as any, requestData);
     if (response.success) {
       setExtendDialogOpen(false);
       setSelectedKeyId(null);
@@ -177,7 +165,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
       <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.LARGE }}>
         <ThemedButton
           id="back-btn"
-          theme={theme}
+          
           variant="text"
           startIcon={<ArrowBackIcon />}
           onClick={handleBack}
@@ -185,7 +173,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         >
           뒤로가기
         </ThemedButton>
-        <PageTitle title="API 인증키 관리" theme={theme} />
+        <PageTitle title="API 인증키 관리" />
       </Box>
 
       {isError && (
@@ -197,7 +185,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         </Box>
       )}
 
-      <ThemedCard theme={theme}>
+      <ThemedCard>
         {loading ? (
           <Box sx={{ position: 'relative', minHeight: 400 }}>
             <LoadingSpinner loading={true} />
@@ -211,13 +199,13 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         ) : (
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
-            <Typography variant="h6" component="h2" sx={{ color: colors.text }}>
+             <Typography variant="h6" component="h2" sx={{ color: colors.text }}>
               발행된 인증키
             </Typography>
             {!hasActiveKey && (
               <ThemedButton
                 id="create-key-btn"
-                theme={theme}
+                
                 variant="primary"
                 startIcon={<AddIcon />}
                 onClick={() => setCreateDialogOpen(true)}
@@ -269,7 +257,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
                       <>
                         <ThemedButton
                           id={`extend-key-${authKey.keyId}`}
-                          theme={theme}
+                          
                           variant="outlined"
                           size="small"
                           startIcon={<ScheduleIcon />}
@@ -282,7 +270,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
                         </ThemedButton>
                         <ThemedButton
                           id={`delete-key-${authKey.keyId}`}
-                          theme={theme}
+                          
                           variant="outlined"
                           size="small"
                           startIcon={<DeleteIcon />}
@@ -290,7 +278,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
                             setSelectedKeyId(authKey.keyId);
                             setDeleteDialogOpen(true);
                           }}
-                          sx={{ color: colors.error }}
+                           sx={{ color: colors.error }}
                         >
                           삭제
                         </ThemedButton>
@@ -352,7 +340,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <ThemedButton
-              theme={theme}
+              
               variant="outlined"
               onClick={() => {
                 const today = new Date();
@@ -367,7 +355,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
               90일 설정
             </ThemedButton>
             <ThemedButton
-              theme={theme}
+              
               variant="outlined"
               onClick={() => {
                 const today = new Date();
@@ -384,10 +372,10 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
           </Box>
         </DialogContent>
         <DialogActions>
-          <ThemedButton theme={theme} variant="text" onClick={() => setCreateDialogOpen(false)}>
+          <ThemedButton variant="text" onClick={() => setCreateDialogOpen(false)}>
             취소
           </ThemedButton>
-          <ThemedButton theme={theme} variant="primary" onClick={handleCreateKey} disabled={loading}>
+          <ThemedButton variant="primary" onClick={handleCreateKey} disabled={loading}>
             발행
           </ThemedButton>
         </DialogActions>
@@ -403,7 +391,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         showCancel={true}
         confirmText="삭제"
         cancelText="취소"
-        theme={theme}
+        
       />
 
      // 기간 연장 다이얼로그
@@ -421,10 +409,10 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <ThemedButton theme={theme} variant="text" onClick={() => setExtendDialogOpen(false)}>
+          <ThemedButton variant="text" onClick={() => setExtendDialogOpen(false)}>
             취소
           </ThemedButton>
-          <ThemedButton theme={theme} variant="primary" onClick={handleExtendKey} disabled={loading}>
+          <ThemedButton variant="primary" onClick={handleExtendKey} disabled={loading}>
             연장
           </ThemedButton>
         </DialogActions>

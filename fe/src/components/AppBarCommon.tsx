@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from '@mui/material/styles';
 
-export function HomeIconButton({ to = '/', theme = 'user' }: { to?: string; theme?: 'user' | 'admin' }) {
+export function HomeIconButton({ to = '/' }: { to?: string; theme?: 'user' | 'admin' }) {
   const navigate = useNavigate();
   const muiTheme = useTheme();
   const primary = muiTheme.palette.primary.main;
@@ -37,7 +37,7 @@ export function HomeIconButton({ to = '/', theme = 'user' }: { to?: string; them
   );
 }
 
-export function Logo({ serviceName, theme = 'user' }: { serviceName: string; theme?: 'user' | 'admin' }) {
+export function Logo({ serviceName }: { serviceName: string; theme?: 'user' | 'admin' }) {
   const navigate = useNavigate();
   const muiTheme = useTheme();
   const text = muiTheme.palette.text.primary;
@@ -68,7 +68,7 @@ export function Logo({ serviceName, theme = 'user' }: { serviceName: string; the
   );
 }
 
-export function DashboardIconButton({ to = '/dashbd', theme = 'user' }: { to?: string; theme?: 'user' | 'admin' }) {
+export function DashboardIconButton({ to = '/dashbd' }: { to?: string; theme?: 'user' | 'admin' }) {
   const navigate = useNavigate();
   const muiTheme = useTheme();
   const primary = muiTheme.palette.primary.main;

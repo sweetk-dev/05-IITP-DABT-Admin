@@ -23,7 +23,6 @@ export default function SelectField({
   onChange,
   options,
   label,
-  theme = 'user',
   fullWidth = true,
   disabled = false,
   size = 'medium'

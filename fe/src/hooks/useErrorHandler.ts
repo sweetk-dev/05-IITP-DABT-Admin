@@ -23,7 +23,7 @@ export const useErrorHandler = (): UseErrorHandlerResult => {
     console.log('User logged out');
   }, []);
 
-  const handleError = useCallback((error: any) => {
+  const handleError = useCallback((error: any): { errorCode: string | number; errorMessage: string; handled: true } => {
     console.error('Error handled:', error);
 
     // API 응답 에러인 경우
@@ -47,21 +47,13 @@ export const useErrorHandler = (): UseErrorHandlerResult => {
       const errorMessage = errorData.errorMessage || '오류가 발생했습니다.';
       setInlineError(errorMessage);
 
-      return {
-        errorCode,
-        errorMessage,
-        handled: true
-      };
+      return { errorCode: String(errorCode), errorMessage: String(errorMessage), handled: true } as const;
     }
 
     // 네트워크 에러나 기타 에러
     setInlineError('알 수 없는 오류가 발생했습니다.');
 
-    return {
-      errorCode: ErrorCode.UNKNOWN_ERROR,
-      errorMessage: '알 수 없는 오류가 발생했습니다.',
-      handled: true
-    };
+    return { errorCode: String(ErrorCode.UNKNOWN_ERROR), errorMessage: '알 수 없는 오류가 발생했습니다.', handled: true } as const;
   }, [navigate, logout]);
 
   const InlineError = inlineError

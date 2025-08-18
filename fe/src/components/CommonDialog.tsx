@@ -45,6 +45,7 @@ export default function CommonDialog({
           <ThemedButton 
             variant="text" 
             onClick={onClose}
+            buttonSize="cta"
           >
             {cancelText}
           </ThemedButton>
@@ -53,6 +54,7 @@ export default function CommonDialog({
           variant="primary" 
           onClick={onConfirm || onClose}
           autoFocus
+          buttonSize="cta"
         >
           {confirmText}
         </ThemedButton>

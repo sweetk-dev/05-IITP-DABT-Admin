@@ -3,14 +3,14 @@ import { Box, Typography, Chip, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate, useParams } from 'react-router-dom';
 import ThemedCard from '../../components/common/ThemedCard';
-import PageTitle from '../../components/common/PageTitle';
 import ThemedButton from '../../components/common/ThemedButton';
 import EmptyState from '../../components/common/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { ArrowBack, NavigateBefore, NavigateNext } from '@mui/icons-material';
+import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getUserNoticeDetail, getUserNoticeList } from '../../api';
 import { SPACING } from '../../constants/spacing';
+import PageHeader from '../../components/common/PageHeader';
 
 interface SimpleNoticeItem { noticeId: number; }
 
@@ -111,11 +111,8 @@ export default function NoticeDetail() {
     <Box id="notice-detail-page" sx={{ minHeight: '100vh', background: colors.background, py: SPACING.LARGE }}>
       <Box id="notice-detail-container" sx={{ mx: 'auto', px: { xs: SPACING.MEDIUM, md: SPACING.LARGE } }}>
         {/* 헤더 */}
-        <Box sx={{ mb: SPACING.LARGE }}>
-          <ThemedButton variant="outlined" startIcon={<ArrowBack />} onClick={handleBackToList} sx={{ mb: SPACING.MEDIUM }}>
-            목록으로
-          </ThemedButton>
-          <PageTitle title="공지사항" />
+        <Box id="notice-detail-header">
+          <PageHeader title="공지사항" onBack={handleBackToList} />
         </Box>
 
         {/* 공지사항 상세 */}

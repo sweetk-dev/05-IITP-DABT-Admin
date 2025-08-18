@@ -104,7 +104,7 @@ export default function QnaList() {
           totalCount={qnaData?.total}
         />
         <Box id="qna-create-button-row" sx={{ display: 'flex', justifyContent: 'flex-end', mb: SPACING.MEDIUM }}>
-          <ThemedButton id="qna-create-button" variant="primary" onClick={handleCreateQna}>질문 등록하기</ThemedButton>
+          <ThemedButton id="qna-create-button" variant="primary" onClick={handleCreateQna}>문의하기</ThemedButton>
         </Box>
 
         {/* Q&A 타입 선택 */}
@@ -135,7 +135,7 @@ export default function QnaList() {
                     <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
                       {/* 공개 여부 필드는 타입에 없으므로 생략 또는 별도 매핑 필요 */}
                       <Chip id={`qna-item-type-${qna.qnaId}`} label={getQnaTypeLabel(qna.qnaType)} color="primary" size="small" sx={{ mr: 2, mb: 1 }} />
-                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredAt ? '답변완료' : '답변대기'} color={qna.answeredAt ? 'success' : 'warning'} size="small" sx={{ mr: 2, mb: 1 }} />
+                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 2, mb: 1 }} />
                       <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1 }}>{formatDate(qna.createdAt)}</Typography>
                     </Box>
                     <Typography id={`qna-item-title-${qna.qnaId}`} variant="h6" sx={{ color: colors.text, fontWeight: 500, mb: 1 }}>{qna.title}</Typography>

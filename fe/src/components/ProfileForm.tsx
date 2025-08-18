@@ -19,7 +19,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import LockIcon from '@mui/icons-material/Lock';
 import { getThemeColors } from '../theme';
 import type { ThemeType } from '../theme';
-import PageTitle from './common/PageTitle';
+import PageHeader from './common/PageHeader';
 import ThemedButton from './common/ThemedButton';
 import ThemedCard from './common/ThemedCard';
 import LoadingSpinner from './LoadingSpinner';
@@ -201,7 +201,7 @@ export default function ProfileForm({
         backgroundOpacity={0.7}
         color="primary"
       />
-      <PageTitle title={title} />
+      <PageHeader title={title} />
       
       {error && (
         <Alert 
@@ -275,6 +275,7 @@ export default function ProfileForm({
                     onClick={handleStartEdit}
                     id="edit-profile-btn"
                     fullWidth
+                    buttonSize="cta"
                   >
                     정보 변경
                   </ThemedButton>
@@ -285,6 +286,7 @@ export default function ProfileForm({
                     onClick={() => setPasswordModalOpen(true)}
                     id="change-password-btn"
                     fullWidth
+                    buttonSize="cta"
                   >
                     비밀번호 변경
                   </ThemedButton>
@@ -299,6 +301,7 @@ export default function ProfileForm({
                     disabled={saving}
                     id="save-profile-btn"
                     fullWidth
+                    buttonSize="cta"
                   >
                     {saving ? <CircularProgress size={20} sx={{ color: 'white' }} /> : '저장'}
                   </ThemedButton>
@@ -310,6 +313,7 @@ export default function ProfileForm({
                     disabled={saving}
                     id="cancel-edit-btn"
                     fullWidth
+                    buttonSize="cta"
                   >
                     취소
                   </ThemedButton>
@@ -494,6 +498,7 @@ export default function ProfileForm({
             variant="outlined"
             onClick={() => setPasswordModalOpen(false)} 
             disabled={changingPassword}
+            buttonSize="cta"
           >
             취소
           </ThemedButton>
@@ -502,6 +507,7 @@ export default function ProfileForm({
             variant="primary"
             onClick={handleChangePassword} 
             disabled={changingPassword || !passwordValidation.isValid}
+            buttonSize="cta"
           >
             {changingPassword ? <CircularProgress size={20} sx={{ color: 'white' }} /> : '변경'}
           </ThemedButton>

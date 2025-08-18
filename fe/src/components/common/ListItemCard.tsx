@@ -2,14 +2,15 @@ import { Box } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 
 interface ListItemCardProps {
+  id?: string;
   onClick?: () => void;
   children: React.ReactNode;
 }
 
-export default function ListItemCard({ onClick, children }: ListItemCardProps) {
+export default function ListItemCard({ id, onClick, children }: ListItemCardProps) {
   const theme = useTheme();
   return (
-    <Box onClick={onClick} sx={{
+    <Box id={id} onClick={onClick} sx={{
       p: 2,
       borderRadius: 2,
       cursor: onClick ? 'pointer' : 'default',

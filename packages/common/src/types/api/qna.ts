@@ -81,6 +81,7 @@ export interface UserQnaHomeRes {
 // Q&A 목록 조회 (관리자용)
 export interface AdminQnaListQuery extends PaginationReq {
   search?: string;
+  status?: string;
 }
 
 export type AdminQnaListRes = PaginationRes<AdminQnaItem>;
@@ -109,6 +110,7 @@ export interface AdminQnaAnswerParams {
 export interface AdminQnaUpdateReq {
   title?: string;
   content?: string;
+  answerContent?: string;
   updatedBy?: string;
 }
 

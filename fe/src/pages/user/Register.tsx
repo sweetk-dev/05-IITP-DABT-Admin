@@ -160,10 +160,11 @@ export default function Register() {
       bgcolor: colors.background
     }}>
       <Box id="register-form-box" sx={{
-        maxWidth: 400,
+        maxWidth: 550,
         width: '100%',
         mx: 'auto',
-        p: 4,
+        px: 4,
+        py: 8,
         borderRadius: 3,
         bgcolor: colors.paper,
         border: `1px solid ${colors.border}`,

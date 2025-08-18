@@ -7,12 +7,15 @@ interface ThemedButtonProps extends Omit<ButtonProps, 'variant'> {
   children: React.ReactNode;
   // Accept and ignore legacy theme prop to avoid TS errors at call-sites
   theme?: 'user' | 'admin';
+  // Prominent size for key actions like 저장/취소/확인/등록
+  buttonSize?: 'default' | 'cta';
 }
 
 export default function ThemedButton({ 
   variant = 'primary', 
   children, 
   sx, 
+  buttonSize = 'default',
   ...props 
 }: ThemedButtonProps) {
   const muiTheme = useTheme();
@@ -48,11 +51,25 @@ export default function ThemedButton({
     }
   };
 
+  const getSizeStyle = () => {
+    if (buttonSize === 'cta') {
+      return {
+        fontSize: '1rem',
+        px: 2.5,
+        py: 1.5,
+        minHeight: 44,
+        borderRadius: 2,
+      } as const;
+    }
+    return {} as const;
+  };
+
   return (
     <Button
       variant={variant === 'outlined' ? 'outlined' : variant === 'text' || variant === 'softText' ? 'text' : 'contained'}
       sx={{
         ...getButtonStyle(),
+        ...getSizeStyle(),
         ...sx
       }}
       {...restProps}

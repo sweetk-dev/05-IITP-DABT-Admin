@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import Login from './pages/user/Login';
 import Home from './pages/user/Home';
 import Register from './pages/user/Register';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserProfile from './pages/user/UserProfile';
-import AdminProfile from './pages/admin/AdminProfile';
+const AdminProfile = lazy(() => import('./pages/admin/AdminProfile'));
 import { Dashboard } from './pages/user/Dashboard';
 import { QnaCreate } from './pages/user/QnaCreate';
 import { QnaHistory } from './pages/user/QnaHistory';
@@ -21,23 +22,28 @@ import { PrivateRoute, AdminProtectedRoute } from './components/ProtectedRoute';
 
 import { ROUTES } from './routes';
 
-// 관리자 페이지 임시 컴포넌트들
+// 관리자 페이지 구현 컴포넌트들
+const AdminFaqList = lazy(() => import('./pages/admin/FaqList'));
+const AdminFaqCreate = lazy(() => import('./pages/admin/FaqCreate'));
+const AdminQnaList = lazy(() => import('./pages/admin/QnaManage'));
+const AdminNoticeList = lazy(() => import('./pages/admin/NoticeManage'));
+const AdminOpenApiClients = lazy(() => import('./pages/admin/OpenApiManage'));
+const AdminOpenApiRequests = lazy(() => import('./pages/admin/OpenApiRequests'));
+const AdminOpenApiDetail = lazy(() => import('./pages/admin/OpenApiDetail'));
+const AdminOpenApiEdit = lazy(() => import('./pages/admin/OpenApiEdit'));
+const AdminNoticeCreate = lazy(() => import('./pages/admin/NoticeCreate'));
+const AdminNoticeDetail = lazy(() => import('./pages/admin/NoticeDetail'));
+const AdminNoticeEdit = lazy(() => import('./pages/admin/NoticeEdit'));
+const AdminFaqDetail = lazy(() => import('./pages/admin/FaqDetail'));
+const AdminFaqEdit = lazy(() => import('./pages/admin/FaqEdit'));
+const AdminQnaDetail = lazy(() => import('./pages/admin/QnaDetail'));
+const AdminQnaReply = lazy(() => import('./pages/admin/QnaReply'));
+import LoadingSpinner from './components/LoadingSpinner';
+
+// 임시 잔여 컴포넌트
 const UserManagement = () => <div>UserManagement</div>;
 const UserDetail = () => <div>UserDetail</div>;
-const ApiClientManagement = () => <div>ApiClientManagement</div>;
-const ApiClientDetail = () => <div>ApiClientDetail</div>;
-const ApiRequestManagement = () => <div>ApiRequestManagement</div>;
 const ApiRequestDetail = () => <div>ApiRequestDetail</div>;
-const AdminNoticeList = () => <div>AdminNoticeList</div>;
-const AdminNoticeCreate = () => <div>AdminNoticeCreate</div>;
-const AdminNoticeDetail = () => <div>AdminNoticeDetail</div>;
-const AdminNoticeEdit = () => <div>AdminNoticeEdit</div>;
-const AdminFaqList = () => <div>AdminFaqList</div>;
-const AdminFaqCreate = () => <div>AdminFaqCreate</div>;
-const AdminFaqDetail = () => <div>AdminFaqDetail</div>;
-const AdminFaqEdit = () => <div>AdminFaqEdit</div>;
-const AdminQnaList = () => <div>AdminQnaList</div>;
-const AdminQnaDetail = () => <div>AdminQnaDetail</div>;
 const AdminQnaEdit = () => <div>AdminQnaEdit</div>;
 
 function App() {
@@ -84,29 +90,33 @@ function App() {
             <Route path="/admin/" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
             <Route path="/admin/*" element={
               <AdminProtectedRoute>
-                <Routes>
-                  <Route path="dashbd" element={<AdminDashboard />} />
-                  <Route path="profile" element={<AdminProfile />} />
-                  <Route path="users" element={<UserManagement />} />
-                  <Route path="users/:id" element={<UserDetail />} />
-                  <Route path="openapi/clients" element={<ApiClientManagement />} />
-                  <Route path="openapi/clients/:id" element={<ApiClientDetail />} />
-                  <Route path="openapi/requests" element={<ApiRequestManagement />} />
-                  <Route path="openapi/requests/:id" element={<ApiRequestDetail />} />
-                  <Route path="notices" element={<AdminNoticeList />} />
-                  <Route path="notices/create" element={<AdminNoticeCreate />} />
-                  <Route path="notices/:id" element={<AdminNoticeDetail />} />
-                  <Route path="notices/:id/edit" element={<AdminNoticeEdit />} />
-                  <Route path="faqs" element={<AdminFaqList />} />
-                  <Route path="faqs/create" element={<AdminFaqCreate />} />
-                  <Route path="faqs/:id" element={<AdminFaqDetail />} />
-                  <Route path="faqs/:id/edit" element={<AdminFaqEdit />} />
-                  <Route path="qnas" element={<AdminQnaList />} />
-                  <Route path="qnas/:id" element={<AdminQnaDetail />} />
-                  <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
-                  {/* 관리자 경로에서 인증되지 않은 경우 로그인으로 리다이렉트 */}
-                  <Route path="*" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
-                </Routes>
+                <Suspense fallback={<LoadingSpinner loading={true} />}>
+                  <Routes>
+                    <Route path="dashbd" element={<AdminDashboard />} />
+                    <Route path="profile" element={<AdminProfile />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="users/:id" element={<UserDetail />} />
+                    <Route path="openapi/clients" element={<AdminOpenApiClients />} />
+                    <Route path="openapi/clients/:id" element={<AdminOpenApiDetail />} />
+                    <Route path="openapi/clients/:id/edit" element={<AdminOpenApiEdit />} />
+                    <Route path="openapi/requests" element={<AdminOpenApiRequests />} />
+                    <Route path="openapi/requests/:id" element={<ApiRequestDetail />} />
+                    <Route path="notices" element={<AdminNoticeList />} />
+                    <Route path="notices/create" element={<AdminNoticeCreate />} />
+                    <Route path="notices/:id" element={<AdminNoticeDetail />} />
+                    <Route path="notices/:id/edit" element={<AdminNoticeEdit />} />
+                    <Route path="faqs" element={<AdminFaqList />} />
+                    <Route path="faqs/create" element={<AdminFaqCreate />} />
+                    <Route path="faqs/:id" element={<AdminFaqDetail />} />
+                    <Route path="faqs/:id/edit" element={<AdminFaqEdit />} />
+                    <Route path="qnas" element={<AdminQnaList />} />
+                    <Route path="qnas/:id" element={<AdminQnaDetail />} />
+                    <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
+                    <Route path="qnas/:id/reply" element={<AdminQnaReply />} />
+                    {/* 관리자 경로에서 인증되지 않은 경우 로그인으로 리다이렉트 */}
+                    <Route path="*" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
+                  </Routes>
+                </Suspense>
               </AdminProtectedRoute>
             } />
 

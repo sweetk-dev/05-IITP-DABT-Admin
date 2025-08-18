@@ -22,7 +22,6 @@ import {
   Tooltip
 } from '@mui/material';
 import { 
-  ArrowBack as ArrowBackIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
   Schedule as ScheduleIcon,
@@ -38,7 +37,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
 import { SPACING } from '../../constants/spacing';
-import PageTitle from '../../components/common/PageTitle';
+import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
@@ -162,18 +161,8 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
 
   return (
     <Box id={id} sx={{ p: SPACING.LARGE }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.LARGE }}>
-        <ThemedButton
-          id="back-btn"
-          
-          variant="text"
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mr: SPACING.MEDIUM }}
-        >
-          뒤로가기
-        </ThemedButton>
-        <PageTitle title="API 인증키 관리" />
+      <Box id="openapi-management-header">
+        <PageHeader title="API 인증키 관리" onBack={handleBack} />
       </Box>
 
       {isError && (
@@ -209,6 +198,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
                 variant="primary"
                 startIcon={<AddIcon />}
                 onClick={() => setCreateDialogOpen(true)}
+                buttonSize="cta"
               >
                 신규 인증키 발행
               </ThemedButton>
@@ -265,6 +255,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
                             setSelectedKeyId(authKey.keyId);
                             setExtendDialogOpen(true);
                           }}
+                          buttonSize="cta"
                         >
                           기간연장
                         </ThemedButton>
@@ -279,6 +270,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
                             setDeleteDialogOpen(true);
                           }}
                            sx={{ color: colors.error }}
+                           buttonSize="cta"
                         >
                           삭제
                         </ThemedButton>
@@ -372,10 +364,10 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
           </Box>
         </DialogContent>
         <DialogActions>
-          <ThemedButton variant="text" onClick={() => setCreateDialogOpen(false)}>
+          <ThemedButton variant="text" onClick={() => setCreateDialogOpen(false)} buttonSize="cta">
             취소
           </ThemedButton>
-          <ThemedButton variant="primary" onClick={handleCreateKey} disabled={loading}>
+          <ThemedButton variant="primary" onClick={handleCreateKey} disabled={loading} buttonSize="cta">
             발행
           </ThemedButton>
         </DialogActions>
@@ -409,10 +401,10 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <ThemedButton variant="text" onClick={() => setExtendDialogOpen(false)}>
+          <ThemedButton variant="text" onClick={() => setExtendDialogOpen(false)} buttonSize="cta">
             취소
           </ThemedButton>
-          <ThemedButton variant="primary" onClick={handleExtendKey} disabled={loading}>
+          <ThemedButton variant="primary" onClick={handleExtendKey} disabled={loading} buttonSize="cta">
             연장
           </ThemedButton>
         </DialogActions>

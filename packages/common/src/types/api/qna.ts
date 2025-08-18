@@ -12,6 +12,7 @@ export interface UserQnaItem {
   answeredYn: string;
   createdAt: string;
   answeredAt?: string;
+  hitCnt?: number;
 }
 
 // 관리자용 Q&A 아이템 (전체 정보)
@@ -32,6 +33,7 @@ export interface AdminQnaItem {
   createdBy?: string;
   updatedBy?: string;
   deletedBy?: string;
+  hitCnt?: number;
 }
 
 // Q&A 상세 (답변 포함) - 사용자용
@@ -48,6 +50,7 @@ export interface AdminQnaDetailItem extends AdminQnaItem {
 export interface UserQnaListQuery extends PaginationReq {
   qnaType?: string;
   search?: string;
+  sort?: string; // 'createdAt-desc' | 'hit-desc'
 }
 
 export type UserQnaListRes = PaginationRes<UserQnaItem>;
@@ -82,6 +85,7 @@ export interface UserQnaHomeRes {
 export interface AdminQnaListQuery extends PaginationReq {
   search?: string;
   status?: string;
+  sort?: string; // 'createdAt-desc' | 'hit-desc'
 }
 
 export type AdminQnaListRes = PaginationRes<AdminQnaItem>;

@@ -22,21 +22,21 @@ router.get(API_URLS.USER.PROFILE, ...routerMiddleware.user, getProfile);
 router.put(API_URLS.USER.PROFILE, ...routerMiddleware.user, updateProfile);
 router.put(API_URLS.USER.PASSWORD, ...routerMiddleware.user, changePassword);
 
-// FAQ 관련 (공개 API)
+// FAQ 관련 (공개 API) - 정적 → 동적(숫자 제약)
 router.get(API_URLS.USER.FAQ.LIST, ...routerMiddleware.public, getFaqListForUser);
-router.get<UserFaqDetailParams>(API_URLS.USER.FAQ.DETAIL, ...routerMiddleware.public, getFaqDetailForUser as any);
 router.get(API_URLS.USER.FAQ.HOME, ...routerMiddleware.public, getFaqHomeForUser);
+router.get<UserFaqDetailParams>('/faq/:faqId(\\d+)', ...routerMiddleware.public, getFaqDetailForUser as any);
 
-// Notice 관련 (공개 API)
+// Notice 관련 (공개 API) - 정적 → 동적(숫자 제약)
 router.get(API_URLS.USER.NOTICE.LIST, ...routerMiddleware.public, getNoticeListForUser);
-router.get<UserNoticeDetailParams>(API_URLS.USER.NOTICE.DETAIL, ...routerMiddleware.public, getNoticeDetailForUser as any);
 router.get(API_URLS.USER.NOTICE.HOME, ...routerMiddleware.public, getNoticeHomeForUser);
+router.get<UserNoticeDetailParams>('/notice/:noticeId(\\d+)', ...routerMiddleware.public, getNoticeDetailForUser as any);
 
-// QnA 관련
-router.get(API_URLS.USER.QNA.LIST, ...routerMiddleware.user, getQnaListForUser);
-router.get<UserQnaDetailParams>(API_URLS.USER.QNA.DETAIL, ...routerMiddleware.user, getQnaDetailForUser as any);
+// QnA 관련: 목록/홈/상세는 공개(숫자 제약), 생성은 로그인 필요
+router.get(API_URLS.USER.QNA.LIST, ...routerMiddleware.public, getQnaListForUser);
+router.get(API_URLS.USER.QNA.HOME, ...routerMiddleware.public, getQnaHomeForUser);
+router.get<UserQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.public, getQnaDetailForUser as any);
 router.post(API_URLS.USER.QNA.CREATE, ...routerMiddleware.user, createQnaForUser);
-router.get(API_URLS.USER.QNA.HOME, ...routerMiddleware.user, getQnaHomeForUser);
 
 // OpenAPI 관련
 router.get(API_URLS.USER.OPEN_API.LIST, ...routerMiddleware.user, getUserOpenApiList);

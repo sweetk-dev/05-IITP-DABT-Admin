@@ -31,7 +31,11 @@ export const getNoticeListForUser = async (req: Request<{}, {}, {}, UserNoticeLi
       if (msg.includes('validation')) return sendValidationError(res, 'general', msg);
       if (msg.includes('database')) return sendDatabaseError(res, '조회', '공지사항');
     }
-    sendError(res, ErrorCode.NOTICE_NOT_FOUND);
+    // 비-DB 오류 시 빈 리스트로 성공 응답
+    const page = Number((req.query as any).page) || 1;
+    const limit = Number((req.query as any).limit) || 10;
+    const empty: UserNoticeListRes = { items: [], total: 0, page, limit, totalPages: 0 } as any;
+    return sendSuccess(res, empty, undefined, 'USER_NOTICE_LIST_VIEW', { count: 0 }, true);
   }
 };
 
@@ -62,7 +66,15 @@ export const getNoticeHomeForUser = async (_req: Request, res: Response) => {
     const response: UserNoticeHomeRes = data;
     sendSuccess(res, response, undefined, 'USER_NOTICE_HOME_VIEW', { count: response.notices.length });
   } catch (error) {
-    sendError(res, ErrorCode.NOTICE_NOT_FOUND);
+    // 홈 리스트: DB 에러가 아닌 경우 빈 리스트로 성공 응답
+    if (error instanceof Error) {
+      const msg = normalizeErrorMessage(error);
+      if (msg.includes('database') || msg.includes('connection')) {
+        return sendDatabaseError(res, '조회', '공지사항');
+      }
+    }
+    const empty: UserNoticeHomeRes = { notices: [] } as any;
+    return sendSuccess(res, empty, undefined, 'USER_NOTICE_HOME_VIEW', { count: 0 });
   }
 };
 

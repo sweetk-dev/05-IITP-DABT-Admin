@@ -50,7 +50,11 @@ export const getFaqListForUser = async (req: Request<{}, {}, {}, UserFaqListQuer
         return sendDatabaseError(res, '조회', 'FAQ 목록');
       }
     }
-    sendError(res, ErrorCode.FAQ_NOT_FOUND);
+    // 비-DB 오류 시 빈 리스트로 성공 응답
+    const page = Number((req.query as any).page) || 1;
+    const limit = Number((req.query as any).limit) || 10;
+    const empty: UserFaqListRes = { items: [], total: 0, page, limit, totalPages: 0 } as any;
+    return sendSuccess(res, empty, undefined, 'USER_FAQ_LIST_VIEW', undefined, true);
   }
 };
 
@@ -92,7 +96,15 @@ export const getFaqHomeForUser = async (_req: Request, res: Response) => {
     const response: UserFaqHomeRes = data;
     sendSuccess(res, response, undefined, 'USER_FAQ_HOME_VIEW', { count: response.faqs.length });
   } catch (error) {
-    sendError(res, ErrorCode.FAQ_NOT_FOUND);
+    // 홈 리스트: DB 에러가 아닌 경우 빈 리스트로 성공 응답
+    if (error instanceof Error) {
+      const errorMsg = error.message;
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '조회', 'FAQ');
+      }
+    }
+    const empty: UserFaqHomeRes = { faqs: [] } as any;
+    return sendSuccess(res, empty, undefined, 'USER_FAQ_HOME_VIEW', { count: 0 });
   }
 };
 

@@ -46,7 +46,7 @@ export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNotice
       if (msg.includes('validation')) return sendValidationError(res, 'general', msg);
       if (msg.includes('database')) return sendDatabaseError(res, '조회', '공지사항');
     }
-    sendError(res, ErrorCode.NOTICE_NOT_FOUND);
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 

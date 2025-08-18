@@ -17,7 +17,7 @@ export async function findQnas(options: {
 }> {
   const limit = options.limit || 10;
   const offset = options.offset || 0;
-  const order = options.order || [['createdAt', 'DESC']];
+  const order = options.order || [[SysQna.sequelize!.col('created_at'), 'DESC']];
 
   const { count, rows } = await SysQna.findAndCountAll({
     where: options.where || {},

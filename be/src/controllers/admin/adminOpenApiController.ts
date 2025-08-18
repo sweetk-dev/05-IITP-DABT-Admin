@@ -80,7 +80,7 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
         return sendDatabaseError(res, '조회', 'OpenAPI 목록');
       }
     }
-    sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 

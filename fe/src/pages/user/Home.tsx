@@ -2,16 +2,16 @@ import { Box, Typography, Stack, Divider } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 // theme colors come from MUI palette
-import ThemedButton from '../components/common/ThemedButton';
-import ThemedCard from '../components/common/ThemedCard';
-import EmptyState from '../components/common/EmptyState';
-import LoadingSpinner from '../components/LoadingSpinner';
+import ThemedButton from '../../components/common/ThemedButton';
+import ThemedCard from '../../components/common/ThemedCard';
+import EmptyState from '../../components/common/EmptyState';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { ArrowForward } from '@mui/icons-material';
-import { OPEN_API_DOC_URL } from '../config';
-import { PAGINATION } from '../constants/pagination';
-import { SPACING } from '../constants/spacing';
-import { useDataFetching } from '../hooks/useDataFetching';
-import { getHomeNoticeList, getHomeFaqList, getHomeQnaList } from '../api';
+import { OPEN_API_DOC_URL } from '../../config';
+import { PAGINATION } from '../../constants/pagination';
+import { SPACING } from '../../constants/spacing';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { getHomeNoticeList, getHomeFaqList, getHomeQnaList } from '../../api';
 import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
 
 export default function Home() {

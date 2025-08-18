@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import ThemedButton from '../../components/common/ThemedButton';
 import { useNavigate } from 'react-router-dom';
-import ThemedCard from '../components/common/ThemedCard';
+import ThemedCard from '../../components/common/ThemedCard';
 // import PageTitle from '../components/common/PageTitle';
 // import ThemedButton from '../components/common/ThemedButton';
-import EmptyState from '../components/common/EmptyState';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Pagination from '../components/common/Pagination';
-import SelectField from '../components/common/SelectField';
-import ListHeader from '../components/common/ListHeader';
-import { useQuerySync } from '../hooks/useQuerySync';
-import { useErrorHandler, type UseErrorHandlerResult } from '../hooks/useErrorHandler';
+import EmptyState from '../../components/common/EmptyState';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import Pagination from '../../components/common/Pagination';
+import SelectField from '../../components/common/SelectField';
+import ListHeader from '../../components/common/ListHeader';
+import { useQuerySync } from '../../hooks/useQuerySync';
+import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
 // import { ArrowBack } from '@mui/icons-material';
-import { PAGINATION } from '../constants/pagination';
-import { SPACING } from '../constants/spacing';
-import { useDataFetching } from '../hooks/useDataFetching';
-import { usePagination } from '../hooks/usePagination';
-import { getUserQnaList, getUserQnaListByType, getCommonCodesByGroupId } from '../api';
+import { PAGINATION } from '../../constants/pagination';
+import { SPACING } from '../../constants/spacing';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { usePagination } from '../../hooks/usePagination';
+import { getUserQnaList, getUserQnaListByType, getCommonCodesByGroupId } from '../../api';
 import type { UserQnaItem, CommonCodeByGroupRes } from '@iitp-dabt/common';
 
 export default function QnaList() {
@@ -50,7 +51,7 @@ export default function QnaList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.page, query.limit, query.qnaType]);
 
-  const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('QNA_TYPE'), autoFetch: true });
+  const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('qna_type'), autoFetch: true });
 
   useEffect(() => {
     if (qnaTypeCodes) {
@@ -77,6 +78,16 @@ export default function QnaList() {
   const getQnaTypeLabel = (type: string) => qnaTypeOptions.find(opt => opt.value === type)?.label ?? type;
   const maskAuthorName = (name: string) => (name.length <= 2 ? name : name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1));
 
+  const handleCreateQna = () => {
+    // 로그인 여부에 따라 분기: 미로그인 → 로그인 후 돌아오기
+    const isLoggedIn = localStorage.getItem('accessToken');
+    if (!isLoggedIn) {
+      navigate('/login', { state: { from: '/user/qna/create' } });
+      return;
+    }
+    navigate('/user/qna/create');
+  };
+
   return (
     <Box id="qna-list-page" sx={{ minHeight: '100vh', background: colors.background, py: SPACING.LARGE }}>
       <Box id="qna-list-container" sx={{ mx: 'auto', px: { xs: SPACING.MEDIUM, md: SPACING.LARGE } }}>
@@ -92,6 +103,9 @@ export default function QnaList() {
           filters={[{ label: '유형', value: qnaType, options: qnaTypeOptions, onChange: (v: string) => handleQnaTypeChange(v || 'ALL') }]}
           totalCount={qnaData?.total}
         />
+        <Box id="qna-create-button-row" sx={{ display: 'flex', justifyContent: 'flex-end', mb: SPACING.MEDIUM }}>
+          <ThemedButton id="qna-create-button" variant="contained" onClick={handleCreateQna}>질문 등록하기</ThemedButton>
+        </Box>
 
         {/* Q&A 타입 선택 */}
         <ThemedCard sx={{ mb: SPACING.LARGE }}>
@@ -102,9 +116,9 @@ export default function QnaList() {
         </ThemedCard>
 
         {/* Q&A 목록 */}
-        <ThemedCard>
+        <ThemedCard id="qna-list-card">
           {isLoading ? (
-            <Box sx={{ position: 'relative', minHeight: 400 }}>
+            <Box id="qna-list-loading" sx={{ position: 'relative', minHeight: 400 }}>
               <LoadingSpinner loading={true} />
             </Box>
           ) : isError ? (
@@ -113,18 +127,18 @@ export default function QnaList() {
             <EmptyState message="등록된 Q&A가 없습니다." />
           ) : (
             <>
-              <Stack spacing={2}>
+              <Stack id="qna-list-stack" spacing={2}>
                 {qnaData?.items.map((qna: UserQnaItem) => (
-                  <Box key={qna.qnaId} onClick={() => handleQnaClick(qna.qnaId)} sx={{ p: 3, borderRadius: 2, cursor: 'pointer', transition: 'all 0.2s ease-in-out', border: `1px solid ${colors.border}`, backgroundColor: 'transparent', '&:hover': { backgroundColor: `${colors.primary}15`, borderColor: colors.primary, transform: 'translateY(-1px)', boxShadow: `0 4px 12px ${colors.primary}20` } }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
+                  <Box id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna.qnaId)} sx={{ p: 3, borderRadius: 2, cursor: 'pointer', transition: 'all 0.2s ease-in-out', border: `1px solid ${colors.border}`, backgroundColor: 'transparent', '&:hover': { backgroundColor: `${colors.primary}15`, borderColor: colors.primary, transform: 'translateY(-1px)', boxShadow: `0 4px 12px ${colors.primary}20` } }}>
+                    <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
                       {/* 공개 여부 필드는 타입에 없으므로 생략 또는 별도 매핑 필요 */}
-                      <Chip label={getQnaTypeLabel(qna.qnaType)} color="primary" size="small" sx={{ mr: 2, mb: 1 }} />
-                      <Chip label={qna.answeredAt ? '답변완료' : '답변대기'} color={qna.answeredAt ? 'success' : 'warning'} size="small" sx={{ mr: 2, mb: 1 }} />
-                      <Typography variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1 }}>{formatDate(qna.createdAt)}</Typography>
+                      <Chip id={`qna-item-type-${qna.qnaId}`} label={getQnaTypeLabel(qna.qnaType)} color="primary" size="small" sx={{ mr: 2, mb: 1 }} />
+                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredAt ? '답변완료' : '답변대기'} color={qna.answeredAt ? 'success' : 'warning'} size="small" sx={{ mr: 2, mb: 1 }} />
+                      <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1 }}>{formatDate(qna.createdAt)}</Typography>
                     </Box>
-                    <Typography variant="h6" sx={{ color: colors.text, fontWeight: 500, mb: 1 }}>{qna.title}</Typography>
-                    <Typography variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', mb: 1 }}>{qna.content}</Typography>
-                    <Typography variant="caption" sx={{ color: colors.textSecondary, opacity: 0.7 }}>작성자: {maskAuthorName(qna.writerName)}</Typography>
+                    <Typography id={`qna-item-title-${qna.qnaId}`} variant="h6" sx={{ color: colors.text, fontWeight: 500, mb: 1 }}>{qna.title}</Typography>
+                    <Typography id={`qna-item-content-${qna.qnaId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', mb: 1 }}>{qna.content}</Typography>
+                    <Typography id={`qna-item-writer-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, opacity: 0.7 }}>작성자: {maskAuthorName(qna.writerName)}</Typography>
                   </Box>
                 ))}
               </Stack>

@@ -25,6 +25,7 @@ export interface QnaUpdateData {
   content?: string;
   qnaType?: string;
   secretYn?: string;
+  answerContent?: string;
 }
 
 export interface QnaListResult {
@@ -53,7 +54,10 @@ export const getQnaList = async (params: QnaListParams): Promise<QnaListResult> 
     }
     
     if (status) {
-      whereConditions.status = status;
+      // status는 'Y' | 'N' 기준으로 answeredYn 필터로 매핑
+      if (status === 'Y' || status === 'N') {
+        whereConditions.answeredYn = status;
+      }
     }
 
     const result = await findQnas({

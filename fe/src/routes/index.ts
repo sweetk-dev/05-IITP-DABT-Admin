@@ -15,6 +15,10 @@ export const ROUTES = {
     FAQ: '/faq',
     QNA: '/qna',
     QNA_DETAIL: '/qna/:qnaId',
+    // 공개 정적 페이지
+    ABOUT: '/about',
+    TERMS: '/terms',
+    PRIVACY: '/privacy',
   },
 
   // 사용자 페이지 (로그인 필요)
@@ -179,6 +183,24 @@ export const ROUTE_META = {
   },
   [ROUTES.PUBLIC.REGISTER]: {
     title: '회원가입',
+    requiresAuth: false,
+    requiresAdmin: false,
+    showInNav: false,
+  },
+  [ROUTES.PUBLIC.ABOUT]: {
+    title: 'OpenAPI센터 소개',
+    requiresAuth: false,
+    requiresAdmin: false,
+    showInNav: false,
+  },
+  [ROUTES.PUBLIC.TERMS]: {
+    title: '이용약관',
+    requiresAuth: false,
+    requiresAdmin: false,
+    showInNav: false,
+  },
+  [ROUTES.PUBLIC.PRIVACY]: {
+    title: '개인정보처리방침',
     requiresAuth: false,
     requiresAdmin: false,
     showInNav: false,

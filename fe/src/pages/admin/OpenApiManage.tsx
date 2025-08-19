@@ -10,6 +10,7 @@ import DataTable, { type DataTableColumn } from '../../components/common/DataTab
 import StatusChip from '../../components/common/StatusChip';
 import ThemedButton from '../../components/common/ThemedButton';
 import { useQuerySync } from '../../hooks/useQuerySync';
+import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 
 export default function AdminOpenApiClients() {
   const [search, setSearch] = useState('');
@@ -46,7 +47,7 @@ export default function AdminOpenApiClients() {
 
   const columns: Array<DataTableColumn<any>> = [
     { key: 'keyName', header: '이름', render: (r) => <span style={{ cursor: 'pointer' }} onClick={()=>window.location.assign(`/admin/openapi/clients/${r.keyId}`)}>{r.keyName || `Key ${r.keyId}`}</span> },
-    { key: 'activeYn', header: '상태', render: (r) => <StatusChip kind={r.activeYn === 'Y' ? 'active' : 'inactive'} /> },
+    { key: 'activeYn', header: '상태', render: (r) => <StatusChip kind={getOpenApiKeyStatus(r)} /> },
     { key: 'createdAt', header: '생성일', width: 160 },
   ];
 

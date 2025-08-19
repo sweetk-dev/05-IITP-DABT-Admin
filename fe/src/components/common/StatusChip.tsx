@@ -8,6 +8,7 @@ type StatusKind =
   | 'private'
   | 'active'
   | 'inactive'
+  | 'expired'
   | 'warning'
   | 'default';
 
@@ -56,6 +57,12 @@ export default function StatusChip({ id, kind, label, size = 'small' }: StatusCh
         return { color: 'success' as const, text: label || '활성' };
       case 'inactive':
         return { color: 'default' as const, text: label || '비활성' };
+      case 'expired': {
+        // QnA의 완료 칩과 동일한 톤으로 정렬 (짙은 회색 배경 + 대비 텍스트)
+        const bg = theme.palette.grey[500];
+        const fg = theme.palette.getContrastText(bg as any);
+        return { color: undefined, text: label || '만료', sx: { bgcolor: bg, color: fg } } as const;
+      }
       case 'warning':
         return { color: 'warning' as const, text: label || '주의' };
       default:

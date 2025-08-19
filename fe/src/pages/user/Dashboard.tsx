@@ -8,14 +8,17 @@ import {
   List, 
   ListItem, 
   ListItemText, 
-  Chip
+  Chip,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import { 
   QuestionAnswer as QnaIcon, 
   Key as KeyIcon,
   Add as AddIcon,
   History as HistoryIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  ContentCopy as CopyIcon
 } from '@mui/icons-material';
 import { 
   getUserQnaList, 
@@ -31,6 +34,8 @@ import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import EmptyState from '../../components/common/EmptyState';
+import StatusChip from '../../components/common/StatusChip';
+import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 import { getThemeColors } from '../../theme';
 import { useDataFetching } from '../../hooks/useDataFetching';
 
@@ -90,6 +95,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
     navigate(ROUTES.USER.OPEN_API_MANAGEMENT);
   };
 
+  const handleCopyKey = (authKey: string) => {
+    navigator.clipboard.writeText(authKey);
+  };
+
+
   if (loading) {
     return <LoadingSpinner loading={true} />;
   }
@@ -109,8 +119,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
       <Grid container spacing={SPACING.LARGE}>
         {/* 내 QnA 섹션 */}
         <Grid item xs={12} md={6}>
-          <ThemedCard>
-            <CardContent>
+          <ThemedCard sx={{ minHeight: 800, display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
                 <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
                   <QnaIcon sx={{ mr: 1, color: colors.primary }} />
@@ -168,8 +178,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
 
         {/* API 인증키 관리 섹션 */}
         <Grid item xs={12} md={6}>
-          <ThemedCard>
-            <CardContent>
+          <ThemedCard sx={{ minHeight: 800, display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
                 <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
                   <KeyIcon sx={{ mr: 1, color: colors.primary }} />
@@ -191,15 +201,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
               {openApiList?.authKeys && openApiList.authKeys.length > 0 ? (
                 <List>
                   {openApiList.authKeys.slice(0, 3).map((authKey: any) => (
-                    <ListItem key={authKey.keyId} divider>
+                    <ListItem key={authKey.keyId} divider sx={{ alignItems: 'center' }}>
                       <ListItemText
-                        primary={`API Key: ${authKey.authKey.substring(0, 8)}...`}
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body1" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                              API Key: {authKey.authKey.substring(0, 36)}...
+                            </Typography>
+                            <Tooltip title="복사">
+                              <IconButton id={`dash-copy-key-${authKey.keyId}`} size="small" onClick={() => handleCopyKey(authKey.authKey)}>
+                                <CopyIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <StatusChip kind={getOpenApiKeyStatus(authKey)} />
+                          </Box>
+                        }
                         secondary={`유효기간: ${authKey.startDt} ~ ${authKey.endDt}`}
-                      />
-                      <Chip
-                        label={authKey.activeYn === 'Y' ? '활성' : '비활성'}
-                        color={authKey.activeYn === 'Y' ? 'success' : 'default'}
-                        size="small"
                       />
                     </ListItem>
                   ))}

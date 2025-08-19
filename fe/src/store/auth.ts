@@ -6,6 +6,8 @@ import {
   getTokenInfoString 
 } from '../utils/jwt';
 import { clearLoginInfo, getUserType } from './user';
+import { API_BASE_URL } from '../config';
+import { FULL_API_URLS } from '@iitp-dabt/common';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -171,33 +173,60 @@ export async function ensureValidToken(): Promise<string | null> {
   validateAndCleanTokens();
   
   const accessToken = getAccessToken();
+  const refreshToken = getRefreshToken();
   
   // 토큰이 없으면 null 반환
   if (!accessToken) {
+    // Access 없음 → Refresh로 갱신 시도
+    if (refreshToken && !isTokenExpired(refreshToken)) {
+      const refreshed = await tryRefreshToken(refreshToken);
+      return refreshed;
+    }
     return null;
   }
   
-  // Access Token이 유효하면 반환
-  if (!isTokenExpired(accessToken)) {
+  // Access Token이 유효하고 갱신 필요 없으면 그대로 사용
+  if (!isTokenExpired(accessToken) && !shouldRefreshToken(accessToken)) {
     return accessToken;
   }
-  
-  // Access Token이 만료되었지만 Refresh Token이 유효하면 갱신 시도
-  const refreshToken = getRefreshToken();
+
+  // Access 만료 또는 만료 임박 → Refresh로 갱신 시도
   if (refreshToken && !isTokenExpired(refreshToken)) {
-    try {
-      // TODO: 토큰 갱신 API 호출 구현
-      // const response = await refreshTokenAPI(refreshToken);
-      // if (response.success) {
-      //   saveTokens(response.data.accessToken, response.data.refreshToken);
-      //   return response.data.accessToken;
-      // }
-      console.warn('Token refresh not implemented yet');
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-    }
+    const refreshed = await tryRefreshToken(refreshToken);
+    return refreshed;
   }
-  
+
   // 갱신 실패 시 null 반환
   return null;
 } 
+
+/**
+ * Refresh Token으로 Access/Refresh 재발급 시도 (api.ts 의존 없이 순수 fetch 사용)
+ */
+async function tryRefreshToken(refreshToken: string): Promise<string | null> {
+  try {
+    const userType = getUserType();
+    const url = userType === 'A' ? FULL_API_URLS.AUTH.ADMIN.REFRESH : FULL_API_URLS.AUTH.USER.REFRESH;
+    const res = await fetch(`${API_BASE_URL}${url}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    });
+    if (!res.ok) {
+      throw new Error(`Refresh failed: ${res.status}`);
+    }
+    const data = await res.json();
+    const newAccess = data?.data?.token || data?.token;
+    const newRefresh = data?.data?.refreshToken || data?.refreshToken;
+    if (newAccess && newRefresh && isValidTokenFormat(newAccess) && isValidTokenFormat(newRefresh)) {
+      saveTokens(newAccess, newRefresh);
+      return newAccess;
+    }
+    throw new Error('Invalid refresh response');
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    removeTokens();
+    clearLoginInfo();
+    return null;
+  }
+}

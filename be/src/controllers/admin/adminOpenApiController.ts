@@ -10,6 +10,7 @@ import {
   extendOpenApiKey,
   getOpenApiStats
 } from '../../services/admin/adminOpenApiService';
+import { updateAuthKey as updateOpenApiAuthKeyRepo } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
 import { 
@@ -270,7 +271,7 @@ export const deleteOpenApiForAdmin = async (
  * API: POST /api/admin/open-api/:keyId/extend
  * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.OPEN_API.EXTEND}`]
  */
-export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, AdminOpenApiExtendReq>, res: Response) => {
+export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, { startDt?: string; endDt?: string; updatedBy?: string }>, res: Response) => {
   try {
     logApiCall('POST', API_URLS.ADMIN.OPEN_API.EXTEND, ADMIN_API_MAPPING as any, 'OpenAPI 키 기간 연장 (관리자용)');
 
@@ -287,19 +288,18 @@ export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, Adm
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    if (!extendData.extensionDays || extendData.extensionDays <= 0) {
-      return sendValidationError(res, 'extensionDays', '연장 일수는 1일 이상이어야 합니다.');
+    if (!extendData.startDt || !extendData.endDt) {
+      return sendValidationError(res, 'period', '시작일과 종료일이 필요합니다.');
     }
 
-    if (!extendData.updatedBy) {
-      return sendValidationError(res, 'updatedBy', '수정자 정보는 필수입니다.');
+    // 기간 업데이트 (updatedBy는 adminId)
+    const ok = await updateOpenApiAuthKeyRepo(parseInt(keyId), { startDt: new Date(extendData.startDt), endDt: new Date(extendData.endDt), updatedBy: actorTag });
+    if (!ok) {
+      return sendError(res, ErrorCode.OPEN_API_UPDATE_FAILED);
     }
+    const response: AdminOpenApiExtendRes = { newStartDt: new Date(extendData.startDt).toISOString(), newEndDt: new Date(extendData.endDt).toISOString() } as any;
 
-    // OpenAPI 키 기간 연장 서비스 호출 (updatedBy는 adminId로 설정)
-    const result = await extendOpenApiKey(parseInt(keyId), extendData.extensionDays, actorTag);
-    const response: AdminOpenApiExtendRes = { newEndDt: result.endDt.toISOString() };
-
-    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_EXTENDED', { adminId, keyId, extensionDays: extendData.extensionDays });
+    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_EXTENDED', { adminId, keyId, startDt: extendData.startDt, endDt: extendData.endDt });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 키 기간 연장 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     if (error instanceof Error) {

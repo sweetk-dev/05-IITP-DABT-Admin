@@ -55,6 +55,7 @@ export async function findActiveAuthKeysByUserId(userId: number, includeUnlimite
 /**
  * 인증 키 생성
  */
+//TODO: 임시로 자동 허가 (activeYn=Y,activeAt), 추후 관리자 승인 로직 추가 필요
 export async function createAuthKey(authKeyData: {
   userId: number;
   authKey: string;
@@ -71,6 +72,7 @@ export async function createAuthKey(authKeyData: {
     keyDesc: authKeyData.keyDesc,
     startDt: authKeyData.startDt,
     endDt: authKeyData.endDt,
+    activeAt: new Date(),
     activeYn: 'Y',
     delYn: 'N',
     createdBy: authKeyData.createdBy
@@ -300,33 +302,7 @@ export async function getAuthKeyStats(userId: number, includeUnlimited: boolean 
 /**
  * 인증 키 기간 연장
  */
-export async function extendAuthKeyPeriod(keyId: number, extensionDays: number, updatedBy: string): Promise<boolean> {
-  const authKey = await OpenApiAuthKey.findOne({
-    where: { 
-      keyId,
-      delYn: 'N'
-    }
-  });
-
-  if (!authKey) {
-    return false;
-  }
-
-  const currentEndDt = authKey.endDt ? new Date(authKey.endDt) : new Date();
-  const newEndDt = new Date(currentEndDt.getTime() + extensionDays * 24 * 60 * 60 * 1000);
-
-  const [affectedRows] = await OpenApiAuthKey.update({
-    endDt: newEndDt,
-    updatedBy
-  }, {
-    where: { 
-      keyId,
-      delYn: 'N'
-    }
-  });
-
-  return affectedRows > 0;
-}
+// deprecated: extensionDays-based extend removed
 
 /**
  * 인증 키 상세 정보 조회

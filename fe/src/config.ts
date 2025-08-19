@@ -3,3 +3,4 @@ export const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 10000;
 
 // Vite exposes only variables prefixed with VITE_
 export const OPEN_API_DOC_URL = import.meta.env.VITE_OPEN_API_DOC_URL || 'http://localhost:8080/api-docs';
+export const OPEN_API_SERVER_URL = import.meta.env.VITE_OPEN_API_SERVER_URL || 'http://localhost:8080';

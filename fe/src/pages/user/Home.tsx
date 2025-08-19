@@ -472,7 +472,7 @@ export default function Home() {
                 isolation: 'isolate'
               }}
             >
-              장애인 자립 생활 지원 플랫폼 API 센터
+              장애인 자립생활 지원 플랫폼 Open API 센터
             </Typography>
             <Typography 
               align="center" 
@@ -482,7 +482,8 @@ export default function Home() {
                 isolation: 'isolate'
               }}
             >
-              누구나 쉽고 안전하게 장애인 자립 생활 지원 플랫폼 데이터 API를 탐색하고 활용할 수 있는 공간입니다.
+              누구나 장애인 자립을 지원하는 서비스를 만들 수 있도록 <br/>
+              장애인 자립 관련 데이터를 편리하게 받아서 활용할 수 있는 열린 데이터 공간입니다
             </Typography>
           </Box>
         </ThemedCard>

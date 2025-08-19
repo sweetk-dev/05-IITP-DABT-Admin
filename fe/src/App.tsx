@@ -21,6 +21,9 @@ import Layout from './components/Layout';
 import { PrivateRoute, AdminProtectedRoute } from './components/ProtectedRoute';
 
 import { ROUTES } from './routes';
+import OpenApiAbout from './pages/public/OpenApiAbout';
+import Terms from './pages/public/Terms';
+import Privacy from './pages/public/Privacy';
 
 // 관리자 페이지 구현 컴포넌트들
 const AdminFaqList = lazy(() => import('./pages/admin/FaqList'));
@@ -74,6 +77,9 @@ function App() {
             <Route path={ROUTES.PUBLIC.QNA_DETAIL} element={<QnaDetail />} />
             <Route path={ROUTES.PUBLIC.LOGIN} element={<Login />} />
             <Route path={ROUTES.PUBLIC.REGISTER} element={<Register />} />
+            <Route path={ROUTES.PUBLIC.ABOUT} element={<OpenApiAbout />} />
+            <Route path={ROUTES.PUBLIC.TERMS} element={<Terms />} />
+            <Route path={ROUTES.PUBLIC.PRIVACY} element={<Privacy />} />
 
             {/* 일반 사용자 페이지 (로그인 필요) */}
             <Route path={ROUTES.USER.DASHBOARD} element={<PrivateRoute><Dashboard /></PrivateRoute>} />

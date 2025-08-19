@@ -10,6 +10,7 @@ import { deleteAdminOpenApi, getAdminOpenApiDetail } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import StatusChip from '../../components/common/StatusChip';
 import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
+import ExtendKeyDialog from '../../components/common/ExtendKeyDialog';
 
 export default function AdminOpenApiDetail() {
   const navigate = useNavigate();
@@ -20,13 +21,15 @@ export default function AdminOpenApiDetail() {
   const item = (data as any)?.authKey || (data as any);
 
   const handleBack = () => navigate(ROUTES.ADMIN.OPENAPI.CLIENTS);
+  const [extendOpen, setExtendOpen] = React.useState(false);
   const handleEdit = () => navigate(ROUTES.ADMIN.OPENAPI.CLIENTS + '/' + keyId + '/edit');
   const handleDelete = async () => { const res = await deleteAdminOpenApi(keyId); handleApiResponse(res, ()=>navigate(ROUTES.ADMIN.OPENAPI.CLIENTS)); };
 
   return (
     <Box id="admin-openapi-detail-page" sx={{ p: SPACING.LARGE }}>
       <PageHeader id="admin-openapi-detail-header" title="OpenAPI 상세" onBack={handleBack} actionsRight={<>
-        <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">기간연장/수정</ThemedButton>
+        <ThemedButton variant="outlined" onClick={()=>setExtendOpen(true)} buttonSize="cta">기간연장</ThemedButton>
+        <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">수정</ThemedButton>
         <ThemedButton variant="outlined" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
       </>} />
       <ThemedCard>
@@ -49,6 +52,7 @@ export default function AdminOpenApiDetail() {
           )}
         </CardContent>
       </ThemedCard>
+      <ExtendKeyDialog open={extendOpen} onClose={()=>setExtendOpen(false)} onConfirm={(days)=>{ /* integrate API if needed */ setExtendOpen(false); }} />
     </Box>
   );
 }

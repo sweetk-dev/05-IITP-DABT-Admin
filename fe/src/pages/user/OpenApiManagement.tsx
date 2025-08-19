@@ -44,6 +44,7 @@ import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 import CommonDialog from '../../components/CommonDialog';
 import { useTheme, alpha } from '@mui/material/styles';
 import { useDataFetching } from '../../hooks/useDataFetching';
+import ExtendKeyDialog from '../../components/common/ExtendKeyDialog';
 import type { 
   UserOpenApiCreateReq, 
   UserOpenApiExtendReq, 
@@ -379,7 +380,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
           <ThemedButton variant="text" onClick={() => setCreateDialogOpen(false)} buttonSize="cta" sx={{ minHeight: 52, px: 3, py: 1.75, fontSize: '1.05rem' }}>
             취소
           </ThemedButton>
-          <ThemedButton variant="primary" onClick={handleCreateKey} disabled={loading} buttonSize="cta" sx={{ minHeight: 52, px: 3, py: 1.75, fontSize: '1.05rem' }}>
+          <ThemedButton variant="primary" onClick={handleCreateKey} disabled={loading || !createForm.startDt || !createForm.endDt} buttonSize="cta" sx={{ minHeight: 52, px: 3, py: 1.75, fontSize: '1.05rem' }}>
             신청
           </ThemedButton>
         </DialogActions>
@@ -397,29 +398,12 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         cancelText="취소"
         
       />
-      {/* 인증키 기간 연장 다이얼로그 */}
-      <Dialog open={extendDialogOpen} onClose={() => setExtendDialogOpen(false)}>
-        <DialogTitle>인증키 기간 연장</DialogTitle>
-        <DialogContent>
-          <FormControl component="fieldset" sx={{ mt: 1 }}>
-            <RadioGroup
-              value={extendForm.extensionDays}
-              onChange={(e) => setExtendForm(prev => ({ ...prev, extensionDays: Number(e.target.value) }))}
-            >
-              <FormControlLabel value={90} control={<Radio />} label="90일 연장" />
-              <FormControlLabel value={365} control={<Radio />} label="1년 연장" />
-            </RadioGroup>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <ThemedButton variant="text" onClick={() => setExtendDialogOpen(false)} buttonSize="cta">
-            취소
-          </ThemedButton>
-          <ThemedButton variant="primary" onClick={handleExtendKey} disabled={loading} buttonSize="cta">
-            연장
-          </ThemedButton>
-        </DialogActions>
-      </Dialog>
+      <ExtendKeyDialog 
+        open={extendDialogOpen}
+        onClose={() => setExtendDialogOpen(false)}
+        onConfirm={(days)=>{ setExtendForm({ extensionDays: days }); handleExtendKey(); }}
+        defaultDays={extendForm.extensionDays}
+      />
     </Box>
   );
 }; 

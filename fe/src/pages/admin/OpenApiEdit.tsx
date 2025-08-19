@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, CardContent, TextField, Alert } from '@mui/material';
+import { Box, CardContent, TextField, Alert, Stack, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
@@ -8,6 +8,8 @@ import { SPACING } from '../../constants/spacing';
 import { ROUTES } from '../../routes';
 import { extendAdminOpenApi, getAdminOpenApiDetail, updateAdminOpenApi } from '../../api';
 import { useDataFetching } from '../../hooks/useDataFetching';
+import StatusChip from '../../components/common/StatusChip';
+import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 export default function AdminOpenApiEdit() {
@@ -43,6 +45,12 @@ export default function AdminOpenApiEdit() {
       <PageHeader id="admin-openapi-edit-header" title="OpenAPI 기간연장/수정" onBack={handleBack} />
       <ThemedCard>
         <CardContent>
+          {detail?.keyId && (
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: SPACING.MEDIUM }}>
+              <Typography variant="h6" fontWeight={700}>{detail.keyName || `Key ${detail.keyId}`}</Typography>
+              <StatusChip kind={getOpenApiKeyStatus(detail)} />
+            </Stack>
+          )}
           {error && (<Alert severity="error" sx={{ mb: SPACING.MEDIUM }} onClose={()=>setError(null)}>{error}</Alert>)}
           <TextField id="key-name" fullWidth label="이름" value={keyName} onChange={(e)=>setKeyName(e.target.value)} sx={{ mb: SPACING.MEDIUM }} />
           <TextField id="key-desc" fullWidth label="설명" value={keyDesc} onChange={(e)=>setKeyDesc(e.target.value)} sx={{ mb: SPACING.MEDIUM }} />

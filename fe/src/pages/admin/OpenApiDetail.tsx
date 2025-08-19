@@ -9,6 +9,7 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminOpenApi, getAdminOpenApiDetail } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import StatusChip from '../../components/common/StatusChip';
+import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 
 export default function AdminOpenApiDetail() {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ export default function AdminOpenApiDetail() {
             <>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                 <Typography variant="h6" fontWeight={700}>{item.keyName || `Key ${item.keyId}`}</Typography>
-                <StatusChip kind={item.activeYn === 'Y' ? 'active' : 'inactive'} />
+                <StatusChip kind={getOpenApiKeyStatus(item)} />
               </Stack>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>생성일: {item.createdAt}</Typography>
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{item.keyDesc}</Typography>

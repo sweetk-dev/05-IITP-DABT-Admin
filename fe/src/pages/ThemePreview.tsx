@@ -337,6 +337,12 @@ export default function ThemePreview() {
                 <StatusChip kind="pending" />
                 <StatusChip kind="private" />
               </Stack>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1, mt: 2 }}>Status Chips (API)</Typography>
+              <Stack direction="row" spacing={1}>
+                <StatusChip kind="pending" />
+                <StatusChip kind="active" />
+                <StatusChip kind="expired" />
+              </Stack>
             </ThemedCard>
           </Stack>
 

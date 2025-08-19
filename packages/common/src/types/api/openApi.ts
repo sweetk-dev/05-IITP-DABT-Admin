@@ -81,11 +81,13 @@ export interface UserOpenApiExtendParams {
 }
 
 export interface UserOpenApiExtendReq {
-  extensionDays: number; // 90일 또는 365일
+    startDt?: string;
+    endDt?: string;
 }
 
 export interface UserOpenApiExtendRes {
-  newEndDt: string;
+  startDt?: string;
+  endDt?: string;
 }
 
 // ===== Admin용 OpenAPI 인증키 관련 DTO =====
@@ -154,12 +156,14 @@ export interface AdminOpenApiExtendParams {
 }
 
 export interface AdminOpenApiExtendReq {
-  extensionDays: number;
+  startDt?: string;
+  endDt?: string;
   updatedBy: string;
 }
 
 export interface AdminOpenApiExtendRes {
-  newEndDt: string;
+  startDt?: string;
+  endDt?: string;
 }
 
 // Admin OpenAPI 인증키 통계

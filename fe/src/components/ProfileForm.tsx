@@ -441,18 +441,15 @@ export default function ProfileForm({
       <Dialog 
         open={passwordModalOpen} 
         onClose={() => setPasswordModalOpen(false)} 
-        maxWidth="sm" 
+        maxWidth="md" 
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 2
-          }
-        }}
+        PaperProps={{ sx: { borderRadius: 3 } }}
       >
-        <DialogTitle sx={{ color: colors.primary, fontWeight: 600 }}>
+        <DialogTitle sx={{ fontWeight: 800, pb: 1.5 }}>
           비밀번호 변경
+          <Box sx={{ mt: 1, height: 2, background: (theme)=>`linear-gradient(90deg, ${theme.palette.primary.main}99, ${theme.palette.primary.main}33, ${theme.palette.primary.main}99)`, borderRadius: 1 }} />
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: 3 }}>
           <Box sx={{ pt: 1 }}>
             {passwordError && (
               <Alert severity="error" sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }} onClose={() => setPasswordError(undefined)}>

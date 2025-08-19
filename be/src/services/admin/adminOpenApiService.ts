@@ -27,7 +27,6 @@ export interface OpenApiCreateData {
 export interface OpenApiUpdateData {
   keyName?: string;
   keyDesc?: string;
-  extensionDays?: number;
   status?: string;
 }
 
@@ -155,7 +154,7 @@ export const deleteOpenApi = async (apiId: number, actorTag: string) => {
 /**
  * OpenAPI 키 기간 연장 (관리자용)
  */
-export const extendOpenApiKey = async (keyId: number, extensionDays: number, actorTag: string) => {
+export const extendOpenApiKey = async (keyId: number, range: { startDt: string; endDt: string }, actorTag: string) => {
   try {
     // 기존 키 조회
     const existingKey = await findAuthKeyById(keyId);
@@ -163,13 +162,13 @@ export const extendOpenApiKey = async (keyId: number, extensionDays: number, act
       throw new Error('OPEN_API_NOT_FOUND');
     }
 
-    // 만료일 계산 (기존 만료일 + 연장 일수)
-    const currentEndDate = existingKey.endDt ? new Date(existingKey.endDt) : new Date();
-    const newEndDate = new Date(currentEndDate);
-    newEndDate.setDate(newEndDate.getDate() + extensionDays);
+    // 기간 업데이트 (시작/종료를 직접 세팅)
+    const newStartDate = range.startDt ? new Date(range.startDt) : (existingKey.startDt ? new Date(existingKey.startDt) : undefined);
+    const newEndDate = new Date(range.endDt);
 
     // 키 업데이트
     const updatedOk = await updateOpenApiAuthKeyRepo(keyId, {
+      startDt: newStartDate,
       endDt: newEndDate,
       updatedBy: actorTag
     });
@@ -178,10 +177,10 @@ export const extendOpenApiKey = async (keyId: number, extensionDays: number, act
       throw new Error('OPEN_API_UPDATE_FAILED');
     }
 
-    appLogger.info('OpenAPI 키 기간 연장 성공', { keyId, extensionDays, actorTag, newEndDate });
-    return { endDt: newEndDate };
+    appLogger.info('OpenAPI 키 기간 연장 성공', { keyId, actorTag, newStartDate, newEndDate });
+    return { startDt: newStartDate, endDt: newEndDate };
   } catch (error) {
-    appLogger.error('OpenAPI 키 기간 연장 중 오류 발생', { error, keyId, extensionDays, actorTag });
+    appLogger.error('OpenAPI 키 기간 연장 중 오류 발생', { error, keyId, actorTag, range });
     throw error;
   }
 };

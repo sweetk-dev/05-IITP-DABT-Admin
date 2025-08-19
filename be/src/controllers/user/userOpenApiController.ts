@@ -30,6 +30,7 @@ import {
   validateAndParseNumber, 
   normalizeErrorMessage 
 } from '../../utils/commonUtils';
+import app from 'src';
 
 /**
  * 사용자 OpenAPI 인증키 목록 조회
@@ -247,7 +248,7 @@ export const deleteUserOpenApi = async (req: Request<UserOpenApiDeleteParams>, r
  * 매핑: USER_API_MAPPING[`POST ${API_URLS.USER.OPEN_API.EXTEND}`]
  */
 export const extendUserOpenApi = async (
-  req: Request<UserOpenApiDeleteParams, {}, Pick<UserOpenApiExtendReq, 'extensionDays'>>,
+  req: Request<UserOpenApiDeleteParams, {}, UserOpenApiExtendReq>,
   res: Response
 ) => {
   try {
@@ -255,13 +256,14 @@ export const extendUserOpenApi = async (
 
     const userId = extractUserIdFromRequest(req);
     
+    appLogger.info
     if (!userId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
     // 기본 파라미터 검증
     const { keyId: keyIdParam } = req.params;
-    const { extensionDays } = req.body;
+    const { startDt, endDt } = req.body;
     
     if (!keyIdParam) {
       return sendValidationError(res, 'keyId', '인증키 ID가 필요합니다.');
@@ -272,21 +274,18 @@ export const extendUserOpenApi = async (
       return sendValidationError(res, 'keyId', '유효하지 않은 인증키 ID입니다.');
     }
 
-    if (!extensionDays) {
-      return sendValidationError(res, 'extensionDays', '연장 일수가 필요합니다.');
+    if (!startDt || !endDt) {
+      return sendValidationError(res, 'period', '시작일과 종료일이 필요합니다.');
     }
 
-    if (extensionDays !== 90 && extensionDays !== 365) {
-      return sendValidationError(res, 'extensionDays', '연장 일수는 90일 또는 365일이어야 합니다.');
-    }
-
-    const response = await UserOpenApiService.extendUserOpenApi(userId, keyId, extensionDays);
-    const result: UserOpenApiExtendRes = { newEndDt: response.newEndDt };
+    const response = await UserOpenApiService.extendUserOpenApi(userId, keyId, { startDt, endDt } as any);
+    const result: UserOpenApiExtendRes = { newStartDt: response.newStartDt, newEndDt: response.newEndDt } as any;
 
     sendSuccess(res, result, undefined, 'USER_OPENAPI_EXTEND', {
       userId: userId,
       keyId: keyId,
-      extensionDays: extensionDays
+      startDt,
+      endDt
     });
   } catch (error) {
     appLogger.error('사용자 OpenAPI 인증키 기간 연장 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });

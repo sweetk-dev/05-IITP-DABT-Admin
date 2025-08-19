@@ -62,7 +62,7 @@ export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<Q
     if (!qna) {
       throw new Error('Q&A를 찾을 수 없거나 접근 권한이 없습니다.');
     }
-    if (qna.secretYn === 'Y' && qna.userId !== userId) {
+    if (qna.secretYn === 'Y' && Number(qna.userId) !== Number(userId)) {
       throw new Error('Q&A를 찾을 수 없거나 접근 권한이 없습니다.');
     }
     // 조회수 증가: 공개 QnA만, 본문 열람 시 1회 증가 (간단 버전)

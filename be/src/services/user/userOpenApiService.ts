@@ -9,7 +9,7 @@ import {
   findAuthKeysByUserId,
   createAuthKey,
   deleteAuthKey,
-  extendAuthKeyPeriod,
+  updateAuthKey,
   findAuthKeyById
 } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
@@ -43,7 +43,7 @@ export class UserOpenApiService {
     }
 
     // 사용자 본인의 키인지 확인
-    if (authKey.userId !== userId) {
+    if (Number(authKey.userId) !== Number(userId)) {
       throw new Error('접근 권한이 없습니다.');
     }
 
@@ -91,7 +91,8 @@ export class UserOpenApiService {
     }
 
     // 사용자 본인의 키인지 확인
-    if (authKey.userId !== userId) {
+    if (Number(authKey.userId) !== Number(userId)) {
+      appLogger.warn('OpenAPI 키 삭제 - 소유자 불일치', { keyId, keyOwnerId: authKey.userId, actorUserId: userId });
       throw new Error('접근 권한이 없습니다.');
     }
 
@@ -111,33 +112,36 @@ export class UserOpenApiService {
   /**
    * 사용자 OpenAPI 인증키 기간 연장
    */
-  static async extendUserOpenApi(userId: number, keyId: number, extensionDays: number): Promise<{ newEndDt: string; }> {
+  static async extendUserOpenApi(userId: number, keyId: number, range: { startDt: string; endDt: string }): Promise<{ newStartDt?: string; newEndDt: string; }> {
 
     const authKey = await findAuthKeyById(keyId);
     if (!authKey) {
       throw new Error('인증키를 찾을 수 없습니다.');
     }
 
-    // 사용자 본인의 키인지 확인
-    if (authKey.userId !== userId) {
+    // 사용자 본인의 키인지 확인 (타입 강제 일치)
+    const keyOwnerId = Number(authKey.userId);
+    const actorUserId = Number(userId);
+    if (keyOwnerId !== actorUserId) {
+      appLogger.warn('OpenAPI 키 소유자 불일치', { keyId, keyOwnerId, actorUserId });
       throw new Error('접근 권한이 없습니다.');
     }
 
-    const success = await extendAuthKeyPeriod(keyId, extensionDays, `U:${userId}`);
+    const success = await updateAuthKey(keyId, { startDt: new Date(range.startDt), endDt: new Date(range.endDt), updatedBy: `U:${userId}` });
     if (!success) {
       throw new Error('인증키 기간 연장에 실패했습니다.');
     }
 
-    // 새로운 종료일 계산
-    const currentEndDt = authKey.endDt ? new Date(authKey.endDt) : new Date();
-    const newEndDt = new Date(currentEndDt.getTime() + extensionDays * 24 * 60 * 60 * 1000);
+    const newStartDt = range.startDt ? new Date(range.startDt) : undefined;
+    const newEndDt = new Date(range.endDt);
 
     appLogger.info('사용자 OpenAPI 인증키 기간 연장 성공', {
       userId: userId,
       keyId: keyId,
-      extensionDays: extensionDays
+      startDt: newStartDt?.toISOString(),
+      endDt: newEndDt.toISOString()
     });
 
-    return { newEndDt: newEndDt.toISOString().split('T')[0] };
+    return { newStartDt: newStartDt ? newStartDt.toISOString().split('T')[0] : undefined, newEndDt: newEndDt.toISOString().split('T')[0] };
   }
 } 

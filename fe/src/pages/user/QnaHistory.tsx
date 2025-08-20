@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
 	Box,
 	Typography,
-	CardContent,
 	List,
 	ListItem,
 	ListItemText,
@@ -13,13 +12,9 @@ import {
 	Divider
 } from '@mui/material';
 import { getUserQnaList, getUserQnaDetail, getCommonCodesByGroupId } from '../../api';
-import LoadingSpinner from '../../components/LoadingSpinner';
 // import ErrorAlert from '../../components/ErrorAlert';
-import Pagination from '../../components/common/Pagination';
 import { ROUTES } from '../../routes';
 import { PAGINATION } from '../../constants/pagination';
-import PageHeader from '../../components/common/PageHeader';
-import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
 import { deleteUserQna } from '../../api';
@@ -28,10 +23,11 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import type { UserQnaDetailRes } from '@iitp-dabt/common';
-import EmptyState from '../../components/common/EmptyState';
+// EmptyState handled by ListScaffold
 import StatusChip from '../../components/common/StatusChip';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
 import { useQuerySync } from '../../hooks/useQuerySync';
+import ListScaffold from '../../components/common/ListScaffold';
 
 interface QnaHistoryProps {
 	id?: string;
@@ -178,118 +174,92 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 		return new Date(dateString).toLocaleDateString('ko-KR');
 	};
 
-	if (loading) {
-		return <LoadingSpinner loading={true} />;
-	}
-
 	return (
 		<Box id={id} sx={{ p: 3 }}>
-			<Box id="qna-history-header">
-				<PageHeader title="내 문의 내역" onBack={handleBack} />
-			</Box>
-
-			<ThemedCard>
-				{loading ? (
-					<Box sx={{ position: 'relative', minHeight: 400 }}>
-						<LoadingSpinner loading={true} />
-					</Box>
-				) : isError ? (
-					<CardContent>
-						<Typography variant="body2" color="error.main">문의 내역을 불러오는 중 오류가 발생했습니다.</Typography>
-					</CardContent>
-				) : isEmpty ? (
-					<CardContent>
-						<EmptyState message="등록된 문의가 없습니다." minHeight={400} />
-					</CardContent>
-				) : (
-					<CardContent>
-						{qnaList?.items && qnaList.items.length > 0 && (
-						<List>
-							{qnaList.items.map((qna: any, index: number) => (
-								<React.Fragment key={qna.qnaId}>
-									<ListItem>
-										<ListItemText
-											primary={
-												<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-													{/* 순서: 유형 → 상태 → 비공개 → 날짜 */}
-													<QnaTypeChip typeId={qna.qnaType} label={((qnaTypeCodes as any)?.codes || []).find((c: any) => c.codeId === qna.qnaType)?.codeNm || qna.qnaType} />
-													<Chip label={qna.status === 'answered' ? '답변완료' : '답변대기'} color={qna.status === 'answered' ? 'success' : 'warning'} size="small" />
-													{qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
-													<Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-														{formatDate(qna.createdAt)}
-													</Typography>
-												</Box>
-											}
-											secondary={
-												<Typography variant="h6" sx={{ fontWeight: 500, mt: 1 }}>
-													{qna.title}
-												</Typography>
-											}
-										/>
-										<ThemedButton
-											id={`expand-qna-${qna.qnaId}`}
-											variant="outlined"
-											size="small"
-											onClick={() => handleQnaExpand(qna.qnaId)}
-										>
-											{expandedQna === qna.qnaId ? '접기' : '상세보기'}
-										</ThemedButton>
-									</ListItem>
-									
-									{expandedQna === qna.qnaId && (
-										<Accordion expanded={true} sx={{ boxShadow: 'none' }}>
-											<AccordionDetails>
-												<Box sx={{ pl: 2, pr: 2, pb: 2 }}>
-													<Typography variant="h6" gutterBottom>
-														문의 내용
-													</Typography>
-													<Typography variant="body1" sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
-														{qna.content}
-													</Typography>
-													
-													{qnaDetails[qna.qnaId]?.qna.answerContent && (
-														<>
-															<Divider sx={{ my: 2 }} />
-															<Typography variant="h6" gutterBottom>
-																답변
-															</Typography>
-															<Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-																{qnaDetails[qna.qnaId].qna.answerContent}
-															</Typography>
-															{qnaDetails[qna.qnaId].qna.answeredAt && (
-																<Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-																	답변일: {qnaDetails[qna.qnaId].qna.answeredAt ? formatDate(qnaDetails[qna.qnaId].qna.answeredAt || '') : '-'}
-																</Typography>
-															)}
-														</>
-													)}
-													<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
-														<ThemedButton variant="outlined" size="small" onClick={() => onRequestDelete(qna.qnaId)}>삭제</ThemedButton>
-													</Box>
-												</Box>
-											</AccordionDetails>
-										</Accordion>
-									)}
-									
-									{index < qnaList.items.length - 1 && <Divider />}
-								</React.Fragment>
-							))}
-						</List>
-						)}
-
-						{/* 페이지네이션 */}
-						{qnaList && qnaList.totalPages > 1 && (
-							<Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-								<Pagination
-									currentPage={pagination.currentPage}
-									totalPages={qnaList.totalPages}
-									onPageChange={handlePageChange}
+			<ListScaffold
+				title="내 문의 내역"
+				onBack={handleBack}
+				total={qnaList?.total}
+				loading={loading}
+				errorText={isError ? '문의 내역을 불러오는 중 오류가 발생했습니다.' : ''}
+				emptyText={isEmpty ? '등록된 문의가 없습니다.' : ''}
+				pagination={{ page: pagination.currentPage, totalPages: qnaList?.totalPages || 0, onPageChange: handlePageChange }}
+				wrapInCard={false}
+			>
+				{qnaList?.items && qnaList.items.length > 0 && (
+				<List>
+					{qnaList.items.map((qna: any, index: number) => (
+						<React.Fragment key={qna.qnaId}>
+							<ListItem>
+								<ListItemText
+									primary={
+										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+											{/* 순서: 유형 → 상태 → 비공개 → 날짜 */}
+											<QnaTypeChip typeId={qna.qnaType} label={((qnaTypeCodes as any)?.codes || []).find((c: any) => c.codeId === qna.qnaType)?.codeNm || qna.qnaType} />
+											<Chip label={qna.status === 'answered' ? '답변완료' : '답변대기'} color={qna.status === 'answered' ? 'success' : 'warning'} size="small" />
+											{qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
+											<Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
+												{formatDate(qna.createdAt)}
+											</Typography>
+										</Box>
+									}
+									secondary={
+										<Typography variant="h6" sx={{ fontWeight: 500, mt: 1 }}>
+											{qna.title}
+										</Typography>
+									}
 								/>
-							</Box>
-						)}
-					</CardContent>
+								<ThemedButton
+									id={`expand-qna-${qna.qnaId}`}
+									variant="outlined"
+									size="small"
+									onClick={() => handleQnaExpand(qna.qnaId)}
+								>
+									{expandedQna === qna.qnaId ? '접기' : '상세보기'}
+								</ThemedButton>
+							</ListItem>
+							
+							{expandedQna === qna.qnaId && (
+								<Accordion expanded={true} sx={{ boxShadow: 'none' }}>
+									<AccordionDetails>
+										<Box sx={{ pl: 2, pr: 2, pb: 2 }}>
+											<Typography variant="h6" gutterBottom>
+												문의 내용
+											</Typography>
+											<Typography variant="body1" sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
+												{qna.content}
+											</Typography>
+											
+											{qnaDetails[qna.qnaId]?.qna.answerContent && (
+												<>
+													<Divider sx={{ my: 2 }} />
+													<Typography variant="h6" gutterBottom>
+														답변
+													</Typography>
+													<Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+														{qnaDetails[qna.qnaId].qna.answerContent}
+													</Typography>
+													{qnaDetails[qna.qnaId].qna.answeredAt && (
+														<Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+															답변일: {qnaDetails[qna.qnaId].qna.answeredAt ? formatDate(qnaDetails[qna.qnaId].qna.answeredAt || '') : '-'}
+														</Typography>
+													)}
+												</>
+											)}
+											<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
+												<ThemedButton variant="outlined" size="small" onClick={() => onRequestDelete(qna.qnaId)}>삭제</ThemedButton>
+											</Box>
+										</Box>
+									</AccordionDetails>
+								</Accordion>
+							)}
+							
+							{index < qnaList.items.length - 1 && <Divider />}
+						</React.Fragment>
+					))}
+				</List>
 				)}
-			</ThemedCard>
+			</ListScaffold>
 			<CommonDialog
 				open={confirmOpen}
 				title="문의 삭제"

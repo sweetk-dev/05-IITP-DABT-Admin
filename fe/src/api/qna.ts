@@ -74,7 +74,7 @@ export async function getUserQnaListByType(qnaType: string, params: Omit<UserQna
  * Q&A 삭제 (사용자용)
  */
 export async function deleteUserQna(qnaId: number): Promise<ApiResponse<void>> {
-  const url = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
+  const url = FULL_API_URLS.USER.QNA.DELETE.replace(':qnaId', qnaId.toString());
   return apiFetch<void>(url, { method: 'DELETE' });
 }
 

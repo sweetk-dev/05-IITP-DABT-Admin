@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Box, CardContent, Typography, Stack } from '@mui/material';
+import { Box, CardContent, Stack } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader';
-import ThemedCard from '../../components/common/ThemedCard';
-import Pagination from '../../components/common/Pagination';
+import ListScaffold from '../../components/common/ListScaffold';
+// Pagination handled by ListScaffold
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getAdminQnaList, deleteAdminQna } from '../../api';
@@ -78,34 +78,30 @@ export default function AdminQnaList() {
           { value: 'updatedAt-desc', label: '업데이트순(최신)' },
         ], onChange: (v: string)=> { const nv = v || 'name-asc'; setSort(nv); setQuery({ sort: nv, page: 1, limit, status, search }, { replace: true }); } }
       ]} />
-      <ThemedCard>
+      <ListScaffold
+        title=""
+        total={(data as any)?.total}
+        loading={isLoading}
+        errorText={isError ? '목록을 불러오는 중 오류가 발생했습니다.' : ''}
+        emptyText={isEmpty ? '표시할 항목이 없습니다.' : ''}
+        pagination={{ page, totalPages, onPageChange: (p)=>{ setPage(p); setQuery({ page: p, limit, search, status, sort }, { replace: true }); }, pageSize: limit, onPageSizeChange: (s)=>{ setLimit(s); setPage(1); setQuery({ page: 1, limit: s, search, status, sort }, { replace: true }); } }}
+      >
         <CardContent>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mb: 1 }}>
             <ThemedButton variant="outlined" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
           </Stack>
-          {isLoading ? (
-            <Typography variant="body2">불러오는 중...</Typography>
-          ) : isError ? (
-            <Typography variant="body2" color="error.main">목록을 불러오는 중 오류가 발생했습니다.</Typography>
-          ) : (
-            <DataTable
-              id="admin-qna-table"
-              columns={columns}
-              rows={qnas}
-              getRowId={(r)=>r.qnaId}
-              selectedIds={selected}
-              onToggleRow={(id)=>toggleRow(id as number)}
-              onToggleAll={toggleAll}
-              emptyText={isEmpty ? '표시할 항목이 없습니다.' : undefined}
-            />
-          )}
-          {totalPages > 1 && (
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-              <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p)=>{ setPage(p); setQuery({ page: p, limit, search, status, sort }, { replace: true }); }} pageSize={limit} onPageSizeChange={(s)=>{ setLimit(s); setPage(1); setQuery({ page: 1, limit: s, search, status, sort }, { replace: true }); }} />
-            </Box>
-          )}
+          <DataTable
+            id="admin-qna-table"
+            columns={columns}
+            rows={qnas}
+            getRowId={(r)=>r.qnaId}
+            selectedIds={selected}
+            onToggleRow={(id)=>toggleRow(id as number)}
+            onToggleAll={toggleAll}
+            emptyText={isEmpty ? '표시할 항목이 없습니다.' : undefined}
+          />
         </CardContent>
-      </ThemedCard>
+      </ListScaffold>
     </Box>
   );
 }

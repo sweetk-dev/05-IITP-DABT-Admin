@@ -67,6 +67,7 @@ export {
   getHomeQnaList,
   getUserQnaListByType,
   createUserQna,
+  deleteUserQna,
   // Admin QnA
   getAdminQnaList,
   getAdminQnaDetail,

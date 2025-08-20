@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Add as AddIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
+import { Visibility as VisibilityIcon } from '@mui/icons-material';
 import StatusChip from '../../components/common/StatusChip';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
-import ThemedButton from '../../components/common/ThemedButton';
+// import ThemedButton from '../../components/common/ThemedButton';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../routes';
+// import { ROUTES } from '../../routes';
 import ThemedCard from '../../components/common/ThemedCard';
+import ListItemCard from '../../components/common/ListItemCard';
 // import PageTitle from '../components/common/PageTitle';
 // import ThemedButton from '../components/common/ThemedButton';
-import EmptyState from '../../components/common/EmptyState';
 import CommonToast from '../../components/CommonToast';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import Pagination from '../../components/common/Pagination';
+import ListScaffold from '../../components/common/ListScaffold';
 import SelectField from '../../components/common/SelectField';
-import ListHeader from '../../components/common/ListHeader';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
 // import { ArrowBack } from '@mui/icons-material';
@@ -93,106 +91,65 @@ export default function QnaList() {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
   const maskAuthorName = (name: string) => (name.length <= 2 ? name : name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1));
 
-  const handleCreateQna = () => {
-    navigate(ROUTES.USER.QNA_CREATE);
-  };
+  // const handleCreateQna = () => { navigate(ROUTES.USER.QNA_CREATE); };
 
   return (
     <Box id="qna-list-page" sx={{ minHeight: '100vh', background: colors.background, py: SPACING.LARGE }}>
       <Box id="qna-list-container" sx={{ mx: 'auto', px: { xs: SPACING.MEDIUM, md: SPACING.LARGE } }}>
         {errorHandler.InlineError}
 
-        {/* 헤더 */}
-        <ListHeader
+        <ListScaffold
           title="Q&A"
           onBack={() => navigate('/')}
-          searchPlaceholder="제목/내용 검색"
-          searchValue={query.search || ''}
-          onSearchChange={(v) => setQuery({ search: v, page: 1 })}
-          filters={[
-            { label: '정렬', value: (query.sort as string) || 'createdAt-desc', options: [
-              { value: 'createdAt-desc', label: '등록순(최신)' },
-              { value: 'hit-desc', label: '조회수순' }
-            ], onChange: (v: string) => setQuery({ sort: v || 'createdAt-desc', page: 1 }) }
-          ]}
-          totalCount={qnaData?.total}
-        />
-        <Box id="qna-create-button-row" sx={{ display: 'flex', justifyContent: 'flex-end', mb: SPACING.MEDIUM }}>
-          <ThemedButton
-            id="qna-create-button"
-            variant="primary"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={handleCreateQna}
-            buttonSize="cta"
-          >
-            문의하기
-          </ThemedButton>
-        </Box>
-
-        {/* Q&A 타입 선택 */}
-        <ThemedCard id="qna-type-card" sx={{ mb: SPACING.LARGE }}>
-          <Box id="qna-type-card-body" sx={{ p: SPACING.LARGE }}>
-            <Typography id="qna-type-title" variant="h6" sx={{ color: colors.text, mb: SPACING.MEDIUM, fontWeight: 500 }}>Q&A 유형 선택</Typography>
-            <Box id="qna-type-select">
-              <SelectField value={qnaType} onChange={handleQnaTypeChange} options={qnaTypeOptions} label="Q&A 유형" disabled={qnaTypeLoading} />
-            </Box>
-          </Box>
-        </ThemedCard>
-
-        {/* Q&A 목록 */}
-        <ThemedCard id="qna-list-card">
-          {isLoading ? (
-            <Box id="qna-list-loading" sx={{ position: 'relative', minHeight: 400 }}>
-              <LoadingSpinner loading={true} />
-            </Box>
-          ) : isError ? (
-            <EmptyState message="Q&A를 불러오는 중 오류가 발생했습니다." />
-          ) : isEmpty ? (
-            <EmptyState message="등록된 Q&A가 없습니다." />
-          ) : (
-            <>
-              <Stack id="qna-list-stack" spacing={2}>
-                {qnaData?.items.map((qna: UserQnaItem) => (
-                  <Box id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna)} sx={{ p: 3, borderRadius: 2, cursor: 'pointer', transition: 'all 0.2s ease-in-out', border: `1px solid ${colors.border}`, backgroundColor: 'transparent', '&:hover': { backgroundColor: `${colors.primary}15`, borderColor: colors.primary, transform: 'translateY(-1px)', boxShadow: `0 4px 12px ${colors.primary}20` } }}>
-                    <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
-                      {/* 순서: 유형 → 상태 → 비공개 */}
-                      <Box component="span" sx={{ mr: 2, mb: 1 }}>
-                        <QnaTypeChip id={`qna-item-type-${qna.qnaId}`} typeId={qna.qnaType} size="small" label={qnaTypeOptions.find(o=>o.value===qna.qnaType)?.label} />
-                      </Box>
-                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '완료' : '대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 1.5, mb: 1 }} />
-                      {qna.secretYn === 'Y' && (
-                        <StatusChip kind="private" />
-                      )}
-                      <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {formatDate(qna.createdAt)}
-                        {typeof (qna as any).hitCnt === 'number' && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, marginLeft: 8 }}>
-                            <VisibilityIcon sx={{ fontSize: 16, opacity: 0.7 }} />
-                            {(qna as any).hitCnt}
-                          </span>
-                        )}
-                      </Typography>
-                    </Box>
-                    <Typography id={`qna-item-title-${qna.qnaId}`} variant="h6" sx={{ color: colors.text, fontWeight: 500, mb: 1 }}>{qna.title}</Typography>
-                    <Typography id={`qna-item-content-${qna.qnaId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', mb: 1 }}>{qna.content}</Typography>
-                    <Typography id={`qna-item-writer-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, opacity: 0.7 }}>작성자: {maskAuthorName(qna.writerName)}</Typography>
-                  </Box>
-                ))}
-              </Stack>
-
-              {qnaData && qnaData.totalPages > 0 && (
-                <Pagination
-                  currentPage={pagination.currentPage}
-                  totalPages={qnaData.totalPages}
-                  onPageChange={handlePageChange}
-                  pageSize={pagination.pageSize}
-                  onPageSizeChange={(size) => { pagination.handlePageSizeChange(size); setQuery({ limit: size, page: 1 }); }}
-                />
-              )}
-            </>
+          search={{ value: (query.search as string) || '', onChange: (v)=> setQuery({ search: v, page: 1 }), placeholder: '제목/내용 검색' }}
+          filters={[{ label: '정렬', value: (query.sort as string) || 'createdAt-desc', options: [
+            { value: 'createdAt-desc', label: '등록순(최신)' },
+            { value: 'hit-desc', label: '조회수순' }
+          ], onChange: (v: string) => setQuery({ sort: v || 'createdAt-desc', page: 1 }) }]}
+          total={qnaData?.total}
+          loading={isLoading}
+          errorText={isError ? 'Q&A를 불러오는 중 오류가 발생했습니다.' : ''}
+          emptyText={isEmpty ? '등록된 Q&A가 없습니다.' : ''}
+          preContent={(
+            <ThemedCard id="qna-type-card" sx={{ mb: SPACING.LARGE }}>
+              <Box id="qna-type-card-body" sx={{ p: SPACING.LARGE }}>
+                <Typography id="qna-type-title" variant="h6" sx={{ color: colors.text, mb: SPACING.MEDIUM, fontWeight: 500 }}>Q&A 유형 선택</Typography>
+                <Box id="qna-type-select">
+                  <SelectField value={qnaType} onChange={handleQnaTypeChange} options={qnaTypeOptions} label="Q&A 유형" disabled={qnaTypeLoading} />
+                </Box>
+              </Box>
+            </ThemedCard>
           )}
-        </ThemedCard>
+          pagination={{ page: pagination.currentPage, totalPages: qnaData?.totalPages || 0, onPageChange: handlePageChange, pageSize: pagination.pageSize, onPageSizeChange: (size)=>{ pagination.handlePageSizeChange(size); setQuery({ limit: size, page: 1 }); } }}
+        >
+          {isLoading || isError || isEmpty ? null : (
+            <Stack id="qna-list-stack" spacing={1.25}>
+              {qnaData?.items.map((qna: UserQnaItem) => (
+                <ListItemCard id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna)}>
+                  <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 0.5, flexWrap: 'wrap' }}>
+                    <Box component="span" sx={{ mr: 1, mb: 0.5 }}>
+                      <QnaTypeChip id={`qna-item-type-${qna.qnaId}`} typeId={qna.qnaType} size="small" label={qnaTypeOptions.find(o=>o.value===qna.qnaType)?.label} />
+                    </Box>
+                    <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '완료' : '대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 1, mb: 0.5 }} />
+                    {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
+                    <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {formatDate(qna.createdAt)}
+                      {typeof (qna as any).hitCnt === 'number' && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, marginLeft: 8 }}>
+                          <VisibilityIcon sx={{ fontSize: 16, opacity: 0.7 }} />
+                          {(qna as any).hitCnt}
+                        </span>
+                      )}
+                    </Typography>
+                  </Box>
+                  <Typography id={`qna-item-title-${qna.qnaId}`} variant="subtitle1" sx={{ color: colors.text, fontWeight: 600, mb: 0.5 }}>{qna.title}</Typography>
+                  <Typography id={`qna-item-content-${qna.qnaId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }}>{qna.content}</Typography>
+                  <Typography id={`qna-item-writer-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, opacity: 0.7, mt: 0.5, display: 'block' }}>작성자: {maskAuthorName(qna.writerName)}</Typography>
+                </ListItemCard>
+              ))}
+            </Stack>
+          )}
+        </ListScaffold>
         <CommonToast open={!!toast?.open} message={toast?.message || ''} severity={toast?.severity} onClose={() => setToast(null)} />
       </Box>
     </Box>

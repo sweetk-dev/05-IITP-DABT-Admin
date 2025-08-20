@@ -70,6 +70,14 @@ export async function getUserQnaListByType(qnaType: string, params: Omit<UserQna
   return publicApiFetch<UserQnaListRes>(url, { method: 'GET' });
 }
 
+/**
+ * Q&A 삭제 (사용자용)
+ */
+export async function deleteUserQna(qnaId: number): Promise<ApiResponse<void>> {
+  const url = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
+  return apiFetch<void>(url, { method: 'DELETE' });
+}
+
 // ===== 관리자용 API 함수들 =====
 
 /**

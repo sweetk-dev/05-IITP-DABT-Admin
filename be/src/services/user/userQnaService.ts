@@ -113,5 +113,6 @@ export const getUserQnaHome = async (userId: number): Promise<UserQnaHomeRes> =>
     order: [['createdAt', 'DESC']]
   });
 
-  return { qnas: result.qnas.map(toUserQnaItem as any) } as any;
+  // 컨트롤러에서 toUserQnaItem 매핑 및 isMine 주입 처리
+  return { qnas: result.qnas as any } as any;
 };

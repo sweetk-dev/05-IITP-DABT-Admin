@@ -32,10 +32,10 @@ router.get(API_URLS.USER.NOTICE.LIST, ...routerMiddleware.public, getNoticeListF
 router.get(API_URLS.USER.NOTICE.HOME, ...routerMiddleware.public, getNoticeHomeForUser);
 router.get<UserNoticeDetailParams>('/notice/:noticeId(\\d+)', ...routerMiddleware.public, getNoticeDetailForUser as any);
 
-// QnA 관련: 목록/홈/상세는 공개(숫자 제약), 생성은 로그인 필요
-router.get(API_URLS.USER.QNA.LIST, ...routerMiddleware.public, getQnaListForUser);
-router.get(API_URLS.USER.QNA.HOME, ...routerMiddleware.public, getQnaHomeForUser);
-router.get<UserQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.public, getQnaDetailForUser as any);
+// QnA 관련: 목록/홈/상세는 공개+선택적 인증(사용자 토큰 있으면 userId 주입), 생성은 로그인 필요
+router.get(API_URLS.USER.QNA.LIST, ...routerMiddleware.publicOptional, getQnaListForUser);
+router.get(API_URLS.USER.QNA.HOME, ...routerMiddleware.publicOptional, getQnaHomeForUser);
+router.get('/qna/:qnaId(\\d+)', ...routerMiddleware.publicOptional, getQnaDetailForUser as any);
 router.post(API_URLS.USER.QNA.CREATE, ...routerMiddleware.user, createQnaForUser);
 
 // OpenAPI 관련

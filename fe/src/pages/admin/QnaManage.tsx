@@ -51,11 +51,11 @@ export default function AdminQnaList() {
   const columns: Array<DataTableColumn<any>> = [
     { key: 'title', header: '제목', render: (r) => (
       <span style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={()=>navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(r.qnaId)))}>
-        {r.secretYn === 'Y' && (<StatusChip kind="private" />)}
+        {/* 순서: 유형 → 상태 → 비공개는 목록 컬럼에선 유지, 제목 칼럼은 제목만 */}
         {r.title}
       </span>
     ) },
-    { key: 'qnaType', header: '유형', render: (r) => <QnaTypeChip typeId={r.qnaType} label={r.qnaTypeName || r.qnaType} /> },
+    { key: 'qnaType', header: '유형', render: (r) => <QnaTypeChip typeId={r.qnaType} /> },
     { key: 'status', header: '상태', render: (r) => <StatusChip kind={r.answeredYn === 'Y' ? 'answered' : 'pending'} /> },
     { key: 'postedAt', header: '등록일', width: 160 },
   ];

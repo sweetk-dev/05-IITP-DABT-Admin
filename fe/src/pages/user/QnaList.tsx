@@ -156,22 +156,14 @@ export default function QnaList() {
                 {qnaData?.items.map((qna: UserQnaItem) => (
                   <Box id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna)} sx={{ p: 3, borderRadius: 2, cursor: 'pointer', transition: 'all 0.2s ease-in-out', border: `1px solid ${colors.border}`, backgroundColor: 'transparent', '&:hover': { backgroundColor: `${colors.primary}15`, borderColor: colors.primary, transform: 'translateY(-1px)', boxShadow: `0 4px 12px ${colors.primary}20` } }}>
                     <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
-                      {/* 비공개 아이콘 (공개는 없음) */}
-                      {qna.secretYn === 'Y' && (
-                        <StatusChip kind="private" />
-                      )}
-                      {/* 상태 → 유형 */}
-                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '완료' : '대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 1.5, mb: 1 }} />
-                      {qna.secretYn === 'Y' && (
-                        <span id={`qna-item-private-${qna.qnaId}`} style={{ marginRight: 8, marginBottom: 4 }}>
-                          {/* 공통 상태 뱃지 사용: private */}
-                          {/* inline import를 피하기 위해 심플 아이콘만 */}
-                          {/* 기존 임시 아이콘 제거: 위 LockIcon으로 대체 */}
-                        </span>
-                      )}
+                      {/* 순서: 유형 → 상태 → 비공개 */}
                       <Box component="span" sx={{ mr: 2, mb: 1 }}>
                         <QnaTypeChip id={`qna-item-type-${qna.qnaId}`} typeId={qna.qnaType} size="small" label={qnaTypeOptions.find(o=>o.value===qna.qnaType)?.label} />
                       </Box>
+                      <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '완료' : '대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 1.5, mb: 1 }} />
+                      {qna.secretYn === 'Y' && (
+                        <StatusChip kind="private" />
+                      )}
                       <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                         {formatDate(qna.createdAt)}
                         {typeof (qna as any).hitCnt === 'number' && (

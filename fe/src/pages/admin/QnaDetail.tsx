@@ -1,5 +1,6 @@
 import { Box, CardContent, Typography, Alert, Chip, Stack } from '@mui/material';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
+import StatusChip from '../../components/common/StatusChip';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
@@ -39,8 +40,10 @@ export default function AdminQnaDetail() {
           ) : (
             <>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                <QnaTypeChip typeId={qna.qnaType} label={qna.qnaTypeName || qna.qnaType} />
+                {/* 순서: 유형 → 상태 → 비공개 */}
+                <QnaTypeChip typeId={qna.qnaType} />
                 <Chip size="small" label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} />
+                {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>{qna.postedAt}</Typography>
               </Stack>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>{qna.title}</Typography>

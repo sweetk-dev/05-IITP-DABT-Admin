@@ -1,5 +1,5 @@
 import { ErrorCode } from '@iitp-dabt/common';
-import { ensureValidToken, removeTokens } from '../store/auth';
+import { ensureValidToken, removeTokens, getAccessToken } from '../store/auth';
 import { getUserType, clearLoginInfo } from '../store/user';
 import { ROUTES } from '../routes';
 import { API_BASE_URL, API_TIMEOUT } from '../config';
@@ -51,10 +51,13 @@ export async function publicApiFetch<T = any>(
   const id = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    // Optional-auth: include token if present without forcing refresh/redirects
+    const optionalToken = getAccessToken();
     const headers = {
       'Content-Type': 'application/json',
+      ...(optionalToken ? { Authorization: `Bearer ${optionalToken}` } : {}),
       ...(options?.headers || {}),
-    };
+    } as Record<string, string>;
 
     const res = await fetch(`${API_BASE_URL}${path}`, { 
       ...options, 

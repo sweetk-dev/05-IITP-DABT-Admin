@@ -157,7 +157,7 @@ export default function Register() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      bgcolor: colors.background
+      bgcolor: 'background.default'
     }}>
       <Box id="register-form-box" sx={{
         maxWidth: 550,

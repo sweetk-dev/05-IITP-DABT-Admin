@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box, Container, Stack, Typography, Divider, ToggleButtonGroup, ToggleButton, Paper } from '@mui/material';
 import StatusChip from '../components/common/StatusChip';
+import QnaTypeChip from '../components/common/QnaTypeChip';
 import ThemedButton from '../components/common/ThemedButton';
 import ThemedCard from '../components/common/ThemedCard';
 import PageHeader from '../components/common/PageHeader';
@@ -336,6 +337,12 @@ export default function ThemePreview() {
                 <StatusChip kind="answered" />
                 <StatusChip kind="pending" />
                 <StatusChip kind="private" />
+              </Stack>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1, mt: 2 }}>QnaType Chips</Typography>
+              <Stack direction="row" spacing={1}>
+                <QnaTypeChip typeId="TYPE_A" />
+                <QnaTypeChip typeId="TYPE_B" />
+                <QnaTypeChip typeId="TYPE_C" />
               </Stack>
               <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1, mt: 2 }}>Status Chips (API)</Typography>
               <Stack direction="row" spacing={1}>

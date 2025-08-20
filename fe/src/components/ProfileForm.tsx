@@ -168,7 +168,7 @@ export default function ProfileForm({
           justifyContent: 'center', 
           alignItems: 'center', 
           minHeight: '400px',
-          backgroundColor: colors.background,
+          backgroundColor: 'background.default',
           position: 'relative'
         }}
       >
@@ -189,9 +189,10 @@ export default function ProfileForm({
       id="profile-page" 
       sx={{ 
         p: 4, 
-        backgroundColor: colors.background,
+        backgroundColor: 'background.default',
         minHeight: '100vh',
-        borderTop: `1px solid ${colors.border}`,
+        borderTop: '1px solid',
+        borderColor: 'divider',
         position: 'relative'
       }}
     >
@@ -213,10 +214,10 @@ export default function ProfileForm({
         </Alert>
       )}
 
-      <Grid container spacing={4}>
+      <Grid container spacing={4} alignItems="stretch">
         {/* 프로필 이미지 및 기본 정보 */}
-        <Grid item xs={12} md={4}>
-          <ThemedCard sx={{ p: 4, textAlign: 'center', height: 'fit-content' }}>
+        <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
+          <ThemedCard sx={{ p: 4, textAlign: 'center', height: '100%', flex: 1 }}>
             <Avatar
               sx={{
                 width: 120,
@@ -324,14 +325,14 @@ export default function ProfileForm({
         </Grid>
 
         {/* 상세 정보 */}
-        <Grid item xs={12} md={8}>
-          <ThemedCard sx={{ p: 4 }}>
+        <Grid item xs={12} md={8} sx={{ display: 'flex' }}>
+          <ThemedCard sx={{ p: 4, height: '100%', flex: 1 }}>
             <Typography 
               variant="h6" 
               gutterBottom 
               sx={{ 
                 mb: 3,
-                color: colors.primary,
+                color: colors.text,
                 fontWeight: 600,
                 pb: 1,
                 borderBottom: `1px solid ${colors.border}`

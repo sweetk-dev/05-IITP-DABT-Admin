@@ -3,6 +3,7 @@ import { Box, Typography, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Add as AddIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
 import StatusChip from '../../components/common/StatusChip';
+import QnaTypeChip from '../../components/common/QnaTypeChip';
 import ThemedButton from '../../components/common/ThemedButton';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../routes';
@@ -10,6 +11,7 @@ import ThemedCard from '../../components/common/ThemedCard';
 // import PageTitle from '../components/common/PageTitle';
 // import ThemedButton from '../components/common/ThemedButton';
 import EmptyState from '../../components/common/EmptyState';
+import CommonToast from '../../components/CommonToast';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Pagination from '../../components/common/Pagination';
 import SelectField from '../../components/common/SelectField';
@@ -25,6 +27,7 @@ import { getUserQnaList, getUserQnaListByType, getCommonCodesByGroupId } from '.
 import type { UserQnaItem, CommonCodeByGroupRes } from '@iitp-dabt/common';
 
 export default function QnaList() {
+  const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   const navigate = useNavigate();
   const muiTheme = useTheme();
   const colors = {
@@ -79,24 +82,18 @@ export default function QnaList() {
   const handleQnaTypeChange = (newQnaType: string) => { setQnaType(newQnaType); setQuery({ qnaType: newQnaType, page: 1 }); pagination.handlePageChange(1); };
   const handleQnaClick = (qna: UserQnaItem) => {
     const isSecret = qna.secretYn === 'Y';
-    const isLoggedIn = !!localStorage.getItem('accessToken');
-    if (isSecret && !isLoggedIn) {
-      return; // 비로그인 사용자는 비공개 상세 진입 차단
+    const isOwner = !!(qna as any).isMine;
+    if (isSecret && !isOwner) {
+      setToast({ open: true, message: '비공개 질문입니다. 작성자만 상세를 볼 수 있습니다.', severity: 'info' });
+      return;
     }
     navigate(`/qna/${qna.qnaId}`);
   };
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  const getQnaTypeLabel = (type: string) => qnaTypeOptions.find(opt => opt.value === type)?.label ?? type;
   const maskAuthorName = (name: string) => (name.length <= 2 ? name : name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1));
 
   const handleCreateQna = () => {
-    // 로그인 여부에 따라 분기: 미로그인 → 로그인 후 돌아오기
-    const isLoggedIn = localStorage.getItem('accessToken');
-    if (!isLoggedIn) {
-      navigate(ROUTES.PUBLIC.LOGIN, { state: { from: ROUTES.USER.QNA_CREATE } });
-      return;
-    }
     navigate(ROUTES.USER.QNA_CREATE);
   };
 
@@ -113,7 +110,6 @@ export default function QnaList() {
           searchValue={query.search || ''}
           onSearchChange={(v) => setQuery({ search: v, page: 1 })}
           filters={[
-            { label: '유형', value: qnaType, options: qnaTypeOptions, onChange: (v: string) => handleQnaTypeChange(v || 'ALL') },
             { label: '정렬', value: (query.sort as string) || 'createdAt-desc', options: [
               { value: 'createdAt-desc', label: '등록순(최신)' },
               { value: 'hit-desc', label: '조회수순' }
@@ -173,7 +169,9 @@ export default function QnaList() {
                           {/* 기존 임시 아이콘 제거: 위 LockIcon으로 대체 */}
                         </span>
                       )}
-                      <Chip id={`qna-item-type-${qna.qnaId}`} label={getQnaTypeLabel(qna.qnaType)} color="primary" size="small" sx={{ mr: 2, mb: 1 }} />
+                      <Box component="span" sx={{ mr: 2, mb: 1 }}>
+                        <QnaTypeChip id={`qna-item-type-${qna.qnaId}`} typeId={qna.qnaType} size="small" label={qnaTypeOptions.find(o=>o.value===qna.qnaType)?.label} />
+                      </Box>
                       <Typography id={`qna-item-date-${qna.qnaId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                         {formatDate(qna.createdAt)}
                         {typeof (qna as any).hitCnt === 'number' && (
@@ -203,6 +201,7 @@ export default function QnaList() {
             </>
           )}
         </ThemedCard>
+        <CommonToast open={!!toast?.open} message={toast?.message || ''} severity={toast?.severity} onClose={() => setToast(null)} />
       </Box>
     </Box>
   );

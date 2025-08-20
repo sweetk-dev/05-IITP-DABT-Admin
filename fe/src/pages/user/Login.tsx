@@ -6,14 +6,13 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { loginUser } from '../../api';
 import { ROUTES } from '../../routes';
-import { getThemeColors } from '../../theme';
+// import { getThemeColors } from '../../theme';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const theme = 'user' as const;
-  const colors = getThemeColors(theme);
+  // const theme = 'user' as const;
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,7 +52,7 @@ export default function Login() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      bgcolor: colors.background,
+      bgcolor: 'background.default',
       position: 'relative',
     }}>
       <Box sx={{

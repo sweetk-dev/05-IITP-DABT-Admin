@@ -7,33 +7,40 @@ import ThemedButton from '../../components/common/ThemedButton';
 import { SPACING } from '../../constants/spacing';
 import { ROUTES } from '../../routes';
 import ByteLimitHelper from '../../components/common/ByteLimitHelper';
-import { createAdminFaq } from '../../api';
+import { createAdminFaq, getCommonCodesByGroupId } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
+import SelectField from '../../components/common/SelectField';
+import { useDataFetching } from '../../hooks/useDataFetching';
 
 export default function AdminFaqCreate() {
   const navigate = useNavigate();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [faqType, setFaqType] = useState('');
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const titleBytes = useMemo(()=> new TextEncoder().encode(title).length, [title]);
-  const contentBytes = useMemo(()=> new TextEncoder().encode(content).length, [content]);
+  const questionBytes = useMemo(()=> new TextEncoder().encode(question).length, [question]);
+  const answerBytes = useMemo(()=> new TextEncoder().encode(answer).length, [answer]);
   const TITLE_MAX = 600;
   const CONTENT_MAX = 6000;
 
+  // load FAQ type codes
+  const { data: faqTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('faq_type'), autoFetch: true });
+  const faqTypeOptions = [{ value: '', label: '선택하세요' }, ...((faqTypeCodes as any)?.codes || []).map((c: any) => ({ value: c.codeId, label: c.codeNm }))];
+
   const handleBack = () => navigate(ROUTES.ADMIN.FAQ.LIST);
   const handleSubmit = async () => {
-    if (!title || !content) {
-      setError('제목과 내용을 입력해 주세요.');
+    if (!faqType || !question || !answer) {
+      setError('유형, 질문, 답변을 모두 입력해 주세요.');
       return;
     }
-    if (titleBytes > TITLE_MAX || contentBytes > CONTENT_MAX) {
-      setError('입력 용량을 초과했습니다. 제목 600B, 내용 6000B 이내로 입력해 주세요.');
+    if (questionBytes > TITLE_MAX || answerBytes > CONTENT_MAX) {
+      setError('입력 용량을 초과했습니다. 질문 600B, 답변 6000B 이내로 입력해 주세요.');
       return;
     }
     setLoading(true);
     setError(null);
-    const res = await createAdminFaq({ title, content } as any);
+    const res = await createAdminFaq({ faqType, question, answer } as any);
     handleApiResponse(res, () => {
       navigate(ROUTES.ADMIN.FAQ.LIST);
     }, (msg) => setError(msg));
@@ -48,10 +55,11 @@ export default function AdminFaqCreate() {
           {error && (
             <Alert severity="error" sx={{ mb: SPACING.MEDIUM }} onClose={() => setError(null)}>{error}</Alert>
           )}
-          <TextField id="faq-title" fullWidth label="제목" value={title} onChange={(e)=>setTitle(e.target.value)} sx={{ mb: 0.5 }} />
-          <ByteLimitHelper id="faq-title-bytes" currentBytes={titleBytes} maxBytes={TITLE_MAX} />
-          <TextField id="faq-content" fullWidth label="내용" value={content} onChange={(e)=>setContent(e.target.value)} multiline minRows={12} sx={{ mb: 0.5 }} />
-          <ByteLimitHelper id="faq-content-bytes" currentBytes={contentBytes} maxBytes={CONTENT_MAX} />
+          <SelectField id="faq-type" value={faqType} onChange={(v)=>setFaqType(v)} options={faqTypeOptions} label="FAQ 유형" />
+          <TextField id="faq-question" fullWidth label="질문" value={question} onChange={(e)=>setQuestion(e.target.value)} sx={{ mb: 0.5, mt: SPACING.SMALL }} />
+          <ByteLimitHelper id="faq-question-bytes" currentBytes={questionBytes} maxBytes={TITLE_MAX} />
+          <TextField id="faq-answer" fullWidth label="답변" value={answer} onChange={(e)=>setAnswer(e.target.value)} multiline minRows={12} sx={{ mb: 0.5 }} />
+          <ByteLimitHelper id="faq-answer-bytes" currentBytes={answerBytes} maxBytes={CONTENT_MAX} />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.MEDIUM }}>
             <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>
             <ThemedButton variant="primary" buttonSize="cta" onClick={handleSubmit} disabled={loading}>등록</ThemedButton>

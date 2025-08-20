@@ -35,7 +35,7 @@ export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListQuer
     const params = req.query as any;
     const domain = await getUserQnaList(userId, params);
     const result: UserQnaListRes = {
-      items: domain.qnas.map(toUserQnaItem),
+      items: domain.qnas.map(src => ({ ...toUserQnaItem(src), isMine: Number(src.userId) === Number(userId) } as any)),
       total: domain.total,
       page: domain.page,
       limit: domain.limit,
@@ -67,7 +67,12 @@ export const getQnaHomeForUser = async (req: Request, res: Response) => {
     logApiCall('GET', API_URLS.USER.QNA.HOME, USER_API_MAPPING as any, '사용자 Q&A 홈 조회');
     const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용
     const data = await getUserQnaHome(userId);
-    const response: UserQnaHomeRes = data;
+    const response: UserQnaHomeRes = {
+      qnas: (data.qnas as any[]).map((src: any) => ({
+        ...toUserQnaItem(src),
+        isMine: Number(src.userId) === Number(userId)
+      }) as any)
+    } as any;
     sendSuccess(res, response, undefined, 'USER_QNA_HOME_VIEW', { userId, count: response.qnas.length });
   } catch (error) {
     // 홈 리스트: DB 에러가 아닌 경우 빈 리스트로 성공 응답
@@ -94,7 +99,7 @@ export const getQnaDetailForUser = async (req: Request<UserQnaDetailParams>, res
     const { qnaId } = req.params;
     const keyId = parseInt(qnaId);
     const qna = await getUserQnaDetail(userId, keyId);
-    const result: UserQnaDetailRes = { qna: toUserQnaItem(qna) } as any;
+    const result: UserQnaDetailRes = { qna: { ...toUserQnaItem(qna), isMine: Number((qna as any).userId) === Number(userId) } as any } as any;
 
     sendSuccess(res, result, undefined, 'USER_QNA_DETAIL_VIEW', { userId, qnaId });
   } catch (error) {

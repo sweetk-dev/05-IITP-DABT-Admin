@@ -32,6 +32,15 @@ export const conditionalMiddleware = (condition: (req: Request) => boolean, midd
   };
 };
 
+// 선택적 인증 미들웨어: Authorization 헤더가 있으면 인증 파싱, 없으면 통과
+export const optionalAuthMiddleware = conditionalMiddleware(
+  (req) => {
+    const h = req.headers.authorization;
+    return !!h && h.startsWith('Bearer ');
+  },
+  authMiddleware
+);
+
 /**
  * 성능 최적화된 미들웨어 체인 생성
  * @param middlewares 적용할 미들웨어 배열
@@ -74,6 +83,8 @@ export const createOptimizedMiddlewareChain = (
 export const routerMiddleware = {
   // 공개 API (로그만)
   public: [accessLogMiddleware],
+  // 공개 + 선택적 인증 (로그 + trim + optional auth)
+  publicOptional: [accessLogMiddleware, trimMiddleware, optionalAuthMiddleware],
   
   // 사용자 API (로그 + trim + 인증)
   user: [accessLogMiddleware, trimMiddleware, authMiddleware],

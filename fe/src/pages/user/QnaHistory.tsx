@@ -12,7 +12,7 @@ import {
 	AccordionDetails,
 	Divider
 } from '@mui/material';
-import { getUserQnaList, getUserQnaDetail } from '../../api';
+import { getUserQnaList, getUserQnaDetail, getCommonCodesByGroupId } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 // import ErrorAlert from '../../components/ErrorAlert';
 import Pagination from '../../components/common/Pagination';
@@ -41,6 +41,8 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 	const [qnaDetails, setQnaDetails] = useState<Record<number, UserQnaDetailRes>>({});
 	const { query } = useQuerySync({ qnaId: '' });
 	const [pendingExpandId, setPendingExpandId] = useState<number | null>(null);
+	// QnA 유형 공통코드 로드 (라벨 표시용)
+	const { data: qnaTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('qna_type'), autoFetch: true });
 	
 	// Pagination 훅 사용
 	const pagination = usePagination({
@@ -181,30 +183,20 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 									<ListItem>
 										<ListItemText
 											primary={
-												<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-													<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-														{qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
-														<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-															{qna.title}
-														</Typography>
-													</Box>
-													<Chip
-														label={qna.status === 'answered' ? '답변완료' : '답변대기'}
-														color={qna.status === 'answered' ? 'success' : 'warning'}
-														size="small"
-													/>
+												<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+													{/* 순서: 유형 → 상태 → 비공개 → 날짜 */}
+													<QnaTypeChip typeId={qna.qnaType} label={((qnaTypeCodes as any)?.codes || []).find((c: any) => c.codeId === qna.qnaType)?.codeNm || qna.qnaType} />
+													<Chip label={qna.status === 'answered' ? '답변완료' : '답변대기'} color={qna.status === 'answered' ? 'success' : 'warning'} size="small" />
+													{qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
+													<Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
+														{formatDate(qna.createdAt)}
+													</Typography>
 												</Box>
 											}
 											secondary={
-												<Box>
-													<Typography variant="body2" color="text.secondary">
-														{formatDate(qna.createdAt)}
-													</Typography>
-													<Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-														<QnaTypeChip typeId={qna.qnaType} label={(qna as any).qnaTypeName || qna.qnaType} />
-														<Typography variant="body2" color="text.secondary">• {qna.secretYn === 'Y' ? '비공개' : '공개'}</Typography>
-													</Box>
-												</Box>
+												<Typography variant="h6" sx={{ fontWeight: 500, mt: 1 }}>
+													{qna.title}
+												</Typography>
 											}
 										/>
 										<ThemedButton

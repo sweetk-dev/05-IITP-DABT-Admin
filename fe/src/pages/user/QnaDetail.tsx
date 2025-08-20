@@ -100,13 +100,14 @@ export default function QnaDetail() {
               {(() => { const item = (qna as any).qna ?? qna; return (
               <Box sx={{ mb: SPACING.LARGE }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: SPACING.MEDIUM, flexWrap: 'wrap' }}>
-                  {item.secretYn === 'Y' && (
-                    <StatusChip kind="private" />
-                  )}
+                  {/* 순서: 유형 → 상태 → 비공개 */}
                   <Box component="span" sx={{ mr: SPACING.MEDIUM, mb: SPACING.SMALL }}>
                     <QnaTypeChip typeId={item.qnaType} size="medium" label={item.qnaTypeName || item.qnaType} />
                   </Box>
                   <Chip label={item.answeredYn === 'Y' ? '답변완료' : '답변대기'} color={item.answeredYn === 'Y' ? 'success' : 'warning'} size="medium" sx={{ mr: SPACING.MEDIUM, mb: SPACING.SMALL }} />
+                  {item.secretYn === 'Y' && (
+                    <StatusChip kind="private" />
+                  )}
                   <Typography variant="body2" sx={{ color: colors.textSecondary, ml: 'auto', mb: SPACING.SMALL }}>{formatDate(item.createdAt)}</Typography>
                 </Box>
                 <Typography variant="h4" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.MEDIUM }}>{item.title}</Typography>

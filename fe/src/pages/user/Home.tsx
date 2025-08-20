@@ -1,4 +1,4 @@
-import { Box, Typography, Stack, Divider } from '@mui/material';
+import { Box, Typography, Stack, Divider, Chip } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ import CommonToast from '../../components/CommonToast';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
-import { getHomeNoticeList, getHomeFaqList, getHomeQnaList } from '../../api';
+import { getHomeNoticeList, getHomeFaqList, getHomeQnaList, getCommonCodesByGroupId } from '../../api';
 import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
 import { useCommonCode } from '../../hooks/useCommonCode';
 
@@ -59,6 +59,8 @@ export default function Home() {
   } = useDataFetching({
     fetchFunction: getHomeQnaList
   });
+  // QnA 유형 공통코드 로드 (라벨 표시용)
+  const { data: qnaTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('qna_type'), autoFetch: true });
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   // Preload qna_type once for this page
   useEffect(() => { fetchCodesByGroup('qna_type').catch(() => {}); }, [fetchCodesByGroup]);
@@ -407,16 +409,14 @@ export default function Home() {
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                    {/* 비공개 아이콘 (공개는 아이콘 없음) */}
-                    {isSecret && (
-                      <StatusChip kind="private" />
-                    )}
-                    {/* 카테고리 */}
-                    <QnaTypeChip typeId={qna.qnaType} size="small" label={(qna as any).qnaTypeName || qna.qnaType} />
-                    {/* 상태 */}
-                    <Typography variant="caption" sx={{ color: qna.answeredYn === 'Y' ? palette.success.main : palette.warning.main, fontWeight: 700 }}>
-                      {qna.answeredYn === 'Y' ? '답변완료' : '대기'}
-                    </Typography>
+                    {/* 순서: 유형 → 상태 → 비공개 */}
+                    <QnaTypeChip
+                      typeId={qna.qnaType}
+                      size="small"
+                      label={((qnaTypeCodes as any)?.codes || []).find((c: any) => c.codeId === qna.qnaType)?.codeNm || qna.qnaType}
+                    />
+                    <Chip label={qna.answeredYn === 'Y' ? '답변완료' : '대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" />
+                    {isSecret && (<StatusChip kind="private" />)}
                     {/* 조회수 */}
                     {typeof qna.hitCnt === 'number' && (
                       <Typography variant="caption" sx={{ color: palette.text.secondary, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>

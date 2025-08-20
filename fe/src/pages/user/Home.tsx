@@ -1,5 +1,6 @@
 import { Box, Typography, Stack, Divider } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // theme colors come from MUI palette
 import ThemedButton from '../../components/common/ThemedButton';
@@ -8,13 +9,15 @@ import EmptyState from '../../components/common/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { ArrowForward, Visibility as VisibilityIcon } from '@mui/icons-material';
 import StatusChip from '../../components/common/StatusChip';
+import QnaTypeChip from '../../components/common/QnaTypeChip';
 import { OPEN_API_DOC_URL } from '../../config';
+import CommonToast from '../../components/CommonToast';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getHomeNoticeList, getHomeFaqList, getHomeQnaList } from '../../api';
 import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
-import { getUserInfo } from '../../store/user';
+import { useCommonCode } from '../../hooks/useCommonCode';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -22,6 +25,7 @@ export default function Home() {
   const muiTheme = useTheme();
   const palette = muiTheme.palette;
   const openApiDocUrl = OPEN_API_DOC_URL;
+  const { fetchCodesByGroup } = useCommonCode();
   
   // 공지사항 데이터 페칭
   const {
@@ -55,6 +59,9 @@ export default function Home() {
   } = useDataFetching({
     fetchFunction: getHomeQnaList
   });
+  const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+  // Preload qna_type once for this page
+  useEffect(() => { fetchCodesByGroup('qna_type').catch(() => {}); }, [fetchCodesByGroup]);
   
   const handleContentClick = (type: 'notice' | 'faq' | 'qna', id: number) => {
     navigate(`/${type}/${id}`);
@@ -366,13 +373,18 @@ export default function Home() {
           <Stack spacing={1.5}>
             {qnas?.qnas?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: UserQnaItem) => {
               const isSecret = qna.secretYn === 'Y';
-              const currentUserId = getUserInfo()?.userId;
-              const isOwner = Boolean(currentUserId) && (qna as any).userId ? Number((qna as any).userId) === Number(currentUserId) : false;
+              const isOwner = !!(qna as any).isMine;
               const clickable = !isSecret || isOwner;
               return (
                 <Box
                   key={qna.qnaId}
-                  onClick={() => clickable && handleContentClick('qna', qna.qnaId)}
+                  onClick={() => {
+                    if (clickable) {
+                      handleContentClick('qna', qna.qnaId);
+                    } else {
+                      setToast({ open: true, message: '비공개 질문입니다. 작성자만 상세를 볼 수 있습니다.', severity: 'info' });
+                    }
+                  }}
                   sx={{
                     p: 2,
                     borderRadius: 2,
@@ -400,9 +412,7 @@ export default function Home() {
                       <StatusChip kind="private" />
                     )}
                     {/* 카테고리 */}
-                    <Typography variant="caption" sx={{ color: palette.text.secondary }}>
-                      {qna.qnaType}
-                    </Typography>
+                    <QnaTypeChip typeId={qna.qnaType} size="small" label={(qna as any).qnaTypeName || qna.qnaType} />
                     {/* 상태 */}
                     <Typography variant="caption" sx={{ color: qna.answeredYn === 'Y' ? palette.success.main : palette.warning.main, fontWeight: 700 }}>
                       {qna.answeredYn === 'Y' ? '답변완료' : '대기'}
@@ -425,7 +435,7 @@ export default function Home() {
                       transition: 'all 0.2s ease-in-out'
                     }}
                   >
-                    {qna.title}
+                    {qna.title || '(제목 없음)'}
                   </Typography>
                 </Box>
               );
@@ -569,6 +579,7 @@ export default function Home() {
           </Stack>
         </ThemedCard>
       </Box>
+      <CommonToast open={!!toast?.open} message={toast?.message || ''} severity={toast?.severity} onClose={() => setToast(null)} />
     </Box>
   );
 } 

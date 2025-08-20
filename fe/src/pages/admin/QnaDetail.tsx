@@ -1,4 +1,5 @@
 import { Box, CardContent, Typography, Alert, Chip, Stack } from '@mui/material';
+import QnaTypeChip from '../../components/common/QnaTypeChip';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
@@ -38,7 +39,7 @@ export default function AdminQnaDetail() {
           ) : (
             <>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                <Chip size="small" label={qna.qnaType} color="primary" />
+                <QnaTypeChip typeId={qna.qnaType} label={qna.qnaTypeName || qna.qnaType} />
                 <Chip size="small" label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} />
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>{qna.postedAt}</Typography>
               </Stack>

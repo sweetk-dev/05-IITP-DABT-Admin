@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../routes';
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import StatusChip from '../../components/common/StatusChip';
-import StatusChip from '../../components/common/StatusChip';
+import QnaTypeChip from '../../components/common/QnaTypeChip';
 import ThemedButton from '../../components/common/ThemedButton';
 import { useQuerySync } from '../../hooks/useQuerySync';
 
@@ -55,7 +55,7 @@ export default function AdminQnaList() {
         {r.title}
       </span>
     ) },
-    { key: 'qnaType', header: '유형' },
+    { key: 'qnaType', header: '유형', render: (r) => <QnaTypeChip typeId={r.qnaType} label={r.qnaTypeName || r.qnaType} /> },
     { key: 'status', header: '상태', render: (r) => <StatusChip kind={r.answeredYn === 'Y' ? 'answered' : 'pending'} /> },
     { key: 'postedAt', header: '등록일', width: 160 },
   ];

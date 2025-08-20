@@ -66,7 +66,6 @@ export default function FaqList() {
           searchPlaceholder="질문/답변 검색"
           searchValue={query.search || ''}
           onSearchChange={(v) => setQuery({ search: v, page: 1 })}
-          filters={[{ label: '유형', value: faqType, options: faqTypeOptions.map(o => ({ value: o.value, label: o.label })), onChange: (v: string) => handleFaqTypeChange(v || 'ALL') }]}
           totalCount={faqData?.total}
         />
 

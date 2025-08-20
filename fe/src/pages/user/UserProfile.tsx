@@ -97,6 +97,7 @@ export default function UserProfile() {
       onCloseError={() => setError(undefined)}
       showRole={false}
       showLoginId={false}
+      theme="user"
       
     />
   );

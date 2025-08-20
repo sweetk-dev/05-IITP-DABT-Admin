@@ -98,6 +98,7 @@ export default function AdminProfile() {
       onCloseError={() => setError(undefined)}
       showRole={true}
       showLoginId={true}
+      theme="admin"
       
     />
   );

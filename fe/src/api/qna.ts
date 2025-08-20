@@ -23,7 +23,7 @@ import type { ApiResponse } from '../types/api';
  */
 export async function getUserQnaList(params: UserQnaListReq): Promise<ApiResponse<UserQnaListRes>> {
   const url = buildUrl(FULL_API_URLS.USER.QNA.LIST, params as any);
-  // mineOnly가 true이면 인증이 필요하고 내 비공개까지 포함 → apiFetch 사용
+  // 공개 리스트는 공개로, mineOnly=true일 때만 인증 요청
   const needsAuth = !!(params as any).mineOnly;
   return needsAuth
     ? apiFetch<UserQnaListRes>(url, { method: 'GET' })
@@ -35,8 +35,8 @@ export async function getUserQnaList(params: UserQnaListReq): Promise<ApiRespons
  */
 export async function getUserQnaDetail(qnaId: number): Promise<ApiResponse<UserQnaDetailRes>> {
   const url = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
-  // 상세 조회는 비공개 접근 시 인증 필요 → 인증으로 요청
-  return apiFetch<UserQnaDetailRes>(url, { method: 'GET' });
+  // 공통 함수에서 토큰이 있으면 자동으로 헤더를 포함하므로 공개 경로로 호출
+  return publicApiFetch<UserQnaDetailRes>(url, { method: 'GET' });
 }
 
 /**
@@ -54,6 +54,7 @@ export async function createUserQna(data: UserQnaCreateReq): Promise<ApiResponse
  * 홈 화면용 Q&A 조회 (최신 5개)
  */
 export async function getHomeQnaList(): Promise<ApiResponse<UserQnaHomeRes>> {
+  // 홈은 항상 공개 경로 호출(공통 함수가 토큰 있으면 자동 첨부)
   return publicApiFetch<UserQnaHomeRes>(FULL_API_URLS.USER.QNA.HOME, { method: 'GET' });
 }
 
@@ -65,6 +66,7 @@ export async function getUserQnaListByType(qnaType: string, params: Omit<UserQna
     ...params,
     qnaType: qnaType === 'ALL' ? undefined : qnaType
   } as any);
+  // 타입별 리스트도 공개 경로 호출(공통 함수가 토큰 있으면 자동 첨부)
   return publicApiFetch<UserQnaListRes>(url, { method: 'GET' });
 }
 

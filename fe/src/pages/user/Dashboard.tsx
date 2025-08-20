@@ -156,24 +156,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
               {qnaList?.items && qnaList.items.length > 0 ? (
                 <List>
                   {qnaList.items.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
-                    <ListItem key={qna.qnaId} divider>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
-                            <Typography component="span" variant="body1" sx={{ fontWeight: 600 }}>
-                              {qna.title}
-                            </Typography>
-                          </Box>
-                        }
-                        secondary={`${qna.createdAt} • ${qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}`}
-                      />
-                      <Chip
-                        label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}
-                        color={qna.answeredYn === 'Y' ? 'success' : 'warning'}
-                        size="small"
-                      />
-                    </ListItem>
+                    <React.Fragment key={qna.qnaId}>
+                      <ListItem id={`dash-qna-item-${qna.qnaId}`} divider button onClick={() => navigate(`${ROUTES.USER.QNA_HISTORY}?qnaId=${qna.qnaId}`)}>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
+                              <Typography component="span" variant="body1" sx={{ fontWeight: 600 }}>
+                                {qna.title}
+                              </Typography>
+                            </Box>
+                          }
+                          secondary={`${qna.createdAt} • ${qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}`}
+                        />
+                        <Chip
+                          label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}
+                          color={qna.answeredYn === 'Y' ? 'success' : 'warning'}
+                          size="small"
+                        />
+                      </ListItem>
+                    </React.Fragment>
                   ))}
                 </List>
               ) : (

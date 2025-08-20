@@ -28,6 +28,8 @@ import { handleApiResponse } from '../../utils/apiResponseHandler';
 import type { UserQnaDetailRes } from '@iitp-dabt/common';
 import EmptyState from '../../components/common/EmptyState';
 import StatusChip from '../../components/common/StatusChip';
+import QnaTypeChip from '../../components/common/QnaTypeChip';
+import { useQuerySync } from '../../hooks/useQuerySync';
 
 interface QnaHistoryProps {
 	id?: string;
@@ -37,11 +39,9 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 	const navigate = useNavigate();
 	const [expandedQna, setExpandedQna] = useState<number | null>(null);
 	const [qnaDetails, setQnaDetails] = useState<Record<number, UserQnaDetailRes>>({});
+	const { query } = useQuerySync({ qnaId: '' });
+	const [pendingExpandId, setPendingExpandId] = useState<number | null>(null);
 	
-	// 테마 설정 (사용자 페이지는 'user' 테마)
-	// const theme: 'user' | 'admin' = 'user';
-	// const colors = getThemeColors(theme);
-
 	// Pagination 훅 사용
 	const pagination = usePagination({
 		initialLimit: PAGINATION.DEFAULT_PAGE_SIZE
@@ -53,7 +53,6 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 		isLoading: loading,
 		isEmpty,
 		isError,
-		// refetch
 	} = useDataFetching({
 		fetchFunction: () => getUserQnaList({
 			page: pagination.currentPage,
@@ -91,23 +90,55 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 
 		try {
 			const response = await getUserQnaDetail(qnaId);
-			
-			// handleApiResponse를 사용하여 에러 코드별 자동 처리
-			handleApiResponse(response, 
-				(data) => {
-					setQnaDetails(prev => ({
-						...prev,
-						[qnaId]: data
-					}));
-				},
-				(errorMessage) => {
-					console.error('QnA 상세 정보 로드 실패:', errorMessage);
-				}
-			);
+			handleApiResponse(response, (data) => {
+				setQnaDetails(prev => ({ ...prev, [qnaId]: data }));
+			});
 		} catch (err) {
 			console.error('QnA 상세 정보 로드 실패:', err);
 		}
 	};
+
+	// 쿼리파라미터로 전달된 qnaId가 있으면 해당 항목이 포함된 페이지로 이동 후 자동 펼침
+	useEffect(() => {
+		const paramId = Number(query.qnaId);
+		if (!paramId) return;
+		let cancelled = false;
+		(async () => {
+			try {
+				// 현재 페이지에 있는지 먼저 확인
+				if (qnaList?.items?.some((i: any) => i.qnaId === paramId)) {
+					setPendingExpandId(paramId);
+					return;
+				}
+				// 전체 페이지 탐색해서 포함된 페이지로 이동
+				const first = await getUserQnaList({ page: 1, limit: pagination.pageSize, mineOnly: true } as any);
+				const totalPages = (first as any)?.totalPages || 1;
+				for (let p = 1; p <= totalPages; p++) {
+					const res = p === 1 ? first : await getUserQnaList({ page: p, limit: pagination.pageSize, mineOnly: true } as any);
+					const items = (res as any)?.items || [];
+					if (items.some((i: any) => i.qnaId === paramId)) {
+						if (!cancelled) {
+							pagination.handlePageChange(p);
+							setPendingExpandId(paramId);
+						}
+						break;
+					}
+				}
+			} catch {}
+		})();
+		return () => { cancelled = true; };
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [query.qnaId]);
+
+	// 리스트가 로드되면 대기 중인 항목을 자동 펼침
+	useEffect(() => {
+		if (!pendingExpandId || !qnaList?.items) return;
+		if (qnaList.items.some((i: any) => i.qnaId === pendingExpandId)) {
+			handleQnaExpand(pendingExpandId);
+			setPendingExpandId(null);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [qnaList]);
 
 	const handleBack = () => {
 		navigate(ROUTES.USER.DASHBOARD);
@@ -169,9 +200,10 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 													<Typography variant="body2" color="text.secondary">
 														{formatDate(qna.createdAt)}
 													</Typography>
-													<Typography variant="body2" color="text.secondary">
-														유형: {qna.qnaType} • {qna.secretYn === 'Y' ? '비공개' : '공개'}
-													</Typography>
+													<Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+														<QnaTypeChip typeId={qna.qnaType} label={(qna as any).qnaTypeName || qna.qnaType} />
+														<Typography variant="body2" color="text.secondary">• {qna.secretYn === 'Y' ? '비공개' : '공개'}</Typography>
+													</Box>
 												</Box>
 											}
 										/>

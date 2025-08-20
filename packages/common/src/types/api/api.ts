@@ -211,7 +211,7 @@ export const FULL_API_URLS = {
       LIST: getUserUrl(API_URLS.USER.QNA.LIST),
       DETAIL: getUserUrl(API_URLS.USER.QNA.DETAIL),
       CREATE: getUserUrl(API_URLS.USER.QNA.CREATE),
-      // DELETE uses DETAIL path with DELETE method
+      DELETE: getUserUrl(API_URLS.USER.QNA.DELETE),
       HOME: getUserUrl(API_URLS.USER.QNA.HOME),
     },
     NOTICE: {

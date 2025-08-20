@@ -78,6 +78,11 @@ export const USER_API_MAPPING = {
     res: 'UserQnaCreateRes',
     description: '사용자 QnA 작성'
   },
+  [`DELETE ${API_URLS.USER.QNA.DELETE}`]: {
+    params: 'UserQnaDeleteParams',
+    res: 'void',
+    description: '사용자 QnA 삭제'
+  },
   [`GET ${API_URLS.USER.QNA.HOME}`]: {
     res: 'UserQnaHomeRes',
     description: '사용자 QnA 홈 조회'

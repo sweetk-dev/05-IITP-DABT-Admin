@@ -63,8 +63,14 @@ export interface UserQnaDetailParams {
   qnaId: string;
 }
 
+
 export interface UserQnaDetailRes {
   qna: UserQnaDetailItem;
+}
+
+// 삭제도 동일한 경로 파라미터 사용
+export interface UserQnaDeleteParams {
+  qnaId: string;
 }
 
 // Q&A 생성 (사용자용)

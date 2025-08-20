@@ -12,10 +12,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
   IconButton,
   Tooltip
 } from '@mui/material';
@@ -42,6 +38,7 @@ import EmptyState from '../../components/common/EmptyState';
 import StatusChip from '../../components/common/StatusChip';
 import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 import CommonDialog from '../../components/CommonDialog';
+import { useToast } from '../../components/ToastProvider';
 import { useTheme, alpha } from '@mui/material/styles';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import ExtendKeyDialog from '../../components/common/ExtendKeyDialog';
@@ -64,6 +61,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [extendDialogOpen, setExtendDialogOpen] = useState(false);
   const [selectedKeyId, setSelectedKeyId] = useState<number | null>(null);
+  const { showToast } = useToast();
   
   // 폼 데이터
   const [createForm, setCreateForm] = useState({
@@ -72,9 +70,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     startDt: '',
     endDt: ''
   });
-  const [extendForm, setExtendForm] = useState({
-    extensionDays: 90
-  });
+  // no local extend form; handled by common dialog
   
   // 테마 설정 (사용자 페이지는 'user' 테마)
   const muiTheme = useTheme();
@@ -111,6 +107,7 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     if (response.success) {
       setCreateDialogOpen(false);
       setCreateForm({ keyName: '', keyDesc: '', startDt: '', endDt: '' });
+      showToast('인증키 신청이 완료되었습니다.', 'success');
       refetch();
     }
   };
@@ -122,22 +119,18 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
     if (response.success) {
       setDeleteDialogOpen(false);
       setSelectedKeyId(null);
+      showToast('인증키가 삭제되었습니다.', 'success');
       refetch();
     }
   };
 
-  const handleExtendKey = async () => {
+  const handleExtendKey = async (range: UserOpenApiExtendReq) => {
     if (!selectedKeyId) return;
-
-    const requestData: UserOpenApiExtendReq = {
-      extensionDays: extendForm.extensionDays
-    };
-
-    const response = await extendUserOpenApi({ keyId: String(selectedKeyId) } as any, requestData);
+    const response = await extendUserOpenApi({ keyId: String(selectedKeyId) } as any, range);
     if (response.success) {
       setExtendDialogOpen(false);
       setSelectedKeyId(null);
-      setExtendForm({ extensionDays: 90 });
+      showToast('인증키 기간이 연장되었습니다.', 'success');
       refetch();
     }
   };
@@ -398,11 +391,13 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         cancelText="취소"
         
       />
+      {/* 전역 토스트 사용 → 개별 렌더 불필요 */}
       <ExtendKeyDialog 
         open={extendDialogOpen}
         onClose={() => setExtendDialogOpen(false)}
-        onConfirm={(days)=>{ setExtendForm({ extensionDays: days }); handleExtendKey(); }}
-        defaultDays={extendForm.extensionDays}
+        initialStartDt={openApiList?.authKeys.find(k=>k.keyId===selectedKeyId)?.startDt}
+        initialEndDt={openApiList?.authKeys.find(k=>k.keyId===selectedKeyId)?.endDt}
+        onConfirm={(range)=>{ handleExtendKey(range as UserOpenApiExtendReq); }}
       />
     </Box>
   );

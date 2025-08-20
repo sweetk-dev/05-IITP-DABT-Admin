@@ -23,7 +23,11 @@ import type { ApiResponse } from '../types/api';
  */
 export async function getUserQnaList(params: UserQnaListReq): Promise<ApiResponse<UserQnaListRes>> {
   const url = buildUrl(FULL_API_URLS.USER.QNA.LIST, params as any);
-  return publicApiFetch<UserQnaListRes>(url, { method: 'GET' });
+  // mineOnly가 true이면 인증이 필요하고 내 비공개까지 포함 → apiFetch 사용
+  const needsAuth = !!(params as any).mineOnly;
+  return needsAuth
+    ? apiFetch<UserQnaListRes>(url, { method: 'GET' })
+    : publicApiFetch<UserQnaListRes>(url, { method: 'GET' });
 }
 
 /**
@@ -31,7 +35,8 @@ export async function getUserQnaList(params: UserQnaListReq): Promise<ApiRespons
  */
 export async function getUserQnaDetail(qnaId: number): Promise<ApiResponse<UserQnaDetailRes>> {
   const url = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
-  return publicApiFetch<UserQnaDetailRes>(url, { method: 'GET' });
+  // 상세 조회는 비공개 접근 시 인증 필요 → 인증으로 요청
+  return apiFetch<UserQnaDetailRes>(url, { method: 'GET' });
 }
 
 /**

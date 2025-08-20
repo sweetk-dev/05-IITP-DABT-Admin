@@ -51,6 +51,8 @@ export interface UserQnaListQuery extends PaginationReq {
   qnaType?: string;
   search?: string;
   sort?: string; // 'createdAt-desc' | 'hit-desc'
+  // 로그인 사용자의 비공개 포함 '내 문의'만 보고 싶을 때 true
+  mineOnly?: boolean;
 }
 
 export type UserQnaListRes = PaginationRes<UserQnaItem>;

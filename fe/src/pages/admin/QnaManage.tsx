@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../routes';
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import StatusChip from '../../components/common/StatusChip';
+import StatusChip from '../../components/common/StatusChip';
 import ThemedButton from '../../components/common/ThemedButton';
 import { useQuerySync } from '../../hooks/useQuerySync';
 
@@ -48,7 +49,12 @@ export default function AdminQnaList() {
   const totalPages = (data as any)?.totalPages || 0;
 
   const columns: Array<DataTableColumn<any>> = [
-    { key: 'title', header: '제목', render: (r) => <span style={{ cursor: 'pointer' }} onClick={()=>navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(r.qnaId)))}>{r.title}</span> },
+    { key: 'title', header: '제목', render: (r) => (
+      <span style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={()=>navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(r.qnaId)))}>
+        {r.secretYn === 'Y' && (<StatusChip kind="private" />)}
+        {r.title}
+      </span>
+    ) },
     { key: 'qnaType', header: '유형' },
     { key: 'status', header: '상태', render: (r) => <StatusChip kind={r.answeredYn === 'Y' ? 'answered' : 'pending'} /> },
     { key: 'postedAt', header: '등록일', width: 160 },

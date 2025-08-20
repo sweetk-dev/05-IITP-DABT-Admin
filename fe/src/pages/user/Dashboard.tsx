@@ -60,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
     fetchFunction: () => getUserQnaList({
       page: 1,
       limit: PAGINATION.HOME_PAGE_SIZE // 5개로 제한
-    }),
+    } as any),
     autoFetch: true
   });
 
@@ -158,12 +158,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                   {qnaList.items.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
                     <ListItem key={qna.qnaId} divider>
                       <ListItemText
-                        primary={qna.title}
-                        secondary={`${qna.createdAt} • ${qna.status === 'answered' ? '답변완료' : '답변대기'}`}
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
+                            <Typography component="span" variant="body1" sx={{ fontWeight: 600 }}>
+                              {qna.title}
+                            </Typography>
+                          </Box>
+                        }
+                        secondary={`${qna.createdAt} • ${qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}`}
                       />
                       <Chip
-                        label={qna.status === 'answered' ? '답변완료' : '답변대기'}
-                        color={qna.status === 'answered' ? 'success' : 'warning'}
+                        label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}
+                        color={qna.answeredYn === 'Y' ? 'success' : 'warning'}
                         size="small"
                       />
                     </ListItem>

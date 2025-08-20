@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Logo, HomeIconButton, DashboardIconButton } from './AppBarCommon';
 import { logoutUser, logoutAdmin } from '../api';
+import { clearLoginInfo } from '../store/user';
 import { getUserName, getUserType, getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
 import { AccountCircle } from '@mui/icons-material';
@@ -102,18 +103,22 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
   const handleAdminLogout = async () => {
     try {
       await logoutAdmin({});
-      navigate(ROUTES.ADMIN.LOGIN);
     } catch (error) {
       console.error('Admin logout failed:', error);
+    } finally {
+      clearLoginInfo();
+      navigate(ROUTES.ADMIN.LOGIN, { replace: true });
     }
   };
 
   const handleUserLogout = async () => {
     try {
       await logoutUser({});
-      navigate('/'); // 홈화면으로 이동
     } catch (error) {
       console.error('User logout failed:', error);
+    } finally {
+      clearLoginInfo();
+      navigate('/', { replace: true }); // 홈화면으로 이동
     }
   };
 

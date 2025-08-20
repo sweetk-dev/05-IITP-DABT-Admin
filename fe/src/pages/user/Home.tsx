@@ -6,13 +6,15 @@ import ThemedButton from '../../components/common/ThemedButton';
 import ThemedCard from '../../components/common/ThemedCard';
 import EmptyState from '../../components/common/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, Visibility as VisibilityIcon } from '@mui/icons-material';
+import StatusChip from '../../components/common/StatusChip';
 import { OPEN_API_DOC_URL } from '../../config';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getHomeNoticeList, getHomeFaqList, getHomeQnaList } from '../../api';
 import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
+import { getUserInfo } from '../../store/user';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -362,52 +364,72 @@ export default function Home() {
           <EmptyState message="등록된 Q&A가 없습니다." />
         ) : (
           <Stack spacing={1.5}>
-            {qnas?.qnas?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: UserQnaItem) => (
-              <Box
-                key={qna.qnaId}
-                onClick={() => handleContentClick('qna', qna.qnaId)}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                  border: `1px solid ${palette.divider}`,
-                  backgroundColor: 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                    borderColor: palette.primary.main,
-                    transform: 'translateY(-1px)',
-                    boxShadow: 2,
-                    '& .content-text': {
-                      textDecoration: 'underline',
-                      textDecorationColor: palette.text.primary,
-                      textDecorationThickness: '2px'
-                    }
-                  }
-                }}
-              >
-                <Typography 
-                  variant="body2" 
-                  className="content-text"
-                  sx={{ 
-                    color: palette.text.secondary,
+            {qnas?.qnas?.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: UserQnaItem) => {
+              const isSecret = qna.secretYn === 'Y';
+              const currentUserId = getUserInfo()?.userId;
+              const isOwner = Boolean(currentUserId) && (qna as any).userId ? Number((qna as any).userId) === Number(currentUserId) : false;
+              const clickable = !isSecret || isOwner;
+              return (
+                <Box
+                  key={qna.qnaId}
+                  onClick={() => clickable && handleContentClick('qna', qna.qnaId)}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    cursor: clickable ? 'pointer' : 'default',
                     transition: 'all 0.2s ease-in-out',
-                    mb: 0.5
+                    border: `1px solid ${palette.divider}`,
+                    backgroundColor: 'transparent',
+                    opacity: clickable ? 1 : 0.75,
+                    '&:hover': clickable ? {
+                      backgroundColor: 'action.hover',
+                      borderColor: palette.primary.main,
+                      transform: 'translateY(-1px)',
+                      boxShadow: 2,
+                      '& .content-text': {
+                        textDecoration: 'underline',
+                        textDecorationColor: palette.text.primary,
+                        textDecorationThickness: '2px'
+                      }
+                    } : undefined
                   }}
                 >
-                  {qna.title}
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: palette.text.secondary,
-                    opacity: 0.7
-                  }}
-                >
-                  {formatDate(qna.createdAt)}
-                </Typography>
-              </Box>
-            ))}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                    {/* 비공개 아이콘 (공개는 아이콘 없음) */}
+                    {isSecret && (
+                      <StatusChip kind="private" />
+                    )}
+                    {/* 카테고리 */}
+                    <Typography variant="caption" sx={{ color: palette.text.secondary }}>
+                      {qna.qnaType}
+                    </Typography>
+                    {/* 상태 */}
+                    <Typography variant="caption" sx={{ color: qna.answeredYn === 'Y' ? palette.success.main : palette.warning.main, fontWeight: 700 }}>
+                      {qna.answeredYn === 'Y' ? '답변완료' : '대기'}
+                    </Typography>
+                    {/* 조회수 */}
+                    {typeof qna.hitCnt === 'number' && (
+                      <Typography variant="caption" sx={{ color: palette.text.secondary, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                        <VisibilityIcon sx={{ fontSize: 16, opacity: 0.7 }} /> {qna.hitCnt}
+                      </Typography>
+                    )}
+                    <Typography variant="caption" sx={{ color: palette.text.secondary, ml: 'auto' }}>
+                      {formatDate(qna.createdAt)}
+                    </Typography>
+                  </Box>
+                  <Typography 
+                    variant="body2" 
+                    className="content-text"
+                    sx={{ 
+                      color: palette.text.secondary,
+                      transition: 'all 0.2s ease-in-out'
+                    }}
+                  >
+                    {qna.title}
+                  </Typography>
+                </Box>
+              );
+            })}
           </Stack>
         )}
       </Box>

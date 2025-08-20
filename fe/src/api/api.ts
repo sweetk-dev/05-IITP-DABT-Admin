@@ -1,6 +1,6 @@
 import { ErrorCode } from '@iitp-dabt/common';
 import { ensureValidToken, removeTokens } from '../store/auth';
-import { getUserType } from '../store/user';
+import { getUserType, clearLoginInfo } from '../store/user';
 import { ROUTES } from '../routes';
 import { API_BASE_URL, API_TIMEOUT } from '../config';
 import type { ApiResponse } from '../types/api';
@@ -134,17 +134,28 @@ export async function apiFetch<T = any>(
     if (!res.ok) {
       if (res.status === 401) {
         // 401 에러 시 토큰 제거하고 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
-        removeTokens();
+        // 사용자 정보까지 정리하여 헤더/레이아웃이 즉시 비로그인 상태로 전환되도록 함
+        clearLoginInfo();
         const userType = getUserType();
-        if (userType === 'A') {
-          window.location.href = ROUTES.ADMIN.LOGIN;
+        // 서버가 FE 공통 포맷으로 에러 코드를 내려주는 경우 우선 사용
+        const serverErrorCode = data?.errorCode as number | undefined;
+        const redirectTo = (userType === 'A') ? ROUTES.ADMIN.LOGIN : ROUTES.PUBLIC.LOGIN;
+        // TOKEN_REQUIRED, TOKEN_EXPIRED, INVALID_TOKEN, UNAUTHORIZED 모두 로그인 화면으로 보냄
+        if (
+          serverErrorCode === ErrorCode.TOKEN_REQUIRED ||
+          serverErrorCode === ErrorCode.TOKEN_EXPIRED ||
+          serverErrorCode === ErrorCode.INVALID_TOKEN ||
+          serverErrorCode === ErrorCode.UNAUTHORIZED ||
+          serverErrorCode === undefined
+        ) {
+          window.location.href = redirectTo;
         } else {
-          window.location.href = ROUTES.PUBLIC.LOGIN;
+          window.location.href = redirectTo;
         }
         return enhanceApiResponse<T>({ 
           success: false, 
           errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',
-          errorCode: ErrorCode.UNAUTHORIZED
+          errorCode: serverErrorCode ?? ErrorCode.UNAUTHORIZED
         });
       }
       

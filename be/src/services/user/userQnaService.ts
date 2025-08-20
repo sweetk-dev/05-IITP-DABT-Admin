@@ -29,13 +29,12 @@ export const getUserQnaList = async (
       ? [["hit_cnt" as any, 'DESC'], ['createdAt' as any, 'DESC']]
       : [['createdAt' as any, 'DESC']];
 
-    const result = await findQnas({
-      // 공개 목록: 사용자 전체 공개 QnA를 노출 (secretYn='N')
-      where: { delYn: 'N', secretYn: 'N' },
-      limit,
-      offset,
-      order
-    });
+    const where: any = { delYn: 'N' };
+    // mineOnly=true면 내 질문만(비공개 포함), 아니면 전체(공개/비공개) 노출
+    if ((params as any).mineOnly && userId) {
+      where.userId = userId;
+    }
+    const result = await findQnas({ where, limit, offset, order });
     
     appLogger.info('사용자 Q&A 목록 조회 서비스 호출', { userId, params });
     
@@ -65,8 +64,8 @@ export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<Q
     if (qna.secretYn === 'Y' && Number(qna.userId) !== Number(userId)) {
       throw new Error('Q&A를 찾을 수 없거나 접근 권한이 없습니다.');
     }
-    // 조회수 증가: 공개 QnA만, 본문 열람 시 1회 증가 (간단 버전)
-    if (qna.secretYn === 'N') {
+    // 조회수 증가: 공개 QnA이며, 작성자 본인이 아닐 때만 증가
+    if (qna.secretYn === 'N' && Number(qna.userId) !== Number(userId)) {
       const current = (qna as any).hitCnt || 0;
       await qna.update({ hitCnt: current + 1, updatedAt: new Date() });
     }
@@ -106,8 +105,8 @@ export const createUserQna = async (userId: number, createData: UserQnaCreateReq
 
 export const getUserQnaHome = async (userId: number): Promise<UserQnaHomeRes> => {
   const result = await findQnas({
-    // 홈 노출: 공개 QnA 최근 5개
-    where: { delYn: 'N', secretYn: 'N' },
+    // 홈 노출: 공개/비공개 모두 최근 5개
+    where: { delYn: 'N' },
     limit: 5,
     offset: 0,
     // 정렬은 레포지토리에서 컬럼명으로 처리하므로 모델 의존 제거

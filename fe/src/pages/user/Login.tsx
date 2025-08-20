@@ -29,9 +29,17 @@ export default function Login() {
         () => {
           // 로그인 성공 시 이전 페이지(from)로 이동. 문자열 또는 Location 객체 모두 지원
           const fromState = (location.state as any)?.from;
-          const targetPath = typeof fromState === 'string' 
+          let targetPath = typeof fromState === 'string' 
             ? fromState 
             : (fromState?.pathname as string | undefined);
+          // 세션에 저장된 returnTo 우선 복구
+          try {
+            const saved = sessionStorage.getItem('returnTo');
+            if (saved) {
+              targetPath = saved;
+              sessionStorage.removeItem('returnTo');
+            }
+          } catch {}
           navigate(targetPath || ROUTES.USER.DASHBOARD, { replace: true });
         },
         (errorMessage) => {

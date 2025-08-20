@@ -99,11 +99,18 @@ export function handleApiResponse<T>(
       // 실제 팝업 표시는 UI 컴포넌트에서 처리
     }
     
-    // 리다이렉트 처리
+    // 리다이렉트 처리: 공개 페이지에서도 토큰 오류 시 즉시 이동
     if (response.redirectTo) {
-      //console.log('리다이렉트:', response.redirectTo);
-      // 실제 리다이렉트는 React Router에서 처리되므로 여기서는 로그만
-      // 실제 리다이렉트는 ProtectedRoute 컴포넌트에서 처리됨
+      // onError로 메시지 노출 후, 아주 짧은 지연 뒤 이동하여 사용자에게 안내가 보이도록 함
+      setTimeout(() => {
+        try {
+          const returnTo = window.location.pathname + window.location.search + window.location.hash;
+          try { sessionStorage.setItem('returnTo', returnTo); } catch {}
+          window.location.href = response.redirectTo as string;
+        } catch {
+          // fallback 무시
+        }
+      }, 100);
     }
   }
 } 

@@ -1,5 +1,6 @@
 import { ErrorCode } from '@iitp-dabt/common';
-import { ensureValidToken, removeTokens, getAccessToken } from '../store/auth';
+import { ensureValidToken, removeTokens, getAccessToken, getRefreshToken, saveTokens } from '../store/auth';
+import { FULL_API_URLS } from '@iitp-dabt/common';
 import { getUserType, clearLoginInfo } from '../store/user';
 import { ROUTES } from '../routes';
 import { API_BASE_URL, API_TIMEOUT } from '../config';
@@ -69,6 +70,34 @@ export async function publicApiFetch<T = any>(
     const data = await res.json();
     
     if (!res.ok) {
+      // Optional: 401일 때 한 번만 리프레시 후 재시도
+      if (res.status === 401) {
+        try {
+          const refreshToken = getRefreshToken();
+          const userType = getUserType();
+          if (refreshToken) {
+            const refreshUrl = userType === 'A' ? FULL_API_URLS.AUTH.ADMIN.REFRESH : FULL_API_URLS.AUTH.USER.REFRESH;
+            const r = await fetch(`${API_BASE_URL}${refreshUrl}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }) });
+            if (r.ok) {
+              const rd = await r.json();
+              const newAccess = rd?.data?.token || rd?.token;
+              const newRefresh = rd?.data?.refreshToken || rd?.refreshToken || refreshToken;
+              if (newAccess) { saveTokens(newAccess, newRefresh); }
+              const retryHeaders = {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${newAccess}`
+              } as Record<string, string>;
+              const retryRes = await fetch(`${API_BASE_URL}${path}`, { ...options, headers: { ...(options?.headers || {}), ...retryHeaders }, signal: controller.signal });
+              const retryData = await retryRes.json();
+              if (retryRes.ok) {
+                return enhanceApiResponse<T>(retryData);
+              }
+              // 재시도 실패 시 아래 일반 에러 처리로 진행
+              return enhanceApiResponse<T>({ success: false, errorMessage: createUserFriendlyMessage(retryData), errorCode: retryData?.errorCode });
+            }
+          }
+        } catch {/* fallthrough */}
+      }
       return enhanceApiResponse<T>({ 
         success: false, 
         errorMessage: createUserFriendlyMessage(data), 
@@ -143,6 +172,10 @@ export async function apiFetch<T = any>(
         // 서버가 FE 공통 포맷으로 에러 코드를 내려주는 경우 우선 사용
         const serverErrorCode = data?.errorCode as number | undefined;
         const redirectTo = (userType === 'A') ? ROUTES.ADMIN.LOGIN : ROUTES.PUBLIC.LOGIN;
+        try {
+          const returnTo = window.location.pathname + window.location.search + window.location.hash;
+          sessionStorage.setItem('returnTo', returnTo);
+        } catch {}
         // TOKEN_REQUIRED, TOKEN_EXPIRED, INVALID_TOKEN, UNAUTHORIZED 모두 로그인 화면으로 보냄
         if (
           serverErrorCode === ErrorCode.TOKEN_REQUIRED ||

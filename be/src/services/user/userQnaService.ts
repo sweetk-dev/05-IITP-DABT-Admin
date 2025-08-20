@@ -8,7 +8,8 @@ import {
 import { 
   findQnas,
   findQnaById,
-  createQna
+  createQna,
+  deleteQna as deleteQnaRepo
 } from '../../repositories/sysQnaRepository';
 import { appLogger } from '../../utils/logger';
 import { QnaSource, toUserQnaItem } from '../../mappers/qnaMapper';
@@ -115,4 +116,15 @@ export const getUserQnaHome = async (userId: number): Promise<UserQnaHomeRes> =>
 
   // 컨트롤러에서 toUserQnaItem 매핑 및 isMine 주입 처리
   return { qnas: result.qnas as any } as any;
+};
+
+/**
+ * 사용자 Q&A 삭제 (본인만)
+ */
+export const deleteUserQna = async (userId: number, qnaId: number): Promise<void> => {
+  const qna = await findQnaById(qnaId);
+  if (!qna || Number((qna as any).userId) !== Number(userId)) {
+    throw new Error('삭제 권한이 없습니다.');
+  }
+  await deleteQnaRepo(qnaId, `U:${userId}`);
 };

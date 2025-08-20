@@ -6,6 +6,7 @@ import {
   UserQnaListQuery,
   UserQnaListRes,
   UserQnaDetailParams,
+  UserQnaDeleteParams,
   UserQnaDetailRes,
   UserQnaCreateReq,
   UserQnaCreateRes,
@@ -153,9 +154,9 @@ export const createQnaForUser = async (req: Request<{}, {}, UserQnaCreateReq>, r
  * API: DELETE /api/user/qna/:qnaId
  * 매핑: USER_API_MAPPING[`DELETE ${API_URLS.USER.QNA.DETAIL}`]
  */
-export const deleteQnaForUser = async (req: Request<UserQnaDetailParams>, res: Response) => {
+export const deleteQnaForUser = async (req: Request<UserQnaDeleteParams>, res: Response) => {
   try {
-    logApiCall('DELETE', API_URLS.USER.QNA.DETAIL, USER_API_MAPPING as any, '사용자 Q&A 삭제');
+    logApiCall('DELETE', API_URLS.USER.QNA.DELETE, USER_API_MAPPING as any, '사용자 Q&A 삭제');
     const userId = extractUserIdFromRequest(req);
     const { qnaId } = req.params;
     if (!userId) {

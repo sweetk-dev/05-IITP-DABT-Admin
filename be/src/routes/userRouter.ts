@@ -11,7 +11,7 @@ import {
   extendUserOpenApi 
 } from '../controllers/user/userOpenApiController';
 import { routerMiddleware } from '../middleware';
-import { API_URLS, type UserFaqDetailParams, type UserNoticeDetailParams, type UserQnaDetailParams, type UserOpenApiDetailParams, type UserOpenApiDeleteParams } from '@iitp-dabt/common';
+import { API_URLS, type UserFaqDetailParams, type UserNoticeDetailParams, type UserQnaDetailParams, type UserOpenApiDetailParams, type UserOpenApiDeleteParams, type UserQnaDeleteParams } from '@iitp-dabt/common';
 
 const router = express.Router();
 
@@ -37,7 +37,7 @@ router.get(API_URLS.USER.QNA.LIST, ...routerMiddleware.publicOptional, getQnaLis
 router.get(API_URLS.USER.QNA.HOME, ...routerMiddleware.publicOptional, getQnaHomeForUser);
 router.get('/qna/:qnaId(\\d+)', ...routerMiddleware.publicOptional, getQnaDetailForUser as any);
 router.post(API_URLS.USER.QNA.CREATE, ...routerMiddleware.user, createQnaForUser);
-router.delete(API_URLS.USER.QNA.DETAIL, ...routerMiddleware.user, deleteQnaForUser as any);
+router.delete<UserQnaDeleteParams>(API_URLS.USER.QNA.DELETE, ...routerMiddleware.user, deleteQnaForUser as any);
 
 // OpenAPI 관련
 router.get(API_URLS.USER.OPEN_API.LIST, ...routerMiddleware.user, getUserOpenApiList);

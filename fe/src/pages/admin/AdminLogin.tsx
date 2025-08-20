@@ -26,7 +26,15 @@ export default function AdminLogin() {
       // handleApiResponse를 사용하여 에러 코드별 자동 처리
       handleApiResponse(res, 
         () => {
-          // 관리자 로그인 성공 시 관리자 대시보드로 이동
+          // 관리자 로그인 성공 시 이전 위치 복구 후 대시보드
+          try {
+            const saved = sessionStorage.getItem('returnTo');
+            if (saved) {
+              sessionStorage.removeItem('returnTo');
+              window.location.href = saved;
+              return;
+            }
+          } catch {}
           window.location.href = ROUTES.ADMIN.DASHBOARD;
         },
         (errorMessage) => {

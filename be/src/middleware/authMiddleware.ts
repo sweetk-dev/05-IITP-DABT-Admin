@@ -5,6 +5,7 @@ import { ErrorCode } from '@iitp-dabt/common';
 import { sendError } from '../utils/errorHandler';
 import { createLog } from '../repositories/sysLogUserAccessRepository';
 import { appLogger } from '../utils/logger';
+import { generateAccessToken } from '../utils/jwt';
 
 interface JwtPayload {
   userId: number;
@@ -38,6 +39,24 @@ export const authMiddleware: RequestHandler<any, any, any, any> = async (req, re
         userType: decoded.userType,
         actorTag: `${decoded.userType}:${decoded.userId}`
       };
+
+      // Sliding-session: Access Token 만료 임박 시 신규 토큰 발급 후 헤더로 전달
+      try {
+        const nowSec = Math.floor(Date.now() / 1000);
+        const timeLeft = (decoded.exp || 0) - nowSec;
+        const REFRESH_THRESHOLD_SEC = 120; // 2분 미만 남으면 재발급
+        if (timeLeft > 0 && timeLeft <= REFRESH_THRESHOLD_SEC) {
+          const newAccess = generateAccessToken({ userId: decoded.userId, userType: decoded.userType });
+          res.setHeader('X-New-Access-Token', newAccess);
+          res.setHeader('X-Token-Refreshed', 'true');
+          // FE가 읽을 수 있도록 CORS 노출 헤더 설정
+          const expose = (res.getHeader('Access-Control-Expose-Headers') as string | undefined) || '';
+          const merged = Array.from(new Set([...expose.split(',').map(s=>s.trim()).filter(Boolean), 'X-New-Access-Token', 'X-Token-Refreshed']));
+          res.setHeader('Access-Control-Expose-Headers', merged.join(', '));
+        }
+      } catch (e) {
+        appLogger.warn('Sliding token refresh failed', { error: e });
+      }
 
       next();
     } catch (jwtError) {

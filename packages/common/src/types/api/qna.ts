@@ -13,6 +13,8 @@ export interface UserQnaItem {
   createdAt: string;
   answeredAt?: string;
   hitCnt?: number;
+  // 클라이언트 UX를 위한 소유 여부 표시 (민감정보(userId) 노출 없이)
+  isMine?: boolean;
 }
 
 // 관리자용 Q&A 아이템 (전체 정보)

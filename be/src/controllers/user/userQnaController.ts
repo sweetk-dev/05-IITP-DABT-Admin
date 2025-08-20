@@ -147,3 +147,26 @@ export const createQnaForUser = async (req: Request<{}, {}, UserQnaCreateReq>, r
     sendError(res, ErrorCode.QNA_CREATE_FAILED);
   }
 }; 
+
+/**
+ * 사용자 Q&A 삭제
+ * API: DELETE /api/user/qna/:qnaId
+ * 매핑: USER_API_MAPPING[`DELETE ${API_URLS.USER.QNA.DETAIL}`]
+ */
+export const deleteQnaForUser = async (req: Request<UserQnaDetailParams>, res: Response) => {
+  try {
+    logApiCall('DELETE', API_URLS.USER.QNA.DETAIL, USER_API_MAPPING as any, '사용자 Q&A 삭제');
+    const userId = extractUserIdFromRequest(req);
+    const { qnaId } = req.params;
+    if (!userId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+    const keyId = parseInt(qnaId);
+    const svc = await import('../../services/user/userQnaService');
+    await svc.deleteUserQna(userId, keyId);
+    sendSuccess(res, undefined, undefined, 'USER_QNA_DELETED', { userId, qnaId: keyId });
+  } catch (error) {
+    appLogger.error('사용자 Q&A 삭제 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });
+    sendError(res, ErrorCode.QNA_DELETE_FAILED);
+  }
+};

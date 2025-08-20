@@ -1,7 +1,7 @@
 import express from 'express';
 import { checkEmail, register, getProfile, updateProfile, changePassword } from '../controllers/user/userController';
 import { getFaqListForUser, getFaqDetailForUser, getFaqHomeForUser } from '../controllers/user/userFaqController';
-import { getQnaListForUser, getQnaDetailForUser, createQnaForUser, getQnaHomeForUser } from '../controllers/user/userQnaController';
+import { getQnaListForUser, getQnaDetailForUser, createQnaForUser, getQnaHomeForUser, deleteQnaForUser } from '../controllers/user/userQnaController';
 import { getNoticeListForUser, getNoticeDetailForUser, getNoticeHomeForUser } from '../controllers/user/userNoticeController';
 import { 
   getUserOpenApiList, 
@@ -37,6 +37,7 @@ router.get(API_URLS.USER.QNA.LIST, ...routerMiddleware.publicOptional, getQnaLis
 router.get(API_URLS.USER.QNA.HOME, ...routerMiddleware.publicOptional, getQnaHomeForUser);
 router.get('/qna/:qnaId(\\d+)', ...routerMiddleware.publicOptional, getQnaDetailForUser as any);
 router.post(API_URLS.USER.QNA.CREATE, ...routerMiddleware.user, createQnaForUser);
+router.delete(API_URLS.USER.QNA.DETAIL, ...routerMiddleware.user, deleteQnaForUser as any);
 
 // OpenAPI 관련
 router.get(API_URLS.USER.OPEN_API.LIST, ...routerMiddleware.user, getUserOpenApiList);

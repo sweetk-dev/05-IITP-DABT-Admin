@@ -21,6 +21,8 @@ import { PAGINATION } from '../../constants/pagination';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
+import CommonDialog from '../../components/CommonDialog';
+import { deleteUserQna } from '../../api';
 // import { getThemeColors } from '../../theme';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
@@ -41,6 +43,8 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 	const [qnaDetails, setQnaDetails] = useState<Record<number, UserQnaDetailRes>>({});
 	const { query } = useQuerySync({ qnaId: '' });
 	const [pendingExpandId, setPendingExpandId] = useState<number | null>(null);
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [targetDeleteId, setTargetDeleteId] = useState<number | null>(null);
 	// QnA 유형 공통코드 로드 (라벨 표시용)
 	const { data: qnaTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('qna_type'), autoFetch: true });
 	
@@ -97,6 +101,29 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 			});
 		} catch (err) {
 			console.error('QnA 상세 정보 로드 실패:', err);
+		}
+	};
+
+	const onRequestDelete = (qnaId: number) => {
+		setTargetDeleteId(qnaId);
+		setConfirmOpen(true);
+	};
+
+	const onConfirmDelete = async () => {
+		if (!targetDeleteId) { setConfirmOpen(false); return; }
+		try {
+			await deleteUserQna(targetDeleteId);
+			setConfirmOpen(false);
+			setTargetDeleteId(null);
+			// 삭제 후 목록 새로고침: 현재 페이지 그대로 유지
+			await getUserQnaList({ page: pagination.currentPage, limit: pagination.pageSize, mineOnly: true } as any);
+			// 간단히 리프레시 위해 setExpandedQna도 닫음
+			setExpandedQna(null);
+			// qnaList는 useDataFetching 관리이므로, 간단히 페이지를 트리거
+			pagination.handlePageChange(pagination.currentPage);
+		} catch (e) {
+			setConfirmOpen(false);
+			setTargetDeleteId(null);
 		}
 	};
 
@@ -236,6 +263,9 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 															)}
 														</>
 													)}
+													<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
+														<ThemedButton variant="outlined" size="small" onClick={() => onRequestDelete(qna.qnaId)}>삭제</ThemedButton>
+													</Box>
 												</Box>
 											</AccordionDetails>
 										</Accordion>
@@ -260,6 +290,16 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 					</CardContent>
 				)}
 			</ThemedCard>
+			<CommonDialog
+				open={confirmOpen}
+				title="문의 삭제"
+				message="이 문의를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다."
+				onClose={() => { setConfirmOpen(false); setTargetDeleteId(null); }}
+				onConfirm={onConfirmDelete}
+				showCancel
+				confirmText="삭제"
+				cancelText="취소"
+			/>
 		</Box>
 	);
 }; 

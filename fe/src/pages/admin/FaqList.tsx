@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Add as AddIcon } from '@mui/icons-material';
-import { Box, CardContent, Typography, Stack, Chip } from '@mui/material';
+import { Box, CardContent, Stack, Chip } from '@mui/material';
+// total handled by ListScaffold
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-import ThemedCard from '../../components/common/ThemedCard';
+// card/pagination handled by ListScaffold
 import ThemedButton from '../../components/common/ThemedButton';
-import Pagination from '../../components/common/Pagination';
+// pagination handled by ListScaffold
 import { SPACING } from '../../constants/spacing';
 import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getAdminFaqList, deleteAdminFaq, getCommonCodesByGroupId } from '../../api';
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import { useQuerySync } from '../../hooks/useQuerySync';
+import ListScaffold from '../../components/common/ListScaffold';
 
 export default function AdminFaqList() {
   const navigate = useNavigate();
@@ -97,34 +99,30 @@ export default function AdminFaqList() {
         ]}
       />
 
-      <ThemedCard id="admin-faq-list-card">
+      <ListScaffold
+        title=""
+        total={(data as any)?.total}
+        loading={isLoading}
+        errorText={isError ? '목록을 불러오는 중 오류가 발생했습니다.' : ''}
+        emptyText={isEmpty ? '표시할 항목이 없습니다.' : ''}
+        pagination={{ page, totalPages, onPageChange: (p)=>{ setPage(p); setQuery({ page: p, limit, search, faqType, sort }, { replace: true }); }, pageSize: limit, onPageSizeChange: (s)=>{ setLimit(s); setPage(1); setQuery({ page: 1, limit: s, search, faqType, sort }, { replace: true }); } }}
+      >
         <CardContent>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mb: 1 }}>
             <ThemedButton variant="outlined" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
           </Stack>
-          {isLoading ? (
-            <Typography variant="body2">불러오는 중...</Typography>
-          ) : isError ? (
-            <Typography variant="body2" color="error.main">목록을 불러오는 중 오류가 발생했습니다.</Typography>
-          ) : (
-            <DataTable
-              id="admin-faq-table"
-              columns={columns}
-              rows={items}
-              getRowId={(r)=>r.faqId}
-              selectedIds={selected}
-              onToggleRow={(id)=>toggleRow(id as number)}
-              onToggleAll={toggleAll}
-              emptyText={isEmpty ? '표시할 항목이 없습니다.' : undefined}
-            />
-          )}
-          {totalPages > 1 && (
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-              <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p)=>{ setPage(p); setQuery({ page: p, limit, search, faqType, sort }, { replace: true }); }} pageSize={limit} onPageSizeChange={(s)=>{ setLimit(s); setPage(1); setQuery({ page: 1, limit: s, search, faqType, sort }, { replace: true }); }} />
-            </Box>
-          )}
+          <DataTable
+            id="admin-faq-table"
+            columns={columns}
+            rows={items}
+            getRowId={(r)=>r.faqId}
+            selectedIds={selected}
+            onToggleRow={(id)=>toggleRow(id as number)}
+            onToggleAll={toggleAll}
+            emptyText={isEmpty ? '표시할 항목이 없습니다.' : undefined}
+          />
         </CardContent>
-      </ThemedCard>
+      </ListScaffold>
     </Box>
   );
 }

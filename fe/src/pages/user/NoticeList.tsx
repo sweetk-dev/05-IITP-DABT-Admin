@@ -2,19 +2,12 @@ import { useEffect } from 'react';
 import { Box, Typography, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import ThemedCard from '../../components/common/ThemedCard';
-// import PageTitle from '../components/common/PageTitle';
-// import ThemedButton from '../components/common/ThemedButton';
-import EmptyState from '../../components/common/EmptyState';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import Pagination from '../../components/common/Pagination';
-// import { ArrowBack } from '@mui/icons-material';
+import ListScaffold from '../../components/common/ListScaffold';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { getUserNoticeList } from '../../api';
-import ListHeader from '../../components/common/ListHeader';
 import ListItemCard from '../../components/common/ListItemCard';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
@@ -63,8 +56,9 @@ export default function NoticeList() {
   return (
     <Box id="notice-list-page" sx={{ minHeight: '100vh', background: colors.background, py: SPACING.LARGE }}>
       <Box id="notice-list-container" sx={{ mx: 'auto', px: { xs: SPACING.MEDIUM, md: SPACING.LARGE } }}>
-        {/* 헤더 */}
-        <ListHeader
+        {errorHandler.InlineError}
+
+        <ListScaffold
           title="공지사항"
           onBack={() => navigate('/')}
           filters={[{
@@ -77,49 +71,27 @@ export default function NoticeList() {
             ],
             onChange: (v: string) => setQuery({ type: v || '', page: 1 })
           }]}
-          totalCount={noticeData?.total}
-        />
-
-        {errorHandler.InlineError}
-
-        {/* 공지사항 목록 */}
-        <ThemedCard id="notice-list-card">
-          {isLoading ? (
-            <Box id="notice-list-loading" sx={{ position: 'relative', minHeight: 400 }}>
-              <LoadingSpinner loading={true} />
-            </Box>
-          ) : isError ? (
-            <EmptyState message="공지사항을 불러오는 중 오류가 발생했습니다." />
-          ) : isEmpty ? (
-            <EmptyState message="등록된 공지사항이 없습니다." />
-          ) : (
-            <>
-              <Stack id="notice-list-stack" spacing={SPACING.MEDIUM}>
-                {noticeData?.items.map((notice: NoticeItem) => (
-                  <ListItemCard id={`notice-item-${notice.noticeId}`} key={notice.noticeId} onClick={() => handleNoticeClick(notice.noticeId)}>
-                    <Box id={`notice-item-header-${notice.noticeId}`} sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
-                      <Chip label={getNoticeTypeLabel(notice.noticeType)} color={getNoticeTypeColor(notice.noticeType) as any} size="small" sx={{ mr: SPACING.MEDIUM }} />
-                      {notice.pinnedYn === 'Y' && <Chip label="고정" color="warning" size="small" sx={{ mr: SPACING.MEDIUM }} />}
-                      <Typography id={`notice-item-date-${notice.noticeId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto' }}>{formatDate(notice.postedAt)}</Typography>
-                    </Box>
-                    <Typography id={`notice-item-title-${notice.noticeId}`} variant="subtitle1" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.SMALL }}>{notice.title}</Typography>
-                    <Typography id={`notice-item-content-${notice.noticeId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }}>{notice.content}</Typography>
-                  </ListItemCard>
-                ))}
-              </Stack>
-
-              {noticeData && noticeData.totalPages > 0 && (
-                <Pagination
-                  currentPage={pagination.currentPage}
-                  totalPages={noticeData.totalPages}
-                  onPageChange={handlePageChange}
-                  pageSize={pagination.pageSize}
-                  onPageSizeChange={(size) => { pagination.handlePageSizeChange(size); setQuery({ limit: size, page: 1 }); }}
-                />
-              )}
-            </>
-          )}
-        </ThemedCard>
+          total={noticeData?.total}
+          loading={isLoading}
+          errorText={isError ? '공지사항을 불러오는 중 오류가 발생했습니다.' : ''}
+          emptyText={isEmpty ? '등록된 공지사항이 없습니다.' : ''}
+          pagination={{ page: pagination.currentPage, totalPages: noticeData?.totalPages || 0, onPageChange: handlePageChange, pageSize: pagination.pageSize, onPageSizeChange: (size)=>{ pagination.handlePageSizeChange(size); setQuery({ limit: size, page: 1 }); } }}
+          wrapInCard={false}
+        >
+          <Stack id="notice-list-stack" spacing={SPACING.MEDIUM}>
+            {noticeData?.items.map((notice: NoticeItem) => (
+              <ListItemCard id={`notice-item-${notice.noticeId}`} key={notice.noticeId} onClick={() => handleNoticeClick(notice.noticeId)}>
+                <Box id={`notice-item-header-${notice.noticeId}`} sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
+                  <Chip label={getNoticeTypeLabel(notice.noticeType)} color={getNoticeTypeColor(notice.noticeType) as any} size="small" sx={{ mr: SPACING.MEDIUM }} />
+                  {notice.pinnedYn === 'Y' && <Chip label="고정" color="warning" size="small" sx={{ mr: SPACING.MEDIUM }} />}
+                  <Typography id={`notice-item-date-${notice.noticeId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto' }}>{formatDate(notice.postedAt)}</Typography>
+                </Box>
+                <Typography id={`notice-item-title-${notice.noticeId}`} variant="subtitle1" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.SMALL }}>{notice.title}</Typography>
+                <Typography id={`notice-item-content-${notice.noticeId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }}>{notice.content}</Typography>
+              </ListItemCard>
+            ))}
+          </Stack>
+        </ListScaffold>
       </Box>
     </Box>
   );

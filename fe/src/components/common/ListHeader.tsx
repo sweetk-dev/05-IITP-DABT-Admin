@@ -13,9 +13,10 @@ interface ListHeaderProps {
   onSearchChange?: (v: string) => void;
   filters?: Array<{ label: string; value: string; options: FilterOption[]; onChange: (v: string) => void }>;
   totalCount?: number;
+  showTotalInHeader?: boolean; // default true
 }
 
-export default function ListHeader({ title, onBack, searchPlaceholder, searchValue, onSearchChange, filters = [], totalCount }: ListHeaderProps) {
+export default function ListHeader({ title, onBack, searchPlaceholder, searchValue, onSearchChange, filters = [], totalCount, showTotalInHeader = true }: ListHeaderProps) {
   const theme = useTheme();
   return (
     <Box sx={{ position: 'sticky', top: 0, zIndex: 1, bgcolor: 'background.default', mb: 2, borderBottom: `1px solid ${theme.palette.divider}`, height: { xs: 64, md: 72 } }}>
@@ -31,7 +32,7 @@ export default function ListHeader({ title, onBack, searchPlaceholder, searchVal
         <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography variant="h6" fontWeight={800} align="center" sx={{ fontSize: { xs: 20, md: 24 }, lineHeight: 1.2 }}>
             {title}
-            {typeof totalCount === 'number' && (
+            {showTotalInHeader && typeof totalCount === 'number' && (
               <Chip label={`총 ${totalCount.toLocaleString()}건`} size="small" color="default" sx={{ ml: 1 }} />
             )}
           </Typography>

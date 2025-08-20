@@ -1,6 +1,6 @@
 import { Chip, Box } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LockIcon from '@mui/icons-material/Lock';
 
 type StatusKind =
   | 'answered'
@@ -30,22 +30,9 @@ export default function StatusChip({ id, kind, label, size = 'small' }: StatusCh
         return { color: undefined, text: label || '완료', sx: { bgcolor: bg, color: fg } } as const;
       }
       case 'private': {
-        // 비공개: 텍스트 없이 자물쇠 아이콘만 표시
-        const bg = alpha(theme.palette.info.main, 0.15);
-        const fg = theme.palette.info.dark;
-        return {
-          color: undefined,
-          text: '',
-          sx: {
-            bgcolor: bg,
-            color: fg,
-            border: '1px solid',
-            borderColor: theme.palette.info.main,
-            px: 0.5,
-            '& .MuiChip-label': { display: 'none' }
-          },
-          icon: <LockOutlinedIcon fontSize="small" />
-        } as const;
+        // 비공개: 아이콘만 (이전 화면에 적용되었던 디자인과 동일 톤)
+        // 실제 렌더는 아래 kind === 'private' 분기에서 처리
+        return { color: undefined, text: '' } as const;
       }
       case 'pending': {
         // 대비 강화: 연한 배경(메인색 15% 투명) + 진한 텍스트 + 보더
@@ -70,7 +57,7 @@ export default function StatusChip({ id, kind, label, size = 'small' }: StatusCh
     }
   };
   if (kind === 'private') {
-    // 아이콘만, Chip과 시각적 높이/정렬 맞춤
+    // 아이콘만, Chip과 시각적 높이/정렬 맞춤 (Lock filled, 살짝 강한 대비와 불투명도)
     return (
       <Box component="span" sx={{
         display: 'inline-flex',
@@ -80,7 +67,7 @@ export default function StatusChip({ id, kind, label, size = 'small' }: StatusCh
         verticalAlign: 'middle',
         mt: '1px',
       }}>
-        <LockOutlinedIcon sx={{ fontSize: 20, color: theme.palette.text.secondary }} />
+        <LockIcon sx={{ fontSize: 18, color: theme.palette.text.secondary, opacity: 0.85 }} />
       </Box>
     );
   }

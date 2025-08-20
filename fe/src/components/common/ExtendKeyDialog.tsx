@@ -6,26 +6,27 @@ import { useTheme, alpha } from '@mui/material/styles';
 interface ExtendKeyDialogProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (days: number) => void;
+  onConfirm: (range: { startDt: string; endDt: string }) => void;
+  // 초기 기간 (기존 기간)
+  initialStartDt?: string;
+  initialEndDt?: string;
   defaultDays?: number;
   title?: string;
 }
 
-export default function ExtendKeyDialog({ open, onClose, onConfirm, defaultDays = 90, title = '인증키 기간 연장' }: ExtendKeyDialogProps) {
+export default function ExtendKeyDialog({ open, onClose, onConfirm, initialStartDt, initialEndDt, defaultDays = 90, title = '인증키 기간 연장' }: ExtendKeyDialogProps) {
   const muiTheme = useTheme();
   const [startDate, setStartDate] = React.useState<string>('');
   const [endDate, setEndDate] = React.useState<string>('');
-  const [days, setDays] = React.useState<number>(defaultDays);
+  // days state removed; we compute validity from dates
 
   React.useEffect(() => {
-    const today = new Date();
-    const end = new Date(today.getTime() + defaultDays * 24 * 60 * 60 * 1000);
-    const sd = today.toISOString().split('T')[0];
-    const ed = end.toISOString().split('T')[0];
+    const sd = (initialStartDt && initialStartDt.substring(0,10)) || new Date().toISOString().split('T')[0];
+    const baseEnd = initialEndDt ? new Date(initialEndDt) : new Date(new Date().getTime() + defaultDays * 24 * 60 * 60 * 1000);
+    const ed = baseEnd.toISOString().split('T')[0];
     setStartDate(sd);
     setEndDate(ed);
-    setDays(defaultDays);
-  }, [defaultDays, open]);
+  }, [defaultDays, open, initialStartDt, initialEndDt]);
 
   const computeDays = (s: string, e: string) => {
     try {
@@ -39,6 +40,7 @@ export default function ExtendKeyDialog({ open, onClose, onConfirm, defaultDays 
   };
 
   const isValid = Boolean(startDate && endDate && computeDays(startDate, endDate) > 0);
+  const isUnchanged = (startDate === (initialStartDt || '') && endDate === (initialEndDt || ''));
 
   return (
     <Dialog
@@ -63,7 +65,7 @@ export default function ExtendKeyDialog({ open, onClose, onConfirm, defaultDays 
               aria-label="시작일"
               type="date"
               value={startDate}
-              onChange={(e)=>{ setStartDate(e.target.value); setDays(computeDays(e.target.value, endDate)); }}
+              onChange={(e)=>{ setStartDate(e.target.value); }}
               sx={{ width: '100%' }}
             />
           </Box>
@@ -76,29 +78,27 @@ export default function ExtendKeyDialog({ open, onClose, onConfirm, defaultDays 
               aria-label="종료일"
               type="date"
               value={endDate}
-              onChange={(e)=>{ setEndDate(e.target.value); setDays(computeDays(startDate, e.target.value)); }}
+              onChange={(e)=>{ setEndDate(e.target.value); }}
               sx={{ width: '100%' }}
             />
           </Box>
         </Stack>
         <Stack direction="row" spacing={1}>
           <ThemedButton variant="outlined" onClick={() => {
-            const today = new Date();
-            const end = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
-            const sd = today.toISOString().split('T')[0];
+            const base = initialEndDt ? new Date(initialEndDt) : new Date();
+            const end = new Date(base.getTime() + 90 * 24 * 60 * 60 * 1000);
+            const sd = (initialStartDt && initialStartDt.substring(0,10)) || startDate || new Date().toISOString().split('T')[0];
             const ed = end.toISOString().split('T')[0];
             setStartDate(sd);
             setEndDate(ed);
-            setDays(90);
           }}>90일 설정</ThemedButton>
           <ThemedButton variant="outlined" onClick={() => {
-            const today = new Date();
-            const end = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000);
-            const sd = today.toISOString().split('T')[0];
+            const base = initialEndDt ? new Date(initialEndDt) : new Date();
+            const end = new Date(base.getTime() + 365 * 24 * 60 * 60 * 1000);
+            const sd = (initialStartDt && initialStartDt.substring(0,10)) || startDate || new Date().toISOString().split('T')[0];
             const ed = end.toISOString().split('T')[0];
             setStartDate(sd);
             setEndDate(ed);
-            setDays(365);
           }}>1년 설정</ThemedButton>
         </Stack>
       </DialogContent>
@@ -106,7 +106,7 @@ export default function ExtendKeyDialog({ open, onClose, onConfirm, defaultDays 
         <ThemedButton variant="text" onClick={onClose} buttonSize="cta" sx={{ minHeight: 48, px: 3 }}>
           취소
         </ThemedButton>
-        <ThemedButton variant="primary" onClick={() => onConfirm(days)} disabled={!isValid} buttonSize="cta" sx={{ minHeight: 48, px: 3 }}>
+        <ThemedButton variant="primary" onClick={() => onConfirm({ startDt: startDate, endDt: endDate })} disabled={!isValid || isUnchanged} buttonSize="cta" sx={{ minHeight: 48, px: 3 }}>
           연장
         </ThemedButton>
       </DialogActions>

@@ -26,6 +26,7 @@ function shouldShowPopup(errorCode?: number): boolean {
     ErrorCode.UNAUTHORIZED,
     ErrorCode.TOKEN_EXPIRED,
     ErrorCode.INVALID_TOKEN,
+    ErrorCode.TOKEN_REQUIRED,
     ErrorCode.ACCESS_DENIED,
     ErrorCode.LOGIN_FAILED,
     ErrorCode.NETWORK_ERROR,
@@ -42,7 +43,8 @@ function shouldAutoLogout(errorCode?: number): boolean {
   const autoLogoutCodes = [
     ErrorCode.TOKEN_EXPIRED,
     ErrorCode.INVALID_TOKEN,
-    ErrorCode.UNAUTHORIZED
+    ErrorCode.UNAUTHORIZED,
+    ErrorCode.TOKEN_REQUIRED
   ];
   
   return autoLogoutCodes.includes(errorCode);
@@ -59,6 +61,7 @@ function getRedirectUrl(errorCode?: number): string | undefined {
     case ErrorCode.TOKEN_EXPIRED:
     case ErrorCode.INVALID_TOKEN:
     case ErrorCode.UNAUTHORIZED:
+    case ErrorCode.TOKEN_REQUIRED:
       // 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
       if (userType === 'A') {
         return '/admin/login';

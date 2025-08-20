@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import AppBar from './AppBar';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
+import { ToastProvider } from './ToastProvider';
 import { createAppTheme } from '../theme/mui';
 import { isAuthenticated, validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
 import { ROUTES } from '../routes';
@@ -42,21 +43,29 @@ export default function Layout() {
 	});
 	
 	useEffect(() => {
+		// 토큰/유저정보 변경 또는 라우트 이동 시 토큰 정리
 		validateAndCleanTokens();
-	}, []);
+	}, [location.pathname]);
 
-	let appBarType: 'user' | 'public' | 'auth' | 'admin-login' | 'admin' = 'user';
+	let appBarType: 'user' | 'public' | 'auth' | 'admin-login' | 'admin';
 
-	if (location.pathname === ROUTES.ADMIN.LOGIN) {
-		appBarType = 'admin-login';
-	} else if (location.pathname.startsWith('/admin') && location.pathname !== ROUTES.ADMIN.LOGIN) {
-		appBarType = 'admin';
+	const isAdminPath = location.pathname.startsWith('/admin');
+
+	if (isAdminPath) {
+		// 관리자 경로: 로그인 여부에 따라 상단바 분기
+		appBarType = isAdminLoggedIn ? 'admin' : 'admin-login';
 	} else if (location.pathname === ROUTES.PUBLIC.LOGIN || location.pathname === ROUTES.PUBLIC.REGISTER) {
+		// 공개 로그인/회원가입 페이지
 		appBarType = 'auth';
-	} else if (PUBLIC_PAGES.some(page => location.pathname === page || location.pathname.startsWith(page + '/')) && !isLoggedIn) {
+	} else if (isUserLoggedIn) {
+		// 일반 사용자 로그인 상태
+		appBarType = 'user';
+	} else if (PUBLIC_PAGES.some(page => location.pathname === page || location.pathname.startsWith(page + '/'))) {
+		// 공개 페이지들(비로그인 시)
 		appBarType = 'public';
 	} else {
-		appBarType = 'user';
+		// 기본값: 공개
+		appBarType = 'public';
 	}
 
 	console.log('[Layout] AppBar type determined:', appBarType);
@@ -72,6 +81,7 @@ export default function Layout() {
 			<CssBaseline />
 			<Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
 				<AppBar type={appBarType} />
+				<ToastProvider>
 				<Box
 					component="main"
 					id="main-content"
@@ -86,6 +96,7 @@ export default function Layout() {
 						<Outlet />
 					</Container>
 				</Box>
+				</ToastProvider>
 				<Box ref={(el: HTMLDivElement | null) => {
 					if (!el) return;
 					const root = document.documentElement;

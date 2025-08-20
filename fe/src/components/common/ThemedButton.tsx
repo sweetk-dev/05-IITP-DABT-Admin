@@ -9,6 +9,11 @@ interface ThemedButtonProps extends Omit<ButtonProps, 'variant'> {
   theme?: 'user' | 'admin';
   // Prominent size for key actions like 저장/취소/확인/등록
   buttonSize?: 'default' | 'cta';
+  // Allow anchor/Link props to pass through safely
+  target?: string;
+  rel?: string;
+  to?: string;
+  href?: string;
 }
 
 export default function ThemedButton({ 

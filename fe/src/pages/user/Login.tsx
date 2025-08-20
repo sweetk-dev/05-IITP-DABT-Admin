@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import LoginForm from '../../components/LoginForm';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
@@ -13,6 +14,8 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const theme = 'user' as const;
   const colors = getThemeColors(theme);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // 🔽 로그인 처리 콜백
   const handleLogin = async (email: string, password: string) => {
@@ -25,8 +28,12 @@ export default function Login() {
       // handleApiResponse를 사용하여 에러 코드별 자동 처리
       handleApiResponse(res, 
         () => {
-          // 로그인 성공 시 대시보드로 이동
-          window.location.href = ROUTES.USER.DASHBOARD;
+          // 로그인 성공 시 이전 페이지(from)로 이동. 문자열 또는 Location 객체 모두 지원
+          const fromState = (location.state as any)?.from;
+          const targetPath = typeof fromState === 'string' 
+            ? fromState 
+            : (fromState?.pathname as string | undefined);
+          navigate(targetPath || ROUTES.USER.DASHBOARD, { replace: true });
         },
         (errorMessage) => {
           setError(errorMessage);

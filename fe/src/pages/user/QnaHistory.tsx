@@ -27,6 +27,7 @@ import { usePagination } from '../../hooks/usePagination';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import type { UserQnaDetailRes } from '@iitp-dabt/common';
 import EmptyState from '../../components/common/EmptyState';
+import StatusChip from '../../components/common/StatusChip';
 
 interface QnaHistoryProps {
 	id?: string;
@@ -56,7 +57,8 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 	} = useDataFetching({
 		fetchFunction: () => getUserQnaList({
 			page: pagination.currentPage,
-			limit: pagination.pageSize
+			limit: pagination.pageSize,
+			mineOnly: true
 		}),
 		dependencies: [pagination.currentPage, pagination.pageSize],
 		autoFetch: true
@@ -149,9 +151,12 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 										<ListItemText
 											primary={
 												<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-													<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-														{qna.title}
-													</Typography>
+													<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+														{qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
+														<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+															{qna.title}
+														</Typography>
+													</Box>
 													<Chip
 														label={qna.status === 'answered' ? '답변완료' : '답변대기'}
 														color={qna.status === 'answered' ? 'success' : 'warning'}

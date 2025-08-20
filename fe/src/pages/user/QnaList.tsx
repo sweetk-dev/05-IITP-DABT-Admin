@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, Stack, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Add as AddIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
+import StatusChip from '../../components/common/StatusChip';
 import ThemedButton from '../../components/common/ThemedButton';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../routes';
 import ThemedCard from '../../components/common/ThemedCard';
 // import PageTitle from '../components/common/PageTitle';
 // import ThemedButton from '../components/common/ThemedButton';
@@ -75,7 +77,14 @@ export default function QnaList() {
 
   const handlePageChange = (page: number) => { pagination.handlePageChange(page); setQuery({ page }, { replace: true }); };
   const handleQnaTypeChange = (newQnaType: string) => { setQnaType(newQnaType); setQuery({ qnaType: newQnaType, page: 1 }); pagination.handlePageChange(1); };
-  const handleQnaClick = (qnaId: number) => { navigate(`/qna/${qnaId}`); };
+  const handleQnaClick = (qna: UserQnaItem) => {
+    const isSecret = qna.secretYn === 'Y';
+    const isLoggedIn = !!localStorage.getItem('accessToken');
+    if (isSecret && !isLoggedIn) {
+      return; // 비로그인 사용자는 비공개 상세 진입 차단
+    }
+    navigate(`/qna/${qna.qnaId}`);
+  };
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
   const getQnaTypeLabel = (type: string) => qnaTypeOptions.find(opt => opt.value === type)?.label ?? type;
@@ -85,10 +94,10 @@ export default function QnaList() {
     // 로그인 여부에 따라 분기: 미로그인 → 로그인 후 돌아오기
     const isLoggedIn = localStorage.getItem('accessToken');
     if (!isLoggedIn) {
-      navigate('/login', { state: { from: '/user/qna/create' } });
+      navigate(ROUTES.PUBLIC.LOGIN, { state: { from: ROUTES.USER.QNA_CREATE } });
       return;
     }
-    navigate('/user/qna/create');
+    navigate(ROUTES.USER.QNA_CREATE);
   };
 
   return (
@@ -149,17 +158,19 @@ export default function QnaList() {
             <>
               <Stack id="qna-list-stack" spacing={2}>
                 {qnaData?.items.map((qna: UserQnaItem) => (
-                  <Box id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna.qnaId)} sx={{ p: 3, borderRadius: 2, cursor: 'pointer', transition: 'all 0.2s ease-in-out', border: `1px solid ${colors.border}`, backgroundColor: 'transparent', '&:hover': { backgroundColor: `${colors.primary}15`, borderColor: colors.primary, transform: 'translateY(-1px)', boxShadow: `0 4px 12px ${colors.primary}20` } }}>
+                  <Box id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna)} sx={{ p: 3, borderRadius: 2, cursor: 'pointer', transition: 'all 0.2s ease-in-out', border: `1px solid ${colors.border}`, backgroundColor: 'transparent', '&:hover': { backgroundColor: `${colors.primary}15`, borderColor: colors.primary, transform: 'translateY(-1px)', boxShadow: `0 4px 12px ${colors.primary}20` } }}>
                     <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
-                      {/* 상태 → 비공개 → 유형 */}
+                      {/* 비공개 아이콘 (공개는 없음) */}
+                      {qna.secretYn === 'Y' && (
+                        <StatusChip kind="private" />
+                      )}
+                      {/* 상태 → 유형 */}
                       <Chip id={`qna-item-status-${qna.qnaId}`} label={qna.answeredYn === 'Y' ? '완료' : '대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} size="small" sx={{ mr: 1.5, mb: 1 }} />
                       {qna.secretYn === 'Y' && (
                         <span id={`qna-item-private-${qna.qnaId}`} style={{ marginRight: 8, marginBottom: 4 }}>
                           {/* 공통 상태 뱃지 사용: private */}
                           {/* inline import를 피하기 위해 심플 아이콘만 */}
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: 'middle', opacity: 0.7 }}>
-                            <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/><path d="M7 9V7a5 5 0 1 1 10 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2 0h6V7a3 3 0 1 0-6 0v2Z" fill="currentColor"/>
-                          </svg>
+                          {/* 기존 임시 아이콘 제거: 위 LockIcon으로 대체 */}
                         </span>
                       )}
                       <Chip id={`qna-item-type-${qna.qnaId}`} label={getQnaTypeLabel(qna.qnaType)} color="primary" size="small" sx={{ mr: 2, mb: 1 }} />

@@ -141,7 +141,7 @@ export async function extendAdminOpenApi(keyId: number, body: AdminOpenApiExtend
   const url = FULL_API_URLS.ADMIN.OPEN_API.EXTEND.replace(':keyId', keyId.toString());
   return apiFetch<AdminOpenApiExtendRes>(url, {
     method: 'POST',
-    body: JSON.stringify({ extensionDays: body.extensionDays })
+    body: JSON.stringify(body)
   });
 }
 

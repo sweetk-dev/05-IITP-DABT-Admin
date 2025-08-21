@@ -77,16 +77,6 @@ export const API_URLS = {
       UPDATE: '/notice/:noticeId',
       DELETE: '/notice/:noticeId',
     },
-    // Admin 계정 관리
-    ACCOUNT: {
-      LIST: '/accounts',
-      DETAIL: '/accounts/:adminId',
-      CREATE: '/accounts',
-      CHECK_EMAIL: '/accounts/email/check',
-      UPDATE: '/accounts/:adminId',
-      DELETE: '/accounts/:adminId',
-      PASSWORD_CHANGE: '/accounts/:adminId/password',
-    },
     // OpenAPI 인증키 관리
     OPEN_API: {
       LIST: '/openapi/keys',
@@ -96,7 +86,29 @@ export const API_URLS = {
       DELETE: '/openapi/keys/:keyId',
       EXTEND: '/openapi/keys/:keyId/extend',
       STATUS: '/openapi/status', 
-    }
+    },
+    // 운영자 계정 관리 (S-Admin 전용)
+    OPERATOR_ACCOUNT: {
+      LIST: '/operator-accounts',
+      DETAIL: '/operator-accounts/:adminId',
+      CREATE: '/operator-accounts',
+      UPDATE: '/operator-accounts/:adminId',
+      DELETE: '/operator-accounts/:adminId',
+      PASSWORD_CHANGE: '/operator-accounts/:adminId/password',
+      ROLE_UPDATE: '/operator-accounts/:adminId/role',
+      CHECK_EMAIL: '/operator-accounts/email/check',
+    },
+    // 사용자 계정 관리 (일반 Admin도 접근 가능)
+    USER_ACCOUNT: {
+      LIST: '/user-accounts',
+      DETAIL: '/user-accounts/:userId',
+      CREATE: '/user-accounts',
+      UPDATE: '/user-accounts/:userId',
+      DELETE: '/user-accounts/:userId',
+      PASSWORD_CHANGE: '/user-accounts/:userId/password',
+      STATUS_UPDATE: '/user-accounts/:userId/status',
+      CHECK_EMAIL: '/user-accounts/email/check',
+    },
   },
   
   // 공통
@@ -256,15 +268,6 @@ export const FULL_API_URLS = {
       UPDATE: getAdminUrl(API_URLS.ADMIN.NOTICE.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.NOTICE.DELETE),
     },
-    ACCOUNT: {
-      LIST: getAdminUrl(API_URLS.ADMIN.ACCOUNT.LIST),
-      DETAIL: getAdminUrl(API_URLS.ADMIN.ACCOUNT.DETAIL),
-      CREATE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.CREATE),
-      CHECK_EMAIL: getAdminUrl(API_URLS.ADMIN.ACCOUNT.CHECK_EMAIL),
-      UPDATE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.UPDATE),
-      DELETE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.DELETE),
-      PASSWORD_CHANGE: getAdminUrl(API_URLS.ADMIN.ACCOUNT.PASSWORD_CHANGE),
-    },
     OPEN_API: {
       LIST: getAdminUrl(API_URLS.ADMIN.OPEN_API.LIST),
       DETAIL: getAdminUrl(API_URLS.ADMIN.OPEN_API.DETAIL),
@@ -273,7 +276,29 @@ export const FULL_API_URLS = {
       DELETE: getAdminUrl(API_URLS.ADMIN.OPEN_API.DELETE),
       EXTEND: getAdminUrl(API_URLS.ADMIN.OPEN_API.EXTEND),
       STATUS: getAdminUrl(API_URLS.ADMIN.OPEN_API.STATUS),
-    }
+    },
+    // 운영자 계정 관리 (S-Admin 전용)
+    OPERATOR_ACCOUNT: {
+      LIST: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.LIST),
+      DETAIL: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.DETAIL),
+      CREATE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.CREATE),
+      UPDATE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.UPDATE),
+      DELETE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.DELETE),
+      PASSWORD_CHANGE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.PASSWORD_CHANGE),
+      ROLE_UPDATE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.ROLE_UPDATE),
+      CHECK_EMAIL: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.CHECK_EMAIL),
+    },
+    // 사용자 계정 관리 (일반 Admin도 접근 가능)
+    USER_ACCOUNT: {
+      LIST: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.LIST),
+      DETAIL: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.DETAIL),
+      CREATE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.CREATE),
+      UPDATE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.UPDATE),
+      DELETE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.DELETE),
+      PASSWORD_CHANGE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.PASSWORD_CHANGE),
+      STATUS_UPDATE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.STATUS_UPDATE),
+      CHECK_EMAIL: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.CHECK_EMAIL),
+    },
   },
   COMMON: {
     HEALTH_CHECK: getCommonUrl(API_URLS.COMMON.HEALTH_CHECK),

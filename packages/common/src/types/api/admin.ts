@@ -116,45 +116,6 @@ export const ADMIN_API_MAPPING = {
     description: '관리자 공지사항 삭제'
   },
   
-  // Admin 계정 관리
-  [`GET ${API_URLS.ADMIN.ACCOUNT.LIST}`]: {
-    query: 'AdminListReq',
-    res: 'AdminListRes',
-    description: '관리자 계정 목록 조회'
-  },
-  [`GET ${API_URLS.ADMIN.ACCOUNT.DETAIL}`]: {
-    params: 'AdminDetailReq',
-    res: 'AdminDetailRes',
-    description: '관리자 계정 상세 조회'
-  },
-  [`POST ${API_URLS.ADMIN.ACCOUNT.CREATE}`]: {
-    body: 'AdminCreateReq',
-    res: 'AdminCreateRes',
-    description: '관리자 계정 생성'
-  },
-  [`POST ${API_URLS.ADMIN.ACCOUNT.CHECK_EMAIL}`]: {
-    body: 'AdminCheckEmailReq',
-    res: 'AdminCheckEmailRes',
-    description: '관리자 계정 이메일 중복 체크'
-  },
-  [`PUT ${API_URLS.ADMIN.ACCOUNT.UPDATE}`]: {
-    params: 'AdminDetailReq',
-    body: 'AdminUpdateReq',
-    res: 'void',
-    description: '관리자 계정 업데이트'
-  },
-  [`DELETE ${API_URLS.ADMIN.ACCOUNT.DELETE}`]: {
-    params: 'AdminDetailReq',
-    res: 'void',
-    description: '관리자 계정 삭제'
-  },
-  [`PUT ${API_URLS.ADMIN.ACCOUNT.PASSWORD_CHANGE}`]: {
-    params: 'AdminDetailReq',
-    body: 'AdminPasswordChangeReq',
-    res: 'void',
-    description: '관리자 계정 비밀번호 변경'
-  },
-  
   // OpenAPI 관리
   [`GET ${API_URLS.ADMIN.OPEN_API.LIST}`]: {
     query: 'AdminOpenApiListQuery',
@@ -192,24 +153,98 @@ export const ADMIN_API_MAPPING = {
     // no params/query/body
     res: 'AdminOpenApiStatsRes',
     description: '관리자 OpenAPI 상태(통계) 조회'
+  },
+  
+  // 운영자 계정 관리 (S-Admin 전용)
+  [`GET ${API_URLS.ADMIN.OPERATOR_ACCOUNT.LIST}`]: {
+    query: 'OperatorAccountListQuery',
+    res: 'OperatorAccountListRes',
+    description: '운영자 계정 목록 조회'
+  },
+  [`GET ${API_URLS.ADMIN.OPERATOR_ACCOUNT.DETAIL}`]: {
+    params: 'OperatorAccountDetailParams',
+    res: 'OperatorAccountDetailRes',
+    description: '운영자 계정 상세 조회'
+  },
+  [`POST ${API_URLS.ADMIN.OPERATOR_ACCOUNT.CREATE}`]: {
+    body: 'OperatorAccountCreateReq',
+    res: 'OperatorAccountCreateRes',
+    description: '운영자 계정 생성'
+  },
+  [`PUT ${API_URLS.ADMIN.OPERATOR_ACCOUNT.UPDATE}`]: {
+    params: 'OperatorAccountUpdateParams',
+    body: 'OperatorAccountUpdateReq',
+    res: 'void',
+    description: '운영자 계정 업데이트'
+  },
+  [`DELETE ${API_URLS.ADMIN.OPERATOR_ACCOUNT.DELETE}`]: {
+    params: 'OperatorAccountDeleteParams',
+    res: 'void',
+    description: '운영자 계정 삭제'
+  },
+  [`PUT ${API_URLS.ADMIN.OPERATOR_ACCOUNT.PASSWORD_CHANGE}`]: {
+    params: 'OperatorAccountPasswordChangeParams',
+    body: 'OperatorAccountPasswordChangeReq',
+    res: 'void',
+    description: '운영자 계정 비밀번호 변경'
+  },
+  [`PUT ${API_URLS.ADMIN.OPERATOR_ACCOUNT.ROLE_UPDATE}`]: {
+    params: 'OperatorAccountRoleUpdateParams',
+    body: 'OperatorAccountRoleUpdateReq',
+    res: 'void',
+    description: '운영자 계정 역할 업데이트'
+  },
+  [`POST ${API_URLS.ADMIN.OPERATOR_ACCOUNT.CHECK_EMAIL}`]: {
+    body: 'OperatorAccountCheckEmailReq',
+    res: 'OperatorAccountCheckEmailRes',
+    description: '운영자 계정 이메일 중복 체크'
+  },
+  
+  // 사용자 계정 관리 (일반 Admin도 접근 가능)
+  [`GET ${API_URLS.ADMIN.USER_ACCOUNT.LIST}`]: {
+    query: 'UserAccountListQuery',
+    res: 'UserAccountListRes',
+    description: '사용자 계정 목록 조회'
+  },
+  [`GET ${API_URLS.ADMIN.USER_ACCOUNT.DETAIL}`]: {
+    params: 'UserAccountDetailParams',
+    res: 'UserAccountDetailRes',
+    description: '사용자 계정 상세 조회'
+  },
+  [`POST ${API_URLS.ADMIN.USER_ACCOUNT.CREATE}`]: {
+    body: 'UserAccountCreateReq',
+    res: 'UserAccountCreateRes',
+    description: '사용자 계정 생성'
+  },
+  [`PUT ${API_URLS.ADMIN.USER_ACCOUNT.UPDATE}`]: {
+    params: 'UserAccountUpdateParams',
+    body: 'UserAccountUpdateReq',
+    res: 'void',
+    description: '사용자 계정 업데이트'
+  },
+  [`DELETE ${API_URLS.ADMIN.USER_ACCOUNT.DELETE}`]: {
+    params: 'UserAccountDeleteParams',
+    res: 'void',
+    description: '사용자 계정 삭제'
+  },
+  [`PUT ${API_URLS.ADMIN.USER_ACCOUNT.PASSWORD_CHANGE}`]: {
+    params: 'UserAccountPasswordChangeParams',
+    body: 'UserAccountPasswordChangeReq',
+    res: 'void',
+    description: '사용자 계정 비밀번호 변경'
+  },
+  [`PUT ${API_URLS.ADMIN.USER_ACCOUNT.STATUS_UPDATE}`]: {
+    params: 'UserAccountStatusUpdateParams',
+    body: 'UserAccountStatusUpdateReq',
+    res: 'void',
+    description: '사용자 계정 상태 업데이트'
+  },
+  [`POST ${API_URLS.ADMIN.USER_ACCOUNT.CHECK_EMAIL}`]: {
+    body: 'UserAccountCheckEmailReq',
+    res: 'UserAccountCheckEmailRes',
+    description: '사용자 계정 이메일 중복 체크'
   }
 } as const;
-
-// Admin 계정 엔티티
-export interface Admin {
-  adminId: number;
-  loginId: string;
-  name: string;
-  roles: string;
-  affiliation?: string;
-  description?: string;
-  note?: string;
-  status: string;
-  delYn: string;
-  createdAt: string;
-  updatedAt?: string;
-  lastLoginAt?: string;
-}
 
 // Admin Profile 조회 (필요한 정보만)
 export interface AdminProfileRes {
@@ -237,87 +272,11 @@ export interface AdminPasswordChangeReq {
 
 // 비밀번호 변경 응답은 ApiResponse<void> 사용
 
-// Admin 계정 목록 조회
-export interface AdminListReq extends PaginationReq {
-  search?: string;
-  status?: string;
-  roles?: string;
-}
+// 계정 관련 타입들은 account.ts에서 import하여 사용
+export type {
+  OperatorAccount,
+  UserAccount
+} from './account.js';
 
-export interface AdminListRes extends PaginationRes<Admin> {
-  admins: Admin[];
-}
 
-// Admin 계정 상세 조회
-export interface AdminDetailReq {
-  adminId: string;
-}
 
-export interface AdminDetailRes {
-  admin: Admin;
-}
-
-// Admin 계정 생성
-export interface AdminCreateReq {
-  loginId: string;
-  password: string;
-  name: string;
-  roles: string;
-  affiliation?: string;
-  description?: string;
-  note?: string;
-  status?: string;
-}
-
-export interface AdminCreateRes {
-  adminId: number;
-}
-
-// Admin 계정 이메일 중복 체크
-export interface AdminCheckEmailReq {
-  loginId: string;
-}
-
-export interface AdminCheckEmailRes {
-  available: boolean;
-}
-
-// Admin 계정 수정
-export interface AdminUpdateReq {
-  name?: string;
-  roles?: string;
-  affiliation?: string;
-  description?: string;
-  note?: string;
-  status?: string;
-  updatedBy?: string;
-}
-
-// 계정 업데이트 응답은 ApiResponse<void> 사용
-
-// Admin 계정 삭제
-export interface AdminDeleteReq {
-  adminId: string;
-}
-
-// 계정 삭제 응답은 ApiResponse<void> 사용
-
-// Admin 계정 상태 변경
-export interface AdminStatusChangeReq {
-  status: string;
-  reason?: string;
-}
-
-// 계정 상태 변경 응답은 ApiResponse<void> 사용
-
-// Admin 계정 통계
-export interface AdminStatsRes {
-  totalAdmins: number;
-  activeAdmins: number;
-  inactiveAdmins: number;
-  lockedAdmins: number;
-  roleStats: Array<{
-    role: string;
-    count: number;
-  }>;
-} 

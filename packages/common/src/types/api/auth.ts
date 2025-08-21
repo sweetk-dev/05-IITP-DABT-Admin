@@ -51,6 +51,7 @@ export interface AdminLoginRes {
     adminId: number;
     name: string;
     role: string;
+    roleName: string; // 역할 이름 (코드 대신)
   };
 }
 

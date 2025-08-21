@@ -2,6 +2,8 @@ import { Box, Container } from '@mui/material';
 import { useLocation, Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import AppBar from './AppBar';
+import SideNav from './admin/SideNav';
+import AdminPageHeader from './admin/AdminPageHeader';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { ToastProvider } from './ToastProvider';
@@ -82,20 +84,42 @@ export default function Layout() {
 			<Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
 				<AppBar type={appBarType} />
 				<ToastProvider>
-				<Box
-					component="main"
-					id="main-content"
-					sx={{
-						flex: 1,
-					// Use a capped footer height to avoid over-shrinking content on tall screens before measurement settles
-					'--content-max-height': 'calc(100dvh - var(--header-height-px, 0px) - var(--admin-menu-height-px, 0px) - min(var(--footer-height-px, 0px), var(--footer-height-cap, 120px)))',
-						minHeight: 'calc(100dvh - var(--header-height-px, 64px) - var(--admin-menu-height-px, 0px) - var(--footer-height-px, 0px) + var(--main-height-offset, 0px))'
-					}}
-				>
-					<Container id="layout-content-container" maxWidth={false} sx={{ py: { xs: 2, md: 4 }, maxWidth: 'var(--content-max-width, 1600px)', mx: 'auto', minHeight: 'var(--content-max-height)' }}>
-						<Outlet />
-					</Container>
-				</Box>
+					{appBarType === 'admin' ? (
+						<Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
+							<SideNav />
+							<Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+								<AdminPageHeader />
+								<Box
+									component="main"
+									id="main-content"
+									sx={{
+										flex: 1,
+										'--content-max-height': 'calc(100dvh - var(--header-height-px, 0px) - min(var(--footer-height-px, 0px), var(--footer-height-cap, 120px)))',
+										minHeight: 'calc(100dvh - var(--header-height-px, 64px) - var(--footer-height-px, 0px) + var(--main-height-offset, 0px))'
+									}}
+								>
+									<Container id="layout-content-container" maxWidth={false} sx={{ py: { xs: 2, md: 4 }, maxWidth: 'var(--content-max-width, 1600px)', mx: 'auto', minHeight: 'var(--content-max-height)' }}>
+										<Outlet />
+									</Container>
+								</Box>
+							</Box>
+						</Box>
+					) : (
+						<Box
+							component="main"
+							id="main-content"
+							sx={{
+								flex: 1,
+								// Use a capped footer height to avoid over-shrinking content on tall screens before measurement settles
+								'--content-max-height': 'calc(100dvh - var(--header-height-px, 0px) - var(--admin-menu-height-px, 0px) - min(var(--footer-height-px, 0px), var(--footer-height-cap, 120px)))',
+								minHeight: 'calc(100dvh - var(--header-height-px, 64px) - var(--admin-menu-height-px, 0px) - var(--footer-height-px, 0px) + var(--main-height-offset, 0px))'
+							}}
+						>
+							<Container id="layout-content-container" maxWidth={false} sx={{ py: { xs: 2, md: 4 }, maxWidth: 'var(--content-max-width, 1600px)', mx: 'auto', minHeight: 'var(--content-max-height)' }}>
+								<Outlet />
+							</Container>
+						</Box>
+					)}
 				</ToastProvider>
 				<Box ref={(el: HTMLDivElement | null) => {
 					if (!el) return;

@@ -34,7 +34,17 @@ export default function QnaDetail() {
   const [allQnas, setAllQnas] = useState<UserQnaItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
-  const { data: qna, isLoading, isEmpty, isError } = useDataFetching({ fetchFunction: () => getUserQnaDetail(Number(qnaId)), dependencies: [qnaId], autoFetch: !!qnaId });
+  const { data: qna, isLoading, isEmpty, isError } = useDataFetching({ 
+    fetchFunction: () => {
+      const id = Number(qnaId);
+      const key = `qna_viewed_${id}`;
+      const alreadyViewed = sessionStorage.getItem(key) === '1';
+      // 세션당 1회 증가 및 작성자 본인 클릭은 증가하지 않도록 서버에서도 처리하지만, 클라에서도 skip 힌트를 전달
+      return getUserQnaDetail(id, { skipHit: alreadyViewed });
+    }, 
+    dependencies: [qnaId], 
+    autoFetch: !!qnaId 
+  });
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
 
   useEffect(() => {
@@ -57,6 +67,13 @@ export default function QnaDetail() {
       setToast({ open: true, message: '비공개 질문입니다. 작성자만 열람할 수 있습니다.', severity: 'info' });
       const id = setTimeout(() => handleBackToList(), 600);
       return () => clearTimeout(id);
+    }
+    // 세션당 1회 증가 마킹 (소유자 본인인 경우는 증가하지 않으므로 마킹하지 않음)
+    if (item && item.secretYn === 'N' && !item.isMine && qnaId) {
+      const key = `qna_viewed_${Number(qnaId)}`;
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+      }
     }
   }, [qna]);
 

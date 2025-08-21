@@ -115,12 +115,22 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
   const handleDeleteKey = async () => {
     if (!selectedKeyId) return;
 
-    const response = await deleteUserOpenApi(selectedKeyId);
-    if (response.success) {
-      setDeleteDialogOpen(false);
-      setSelectedKeyId(null);
-      showToast('인증키가 삭제되었습니다.', 'success');
-      refetch();
+    try {
+      const response = await deleteUserOpenApi(selectedKeyId);
+      if (response.success) {
+        // 즉시 다이얼로그 상태를 업데이트
+        setDeleteDialogOpen(false);
+        setSelectedKeyId(null);
+        showToast('인증키가 삭제되었습니다.', 'success');
+        refetch();
+      } else {
+        // 에러 발생 시 사용자에게 알림
+        showToast(response.errorMessage || '인증키 삭제에 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      // 예외 발생 시 사용자에게 알림
+      showToast('인증키 삭제 중 오류가 발생했습니다.', 'error');
+      console.error('Delete API key error:', error);
     }
   };
 
@@ -384,12 +394,14 @@ export const OpenApiManagement: React.FC<OpenApiManagementProps> = ({ id = 'open
         open={deleteDialogOpen}
         title="인증키 삭제 확인"
         message="선택한 인증키를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
-        onClose={() => setDeleteDialogOpen(false)}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setSelectedKeyId(null);
+        }}
         onConfirm={handleDeleteKey}
         showCancel={true}
         confirmText="삭제"
         cancelText="취소"
-        
       />
       {/* 전역 토스트 사용 → 개별 렌더 불필요 */}
       <ExtendKeyDialog 

@@ -9,7 +9,7 @@ import { getUserName, getUserType, getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
 import { AccountCircle } from '@mui/icons-material';
 import ThemedButton from './common/ThemedButton';
-import AdminMenuBar from './AdminMenuBar';
+// AdminMenuBar removed in favor of SideNav + AdminPageHeader
 
 const SERVICE_NAME = 'IITP DABT';
 
@@ -193,7 +193,6 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
               }
               right={
                 <>
-                  <HomeIconButton to={ROUTES.ADMIN.DASHBOARD} />
                   <ThemedButton 
                     id="appbar-admin-profile-btn"
                     variant="text"
@@ -227,7 +226,7 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
             />
           </Toolbar>
         </MuiAppBar>
-        <AdminMenuBar />
+        {/* Admin horizontal menu removed */}
       </>
     );
   }

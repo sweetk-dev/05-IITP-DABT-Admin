@@ -17,7 +17,7 @@ import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
-import { getUserFaqList, getUserFaqListByType, getCommonCodesByGroupId } from '../../api';
+import { getUserFaqList, getUserFaqListByType, getCommonCodesByGroupId, getUserFaqDetail } from '../../api';
 import type { UserFaqItem } from '@iitp-dabt/common';
 import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
 
@@ -32,7 +32,7 @@ export default function FaqList() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   
   const pagination = usePagination({ initialLimit: PAGINATION.DEFAULT_PAGE_SIZE });
-  const { query, setQuery } = useQuerySync({ page: 1, limit: pagination.pageSize, faqType: 'ALL', search: '' });
+  const { query, setQuery } = useQuerySync({ page: 1, limit: pagination.pageSize, faqType: 'ALL', search: '', faqId: '' });
   const errorHandler: UseErrorHandlerResult = useErrorHandler();
 
   const { data: faqTypeCodes, isLoading: faqTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('faq_type'), autoFetch: true });
@@ -44,7 +44,7 @@ export default function FaqList() {
     }
   }, [faqTypeCodes]);
 
-  const { data: faqData, isLoading, isEmpty, isError } = useDataFetching({
+  const { data: faqData, isLoading, isEmpty, isError, refetch } = useDataFetching({
     fetchFunction: () => (faqType === 'ALL' ? getUserFaqList({ page: pagination.currentPage, limit: pagination.pageSize, search: query.search || undefined }) : getUserFaqListByType(faqType, { page: pagination.currentPage, limit: pagination.pageSize })),
     dependencies: [pagination.currentPage, pagination.pageSize, faqType, query.search],
     autoFetch: true,
@@ -55,7 +55,50 @@ export default function FaqList() {
 
   const handlePageChange = (page: number) => { pagination.handlePageChange(page); setQuery({ page }, { replace: true }); };
   const handleFaqTypeChange = (newFaqType: string) => { setFaqType(newFaqType); setQuery({ faqType: newFaqType, page: 1 }); setExpandedFaq(null); pagination.handlePageChange(1); };
-  const handleFaqExpand = (faqId: number) => setExpandedFaq(expandedFaq === faqId ? null : faqId);
+  const handleFaqExpand = async (faqId: number) => {
+    const nextExpanded = expandedFaq === faqId ? null : faqId;
+    setExpandedFaq(nextExpanded);
+    // 상세 조회 호출로 조회수 증가 (백엔드가 증가 처리함)
+    if (nextExpanded === faqId) {
+      try {
+        // 세션당 1회 증가: sessionStorage에 체크
+        const key = `faq_viewed_${faqId}`;
+        const alreadyViewed = sessionStorage.getItem(key) === '1';
+        if (!alreadyViewed) {
+          await getUserFaqDetail(faqId);
+          sessionStorage.setItem(key, '1');
+        } else {
+          // 이미 본 경우 증가 스킵 요청
+          await getUserFaqDetail(faqId, { skipHit: true });
+        }
+        // 목록 갱신하여 증가된 조회수 반영
+        refetch();
+      } catch (e) {
+        // 조회 실패는 무시하고 UI는 그대로 유지
+      }
+    }
+  };
+
+  // 홈에서 넘어온 faqId가 있으면 자동 확장 처리
+  useEffect(() => {
+    const paramFaqId = Number(query.faqId);
+    if (paramFaqId && !Number.isNaN(paramFaqId) && expandedFaq !== paramFaqId) {
+      // 목록이 로드된 후에 확장
+      if (faqData?.items?.some((f: any) => Number(f.faqId) === paramFaqId)) {
+        setExpandedFaq(paramFaqId);
+        // 상세 조회 호출하여 조회수 증가
+        // 세션당 1회 증가 처리
+        const key = `faq_viewed_${paramFaqId}`;
+        const alreadyViewed = sessionStorage.getItem(key) === '1';
+        getUserFaqDetail(paramFaqId, { skipHit: alreadyViewed })
+          .then(() => refetch())
+          .catch(() => {});
+        if (!alreadyViewed) {
+          sessionStorage.setItem(key, '1');
+        }
+      }
+    }
+  }, [query.faqId, faqData]);
 
   return (
     <Box id="faq-list-page" sx={{ minHeight: '100vh', background: muiTheme.palette.background.default, py: SPACING.LARGE }}>

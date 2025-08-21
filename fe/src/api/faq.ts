@@ -26,8 +26,9 @@ export async function getUserFaqList(params: UserFaqListReq): Promise<ApiRespons
 /**
  * FAQ 상세 조회 (사용자용)
  */
-export async function getUserFaqDetail(faqId: number): Promise<ApiResponse<UserFaqDetailRes>> {
-  const url = FULL_API_URLS.USER.FAQ.DETAIL.replace(':faqId', faqId.toString());
+export async function getUserFaqDetail(faqId: number, options?: { skipHit?: boolean }): Promise<ApiResponse<UserFaqDetailRes>> {
+  const base = FULL_API_URLS.USER.FAQ.DETAIL.replace(':faqId', faqId.toString());
+  const url = options?.skipHit ? `${base}?skipHit=true` : base;
   return apiFetch<UserFaqDetailRes>(url, { method: 'GET' });
 }
 

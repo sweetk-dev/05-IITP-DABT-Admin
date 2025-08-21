@@ -29,6 +29,7 @@ import StatusChip from '../../components/common/StatusChip';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import ListScaffold from '../../components/common/ListScaffold';
+import { formatYmdHm } from '../../utils/date';
 
 interface QnaHistoryProps {
 	id?: string;
@@ -174,10 +175,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 		navigate(ROUTES.USER.DASHBOARD);
 	};
 
-	const formatDate = (dateString: string) => {
-		if (!dateString) return '-';
-		return new Date(dateString).toLocaleDateString('ko-KR');
-	};
+	const formatDate = (dateString: string) => formatYmdHm(dateString);
 
 	return (
 		<Box id={id} sx={{ p: 3 }}>
@@ -214,6 +212,11 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 										</Typography>
 									}
 								/>
+								{expandedQna === qna.qnaId && (
+									<ThemedButton variant="dangerSoft" size="small" startIcon={<DeleteIcon />} onClick={() => onRequestDelete(qna.qnaId)} sx={{ mr: 1 }}>
+										삭제
+									</ThemedButton>
+								)}
 								<ThemedButton
 									id={`expand-qna-${qna.qnaId}`}
 									variant="outlined"
@@ -251,11 +254,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 													)}
 												</>
 											)}
-											<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
-												<ThemedButton variant="dangerSoft" size="small" startIcon={<DeleteIcon />} onClick={() => onRequestDelete(qna.qnaId)}>
-													삭제
-												</ThemedButton>
-											</Box>
+											{/* bottom action buttons removed; delete is shown only when expanded at the top */}
 										</Box>
 									</AccordionDetails>
 								</Accordion>

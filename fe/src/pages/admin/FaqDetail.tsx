@@ -8,6 +8,7 @@ import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminFaq, getAdminFaqDetail, getCommonCodesByGroupId } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
+import { formatYmdHm } from '../../utils/date';
 
 export default function AdminFaqDetail() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export default function AdminFaqDetail() {
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>{faq.question}</Typography>
                 <Chip size="small" label={faqTypeLabel} color="primary" />
               </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>{faq.createdAt}</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>{formatYmdHm(faq.createdAt)}</Typography>
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{faq.answer}</Typography>
             </>
           )}

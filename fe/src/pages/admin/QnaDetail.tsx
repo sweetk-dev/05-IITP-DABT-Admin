@@ -10,6 +10,7 @@ import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminQna, getAdminQnaDetail } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
+import { formatYmdHm } from '../../utils/date';
 
 export default function AdminQnaDetail() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function AdminQnaDetail() {
                 <QnaTypeChip typeId={qna.qnaType} />
                 <Chip size="small" label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} />
                 {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>{qna.postedAt}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>{formatYmdHm(qna.postedAt)}</Typography>
               </Stack>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>{qna.title}</Typography>
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: SPACING.MEDIUM }}>{qna.content}</Typography>

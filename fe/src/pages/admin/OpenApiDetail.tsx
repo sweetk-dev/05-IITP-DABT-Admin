@@ -9,6 +9,7 @@ import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminOpenApi, getAdminOpenApiDetail, extendAdminOpenApi } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
+import { formatYmdHm } from '../../utils/date';
 import StatusChip from '../../components/common/StatusChip';
 import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 import ExtendKeyDialog from '../../components/common/ExtendKeyDialog';
@@ -49,7 +50,7 @@ export default function AdminOpenApiDetail() {
                 <Typography variant="h6" fontWeight={700}>{item.keyName || `Key ${item.keyId}`}</Typography>
                 <StatusChip kind={getOpenApiKeyStatus(item)} />
               </Stack>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>생성일: {item.createdAt}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>생성일: {formatYmdHm(item.createdAt)}</Typography>
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{item.keyDesc}</Typography>
             </>
           )}

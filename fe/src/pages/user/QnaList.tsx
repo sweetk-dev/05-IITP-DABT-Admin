@@ -23,6 +23,7 @@ import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { getUserQnaList, getUserQnaListByType, getCommonCodesByGroupId } from '../../api';
+import { formatLocaleDate } from '../../utils/date';
 
 export default function QnaList() {
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
@@ -89,7 +90,7 @@ export default function QnaList() {
     navigate(`/qna/${qna.qnaId}`);
   };
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const formatDate = (dateString: string) => formatLocaleDate(dateString);
   const maskAuthorName = (name: string) => (name.length <= 2 ? name : name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1));
 
   const handleCreateQna = () => {

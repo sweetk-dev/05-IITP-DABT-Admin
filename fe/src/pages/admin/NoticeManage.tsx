@@ -11,6 +11,7 @@ import { getAdminNoticeList, deleteAdminNotice } from '../../api';
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import ListScaffold from '../../components/common/ListScaffold';
+import { formatYmdHm } from '../../utils/date';
 
 export default function AdminNoticeList() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function AdminNoticeList() {
 
   const columns: Array<DataTableColumn<any>> = [
     { key: 'title', header: '제목', render: (n) => <span style={{ cursor: 'pointer' }} onClick={()=>navigate(ROUTES.ADMIN.NOTICES.DETAIL.replace(':id', String(n.noticeId)))}>{n.title}</span> },
-    { key: 'postedAt', header: '게시일', width: 160 },
+    { key: 'postedAt', header: '게시일', width: 160, render: (n) => formatYmdHm(n.postedAt) },
   ];
 
   const toggleAll = (checked: boolean) => setSelected(checked ? notices.map((n: any)=>n.noticeId) : []);

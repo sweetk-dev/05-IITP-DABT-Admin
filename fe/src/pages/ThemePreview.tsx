@@ -306,6 +306,9 @@ export default function ThemePreview() {
                 <ThemedButton variant="primary">Primary</ThemedButton>
                 <ThemedButton variant="outlined">Outlined</ThemedButton>
                 <ThemedButton variant="text">Text</ThemedButton>
+                <ThemedButton variant="dangerSoft">Danger Soft</ThemedButton>
+                <ThemedButton variant="dangerOutlined">Danger Outlined</ThemedButton>
+                <ThemedButton variant="danger">Danger</ThemedButton>
               </Stack>
             </ThemedCard>
 

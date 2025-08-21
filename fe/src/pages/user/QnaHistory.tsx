@@ -18,11 +18,12 @@ import { PAGINATION } from '../../constants/pagination';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
 import { deleteUserQna } from '../../api';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 // import { getThemeColors } from '../../theme';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
-import type { UserQnaDetailRes } from '@iitp-dabt/common';
+// import type { UserQnaDetailRes } from '@iitp-dabt/common';
 // EmptyState handled by ListScaffold
 import StatusChip from '../../components/common/StatusChip';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
@@ -36,7 +37,7 @@ interface QnaHistoryProps {
 export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) => {
 	const navigate = useNavigate();
 	const [expandedQna, setExpandedQna] = useState<number | null>(null);
-	const [qnaDetails, setQnaDetails] = useState<Record<number, UserQnaDetailRes>>({});
+	const [qnaDetails, setQnaDetails] = useState<Record<number, any>>({});
 	const { query } = useQuerySync({ qnaId: '' });
 	const [pendingExpandId, setPendingExpandId] = useState<number | null>(null);
 	const [confirmOpen, setConfirmOpen] = useState(false);
@@ -55,6 +56,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 		isLoading: loading,
 		isEmpty,
 		isError,
+		refetch
 	} = useDataFetching({
 		fetchFunction: () => getUserQnaList({
 			page: pagination.currentPage,
@@ -111,12 +113,15 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 			await deleteUserQna(targetDeleteId);
 			setConfirmOpen(false);
 			setTargetDeleteId(null);
-			// 삭제 후 목록 새로고침: 현재 페이지 그대로 유지
-			await getUserQnaList({ page: pagination.currentPage, limit: pagination.pageSize, mineOnly: true } as any);
 			// 간단히 리프레시 위해 setExpandedQna도 닫음
 			setExpandedQna(null);
-			// qnaList는 useDataFetching 관리이므로, 간단히 페이지를 트리거
-			pagination.handlePageChange(pagination.currentPage);
+			// 현재 페이지의 마지막 항목을 삭제한 경우 이전 페이지로 이동, 아니면 재조회
+			const itemCount = (qnaList as any)?.items?.length || 0;
+			if (itemCount <= 1 && pagination.currentPage > 1) {
+				pagination.handlePageChange(pagination.currentPage - 1);
+			} else {
+				refetch();
+			}
 		} catch (e) {
 			setConfirmOpen(false);
 			setTargetDeleteId(null);
@@ -247,7 +252,9 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 												</>
 											)}
 											<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
-												<ThemedButton variant="outlined" size="small" onClick={() => onRequestDelete(qna.qnaId)}>삭제</ThemedButton>
+												<ThemedButton variant="dangerSoft" size="small" startIcon={<DeleteIcon />} onClick={() => onRequestDelete(qna.qnaId)}>
+													삭제
+												</ThemedButton>
 											</Box>
 										</Box>
 									</AccordionDetails>

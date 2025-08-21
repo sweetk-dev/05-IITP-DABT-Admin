@@ -1,9 +1,9 @@
 import { Button } from '@mui/material';
 import type { ButtonProps } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 
 interface ThemedButtonProps extends Omit<ButtonProps, 'variant'> {
-  variant?: 'primary' | 'outlined' | 'secondary' | 'text' | 'softText';
+  variant?: 'primary' | 'outlined' | 'secondary' | 'text' | 'softText' | 'danger' | 'dangerOutlined' | 'dangerSoft';
   children: React.ReactNode;
   // Accept and ignore legacy theme prop to avoid TS errors at call-sites
   theme?: 'user' | 'admin';
@@ -34,18 +34,59 @@ export default function ThemedButton({
         return {
           bgcolor: palette.primary.main,
           color: muiTheme.palette.getContrastText(palette.primary.main),
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          transition: 'background-color 120ms ease'
         };
       case 'outlined':
         return {
           borderColor: palette.primary.main,
           color: palette.primary.main,
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          transition: 'background-color 120ms ease'
         };
       case 'secondary':
         return {
           bgcolor: palette.secondary.main,
-          color: muiTheme.palette.getContrastText(palette.secondary.main)
+          color: muiTheme.palette.getContrastText(palette.secondary.main),
+          transition: 'background-color 120ms ease'
+        };
+      case 'danger':
+        return {
+          bgcolor: palette.error.main,
+          color: muiTheme.palette.getContrastText(palette.error.main),
+          fontWeight: 'bold',
+          transition: 'background-color 120ms ease',
+          '&:hover': { bgcolor: palette.error.dark },
+          '&:active': { bgcolor: alpha(palette.error.dark, 0.95) }
+        };
+      case 'dangerOutlined':
+        return {
+          borderColor: palette.error.main,
+          color: palette.error.main,
+          fontWeight: 'bold',
+          transition: 'background-color 120ms ease',
+          '&:hover': { bgcolor: alpha(palette.error.main, 0.08) },
+          '&:active': { bgcolor: alpha(palette.error.main, 0.1) }
+        };
+      case 'dangerSoft':
+        return {
+          bgcolor: alpha(palette.error.main, 0.22),
+          color: palette.error.main,
+          fontWeight: 700,
+          border: `1px solid ${alpha(palette.error.main, 0.24)}`,
+          transition: 'background-color 120ms ease, border-color 120ms ease',
+          '&:hover': {
+            bgcolor: alpha(palette.error.main, 0.28),
+            borderColor: alpha(palette.error.main, 0.3)
+          },
+          '&:active': {
+            bgcolor: alpha(palette.error.main, 0.32),
+            borderColor: alpha(palette.error.main, 0.36)
+          },
+          '&:focus-visible': {
+            outline: `2px solid ${alpha(palette.error.main, 0.35)}`,
+            outlineOffset: 2
+          }
         };
       case 'text':
         return { color: palette.primary.main, fontWeight: 'bold' };
@@ -71,7 +112,11 @@ export default function ThemedButton({
 
   return (
     <Button
-      variant={variant === 'outlined' ? 'outlined' : variant === 'text' || variant === 'softText' ? 'text' : 'contained'}
+      variant={
+        variant === 'outlined' || variant === 'dangerOutlined' ? 'outlined'
+        : variant === 'text' || variant === 'softText' ? 'text'
+        : 'contained'
+      }
       sx={{
         ...getButtonStyle(),
         ...getSizeStyle(),

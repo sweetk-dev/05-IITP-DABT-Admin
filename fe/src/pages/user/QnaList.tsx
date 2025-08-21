@@ -4,8 +4,9 @@ import { useTheme } from '@mui/material/styles';
 import { Visibility as VisibilityIcon } from '@mui/icons-material';
 import StatusChip from '../../components/common/StatusChip';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
-// import ThemedButton from '../../components/common/ThemedButton';
-import { useNavigate } from 'react-router-dom';
+import ThemedButton from '../../components/common/ThemedButton';
+import { Add as AddIcon } from '@mui/icons-material';
+import { useNavigate, useLocation } from 'react-router-dom';
 // import { ROUTES } from '../../routes';
 import ThemedCard from '../../components/common/ThemedCard';
 import ListItemCard from '../../components/common/ListItemCard';
@@ -22,11 +23,11 @@ import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { getUserQnaList, getUserQnaListByType, getCommonCodesByGroupId } from '../../api';
-import type { UserQnaItem, CommonCodeByGroupRes } from '@iitp-dabt/common';
 
 export default function QnaList() {
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const muiTheme = useTheme();
   const colors = {
     primary: muiTheme.palette.primary.main,
@@ -59,7 +60,7 @@ export default function QnaList() {
 
   useEffect(() => {
     if (qnaTypeCodes) {
-      const codes = (qnaTypeCodes as CommonCodeByGroupRes).codes || [];
+      const codes = (qnaTypeCodes as any).codes || [];
       const options = [ { value: 'ALL', label: '전체' }, ...codes.map((code: any) => ({ value: code.codeId, label: code.codeNm })) ];
       setQnaTypeOptions(options);
     }
@@ -78,7 +79,7 @@ export default function QnaList() {
 
   const handlePageChange = (page: number) => { pagination.handlePageChange(page); setQuery({ page }, { replace: true }); };
   const handleQnaTypeChange = (newQnaType: string) => { setQnaType(newQnaType); setQuery({ qnaType: newQnaType, page: 1 }); pagination.handlePageChange(1); };
-  const handleQnaClick = (qna: UserQnaItem) => {
+  const handleQnaClick = (qna: any) => {
     const isSecret = qna.secretYn === 'Y';
     const isOwner = !!(qna as any).isMine;
     if (isSecret && !isOwner) {
@@ -91,7 +92,18 @@ export default function QnaList() {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
   const maskAuthorName = (name: string) => (name.length <= 2 ? name : name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1));
 
-  // const handleCreateQna = () => { navigate(ROUTES.USER.QNA_CREATE); };
+  const handleCreateQna = () => {
+    const isLoggedIn = localStorage.getItem('accessToken');
+    const currentPath = location.pathname + (location.search || '');
+    if (!isLoggedIn) {
+      try { sessionStorage.setItem('returnTo', '/user/qna/create'); } catch {}
+      try { sessionStorage.setItem('returnAfterCreate', currentPath); } catch {}
+      navigate('/login', { state: { from: '/user/qna/create' } });
+      return;
+    }
+    try { sessionStorage.setItem('returnAfterCreate', currentPath); } catch {}
+    navigate('/user/qna/create', { state: { returnTo: currentPath } });
+  };
 
   return (
     <Box id="qna-list-page" sx={{ minHeight: '100vh', background: colors.background, py: SPACING.LARGE }}>
@@ -101,6 +113,18 @@ export default function QnaList() {
         <ListScaffold
           title="Q&A"
           onBack={() => navigate('/')}
+          actionsRight={(
+            <ThemedButton
+              id="qna-create-button"
+              variant="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={handleCreateQna}
+              buttonSize="cta"
+            >
+              문의하기
+            </ThemedButton>
+          )}
           search={{ value: (query.search as string) || '', onChange: (v)=> setQuery({ search: v, page: 1 }), placeholder: '제목/내용 검색' }}
           filters={[{ label: '정렬', value: (query.sort as string) || 'createdAt-desc', options: [
             { value: 'createdAt-desc', label: '등록순(최신)' },
@@ -124,7 +148,7 @@ export default function QnaList() {
         >
           {isLoading || isError || isEmpty ? null : (
             <Stack id="qna-list-stack" spacing={1.25}>
-              {qnaData?.items.map((qna: UserQnaItem) => (
+              {qnaData?.items.map((qna: any) => (
                 <ListItemCard id={`qna-item-${qna.qnaId}`} key={qna.qnaId} onClick={() => handleQnaClick(qna)}>
                   <Box id={`qna-item-header-${qna.qnaId}`} sx={{ display: 'flex', alignItems: 'center', mb: 0.5, flexWrap: 'wrap' }}>
                     <Box component="span" sx={{ mr: 1, mb: 0.5 }}>

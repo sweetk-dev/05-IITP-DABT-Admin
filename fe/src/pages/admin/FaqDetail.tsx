@@ -39,7 +39,7 @@ export default function AdminFaqDetail() {
       <PageHeader id="admin-faq-detail-header" title="FAQ 상세" onBack={handleBack} actionsRight={
         <>
           <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">수정</ThemedButton>
-          <ThemedButton variant="outlined" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
+          <ThemedButton variant="dangerSoft" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
         </>
       } />
 

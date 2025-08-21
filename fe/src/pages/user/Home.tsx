@@ -18,6 +18,7 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { getHomeNoticeList, getHomeFaqList, getHomeQnaList, getCommonCodesByGroupId } from '../../api';
 import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
 import { useCommonCode } from '../../hooks/useCommonCode';
+import { ROUTES } from '../../routes';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -66,6 +67,10 @@ export default function Home() {
   useEffect(() => { fetchCodesByGroup('qna_type').catch(() => {}); }, [fetchCodesByGroup]);
   
   const handleContentClick = (type: 'notice' | 'faq' | 'qna', id: number) => {
+    if (type === 'faq') {
+      navigate(`${ROUTES.PUBLIC.FAQ}?faqId=${id}`);
+      return;
+    }
     navigate(`/${type}/${id}`);
   };
 

@@ -119,6 +119,10 @@ function App() {
                     <Route path="qnas/:id" element={<AdminQnaDetail />} />
                     <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
                     <Route path="qnas/:id/reply" element={<AdminQnaReply />} />
+                    {/* 운영자/코드 관리 (S-Admin 전용 메뉴 라우팅) */}
+                    <Route path="account" element={<div>OperatorsManagement</div>} />
+                    <Route path="account/:id" element={<div>OperatorDetail</div>} />
+                    <Route path="code" element={<div>CodeManagement</div>} />
                     {/* 관리자 경로에서 인증되지 않은 경우 로그인으로 리다이렉트 */}
                     <Route path="*" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
                   </Routes>

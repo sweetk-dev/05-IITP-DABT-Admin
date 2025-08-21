@@ -83,6 +83,17 @@ export const ROUTES = {
     SETTINGS: '/admin/settings',
     LOGS: '/admin/logs',
     STATS: '/admin/stats',
+
+    // 운영자 관리 (S-Admin 전용)
+    OPERATORS: {
+      LIST: '/admin/account',
+      DETAIL: '/admin/account/:id',
+    },
+
+    // 코드 관리 (S-Admin 전용)
+    CODE: {
+      LIST: '/admin/code',
+    },
   },
 
   // 공통 페이지
@@ -259,6 +270,12 @@ export const ROUTE_META = {
     requiresAdmin: true,
     showInNav: true,
   },
+  [ROUTES.ADMIN.PROFILE]: {
+    title: '관리자 프로필',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
   [ROUTES.ADMIN.FAQ.LIST]: {
     title: 'FAQ 관리',
     requiresAuth: true,
@@ -285,6 +302,18 @@ export const ROUTE_META = {
   },
   [ROUTES.ADMIN.NOTICES.LIST]: {
     title: '공지사항 관리',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: true,
+  },
+  [ROUTES.ADMIN.OPERATORS.LIST]: {
+    title: '운영자 관리',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: true,
+  },
+  [ROUTES.ADMIN.CODE.LIST]: {
+    title: '코드 관리',
     requiresAuth: true,
     requiresAdmin: true,
     showInNav: true,

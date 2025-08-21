@@ -29,6 +29,23 @@ export default function CommonDialog({
   const muiTheme = useTheme();
   const primary = muiTheme.palette.primary.main;
   const line = `linear-gradient(90deg, ${alpha(primary, 0.6)}, ${alpha(primary, 0.2)}, ${alpha(primary, 0.6)})`;
+
+  const handleConfirm = async () => {
+    if (onConfirm) {
+      try {
+        // onConfirm이 Promise를 반환하는 경우를 처리
+        const result = onConfirm();
+        if (result && typeof result.then === 'function') {
+          await result;
+        }
+      } catch (error) {
+        console.error('Confirm action error:', error);
+      }
+    }
+    // onConfirm이 없거나 실행 완료 후 onClose 호출
+    onClose();
+  };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 3 } }}>
       {title && (
@@ -52,7 +69,7 @@ export default function CommonDialog({
         )}
         <ThemedButton 
           variant="primary" 
-          onClick={onConfirm || onClose}
+          onClick={handleConfirm}
           autoFocus
           buttonSize="cta"
         >

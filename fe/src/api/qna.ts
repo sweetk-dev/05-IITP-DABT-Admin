@@ -33,8 +33,9 @@ export async function getUserQnaList(params: UserQnaListReq): Promise<ApiRespons
 /**
  * Q&A 상세 조회 (사용자용)
  */
-export async function getUserQnaDetail(qnaId: number): Promise<ApiResponse<UserQnaDetailRes>> {
-  const url = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
+export async function getUserQnaDetail(qnaId: number, options?: { skipHit?: boolean }): Promise<ApiResponse<UserQnaDetailRes>> {
+  const base = FULL_API_URLS.USER.QNA.DETAIL.replace(':qnaId', qnaId.toString());
+  const url = options?.skipHit ? `${base}?skipHit=true` : base;
   // 공통 함수에서 토큰이 있으면 자동으로 헤더를 포함하므로 공개 경로로 호출
   return publicApiFetch<UserQnaDetailRes>(url, { method: 'GET' });
 }

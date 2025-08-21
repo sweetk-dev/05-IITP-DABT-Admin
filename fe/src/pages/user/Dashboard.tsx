@@ -38,6 +38,7 @@ import StatusChip from '../../components/common/StatusChip';
 import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
 import { getThemeColors } from '../../theme';
 import { useDataFetching } from '../../hooks/useDataFetching';
+import { formatYmdHm } from '../../utils/date';
 
 interface DashboardProps {
   id?: string;
@@ -98,6 +99,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
   const handleCopyKey = (authKey: string) => {
     navigator.clipboard.writeText(authKey);
   };
+
 
 
   if (loading) {
@@ -167,7 +169,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                               </Typography>
                             </Box>
                           }
-                          secondary={`${qna.createdAt} • ${qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}`}
+                          secondary={`${formatYmdHm(qna.createdAt)} • ${qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}`}
                         />
                         <Chip
                           label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}
@@ -207,9 +209,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) =
                 </ThemedButton>
               </Box>
 
-              {openApiList?.authKeys && openApiList.authKeys.length > 0 ? (
+              {Array.isArray((openApiList as any)?.authKeys) && (openApiList as any).authKeys.length > 0 ? (
                 <List>
-                  {openApiList.authKeys.slice(0, 3).map((authKey: any) => (
+                  {(openApiList as any).authKeys.slice(0, 3).map((authKey: any) => (
                     <ListItem key={authKey.keyId} divider sx={{ alignItems: 'center' }}>
                       <ListItemText
                         primary={

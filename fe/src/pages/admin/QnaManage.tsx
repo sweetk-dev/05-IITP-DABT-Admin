@@ -13,6 +13,7 @@ import StatusChip from '../../components/common/StatusChip';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
 import ThemedButton from '../../components/common/ThemedButton';
 import { useQuerySync } from '../../hooks/useQuerySync';
+import { formatYmdHm } from '../../utils/date';
 
 export default function AdminQnaList() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export default function AdminQnaList() {
     ) },
     { key: 'qnaType', header: '유형', render: (r) => <QnaTypeChip typeId={r.qnaType} /> },
     { key: 'status', header: '상태', render: (r) => <StatusChip kind={r.answeredYn === 'Y' ? 'answered' : 'pending'} /> },
-    { key: 'postedAt', header: '등록일', width: 160 },
+    { key: 'postedAt', header: '등록일', width: 160, render: (r) => formatYmdHm(r.postedAt) },
   ];
 
   const toggleAll = (checked: boolean) => setSelected(checked ? qnas.map((q: any)=>q.qnaId) : []);

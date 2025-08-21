@@ -14,6 +14,7 @@ import { getAdminFaqList, deleteAdminFaq, getCommonCodesByGroupId } from '../../
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import ListScaffold from '../../components/common/ListScaffold';
+import { formatYmdHm } from '../../utils/date';
 
 export default function AdminFaqList() {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export default function AdminFaqList() {
       const label = faqTypeOptions.find(o=>o.value===r.faqType)?.label || r.faqType;
       return <Chip label={label} size="small" color="primary" />;
     } },
-    { key: 'createdAt', header: '등록일', width: 160 },
+    { key: 'createdAt', header: '등록일', width: 160, render: (r) => formatYmdHm(r.createdAt) },
   ];
 
   const toggleAll = (checked: boolean) => setSelected(checked ? items.map((f: any)=>f.faqId) : []);

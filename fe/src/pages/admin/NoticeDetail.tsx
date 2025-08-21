@@ -8,6 +8,7 @@ import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminNotice, getAdminNoticeDetail } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
+import { formatYmdHm } from '../../utils/date';
 
 export default function AdminNoticeDetail() {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ export default function AdminNoticeDetail() {
           ) : (
             <>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>{notice.title}</Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>{notice.postedAt}</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>{formatYmdHm(notice.postedAt)}</Typography>
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{notice.content}</Typography>
             </>
           )}

@@ -2,6 +2,7 @@
 export * from './api.js';
 export * from './auth.js';
 export * from './admin.js';
+export * from './account.js';
 export * from './user.js';
 export * from './faq.js';
 export * from './qna.js';

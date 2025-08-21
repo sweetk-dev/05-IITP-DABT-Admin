@@ -88,7 +88,7 @@ export default function AdminQnaList() {
       >
         <CardContent>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mb: 1 }}>
-            <ThemedButton variant="outlined" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
+            <ThemedButton variant="dangerSoft" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
           </Stack>
           <DataTable
             id="admin-qna-table"

@@ -23,7 +23,6 @@ import ByteLimitHelper from '../../components/common/ByteLimitHelper';
 // import { getThemeColors } from '../../theme';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import { useDataFetching } from '../../hooks/useDataFetching';
-import type { CommonCodeByGroupRes } from '@iitp-dabt/common';
 import { useToast } from '../../components/ToastProvider';
 
 interface QnaCreateProps {
@@ -45,7 +44,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
   const { showToast } = useToast();
 
   // QNA 유형 공통코드 로드 (QnaList와 동일 소스 사용)
-  const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching<CommonCodeByGroupRes>({
+  const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching<any>({
     fetchFunction: () => getCommonCodesByGroupId('qna_type'),
     autoFetch: true
   });
@@ -94,7 +93,15 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
       handleApiResponse(response, 
         () => {
           showToast('문의가 성공적으로 등록되었습니다.', 'success');
-          navigate(ROUTES.USER.DASHBOARD);
+          let target: string | undefined = (location.state as any)?.returnTo;
+          try {
+            const saved = sessionStorage.getItem('returnAfterCreate');
+            if (saved) {
+              target = saved;
+              sessionStorage.removeItem('returnAfterCreate');
+            }
+          } catch {}
+          navigate(target || ROUTES.USER.DASHBOARD, { replace: true });
         },
         (errorMessage) => {
           setError(errorMessage);
@@ -147,7 +154,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
                 <MenuItem value="" disabled>
                   {qnaTypeLoading ? '유형 불러오는 중...' : '유형을 선택하세요'}
                 </MenuItem>
-                {((qnaTypeCodes as CommonCodeByGroupRes | undefined)?.codes || []).map((code) => (
+                {(qnaTypeCodes?.codes || []).map((code: any) => (
                   <MenuItem key={code.codeId} value={code.codeId}>{code.codeNm}</MenuItem>
                 ))}
               </Select>

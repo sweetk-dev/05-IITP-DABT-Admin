@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { Add as AddIcon } from '@mui/icons-material';
-import { Box, CardContent, Typography, Stack } from '@mui/material';
-import ListTotal from '../../components/common/ListTotal';
+import { Box, CardContent, Stack } from '@mui/material';
 import PageHeader from '../../components/common/PageHeader';
-import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
-import Pagination from '../../components/common/Pagination';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../routes';
 import { SPACING } from '../../constants/spacing';
@@ -77,7 +74,7 @@ export default function AdminNoticeList() {
       >
         <CardContent>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mb: 1 }}>
-            <ThemedButton variant="outlined" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
+            <ThemedButton variant="dangerSoft" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
           </Stack>
           <DataTable
             id="admin-notice-table"

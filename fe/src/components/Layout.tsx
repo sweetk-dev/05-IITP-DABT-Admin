@@ -1,6 +1,6 @@
 import { Box, Container } from '@mui/material';
 import { useLocation, Outlet } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import AppBar from './AppBar';
 import SideNav from './admin/SideNav';
 import AdminPageHeader from './admin/AdminPageHeader';
@@ -9,6 +9,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { ToastProvider } from './ToastProvider';
 import { createAppTheme } from '../theme/mui';
 import { isAuthenticated, validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
+import { getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
 import Footer from './Footer';
 
@@ -31,6 +32,8 @@ export default function Layout() {
 	const isLoggedIn = isAuthenticated();
 	const isUserLoggedIn = isUserAuthenticated();
 	const isAdminLoggedIn = isAdminAuthenticated();
+	const [sideNavOpen, setSideNavOpen] = useState(true);
+	const adminRole = getAdminRole();
 	
 	//TODO:: Remove console logs in production
 	// This is for debugging purposes to see the current authentication state and path
@@ -78,15 +81,19 @@ export default function Layout() {
 		'compact70'
 	);
 
+	const handleSideNavToggle = () => {
+		setSideNavOpen(!sideNavOpen);
+	};
+
 	return (
 		<ThemeProvider theme={appTheme}>
 			<CssBaseline />
 			<Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
-				<AppBar type={appBarType} />
+				<AppBar type={appBarType} onSideNavToggle={handleSideNavToggle} />
 				<ToastProvider>
 					{appBarType === 'admin' ? (
 						<Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
-							<SideNav />
+							<SideNav open={sideNavOpen} onToggle={handleSideNavToggle} adminRole={adminRole} />
 							<Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 								<AdminPageHeader />
 								<Box

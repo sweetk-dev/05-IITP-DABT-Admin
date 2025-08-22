@@ -1,108 +1,285 @@
-import React, { useState } from 'react';
-import { Box, CardContent, Stack } from '@mui/material';
-import PageHeader from '../../components/common/PageHeader';
-import ListScaffold from '../../components/common/ListScaffold';
-// Pagination handled by ListScaffold
-import { SPACING } from '../../constants/spacing';
-import { useDataFetching } from '../../hooks/useDataFetching';
-import { getAdminQnaList, deleteAdminQna } from '../../api';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Grid, Card, CardContent, CardActions, Button, Chip, TextField, InputAdornment } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../routes';
-import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
-import StatusChip from '../../components/common/StatusChip';
-import QnaTypeChip from '../../components/common/QnaTypeChip';
+import {
+  QuestionAnswer as QnaIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon
+} from '@mui/icons-material';
+import { ROUTES, ROUTE_META } from '../../routes';
+import { getThemeColors } from '../../theme';
+import ListHeader from '../../components/common/ListHeader';
+import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
-import { useQuerySync } from '../../hooks/useQuerySync';
-import { formatYmdHm } from '../../utils/date';
+import StatusChip from '../../components/common/StatusChip';
 
-export default function AdminQnaList() {
+export default function QnaManage() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [selected, setSelected] = useState<Array<number>>([]);
-  const [sort, setSort] = useState('name-asc');
-  const { query, setQuery } = useQuerySync({ page: 1, limit: 10, search: '', status: '', sort: 'name-asc' });
 
-  React.useEffect(() => {
-    if (query.page) setPage(Number(query.page) || 1);
-    if (query.limit) setLimit(Number(query.limit) || 10);
-    if (query.search !== undefined) setSearch(query.search);
-    if (query.status !== undefined) setStatus(query.status);
-    if (query.sort) setSort(query.sort);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.page, query.limit, query.search, query.status, query.sort]);
+  // ROUTE_META에서 페이지 정보 동적 가져오기
+  const pageMeta = (ROUTE_META as any)[ROUTES.ADMIN.QNA.LIST];
+  const pageTitle = pageMeta?.title || 'Q&A 관리';
 
-  const { data, isLoading, isEmpty, isError, refetch } = useDataFetching({
-    fetchFunction: () => getAdminQnaList({ page, limit, search, status, sort } as any),
-    dependencies: [page, limit, search, status, sort]
+  const theme: 'user' | 'admin' = 'admin';
+  const colors = getThemeColors(theme);
+
+  // 임시 Q&A 데이터 (실제로는 API에서 가져옴)
+  const [qnas, setQnas] = useState([
+    {
+      id: 1,
+      title: 'OpenAPI 인증키 발급 방법',
+      author: '김사용자',
+      status: '답변대기',
+      category: 'API',
+      createdAt: '2024-01-15',
+      isSecret: false
+    },
+    {
+      id: 2,
+      title: '계정 정보 수정 문의',
+      author: '이사용자',
+      status: '답변완료',
+      category: '계정',
+      createdAt: '2024-01-14',
+      isSecret: true
+    },
+    {
+      id: 3,
+      title: '서비스 이용 제한 해제',
+      author: '박사용자',
+      status: '답변대기',
+      category: '서비스',
+      createdAt: '2024-01-13',
+      isSecret: false
+    }
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('전체');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+
+  const statuses = ['전체', '답변대기', '답변완료'];
+  const categories = ['전체', 'API', '계정', '서비스', '기타'];
+
+  const handleCreateQna = () => {
+    navigate(ROUTES.ADMIN.QNA.CREATE);
+  };
+
+  const handleViewQna = (id: number) => {
+    navigate(`${ROUTES.ADMIN.QNA.DETAIL}/${id}`);
+  };
+
+  const handleReplyQna = (id: number) => {
+    navigate(`${ROUTES.ADMIN.QNA.REPLY}/${id}`);
+  };
+
+  const handleDeleteQna = (id: number) => {
+    setQnas(qnas.filter(qna => qna.id !== id));
+  };
+
+  const filteredQnas = qnas.filter(qna => {
+    const matchesSearch = qna.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         qna.author.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = selectedStatus === '전체' || qna.status === selectedStatus;
+    const matchesCategory = selectedCategory === '전체' || qna.category === selectedCategory;
+    return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const raw = (data as any)?.items || (data as any)?.qnas || [];
-  const qnas = [...raw].sort((a: any, b: any) => {
-    const [key, order] = sort.split('-');
-    const av = key === 'name' ? (a.title ?? '') : (a[`${key}`] ?? '');
-    const bv = key === 'name' ? (b.title ?? '') : (b[`${key}`] ?? '');
-    if (key === 'name') return av.localeCompare(bv) * (order === 'asc' ? 1 : -1);
-    return (new Date(av).getTime() - new Date(bv).getTime()) * (order === 'asc' ? 1 : -1);
-  });
-  const totalPages = (data as any)?.totalPages || 0;
+  const getStatusColor = (status: string) => {
+    return status === '답변완료' ? 'success' : 'warning';
+  };
 
-  const columns: Array<DataTableColumn<any>> = [
-    { key: 'title', header: '제목', render: (r) => (
-      <span style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={()=>navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(r.qnaId)))}>
-        {/* 순서: 유형 → 상태 → 비공개는 목록 컬럼에선 유지, 제목 칼럼은 제목만 */}
-        {r.title}
-      </span>
-    ) },
-    { key: 'qnaType', header: '유형', render: (r) => <QnaTypeChip typeId={r.qnaType} /> },
-    { key: 'status', header: '상태', render: (r) => <StatusChip kind={r.answeredYn === 'Y' ? 'answered' : 'pending'} /> },
-    { key: 'postedAt', header: '등록일', width: 160, render: (r) => formatYmdHm(r.postedAt) },
-  ];
-
-  const toggleAll = (checked: boolean) => setSelected(checked ? qnas.map((q: any)=>q.qnaId) : []);
-  const toggleRow = (id: number) => setSelected(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
-
-  const handleBulkDelete = async () => {
-    for (const id of selected) { await deleteAdminQna(id); }
-    setSelected([]); refetch();
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'API':
+        return 'primary';
+      case '계정':
+        return 'secondary';
+      case '서비스':
+        return 'warning';
+      default:
+        return 'default';
+    }
   };
 
   return (
-    <Box id="admin-qna-list-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-qna-list-header" title="Q&A 관리" search={{ value: search, onChange: (v)=>{ setSearch(v); setQuery({ search: v, page: 1, limit, status, sort }, { replace: true }); }, placeholder: '제목/내용 검색' }} filters={[
-        { label: '상태', value: status, options: [{ value: '', label: '전체' }, { value: 'answered', label: '답변완료' }, { value: 'pending', label: '답변대기' }], onChange: (v: string)=>{ setStatus(v); setQuery({ status: v, page: 1, limit, search, sort }, { replace: true }); } },
-        { label: '정렬', value: sort, options: [
-          { value: 'name-asc', label: '이름순' },
-          { value: 'createdAt-desc', label: '생성순(최신)' },
-          { value: 'updatedAt-desc', label: '업데이트순(최신)' },
-        ], onChange: (v: string)=> { const nv = v || 'name-asc'; setSort(nv); setQuery({ sort: nv, page: 1, limit, status, search }, { replace: true }); } }
-      ]} />
-      <ListScaffold
-        title=""
-        total={(data as any)?.total}
-        loading={isLoading}
-        errorText={isError ? '목록을 불러오는 중 오류가 발생했습니다.' : ''}
-        emptyText={isEmpty ? '표시할 항목이 없습니다.' : ''}
-        pagination={{ page, totalPages, onPageChange: (p)=>{ setPage(p); setQuery({ page: p, limit, search, status, sort }, { replace: true }); }, pageSize: limit, onPageSizeChange: (s)=>{ setLimit(s); setPage(1); setQuery({ page: 1, limit: s, search, status, sort }, { replace: true }); } }}
-      >
+    <Box sx={{ p: 3 }}>
+      <ThemedCard sx={{ mb: 3 }}>
+        <ListHeader
+          title={pageTitle}
+          icon={<QnaIcon />}
+          actionsRight={
+            <ThemedButton
+              variant="primary"
+              startIcon={<AddIcon />}
+              onClick={handleCreateQna}
+            >
+              Q&A 추가
+            </ThemedButton>
+          }
+        />
+      </ThemedCard>
+
+      {/* 검색 및 필터 */}
+      <ThemedCard sx={{ mb: 3 }}>
         <CardContent>
-          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mb: 1 }}>
-            <ThemedButton variant="dangerSoft" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
-          </Stack>
-          <DataTable
-            id="admin-qna-table"
-            columns={columns}
-            rows={qnas}
-            getRowId={(r)=>r.qnaId}
-            selectedIds={selected}
-            onToggleRow={(id)=>toggleRow(id as number)}
-            onToggleAll={toggleAll}
-            emptyText={isEmpty ? '표시할 항목이 없습니다.' : undefined}
-          />
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                placeholder="제목 또는 작성자로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                select
+                fullWidth
+                label="상태"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                SelectProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FilterIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              >
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                select
+                fullWidth
+                label="카테고리"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                SelectProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FilterIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Typography variant="body2" color="text.secondary">
+                총 {filteredQnas.length}개
+              </Typography>
+            </Grid>
+          </Grid>
         </CardContent>
-      </ListScaffold>
+      </ThemedCard>
+
+      {/* Q&A 목록 */}
+      <Grid container spacing={3}>
+        {filteredQnas.map((qna) => (
+          <Grid item xs={12} md={6} lg={4} key={qna.id}>
+            <ThemedCard>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Chip
+                      label={qna.category}
+                      size="small"
+                      color={getCategoryColor(qna.category) as any}
+                      variant="outlined"
+                    />
+                    {qna.isSecret && (
+                      <Chip
+                        label="비공개"
+                        size="small"
+                        color="warning"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+                  <StatusChip
+                    label={qna.status}
+                    kind={getStatusColor(qna.status)}
+                    size="small"
+                  />
+                </Box>
+                <Typography variant="h6" gutterBottom sx={{ color: colors.text, minHeight: 48 }}>
+                  {qna.title}
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    작성자: {qna.author}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {qna.createdAt}
+                  </Typography>
+                </Box>
+              </CardContent>
+              <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+                <ThemedButton
+                  variant="outlined"
+                  size="small"
+                  onClick={() => handleViewQna(qna.id)}
+                >
+                  보기
+                </ThemedButton>
+                <Box>
+                  {qna.status === '답변대기' && (
+                    <ThemedButton
+                      variant="primary"
+                      size="small"
+                      onClick={() => handleReplyQna(qna.id)}
+                      sx={{ mr: 1 }}
+                    >
+                      답변
+                    </ThemedButton>
+                  )}
+                  <ThemedButton
+                    variant="dangerOutlined"
+                    size="small"
+                    onClick={() => handleDeleteQna(qna.id)}
+                  >
+                    삭제
+                  </ThemedButton>
+                </Box>
+              </CardActions>
+            </ThemedCard>
+          </Grid>
+        ))}
+      </Grid>
+
+      {filteredQnas.length === 0 && (
+        <ThemedCard>
+          <CardContent sx={{ textAlign: 'center', py: 6 }}>
+            <QnaIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              Q&A가 없습니다
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {searchTerm || selectedStatus !== '전체' || selectedCategory !== '전체' ? '검색 조건을 변경해보세요.' : '새로운 Q&A를 추가해보세요.'}
+            </Typography>
+          </CardContent>
+        </ThemedCard>
+      )}
     </Box>
   );
 }

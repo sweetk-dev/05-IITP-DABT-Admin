@@ -1,244 +1,225 @@
 import React from 'react';
+import { Box, Typography, Grid, Card, CardContent, CardActions, Button, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  Grid, 
-  Typography, 
-  CardContent, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Chip,
-  IconButton,
-  Tooltip
-} from '@mui/material';
-import { 
-  QuestionAnswer as QnaIcon, 
-  Key as KeyIcon,
-  Add as AddIcon,
+import {
+  Dashboard as DashboardIcon,
+  QuestionAnswer as QnaIcon,
+  Help as FaqIcon,
+  Announcement as NoticeIcon,
+  Key as ApiIcon,
   History as HistoryIcon,
-  Settings as SettingsIcon,
-  ContentCopy as CopyIcon
+  Add as AddIcon,
+  Visibility as ViewIcon
 } from '@mui/icons-material';
-import { 
-  getUserQnaList, 
-  getUserOpenApiList
-} from '../../api';
-// 타입은 API 응답에서 추론하도록 any 사용
-import LoadingSpinner from '../../components/LoadingSpinner';
-import ErrorAlert from '../../components/ErrorAlert';
-import { ROUTES } from '../../routes';
-import { PAGINATION } from '../../constants/pagination';
-import { SPACING } from '../../constants/spacing';
-import PageHeader from '../../components/common/PageHeader';
+import { ROUTES, ROUTE_META } from '../../routes';
+import { getThemeColors } from '../../theme';
+import ListHeader from '../../components/common/ListHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
-import EmptyState from '../../components/common/EmptyState';
 import StatusChip from '../../components/common/StatusChip';
-import { getOpenApiKeyStatus } from '../../utils/openApiStatus';
-import { getThemeColors } from '../../theme';
-import { useDataFetching } from '../../hooks/useDataFetching';
-import { formatYmdHm } from '../../utils/date';
 
-interface DashboardProps {
-  id?: string;
-}
-
-export const Dashboard: React.FC<DashboardProps> = ({ id = 'user-dashboard' }) => {
+export default function UserDashboard() {
   const navigate = useNavigate();
-  
-  // 테마 설정 (사용자 페이지는 'user' 테마)
+
+  // ROUTE_META에서 페이지 정보 동적 가져오기
+  const pageMeta = (ROUTE_META as any)[ROUTES.USER.DASHBOARD];
+  const pageTitle = pageMeta?.title || '사용자 대시보드';
+  const pageSubtitle = pageMeta?.subtitle || 'OpenAPI 서비스를 이용할 수 있는 사용자 대시보드입니다';
+
   const theme: 'user' | 'admin' = 'user';
   const colors = getThemeColors(theme);
 
-  // QnA 데이터 페칭 (대시보드용 제한된 수량)
-  const {
-    data: qnaList,
-    isLoading: qnaLoading,
-    isError: qnaIsError,
-    // refetch: refetchQna
-  } = useDataFetching({
-    fetchFunction: () => getUserQnaList({
-      page: 1,
-      limit: PAGINATION.HOME_PAGE_SIZE // 5개로 제한
-    } as any),
-    autoFetch: true
-  });
+  const quickActions = [
+    {
+      title: 'Q&A 작성',
+      description: '새로운 질문을 작성합니다',
+      icon: <AddIcon />,
+      color: 'primary' as const,
+      path: ROUTES.USER.QNA_CREATE,
+      action: () => navigate(ROUTES.USER.QNA_CREATE)
+    },
+    {
+      title: 'Q&A 목록',
+      description: '질문과 답변을 확인합니다',
+      icon: <QnaIcon />,
+      color: 'success' as const,
+      path: ROUTES.USER.QNA_LIST,
+      action: () => navigate(ROUTES.USER.QNA_LIST)
+    },
+    {
+      title: 'Q&A 이력',
+      description: '내가 작성한 질문들을 확인합니다',
+      icon: <HistoryIcon />,
+      color: 'info' as const,
+      path: ROUTES.USER.QNA_HISTORY,
+      action: () => navigate(ROUTES.USER.QNA_HISTORY)
+    },
+    {
+      title: 'FAQ 보기',
+      description: '자주 묻는 질문을 확인합니다',
+      icon: <FaqIcon />,
+      color: 'warning' as const,
+      path: ROUTES.USER.FAQ_LIST,
+      action: () => navigate(ROUTES.USER.FAQ_LIST)
+    },
+    {
+      title: 'OpenAPI 관리',
+      description: 'API 키를 관리합니다',
+      icon: <ApiIcon />,
+      color: 'secondary' as const,
+      path: ROUTES.USER.OPEN_API_MANAGEMENT,
+      action: () => navigate(ROUTES.USER.OPEN_API_MANAGEMENT)
+    }
+  ];
 
-  // OpenAPI 데이터 페칭 (대시보드용 제한된 수량)  
-  const {
-    data: openApiList,
-    isLoading: openApiLoading,
-    isError: openApiIsError,
-    // refetch: refetchOpenApi
-  } = useDataFetching({
-    fetchFunction: () => getUserOpenApiList({
-      page: 1,
-      limit: 3 // 3개로 제한
-    }),
-    autoFetch: true
-  });
+  const recentActivities = [
+    {
+      type: 'Q&A',
+      title: 'OpenAPI 사용법에 대한 질문',
+      status: '답변완료',
+      date: '2024-01-15',
+      color: 'success' as const
+    },
+    {
+      type: 'API',
+      title: '새로운 API 키 생성',
+      status: '완료',
+      date: '2024-01-14',
+      color: 'primary' as const
+    },
+    {
+      type: 'Q&A',
+      title: '데이터 형식 문의',
+      status: '답변대기',
+      date: '2024-01-13',
+      color: 'warning' as const
+    }
+  ];
 
-  const loading = qnaLoading || openApiLoading;
-  const errorMessage = qnaIsError ? 'QnA를 불러오는 중 오류가 발생했습니다.' : (openApiIsError ? 'OpenAPI를 불러오는 중 오류가 발생했습니다.' : '');
-
-
-
-  const handleCreateQna = () => {
-    navigate(ROUTES.USER.QNA_CREATE);
-  };
-
-  const handleQnaHistory = () => {
-    navigate(ROUTES.USER.QNA_HISTORY);
-  };
-
-  const handleOpenApiManagement = () => {
-    navigate(ROUTES.USER.OPEN_API_MANAGEMENT);
-  };
-
-  const handleCopyKey = (authKey: string) => {
-    navigator.clipboard.writeText(authKey);
-  };
-
-
-
-  if (loading) {
-    return <LoadingSpinner loading={true} />;
-  }
+  const stats = [
+    {
+      label: '총 Q&A 수',
+      value: '12',
+      color: 'primary' as const,
+      icon: <QnaIcon />
+    },
+    {
+      label: '답변완료',
+      value: '8',
+      color: 'success' as const,
+      icon: <QnaIcon />
+    },
+    {
+      label: '답변대기',
+      value: '4',
+      color: 'warning' as const,
+      icon: <QnaIcon />
+    },
+    {
+      label: '활성 API 키',
+      value: '3',
+      color: 'info' as const,
+      icon: <ApiIcon />
+    }
+  ];
 
   return (
-    <Box id={id} sx={{ p: SPACING.LARGE }}>
-      <Box sx={{ mb: SPACING.TITLE_BOTTOM }}>
-        <PageHeader title="대시보드" />
-      </Box>
+    <Box sx={{ p: 3 }}>
+      <ThemedCard sx={{ mb: 3 }}>
+        <ListHeader
+          title={pageTitle}
+          icon={<DashboardIcon />}
+        />
+      </ThemedCard>
 
-      {errorMessage && (
-        <Box sx={{ mb: SPACING.ERROR_ALERT_BOTTOM }}>
-          <ErrorAlert error={errorMessage} />
-        </Box>
-      )}
-
-      <Grid container spacing={SPACING.LARGE}>
-        {/* 내 QnA 섹션 */}
-        <Grid item xs={12} md={6}>
-          <ThemedCard sx={{ minHeight: 800, display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
-                <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
-                  <QnaIcon sx={{ mr: 1, color: colors.primary }} />
-                  내 QnA
-                </Typography>
-                <Box>
-                  <ThemedButton
-                    id="create-qna-btn"
-                    
-                    variant="primary"
-                    size="small"
-                    startIcon={<AddIcon />}
-                    onClick={handleCreateQna}
-                    sx={{ mr: 1 }}
-                    buttonSize="cta"
-                  >
-                    문의하기
-                  </ThemedButton>
-                  <ThemedButton
-                    id="qna-history-btn"
-                    
-                    variant="outlined"
-                    size="small"
-                    startIcon={<HistoryIcon />}
-                    onClick={handleQnaHistory}
-                    buttonSize="cta"
-                  >
-                    내 문의 내역
-                  </ThemedButton>
+      {/* 통계 정보 */}
+      <Typography variant="h5" gutterBottom sx={{ color: colors.text, mb: 2 }}>통계 정보</Typography>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {stats.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <ThemedCard>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <Box sx={{ display: 'inline-flex', p: 2, borderRadius: '50%', bgcolor: `${stat.color}.light`, color: `${stat.color}.main`, mb: 2 }}>
+                  {stat.icon}
                 </Box>
-              </Box>
-
-              {qnaList?.items && qnaList.items.length > 0 ? (
-                <List>
-                  {qnaList.items.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
-                    <React.Fragment key={qna.qnaId}>
-                      <ListItem id={`dash-qna-item-${qna.qnaId}`} divider button onClick={() => navigate(`${ROUTES.USER.QNA_HISTORY}?qnaId=${qna.qnaId}`)}>
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
-                              <Typography component="span" variant="body1" sx={{ fontWeight: 600 }}>
-                                {qna.title}
-                              </Typography>
-                            </Box>
-                          }
-                          secondary={`${formatYmdHm(qna.createdAt)} • ${qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}`}
-                        />
-                        <Chip
-                          label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}
-                          color={qna.answeredYn === 'Y' ? 'success' : 'warning'}
-                          size="small"
-                        />
-                      </ListItem>
-                    </React.Fragment>
-                  ))}
-                </List>
-              ) : (
-                <EmptyState message="현재 답변 대기 중인 문의가 없습니다." minHeight={400} />
-              )}
-            </CardContent>
-          </ThemedCard>
-        </Grid>
-
-        {/* API 인증키 관리 섹션 */}
-        <Grid item xs={12} md={6}>
-          <ThemedCard sx={{ minHeight: 800, display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: SPACING.MEDIUM }}>
-                <Typography variant="h6" component="h2" sx={{ display: 'flex', alignItems: 'center', color: colors.text }}>
-                  <KeyIcon sx={{ mr: 1, color: colors.primary }} />
-                  API 인증키 관리
+                <Typography variant="h4" sx={{ color: colors.text, mb: 1, fontWeight: 'bold' }}>
+                  {stat.value}
                 </Typography>
-                <ThemedButton
-                  id="openapi-management-btn"
-                  
-                  variant="outlined"
-                  size="small"
-                  startIcon={<SettingsIcon />}
-                  onClick={handleOpenApiManagement}
-                  buttonSize="cta"
-                >
-                  인증키 관리
-                </ThemedButton>
-              </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {stat.label}
+                </Typography>
+              </CardContent>
+            </ThemedCard>
+          </Grid>
+        ))}
+      </Grid>
 
-              {Array.isArray((openApiList as any)?.authKeys) && (openApiList as any).authKeys.length > 0 ? (
-                <List>
-                  {(openApiList as any).authKeys.slice(0, 3).map((authKey: any) => (
-                    <ListItem key={authKey.keyId} divider sx={{ alignItems: 'center' }}>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body1" sx={{ fontWeight: 700, lineHeight: 1 }}>
-                              API Key: {authKey.authKey.substring(0, 36)}...
-                            </Typography>
-                            <Tooltip title="복사">
-                              <IconButton id={`dash-copy-key-${authKey.keyId}`} size="small" onClick={() => handleCopyKey(authKey.authKey)}>
-                                <CopyIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <StatusChip kind={getOpenApiKeyStatus(authKey)} />
-                          </Box>
-                        }
-                        secondary={`유효기간: ${authKey.startDt} ~ ${authKey.endDt}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              ) : (
-                <EmptyState message="발행된 인증키가 없습니다." minHeight={400} />
-              )}
-            </CardContent>
-          </ThemedCard>
-        </Grid>
+      {/* 빠른 액션 */}
+      <Typography variant="h5" gutterBottom sx={{ color: colors.text, mb: 2 }}>빠른 액션</Typography>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {quickActions.map((action, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+            <ThemedCard
+              sx={{ height: '100%', cursor: 'pointer' }}
+              onClick={action.action}
+            >
+              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <Box sx={{ display: 'inline-flex', p: 2, borderRadius: '50%', bgcolor: `${action.color}.light`, color: `${action.color}.main`, mb: 2 }}>
+                  {action.icon}
+                </Box>
+                <Typography variant="h6" gutterBottom sx={{ color: colors.text }}>
+                  {action.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {action.description}
+                </Typography>
+              </CardContent>
+              <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
+                <ThemedButton
+                  variant="primary"
+                  color={action.color}
+                  onClick={action.action}
+                  startIcon={action.title.includes('작성') || action.title.includes('생성') ? <AddIcon /> : <ViewIcon />}
+                >
+                  {action.title.includes('작성') || action.title.includes('생성') ? '시작하기' : '보기'}
+                </ThemedButton>
+              </CardActions>
+            </ThemedCard>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* 최근 활동 */}
+      <Typography variant="h5" gutterBottom sx={{ color: colors.text, mb: 2 }}>최근 활동</Typography>
+      <Grid container spacing={3}>
+        {recentActivities.map((activity, index) => (
+          <Grid item xs={12} md={4} key={index}>
+            <ThemedCard>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Chip
+                    label={activity.type}
+                    size="small"
+                    color={activity.color}
+                    variant="outlined"
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    {activity.date}
+                  </Typography>
+                </Box>
+                <Typography variant="subtitle1" sx={{ color: colors.text, mb: 1 }}>
+                  {activity.title}
+                </Typography>
+                <StatusChip
+                  label={activity.status}
+                  kind={activity.color}
+                  size="small"
+                />
+              </CardContent>
+            </ThemedCard>
+          </Grid>
+        ))}
       </Grid>
     </Box>
   );
-}; 
+} 

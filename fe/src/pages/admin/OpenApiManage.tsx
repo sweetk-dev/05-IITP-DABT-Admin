@@ -62,7 +62,7 @@ export default function AdminOpenApiClients() {
 
   return (
     <Box id="admin-openapi-clients-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-openapi-clients-header" title="OpenAPI 클라이언트 관리" search={{ value: search, onChange: (v)=>{ setSearch(v); setQuery({ search: v, page: 1, limit, activeYn, sort }, { replace: true }); }, placeholder: '키/설명/사용자 검색' }} filters={[
+      <PageHeader id="admin-openapi-clients-header" title="OpenAPI 인증키 관리" search={{ value: search, onChange: (v)=>{ setSearch(v); setQuery({ search: v, page: 1, limit, activeYn, sort }, { replace: true }); }, placeholder: '키/설명/사용자 검색' }} filters={[
         { label: '상태', value: activeYn, options: [{ value: '', label: '전체' }, { value: 'Y', label: '활성' }, { value: 'N', label: '비활성' }], onChange: (v: string)=>{ setActiveYn(v); setQuery({ activeYn: v, page: 1, limit, search, sort }, { replace: true }); } },
         { label: '정렬', value: sort, options: [
           { value: 'name-asc', label: '이름순' },

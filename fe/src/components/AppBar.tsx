@@ -1,4 +1,4 @@
-import { AppBar as MuiAppBar, Toolbar, Box, Typography } from '@mui/material';
+import { AppBar as MuiAppBar, Toolbar, Box, Typography, IconButton } from '@mui/material';
 import { useEffect, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { logoutUser, logoutAdmin } from '../api';
 import { clearLoginInfo } from '../store/user';
 import { getUserName, getUserType, getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
-import { AccountCircle } from '@mui/icons-material';
+import { AccountCircle, Menu as MenuIcon } from '@mui/icons-material';
 import ThemedButton from './common/ThemedButton';
 // AdminMenuBar removed in favor of SideNav + AdminPageHeader
 
@@ -34,7 +34,13 @@ function AppBarRow({ left, right }: AppBarRowProps) {
   );
 }
 
-export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | 'auth' | 'admin-login' | 'admin' }) {
+export default function AppBar({ 
+  type = 'user', 
+  onSideNavToggle 
+}: { 
+  type?: 'user' | 'public' | 'auth' | 'admin-login' | 'admin';
+  onSideNavToggle?: () => void;
+}) {
   const navigate = useNavigate();
   const userName = getUserName();
   const userType = getUserType();
@@ -183,12 +189,22 @@ export default function AppBar({ type = 'user' }: { type?: 'user' | 'public' | '
           <Toolbar id="appbar-admin-toolbar" sx={commonToolbarStyles}>
             <AppBarRow
               left={
-                <Box 
-                  id="appbar-admin-logo-container"
-                  onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)} 
-                  sx={{ cursor: 'pointer' }}
-                >
-                  <Logo serviceName={SERVICE_NAME + ' - Admin'} />
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <IconButton
+                    id="appbar-admin-menu-toggle"
+                    onClick={onSideNavToggle}
+                    sx={{ mr: 2, color: colors.text }}
+                    aria-label="toggle side navigation"
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                  <Box 
+                    id="appbar-admin-logo-container"
+                    onClick={() => navigate(ROUTES.ADMIN.DASHBOARD)} 
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    <Logo serviceName={SERVICE_NAME + ' - Admin'} />
+                  </Box>
                 </Box>
               }
               right={

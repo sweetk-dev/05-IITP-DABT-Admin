@@ -8,8 +8,6 @@ export const ROUTES = {
   PUBLIC: {
     HOME: '/',
     THEME_PREVIEW: '/theme-preview',
-    LOGIN: '/login',
-    REGISTER: '/register',
     NOTICE: '/notice',
     NOTICE_DETAIL: '/notice/:noticeId',
     FAQ: '/faq',
@@ -25,6 +23,8 @@ export const ROUTES = {
   USER: {
     DASHBOARD: '/dashbd',
     PROFILE: '/profile',
+    LOGIN: '/login',
+    REGISTER: '/register',
     FAQ_LIST: '/user/faq',
     FAQ_DETAIL: '/user/faq/:id',
     QNA_LIST: '/user/qna',
@@ -32,6 +32,8 @@ export const ROUTES = {
     QNA_CREATE: '/user/qna/create',
     QNA_HISTORY: '/user/qna/history',
     OPEN_API_MANAGEMENT: '/user/openapi',
+    NOTICE_LIST: '/user/notice',
+    NOTICE_DETAIL: '/user/notice/:id',
   },
 
   // 관리자 페이지 (관리자 로그인 필요)
@@ -186,14 +188,14 @@ export const ROUTE_META = {
     requiresAdmin: false,
     showInNav: true,
   },
-  [ROUTES.PUBLIC.LOGIN]: {
-    title: '로그인',
+  [ROUTES.USER.LOGIN]: {
+    title: '사용자 로그인',
     requiresAuth: false,
     requiresAdmin: false,
     showInNav: false,
   },
-  [ROUTES.PUBLIC.REGISTER]: {
-    title: '회원가입',
+  [ROUTES.USER.REGISTER]: {
+    title: '사용자 등록',
     requiresAuth: false,
     requiresAdmin: false,
     showInNav: false,
@@ -295,7 +297,7 @@ export const ROUTE_META = {
     showInNav: true,
   },
   [ROUTES.ADMIN.OPENAPI.CLIENTS]: {
-    title: 'OpenAPI 클라이언트 관리',
+    title: 'OpenAPI 인증 키 관리',
     requiresAuth: true,
     requiresAdmin: true,
     showInNav: true,
@@ -324,6 +326,145 @@ export const ROUTE_META = {
     requiresAdmin: true,
     showInNav: true,
   },
+  // FAQ 관련
+  [ROUTES.ADMIN.FAQ.CREATE]: {
+    title: 'FAQ 생성',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.FAQ.EDIT]: {
+    title: 'FAQ 편집',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.FAQ.DETAIL]: {
+    title: 'FAQ 상세',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  // Q&A 관련
+  [ROUTES.ADMIN.QNA.DETAIL]: {
+    title: 'Q&A 상세',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.QNA.REPLY]: {
+    title: 'Q&A 답변',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  // 사용자 관련
+  [ROUTES.ADMIN.USERS.CREATE]: {
+    title: '사용자 생성',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.USERS.EDIT]: {
+    title: '사용자 편집',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.USERS.DETAIL]: {
+    title: '사용자 상세',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  // OpenAPI 관련
+  [ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL]: {
+    title: 'OpenAPI 클라이언트 상세',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.OPENAPI.REQUESTS]: {
+    title: 'OpenAPI 요청 관리',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: true,
+  },
+  [ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL]: {
+    title: 'OpenAPI 요청 상세',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  // 공지사항 관련
+  [ROUTES.ADMIN.NOTICES.CREATE]: {
+    title: '공지사항 생성',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.NOTICES.EDIT]: {
+    title: '공지사항 편집',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  [ROUTES.ADMIN.NOTICES.DETAIL]: {
+    title: '공지사항 상세',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  // 운영자 관련
+  [ROUTES.ADMIN.OPERATORS.DETAIL]: {
+    title: '운영자 상세',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
+  // 사용자 페이지 관련
+  [ROUTES.USER.FAQ_DETAIL]: {
+    title: 'FAQ 상세',
+    requiresAuth: true,
+    requiresAdmin: false,
+    showInNav: false,
+  },
+  [ROUTES.USER.QNA_DETAIL]: {
+    title: 'Q&A 상세',
+    requiresAuth: true,
+    requiresAdmin: false,
+    showInNav: false,
+  },
+  [ROUTES.USER.QNA_CREATE]: {
+    title: 'Q&A 작성',
+    requiresAuth: true,
+    requiresAdmin: false,
+    showInNav: false,
+  },
+  [ROUTES.USER.QNA_HISTORY]: {
+    title: 'Q&A 이력',
+    requiresAuth: true,
+    requiresAdmin: false,
+    showInNav: true,
+  },
+  [ROUTES.USER.OPEN_API_MANAGEMENT]: {
+    title: 'OpenAPI 관리',
+    requiresAuth: true,
+    requiresAdmin: false,
+    showInNav: true,
+  },
+  [ROUTES.USER.NOTICE_LIST]: {
+    title: '공지사항 목록',
+    requiresAuth: true,
+    requiresAdmin: false,
+    showInNav: true,
+  },
+  [ROUTES.USER.NOTICE_DETAIL]: {
+    title: '공지사항 상세',
+    requiresAuth: true,
+    requiresAdmin: false,
+    showInNav: false,
+  },
 } as const;
 
 /**
@@ -345,19 +486,130 @@ export const ROUTE_GROUPS = {
       { path: ROUTES.USER.DASHBOARD, title: '대시보드' },
       { path: ROUTES.USER.PROFILE, title: '프로필' },
       { path: ROUTES.USER.FAQ_LIST, title: 'FAQ 목록' },
+      { path: ROUTES.USER.FAQ_DETAIL, title: 'FAQ 상세' },
       { path: ROUTES.USER.QNA_LIST, title: 'Q&A 목록' },
+      { path: ROUTES.USER.QNA_DETAIL, title: 'Q&A 상세' },
+      { path: ROUTES.USER.QNA_CREATE, title: 'Q&A 작성' },
+      { path: ROUTES.USER.QNA_HISTORY, title: 'Q&A 이력' },
+      { path: ROUTES.USER.OPEN_API_MANAGEMENT, title: 'OpenAPI 관리' },
+      { path: ROUTES.USER.NOTICE_LIST, title: '공지사항 목록' },
+      { path: ROUTES.USER.NOTICE_DETAIL, title: '공지사항 상세' },
     ],
   },
   ADMIN: {
     name: '관리자 페이지',
     routes: [
       { path: ROUTES.ADMIN.DASHBOARD, title: '관리자 대시보드' },
+      { path: ROUTES.ADMIN.PROFILE, title: '관리자 프로필' },
       { path: ROUTES.ADMIN.FAQ.LIST, title: 'FAQ 관리' },
+      { path: ROUTES.ADMIN.FAQ.CREATE, title: 'FAQ 생성' },
+      { path: ROUTES.ADMIN.FAQ.EDIT, title: 'FAQ 편집' },
+      { path: ROUTES.ADMIN.FAQ.DETAIL, title: 'FAQ 상세' },
       { path: ROUTES.ADMIN.QNA.LIST, title: 'Q&A 관리' },
+      { path: ROUTES.ADMIN.QNA.DETAIL, title: 'Q&A 상세' },
+      { path: ROUTES.ADMIN.QNA.REPLY, title: 'Q&A 답변' },
       { path: ROUTES.ADMIN.USERS.LIST, title: '사용자 관리' },
-      { path: ROUTES.ADMIN.OPENAPI.CLIENTS, title: 'OpenAPI 클라이언트 관리' },
+      { path: ROUTES.ADMIN.USERS.CREATE, title: '사용자 생성' },
+      { path: ROUTES.ADMIN.USERS.EDIT, title: '사용자 편집' },
+      { path: ROUTES.ADMIN.USERS.DETAIL, title: '사용자 상세' },
+      { path: ROUTES.ADMIN.OPENAPI.CLIENTS, title: 'OpenAPI 인증 키 관리' },
+      { path: ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL, title: 'OpenAPI 클라이언트 상세' },
+      { path: ROUTES.ADMIN.OPENAPI.REQUESTS, title: 'OpenAPI 요청 관리' },
+      { path: ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL, title: 'OpenAPI 요청 상세' },
       { path: ROUTES.ADMIN.NOTICES.LIST, title: '공지사항 관리' },
+      { path: ROUTES.ADMIN.NOTICES.CREATE, title: '공지사항 생성' },
+      { path: ROUTES.ADMIN.NOTICES.EDIT, title: '공지사항 편집' },
+      { path: ROUTES.ADMIN.NOTICES.DETAIL, title: '공지사항 상세' },
+      { path: ROUTES.ADMIN.OPERATORS.LIST, title: '운영자 관리' },
+      { path: ROUTES.ADMIN.OPERATORS.DETAIL, title: '운영자 상세' },
+      { path: ROUTES.ADMIN.CODE.LIST, title: '코드 관리' },
       { path: ROUTES.ADMIN.SETTINGS, title: '시스템 설정' },
     ],
   },
-} as const; 
+  ADMIN_AUTH: {
+    name: '관리자 인증',
+    routes: [
+      { path: ROUTES.ADMIN.LOGIN, title: '관리자 로그인' },
+    ],
+  },
+  USER_AUTH: {
+    name: '사용자 인증',
+    routes: [
+      { path: ROUTES.USER.LOGIN, title: '사용자 로그인' },
+      { path: ROUTES.USER.REGISTER, title: '사용자 등록' },
+    ],
+  },
+  ADMIN_CONTENT: {
+    name: '콘텐츠 관리',
+    routes: [
+      { path: ROUTES.ADMIN.FAQ.LIST, title: 'FAQ 관리' },
+      { path: ROUTES.ADMIN.FAQ.CREATE, title: 'FAQ 생성' },
+      { path: ROUTES.ADMIN.FAQ.EDIT, title: 'FAQ 편집' },
+      { path: ROUTES.ADMIN.FAQ.DETAIL, title: 'FAQ 상세' },
+      { path: ROUTES.ADMIN.QNA.LIST, title: 'Q&A 관리' },
+      { path: ROUTES.ADMIN.QNA.DETAIL, title: 'Q&A 상세' },
+      { path: ROUTES.ADMIN.QNA.REPLY, title: 'Q&A 답변' },
+      { path: ROUTES.ADMIN.NOTICES.LIST, title: '공지사항 관리' },
+      { path: ROUTES.ADMIN.NOTICES.CREATE, title: '공지사항 생성' },
+      { path: ROUTES.ADMIN.NOTICES.EDIT, title: '공지사항 편집' },
+      { path: ROUTES.ADMIN.NOTICES.DETAIL, title: '공지사항 상세' },
+    ],
+  },
+  ADMIN_ACCOUNT: {
+    name: '계정 관리',
+    routes: [
+      { path: ROUTES.ADMIN.USERS.LIST, title: '사용자 관리' },
+      { path: ROUTES.ADMIN.USERS.CREATE, title: '사용자 생성' },
+      { path: ROUTES.ADMIN.USERS.EDIT, title: '사용자 편집' },
+      { path: ROUTES.ADMIN.USERS.DETAIL, title: '사용자 상세' },
+      { path: ROUTES.ADMIN.OPERATORS.LIST, title: '운영자 관리' },
+      { path: ROUTES.ADMIN.OPERATORS.DETAIL, title: '운영자 상세' },
+    ],
+  },
+  ADMIN_SYSTEM: {
+    name: '시스템 관리',
+    routes: [
+      { path: ROUTES.ADMIN.OPENAPI.CLIENTS, title: 'OpenAPI 인증 키 관리' },
+      { path: ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL, title: 'OpenAPI 클라이언트 상세' },
+      { path: ROUTES.ADMIN.OPENAPI.REQUESTS, title: 'OpenAPI 요청 관리' },
+      { path: ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL, title: 'OpenAPI 요청 상세' },
+      { path: ROUTES.ADMIN.CODE.LIST, title: '코드 관리' },
+      { path: ROUTES.ADMIN.SETTINGS, title: '시스템 설정' },
+    ],
+  },
+  USER_CONTENT: {
+    name: '콘텐츠 조회',
+    routes: [
+      { path: ROUTES.USER.FAQ_LIST, title: 'FAQ 목록' },
+      { path: ROUTES.USER.FAQ_DETAIL, title: 'FAQ 상세' },
+      { path: ROUTES.USER.QNA_LIST, title: 'Q&A 목록' },
+      { path: ROUTES.USER.QNA_DETAIL, title: 'Q&A 상세' },
+      { path: ROUTES.USER.QNA_CREATE, title: 'Q&A 작성' },
+      { path: ROUTES.USER.QNA_HISTORY, title: 'Q&A 이력' },
+      { path: ROUTES.USER.NOTICE_LIST, title: '공지사항 목록' },
+      { path: ROUTES.USER.NOTICE_DETAIL, title: '공지사항 상세' },
+    ],
+  },
+  USER_SERVICES: {
+    name: '서비스 이용',
+    routes: [
+      { path: ROUTES.USER.OPEN_API_MANAGEMENT, title: 'OpenAPI 관리' },
+    ],
+  },
+} as const;
+
+/**
+ * 라우트 가드 컴포넌트들
+ * 인증, 권한, 접근 제어를 담당
+ */
+export { 
+  PublicRoute, 
+  LoginRoute, 
+  AdminLoginRoute, 
+  RegisterRoute 
+} from './guards/PublicRoute';
+
+export { 
+  PrivateRoute, 
+  AdminProtectedRoute 
+} from '../components/ProtectedRoute'; 

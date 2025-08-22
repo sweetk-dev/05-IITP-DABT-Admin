@@ -1,94 +1,300 @@
-import React, { useState } from 'react';
-import { Add as AddIcon } from '@mui/icons-material';
-import { Box, CardContent, Stack } from '@mui/material';
-import PageHeader from '../../components/common/PageHeader';
-import ThemedButton from '../../components/common/ThemedButton';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Grid, Card, CardContent, CardActions, Button, Chip, TextField, InputAdornment } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../routes';
-import { SPACING } from '../../constants/spacing';
-import { useDataFetching } from '../../hooks/useDataFetching';
-import { getAdminNoticeList, deleteAdminNotice } from '../../api';
-import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
-import { useQuerySync } from '../../hooks/useQuerySync';
-import ListScaffold from '../../components/common/ListScaffold';
-import { formatYmdHm } from '../../utils/date';
+import {
+  Announcement as NoticeIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon
+} from '@mui/icons-material';
+import { ROUTES, ROUTE_META } from '../../routes';
+import { getThemeColors } from '../../theme';
+import ListHeader from '../../components/common/ListHeader';
+import ThemedCard from '../../components/common/ThemedCard';
+import ThemedButton from '../../components/common/ThemedButton';
+import StatusChip from '../../components/common/StatusChip';
 
-export default function AdminNoticeList() {
+export default function NoticeManage() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [selected, setSelected] = useState<Array<number>>([]);
-  const [sort, setSort] = useState('name-asc');
-  const { query, setQuery } = useQuerySync({ page: 1, limit: 10, search: '', sort: 'name-asc' });
 
-  React.useEffect(() => {
-    if (query.page) setPage(Number(query.page) || 1);
-    if (query.limit) setLimit(Number(query.limit) || 10);
-    if (query.search !== undefined) setSearch(query.search);
-    if (query.sort) setSort(query.sort);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.page, query.limit, query.search, query.sort]);
+  // ROUTE_META에서 페이지 정보 동적 가져오기
+  const pageMeta = (ROUTE_META as any)[ROUTES.ADMIN.NOTICES.LIST];
+  const pageTitle = pageMeta?.title || '공지사항 관리';
 
-  const { data, isLoading, isEmpty, isError, refetch } = useDataFetching({
-    fetchFunction: () => getAdminNoticeList({ page, limit, search, sort } as any),
-    dependencies: [page, limit, search, sort]
+  const theme: 'user' | 'admin' = 'admin';
+  const colors = getThemeColors(theme);
+
+  // 임시 공지사항 데이터 (실제로는 API에서 가져옴)
+  const [notices, setNotices] = useState([
+    {
+      id: 1,
+      title: '시스템 점검 안내',
+      content: '2024년 1월 20일 새벽 2시부터 4시까지 시스템 점검이 진행됩니다.',
+      category: '시스템',
+      status: '활성',
+      priority: '높음',
+      createdAt: '2024-01-15',
+      updatedAt: '2024-01-15'
+    },
+    {
+      id: 2,
+      title: 'OpenAPI 서비스 이용 안내',
+      content: 'OpenAPI 서비스 이용 시 주의사항을 안내드립니다.',
+      category: '서비스',
+      status: '활성',
+      priority: '보통',
+      createdAt: '2024-01-14',
+      updatedAt: '2024-01-14'
+    },
+    {
+      id: 3,
+      title: '개인정보 처리방침 개정',
+      content: '개인정보 처리방침이 개정되었습니다. 자세한 내용은 첨부파일을 참고하세요.',
+      category: '정책',
+      status: '비활성',
+      priority: '높음',
+      createdAt: '2024-01-13',
+      updatedAt: '2024-01-13'
+    }
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [selectedStatus, setSelectedStatus] = useState('전체');
+
+  const categories = ['전체', '시스템', '서비스', '정책', '기타'];
+  const statuses = ['전체', '활성', '비활성'];
+
+  const handleCreateNotice = () => {
+    navigate(ROUTES.ADMIN.NOTICES.CREATE);
+  };
+
+  const handleEditNotice = (id: number) => {
+    navigate(`${ROUTES.ADMIN.NOTICES.EDIT}/${id}`);
+  };
+
+  const handleViewNotice = (id: number) => {
+    navigate(`${ROUTES.ADMIN.NOTICES.DETAIL}/${id}`);
+  };
+
+  const handleDeleteNotice = (id: number) => {
+    setNotices(notices.filter(notice => notice.id !== id));
+  };
+
+  const filteredNotices = notices.filter(notice => {
+    const matchesSearch = notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         notice.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === '전체' || notice.category === selectedCategory;
+    const matchesStatus = selectedStatus === '전체' || notice.status === selectedStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  const raw = (data as any)?.items || (data as any)?.notices || [];
-  const notices = [...raw].sort((a: any, b: any) => {
-    const [key, order] = sort.split('-');
-    const av = key === 'name' ? (a.title ?? '') : (a[`${key}`] ?? '');
-    const bv = key === 'name' ? (b.title ?? '') : (b[`${key}`] ?? '');
-    if (key === 'name') return av.localeCompare(bv) * (order === 'asc' ? 1 : -1);
-    return (new Date(av).getTime() - new Date(bv).getTime()) * (order === 'asc' ? 1 : -1);
-  });
-  const totalPages = (data as any)?.totalPages || 0;
+  const getStatusColor = (status: string) => {
+    return status === '활성' ? 'success' : 'error';
+  };
 
-  const columns: Array<DataTableColumn<any>> = [
-    { key: 'title', header: '제목', render: (n) => <span style={{ cursor: 'pointer' }} onClick={()=>navigate(ROUTES.ADMIN.NOTICES.DETAIL.replace(':id', String(n.noticeId)))}>{n.title}</span> },
-    { key: 'postedAt', header: '게시일', width: 160, render: (n) => formatYmdHm(n.postedAt) },
-  ];
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case '시스템':
+        return 'error';
+      case '서비스':
+        return 'primary';
+      case '정책':
+        return 'warning';
+      default:
+        return 'default';
+    }
+  };
 
-  const toggleAll = (checked: boolean) => setSelected(checked ? notices.map((n: any)=>n.noticeId) : []);
-  const toggleRow = (id: number) => setSelected(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
-
-  const handleBulkDelete = async () => {
-    for (const id of selected) { await deleteAdminNotice(id); }
-    setSelected([]); refetch();
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case '높음':
+        return 'error';
+      case '보통':
+        return 'warning';
+      case '낮음':
+        return 'success';
+      default:
+        return 'default';
+    }
   };
 
   return (
-    <Box id="admin-notice-list-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-notice-list-header" title="공지사항 관리" actionsRight={<ThemedButton variant="primary" size="small" startIcon={<AddIcon />} onClick={()=>navigate(ROUTES.ADMIN.NOTICES.CREATE)} buttonSize="cta">등록</ThemedButton>} search={{ value: search, onChange: (v)=>{ setSearch(v); setQuery({ search: v, page: 1, limit, sort }, { replace: true }); }, placeholder: '제목/내용 검색' }} filters={[{ label: '정렬', value: sort, options: [
-        { value: 'name-asc', label: '이름순' },
-        { value: 'postedAt-desc', label: '생성순(최신)' },
-        { value: 'updatedAt-desc', label: '업데이트순(최신)' },
-      ], onChange: (v: string)=> { const nv = v || 'name-asc'; setSort(nv); setQuery({ sort: nv, page: 1, limit }, { replace: true }); } }]} />
-      <ListScaffold
-        title=""
-        total={(data as any)?.total}
-        loading={isLoading}
-        errorText={isError ? '목록을 불러오는 중 오류가 발생했습니다.' : ''}
-        emptyText={isEmpty ? '표시할 항목이 없습니다.' : ''}
-        pagination={{ page, totalPages, onPageChange: (p)=>{ setPage(p); setQuery({ page: p, limit, sort }, { replace: true }); }, pageSize: limit, onPageSizeChange: (s)=>{ setLimit(s); setPage(1); setQuery({ page: 1, limit: s, sort }, { replace: true }); } }}
-      >
+    <Box sx={{ p: 3 }}>
+      <ThemedCard sx={{ mb: 3 }}>
+        <ListHeader
+          title={pageTitle}
+          icon={<NoticeIcon />}
+          actionsRight={
+            <ThemedButton
+              variant="primary"
+              startIcon={<AddIcon />}
+              onClick={handleCreateNotice}
+            >
+              공지사항 추가
+            </ThemedButton>
+          }
+        />
+      </ThemedCard>
+
+      {/* 검색 및 필터 */}
+      <ThemedCard sx={{ mb: 3 }}>
         <CardContent>
-          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mb: 1 }}>
-            <ThemedButton variant="dangerSoft" onClick={handleBulkDelete} disabled={selected.length === 0} buttonSize="cta">선택 삭제</ThemedButton>
-          </Stack>
-          <DataTable
-            id="admin-notice-table"
-            columns={columns}
-            rows={notices}
-            getRowId={(r)=>r.noticeId}
-            selectedIds={selected}
-            onToggleRow={(id)=>toggleRow(id as number)}
-            onToggleAll={toggleAll}
-            emptyText={isEmpty ? '표시할 항목이 없습니다.' : undefined}
-          />
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                placeholder="제목 또는 내용으로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                select
+                fullWidth
+                label="카테고리"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                SelectProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FilterIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <TextField
+                select
+                fullWidth
+                label="상태"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                SelectProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FilterIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              >
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Typography variant="body2" color="text.secondary">
+                총 {filteredNotices.length}개
+              </Typography>
+            </Grid>
+          </Grid>
         </CardContent>
-      </ListScaffold>
+      </ThemedCard>
+
+      {/* 공지사항 목록 */}
+      <Grid container spacing={3}>
+        {filteredNotices.map((notice) => (
+          <Grid item xs={12} md={6} lg={4} key={notice.id}>
+            <ThemedCard>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Chip
+                      label={notice.category}
+                      size="small"
+                      color={getCategoryColor(notice.category) as any}
+                      variant="outlined"
+                    />
+                    <Chip
+                      label={notice.priority}
+                      size="small"
+                      color={getPriorityColor(notice.priority) as any}
+                      variant="outlined"
+                    />
+                  </Box>
+                  <StatusChip
+                    label={notice.status}
+                    kind={getStatusColor(notice.status)}
+                    size="small"
+                  />
+                </Box>
+                <Typography variant="h6" gutterBottom sx={{ color: colors.text, minHeight: 48 }}>
+                  {notice.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
+                  {notice.content.length > 100 ? `${notice.content.substring(0, 100)}...` : notice.content}
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    생성: {notice.createdAt}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    수정: {notice.updatedAt}
+                  </Typography>
+                </Box>
+              </CardContent>
+              <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+                <ThemedButton
+                  variant="outlined"
+                  size="small"
+                  onClick={() => handleViewNotice(notice.id)}
+                >
+                  보기
+                </ThemedButton>
+                <Box>
+                  <ThemedButton
+                    variant="outlined"
+                    size="small"
+                    onClick={() => handleEditNotice(notice.id)}
+                    sx={{ mr: 1 }}
+                  >
+                    편집
+                  </ThemedButton>
+                  <ThemedButton
+                    variant="dangerOutlined"
+                    size="small"
+                    onClick={() => handleDeleteNotice(notice.id)}
+                  >
+                    삭제
+                  </ThemedButton>
+                </Box>
+              </CardActions>
+            </ThemedCard>
+          </Grid>
+        ))}
+      </Grid>
+
+      {filteredNotices.length === 0 && (
+        <ThemedCard>
+          <CardContent sx={{ textAlign: 'center', py: 6 }}>
+            <NoticeIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              공지사항이 없습니다
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {searchTerm || selectedCategory !== '전체' || selectedStatus !== '전체' ? '검색 조건을 변경해보세요.' : '새로운 공지사항을 추가해보세요.'}
+            </Typography>
+          </CardContent>
+        </ThemedCard>
+      )}
     </Box>
   );
 }

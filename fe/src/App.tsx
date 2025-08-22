@@ -41,10 +41,15 @@ const AdminFaqDetail = lazy(() => import('./pages/admin/FaqDetail'));
 const AdminFaqEdit = lazy(() => import('./pages/admin/FaqEdit'));
 const AdminQnaDetail = lazy(() => import('./pages/admin/QnaDetail'));
 const AdminQnaReply = lazy(() => import('./pages/admin/QnaReply'));
+
+// 새로 추가된 Admin 페이지들
+const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
+const OperatorManagement = lazy(() => import('./pages/admin/OperatorManagement'));
+const CodeManagement = lazy(() => import('./pages/admin/CodeManagement'));
+
 import LoadingSpinner from './components/LoadingSpinner';
 
 // 임시 잔여 컴포넌트
-const UserManagement = () => <div>UserManagement</div>;
 const UserDetail = () => <div>UserDetail</div>;
 const ApiRequestDetail = () => <div>ApiRequestDetail</div>;
 const AdminQnaEdit = () => <div>AdminQnaEdit</div>;
@@ -98,10 +103,21 @@ function App() {
               <AdminProtectedRoute>
                 <Suspense fallback={<LoadingSpinner loading={true} />}>
                   <Routes>
-                    <Route path="dashbd" element={<AdminDashboard />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="profile" element={<AdminProfile />} />
+                    
+                    {/* 사용자 관리 */}
                     <Route path="users" element={<UserManagement />} />
                     <Route path="users/:id" element={<UserDetail />} />
+                    
+                    {/* 운영자 관리 */}
+                    <Route path="operators" element={<OperatorManagement />} />
+                    <Route path="operators/:id" element={<div>OperatorDetail</div>} />
+                    
+                    {/* 코드 관리 */}
+                    <Route path="code" element={<CodeManagement />} />
+                    
+                    {/* 기존 관리자 페이지들 */}
                     <Route path="openapi/clients" element={<AdminOpenApiClients />} />
                     <Route path="openapi/clients/:id" element={<AdminOpenApiDetail />} />
                     <Route path="openapi/clients/:id/edit" element={<AdminOpenApiEdit />} />
@@ -119,10 +135,7 @@ function App() {
                     <Route path="qnas/:id" element={<AdminQnaDetail />} />
                     <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
                     <Route path="qnas/:id/reply" element={<AdminQnaReply />} />
-                    {/* 운영자/코드 관리 (S-Admin 전용 메뉴 라우팅) */}
-                    <Route path="account" element={<div>OperatorsManagement</div>} />
-                    <Route path="account/:id" element={<div>OperatorDetail</div>} />
-                    <Route path="code" element={<div>CodeManagement</div>} />
+                    
                     {/* 관리자 경로에서 인증되지 않은 경우 로그인으로 리다이렉트 */}
                     <Route path="*" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
                   </Routes>

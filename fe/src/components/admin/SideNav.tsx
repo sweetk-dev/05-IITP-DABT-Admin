@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Tooltip, Divider, IconButton } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -17,41 +17,61 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { ROUTES } from '../../routes';
 import { getAdminRole } from '../../store/user';
+import { hasMenuAccess } from '../../utils/auth';
+
+interface SideNavProps {
+  open: boolean;
+  onToggle: () => void;
+  adminRole: string | null;
+}
 
 interface SideNavItem {
   id: string;
+  key: string;
   label: string;
   to: string;
   icon: React.ReactNode;
-  requiresSAdmin?: boolean;
 }
 
-export default function SideNav() {
+export default function SideNav({ open, onToggle, adminRole }: SideNavProps) {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const adminRole = getAdminRole();
-  const isSAdmin = useMemo(() => adminRole === 'S-ADMIN', [adminRole]);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const items: SideNavItem[] = useMemo(() => [
-    { id: 'sidenav-dashboard', label: '대시보드', to: ROUTES.ADMIN.DASHBOARD, icon: <DashboardIcon /> },
-    { id: 'sidenav-openapi', label: 'Open API 인증 키관리', to: ROUTES.ADMIN.OPENAPI.CLIENTS, icon: <OpenApiIcon /> },
-    { id: 'sidenav-qna', label: 'Q&A 관리', to: ROUTES.ADMIN.QNA.LIST, icon: <QnaIcon /> },
-    { id: 'sidenav-faq', label: 'FAQ 관리', to: ROUTES.ADMIN.FAQ.LIST, icon: <FaqIcon /> },
-    { id: 'sidenav-notice', label: '공지 관리', to: ROUTES.ADMIN.NOTICES.LIST, icon: <NoticeIcon /> },
-    { id: 'sidenav-users', label: '사용자 관리', to: ROUTES.ADMIN.USERS.LIST, icon: <UsersIcon /> },
-    // 시스템 영역 (S-Admin 전용)
-    { id: 'sidenav-operators', label: '운영자 관리', to: ROUTES.ADMIN.OPERATORS.LIST, icon: <AdminIcon />, requiresSAdmin: true },
-    { id: 'sidenav-codes', label: '코드 관리', to: ROUTES.ADMIN.CODE.LIST, icon: <CodeIcon />, requiresSAdmin: true },
+    { id: 'sidenav-dashboard', key: 'dashboard', label: '대시보드', to: ROUTES.ADMIN.DASHBOARD, icon: <DashboardIcon /> },
+    { id: 'sidenav-openapi', key: 'openapi', label: 'Open API 인증 키관리', to: ROUTES.ADMIN.OPENAPI.CLIENTS, icon: <OpenApiIcon /> },
+    { id: 'sidenav-qna', key: 'qna', label: 'Q&A 관리', to: ROUTES.ADMIN.QNA.LIST, icon: <QnaIcon /> },
+    { id: 'sidenav-faq', key: 'faq', label: 'FAQ 관리', to: ROUTES.ADMIN.FAQ.LIST, icon: <FaqIcon /> },
+    { id: 'sidenav-notice', key: 'notice', label: '공지 관리', to: ROUTES.ADMIN.NOTICES.LIST, icon: <NoticeIcon /> },
+    { id: 'sidenav-users', key: 'user-management', label: '사용자 관리', to: ROUTES.ADMIN.USERS.LIST, icon: <UsersIcon /> },
+    { id: 'sidenav-operators', key: 'operator-management', label: '운영자 관리', to: ROUTES.ADMIN.OPERATORS.LIST, icon: <AdminIcon /> },
+    { id: 'sidenav-codes', key: 'code-management', label: '코드 관리', to: ROUTES.ADMIN.CODE.LIST, icon: <CodeIcon /> },
   ], []);
 
-  const visibleItems = items.filter(it => !it.requiresSAdmin || isSAdmin);
+  // 권한에 따른 메뉴 필터링
+  const visibleItems = items.filter(item => hasMenuAccess(adminRole, item.key));
 
   const isActive = (to: string) => location.pathname === to || location.pathname.startsWith(to + '/');
 
+  // 브라우저 크기에 따른 자동 접기 + 수동 접기/펼치기
   const autoCollapsed = useMediaQuery('(max-width:1279px)');
   const [collapsed, setCollapsed] = useState<boolean>(autoCollapsed);
-  const widthPx = collapsed ? 72 : 240;
+  
+  // open prop과 collapsed 상태를 통합하여 실제 표시 여부 결정
+  const isCollapsed = !open || collapsed;
+  const widthPx = isCollapsed ? 72 : 240;
+
+  // 수동 토글 핸들러
+  const handleManualToggle = () => {
+    setCollapsed(v => !v);
+  };
+
+  // 자동 접기 상태가 변경될 때 collapsed 상태 동기화
+  useEffect(() => {
+    setCollapsed(autoCollapsed);
+  }, [autoCollapsed]);
 
   return (
     <Box
@@ -66,13 +86,25 @@ export default function SideNav() {
         borderRight: `1px solid ${theme.palette.divider}`,
         bgcolor: 'background.paper',
         zIndex: 1100,
+        transition: theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: collapsed ? 'center' : 'flex-end', alignItems: 'center', px: 1, py: 0.5 }}>
-        <IconButton id="sidenav-toggle" size="small" onClick={() => setCollapsed(v => !v)} aria-label={collapsed ? 'expand side navigation' : 'collapse side navigation'}>
-          {collapsed ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
+      {/* 접기/펼치기 토글 버튼 */}
+      <Box sx={{ display: 'flex', justifyContent: isCollapsed ? 'center' : 'flex-end', alignItems: 'center', px: 1, py: 0.5 }}>
+        <IconButton 
+          id="sidenav-toggle" 
+          size="small" 
+          onClick={handleManualToggle} 
+          aria-label={isCollapsed ? 'expand side navigation' : 'collapse side navigation'}
+        >
+          {isCollapsed ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
         </IconButton>
       </Box>
+
+      {/* 메인 메뉴 (상위 6개) */}
       <List dense sx={{ py: 1 }}>
         {visibleItems.slice(0, 6).map(item => {
           const active = isActive(item.to);
@@ -92,7 +124,7 @@ export default function SideNav() {
               }}
             >
               <ListItemIcon sx={{ minWidth: 36, justifyContent: 'center' }}>{item.icon}</ListItemIcon>
-              {!collapsed && <ListItemText primary={item.label} />}
+              {!isCollapsed && <ListItemText primary={item.label} />}
             </ListItemButton>
           );
           return (
@@ -103,8 +135,10 @@ export default function SideNav() {
         })}
       </List>
 
+      {/* 구분선 */}
       <Divider sx={{ mx: 1 }} />
 
+      {/* 시스템 메뉴 (나머지) */}
       <List dense sx={{ py: 1 }}>
         {visibleItems.slice(6).map(item => {
           const active = isActive(item.to);
@@ -124,7 +158,7 @@ export default function SideNav() {
               }}
             >
               <ListItemIcon sx={{ minWidth: 36, justifyContent: 'center' }}>{item.icon}</ListItemIcon>
-              {!collapsed && <ListItemText primary={item.label} />}
+              {!isCollapsed && <ListItemText primary={item.label} />}
             </ListItemButton>
           );
           return (

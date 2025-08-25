@@ -1,8 +1,9 @@
 // Admin 계정 관리 관련 DTO 정의
 import { PaginationReq, PaginationRes } from './api.js';
+import { ParsedQs } from 'qs';
 
 // 운영자 계정 관련 타입 정의
-export interface OperatorAccount {
+export interface AdminAccount {
   adminId: number;
   loginId: string;
   name: string;
@@ -21,28 +22,31 @@ export interface OperatorAccount {
 }
 
 // 운영자 계정 목록 조회
-export interface OperatorAccountListQuery extends PaginationReq {
+export interface AdminAccountListQuery extends PaginationReq {
   search?: string;
   status?: string;
   role?: string;
   affiliation?: string;
+  [key: string]: string | number | ParsedQs | (string | ParsedQs)[] | undefined;
 }
 
-export interface OperatorAccountListRes extends PaginationRes<OperatorAccount> {
-  operators: OperatorAccount[];
+export interface AdminAccountListRes extends PaginationRes<AdminAccount> {
+  // PaginationRes의 items를 operators로 오버라이드
+  items: AdminAccount[];
 }
 
 // 운영자 계정 상세 조회
-export interface OperatorAccountDetailParams {
+export interface AdminAccountDetailParams {
   adminId: string;
+  [key: string]: string;
 }
 
-export interface OperatorAccountDetailRes {
-  operator: OperatorAccount;
+export interface AdminAccountDetailRes {
+  operator: AdminAccount;
 }
 
 // 운영자 계정 생성
-export interface OperatorAccountCreateReq {
+export interface AdminAccountCreateReq {
   loginId: string;
   password: string;
   name: string;
@@ -53,16 +57,17 @@ export interface OperatorAccountCreateReq {
   status?: string;
 }
 
-export interface OperatorAccountCreateRes {
+export interface AdminAccountCreateRes {
   adminId: number;
 }
 
 // 운영자 계정 수정
-export interface OperatorAccountUpdateParams {
+export interface AdminAccountUpdateParams {
   adminId: string;
+  [key: string]: string;
 }
 
-export interface OperatorAccountUpdateReq {
+export interface AdminAccountUpdateReq {
   name?: string;
   role?: string;
   affiliation?: string;
@@ -72,35 +77,38 @@ export interface OperatorAccountUpdateReq {
 }
 
 // 운영자 계정 삭제
-export interface OperatorAccountDeleteParams {
+export interface AdminAccountDeleteParams {
   adminId: string;
+  [key: string]: string;
 }
 
 // 운영자 계정 비밀번호 변경
-export interface OperatorAccountPasswordChangeParams {
+export interface AdminAccountPasswordChangeParams {
   adminId: string;
+  [key: string]: string;
 }
 
-export interface OperatorAccountPasswordChangeReq {
+export interface AdminAccountPasswordChangeReq {
   newPassword: string;
 }
 
 // 운영자 계정 역할 업데이트
-export interface OperatorAccountRoleUpdateParams {
+export interface AdminAccountRoleUpdateParams {
   adminId: string;
+  [key: string]: string;
 }
 
-export interface OperatorAccountRoleUpdateReq {
+export interface AdminAccountRoleUpdateReq {
   role: string;
   reason?: string;
 }
 
 // 운영자 계정 이메일 중복 체크
-export interface OperatorAccountCheckEmailReq {
+export interface AdminAccountCheckEmailReq {
   loginId: string;
 }
 
-export interface OperatorAccountCheckEmailRes {
+export interface AdminAccountCheckEmailRes {
   available: boolean;
 }
 
@@ -109,14 +117,13 @@ export interface UserAccount {
   userId: number;
   loginId: string;
   name: string;
-  email: string;
-  phone?: string;
   status: string;
+  affiliation?: string;
+  note?: string;
   delYn: string;
   createdAt: string;
   updatedAt?: string;
-  lastLoginAt?: string;
-  openApiKeyCount: number;
+  latestLoginAt?: string;
   createdBy: string;
   updatedBy?: string;
 }
@@ -126,16 +133,18 @@ export interface UserAccountListQuery extends PaginationReq {
   search?: string;
   status?: string;
   email?: string;
-  phone?: string;
+  [key: string]: string | number | ParsedQs | (string | ParsedQs)[] | undefined;
 }
 
 export interface UserAccountListRes extends PaginationRes<UserAccount> {
-  users: UserAccount[];
+  // PaginationRes의 items를 users로 오버라이드
+  items: UserAccount[];
 }
 
 // 사용자 계정 상세 조회
 export interface UserAccountDetailParams {
   userId: string;
+  [key: string]: string;
 }
 
 export interface UserAccountDetailRes {
@@ -147,8 +156,8 @@ export interface UserAccountCreateReq {
   loginId: string;
   password: string;
   name: string;
-  email: string;
-  phone?: string;
+  affiliation?: string;
+  note?: string;
   status?: string;
 }
 
@@ -159,23 +168,26 @@ export interface UserAccountCreateRes {
 // 사용자 계정 수정
 export interface UserAccountUpdateParams {
   userId: string;
+  [key: string]: string;
 }
 
 export interface UserAccountUpdateReq {
   name?: string;
-  email?: string;
-  phone?: string;
   status?: string;
+  affiliation?: string;
+  note?: string;
 }
 
 // 사용자 계정 삭제
 export interface UserAccountDeleteParams {
   userId: string;
+  [key: string]: string;
 }
 
 // 사용자 계정 비밀번호 변경
 export interface UserAccountPasswordChangeParams {
   userId: string;
+  [key: string]: string;
 }
 
 export interface UserAccountPasswordChangeReq {
@@ -185,6 +197,7 @@ export interface UserAccountPasswordChangeReq {
 // 사용자 계정 상태 업데이트
 export interface UserAccountStatusUpdateParams {
   userId: string;
+  [key: string]: string;
 }
 
 export interface UserAccountStatusUpdateReq {
@@ -200,37 +213,3 @@ export interface UserAccountCheckEmailReq {
 export interface UserAccountCheckEmailRes {
   available: boolean;
 }
-
-// 하위 호환성을 위한 별칭 (기존 코드와의 호환성 유지)
-export type AdminOperatorAccount = OperatorAccount;
-export type AdminUserAccount = UserAccount;
-export type AdminOperatorAccountListQuery = OperatorAccountListQuery;
-export type AdminOperatorAccountListRes = OperatorAccountListRes;
-export type AdminOperatorAccountDetailParams = OperatorAccountDetailParams;
-export type AdminOperatorAccountDetailRes = OperatorAccountDetailRes;
-export type AdminOperatorAccountCreateReq = OperatorAccountCreateReq;
-export type AdminOperatorAccountCreateRes = OperatorAccountCreateRes;
-export type AdminOperatorAccountUpdateParams = OperatorAccountUpdateParams;
-export type AdminOperatorAccountUpdateReq = OperatorAccountUpdateReq;
-export type AdminOperatorAccountDeleteParams = OperatorAccountDeleteParams;
-export type AdminOperatorAccountPasswordChangeParams = OperatorAccountPasswordChangeParams;
-export type AdminOperatorAccountPasswordChangeReq = OperatorAccountPasswordChangeReq;
-export type AdminOperatorAccountRoleUpdateParams = OperatorAccountRoleUpdateParams;
-export type AdminOperatorAccountRoleUpdateReq = OperatorAccountRoleUpdateReq;
-export type AdminOperatorAccountCheckEmailReq = OperatorAccountCheckEmailReq;
-export type AdminOperatorAccountCheckEmailRes = OperatorAccountCheckEmailRes;
-export type AdminUserAccountListQuery = UserAccountListQuery;
-export type AdminUserAccountListRes = UserAccountListRes;
-export type AdminUserAccountDetailParams = UserAccountDetailParams;
-export type AdminUserAccountDetailRes = UserAccountDetailRes;
-export type AdminUserAccountCreateReq = UserAccountCreateReq;
-export type AdminUserAccountCreateRes = UserAccountCreateRes;
-export type AdminUserAccountUpdateParams = UserAccountUpdateParams;
-export type AdminUserAccountUpdateReq = UserAccountUpdateReq;
-export type AdminUserAccountDeleteParams = UserAccountDeleteParams;
-export type AdminUserAccountPasswordChangeParams = UserAccountPasswordChangeParams;
-export type AdminUserAccountPasswordChangeReq = UserAccountPasswordChangeReq;
-export type AdminUserAccountStatusUpdateParams = UserAccountStatusUpdateParams;
-export type AdminUserAccountStatusUpdateReq = UserAccountStatusUpdateReq;
-export type AdminUserAccountCheckEmailReq = UserAccountCheckEmailReq;
-export type AdminUserAccountCheckEmailRes = UserAccountCheckEmailRes;

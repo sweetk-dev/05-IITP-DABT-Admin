@@ -10,12 +10,29 @@ export interface UserQnaItem {
   secretYn: string;
   writerName: string;
   answeredYn: string;
+  answerContent?: string;
   createdAt: string;
   answeredAt?: string;
   hitCnt?: number;
   // 클라이언트 UX를 위한 소유 여부 표시 (민감정보(userId) 노출 없이)
   isMine?: boolean;
 }
+
+
+export interface UserQnaListItem {
+  qnaId: number;
+  qnaType: string;
+  title: string;
+  secretYn: string;
+  writerName: string;
+  answeredYn: string;
+  createdAt: string;
+  hitCnt?: number;
+  // 클라이언트 UX를 위한 소유 여부 표시 (민감정보(userId) 노출 없이)
+  isMine?: boolean;
+}
+
+
 
 // 관리자용 Q&A 아이템 (전체 정보)
 export interface AdminQnaItem {
@@ -27,6 +44,7 @@ export interface AdminQnaItem {
   secretYn: string;
   writerName: string;
   answeredYn: string;
+  answerContent?: string;
   createdAt: string;
   answeredAt?: string;
   answeredBy?: number;
@@ -38,14 +56,28 @@ export interface AdminQnaItem {
   hitCnt?: number;
 }
 
+
+export interface AdminQnaListItem {
+  qnaId: number;
+  userId: number;
+  qnaType: string;
+  title: string;
+  secretYn: string;
+  writerName: string;
+  answeredYn: string;
+  createdAt: string;
+  answeredAt?: string;
+  hitCnt?: number;
+}
+
+
+
 // Q&A 상세 (답변 포함) - 사용자용
 export interface UserQnaDetailItem extends UserQnaItem {
-  answerContent?: string;
 }
 
 // Q&A 상세 (답변 포함) - 관리자용
 export interface AdminQnaDetailItem extends AdminQnaItem {
-  answerContent?: string;
 }
 
 // Q&A 목록 조회 (사용자용)
@@ -57,7 +89,7 @@ export interface UserQnaListQuery extends PaginationReq {
   mineOnly?: boolean;
 }
 
-export type UserQnaListRes = PaginationRes<UserQnaItem>;
+export type UserQnaListRes = PaginationRes<UserQnaListItem>;
 
 export interface UserQnaDetailParams {
   qnaId: string;
@@ -98,7 +130,7 @@ export interface AdminQnaListQuery extends PaginationReq {
   sort?: string; // 'createdAt-desc' | 'hit-desc'
 }
 
-export type AdminQnaListRes = PaginationRes<AdminQnaItem>;
+export type AdminQnaListRes = PaginationRes<AdminQnaListItem>;
 
 export interface AdminQnaDetailParams {
   qnaId: string;

@@ -16,10 +16,25 @@ export interface AdminAccount {
   delYn: string;
   createdAt: string;
   updatedAt?: string;
+  deletedAt?: string;
   lastLoginAt?: string;
   createdBy: string;
   updatedBy?: string;
+  deletedBy?: string;
 }
+
+export interface AdminAccountListItem {
+  adminId: number;
+  loginId: string;
+  name: string;
+  role: string;
+  roleName: string;
+  status: string;
+  delYn: string;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
 
 // 운영자 계정 목록 조회
 export interface AdminAccountListQuery extends PaginationReq {
@@ -30,9 +45,9 @@ export interface AdminAccountListQuery extends PaginationReq {
   [key: string]: string | number | ParsedQs | (string | ParsedQs)[] | undefined;
 }
 
-export interface AdminAccountListRes extends PaginationRes<AdminAccount> {
-  // PaginationRes의 items를 operators로 오버라이드
-  items: AdminAccount[];
+export interface AdminAccountListRes extends PaginationRes<AdminAccountListItem> {
+  // PaginationRes의 items를 AdminAccountListItem 오버라이드
+  items: AdminAccountListItem[];
 }
 
 // 운영자 계정 상세 조회
@@ -42,7 +57,7 @@ export interface AdminAccountDetailParams {
 }
 
 export interface AdminAccountDetailRes {
-  operator: AdminAccount;
+  admin: AdminAccount;
 }
 
 // 운영자 계정 생성
@@ -120,13 +135,32 @@ export interface UserAccount {
   status: string;
   affiliation?: string;
   note?: string;
+  latestKeyCreatedAt?: string;
+  latestLoginAt?: string;
+  keyCount: number;
   delYn: string;
   createdAt: string;
   updatedAt?: string;
-  latestLoginAt?: string;
+  deletedAt?: string;
   createdBy: string;
   updatedBy?: string;
+  deletedBy?: string;
 }
+
+
+export interface UserAccountListItem {
+  userId: number;
+  loginId: string;
+  name: string;
+  status: string;
+  latestKeyCreatedAt?: string;
+  latestLoginAt?: string;
+  keyCount: number;
+  delYn: string;
+  createdAt: string;
+}
+
+
 
 // 사용자 계정 목록 조회
 export interface UserAccountListQuery extends PaginationReq {
@@ -136,9 +170,9 @@ export interface UserAccountListQuery extends PaginationReq {
   [key: string]: string | number | ParsedQs | (string | ParsedQs)[] | undefined;
 }
 
-export interface UserAccountListRes extends PaginationRes<UserAccount> {
+export interface UserAccountListRes extends PaginationRes<UserAccountListItem> {
   // PaginationRes의 items를 users로 오버라이드
-  items: UserAccount[];
+  items: UserAccountListItem[];
 }
 
 // 사용자 계정 상세 조회

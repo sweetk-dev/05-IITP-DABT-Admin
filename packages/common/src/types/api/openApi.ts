@@ -22,6 +22,26 @@ export interface AdminOpenApiKeyItem {
   deletedBy?: string;
 }
 
+
+export interface AdminOpenApiKeyListItem {
+  keyId: number;
+  userId: number;
+  authKey: string;
+  activeYn: string;
+  startDt?: string;
+  endDt?: string;
+  delYn: string;
+  keyName: string;
+  activeAt?: string;
+  latestAccAt?: string;
+  createdAt: string;
+}
+
+
+
+
+
+
 // OpenAPI 인증키 엔티티 (제한된 정보 - User용)
 export interface UserOpenApiKeyItem {
   keyId: number;
@@ -101,7 +121,7 @@ export interface AdminOpenApiListQuery {
   searchKeyword?: string;
 }
 
-export type AdminOpenApiListRes = PaginationRes<AdminOpenApiKeyItem>;
+export type AdminOpenApiListRes = PaginationRes<AdminOpenApiKeyListItem>;
 
 // Admin OpenAPI 인증키 상세 조회
 export interface AdminOpenApiDetailParams {

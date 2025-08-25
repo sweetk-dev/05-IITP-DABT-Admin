@@ -156,47 +156,47 @@ export const ADMIN_API_MAPPING = {
   },
   
   // 운영자 계정 관리 (S-Admin 전용)
-  [`GET ${API_URLS.ADMIN.OPERATOR_ACCOUNT.LIST}`]: {
-    query: 'OperatorAccountListQuery',
-    res: 'OperatorAccountListRes',
+  [`GET ${API_URLS.ADMIN.ADMIN_ACCOUNT.LIST}`]: {
+    query: 'AdminAccountListQuery',
+    res: 'AdminAccountListRes',
     description: '운영자 계정 목록 조회'
   },
-  [`GET ${API_URLS.ADMIN.OPERATOR_ACCOUNT.DETAIL}`]: {
-    params: 'OperatorAccountDetailParams',
-    res: 'OperatorAccountDetailRes',
+  [`GET ${API_URLS.ADMIN.ADMIN_ACCOUNT.DETAIL}`]: {
+    params: 'AdminAccountDetailParams',
+    res: 'AdminAccountDetailRes',
     description: '운영자 계정 상세 조회'
   },
-  [`POST ${API_URLS.ADMIN.OPERATOR_ACCOUNT.CREATE}`]: {
-    body: 'OperatorAccountCreateReq',
-    res: 'OperatorAccountCreateRes',
+  [`POST ${API_URLS.ADMIN.ADMIN_ACCOUNT.CREATE}`]: {
+    body: 'AdminAccountCreateReq',
+    res: 'AdminAccountCreateRes',
     description: '운영자 계정 생성'
   },
-  [`PUT ${API_URLS.ADMIN.OPERATOR_ACCOUNT.UPDATE}`]: {
-    params: 'OperatorAccountUpdateParams',
-    body: 'OperatorAccountUpdateReq',
+  [`PUT ${API_URLS.ADMIN.ADMIN_ACCOUNT.UPDATE}`]: {
+    params: 'AdminAccountUpdateParams',
+    body: 'AdminAccountUpdateReq',
     res: 'void',
     description: '운영자 계정 업데이트'
   },
-  [`DELETE ${API_URLS.ADMIN.OPERATOR_ACCOUNT.DELETE}`]: {
-    params: 'OperatorAccountDeleteParams',
+  [`DELETE ${API_URLS.ADMIN.ADMIN_ACCOUNT.DELETE}`]: {
+    params: 'AdminAccountDeleteParams',
     res: 'void',
     description: '운영자 계정 삭제'
   },
-  [`PUT ${API_URLS.ADMIN.OPERATOR_ACCOUNT.PASSWORD_CHANGE}`]: {
-    params: 'OperatorAccountPasswordChangeParams',
-    body: 'OperatorAccountPasswordChangeReq',
+  [`PUT ${API_URLS.ADMIN.ADMIN_ACCOUNT.PASSWORD_CHANGE}`]: {
+    params: 'AdminAccountPasswordChangeParams',
+    body: 'AdminAccountPasswordChangeReq',
     res: 'void',
     description: '운영자 계정 비밀번호 변경'
   },
-  [`PUT ${API_URLS.ADMIN.OPERATOR_ACCOUNT.ROLE_UPDATE}`]: {
-    params: 'OperatorAccountRoleUpdateParams',
-    body: 'OperatorAccountRoleUpdateReq',
+  [`PUT ${API_URLS.ADMIN.ADMIN_ACCOUNT.ROLE_UPDATE}`]: {
+    params: 'AdminAccountRoleUpdateParams',
+    body: 'AdminAccountRoleUpdateReq',
     res: 'void',
     description: '운영자 계정 역할 업데이트'
   },
-  [`POST ${API_URLS.ADMIN.OPERATOR_ACCOUNT.CHECK_EMAIL}`]: {
-    body: 'OperatorAccountCheckEmailReq',
-    res: 'OperatorAccountCheckEmailRes',
+  [`POST ${API_URLS.ADMIN.ADMIN_ACCOUNT.CHECK_EMAIL}`]: {
+    body: 'AdminAccountCheckEmailReq',
+    res: 'AdminAccountCheckEmailRes',
     description: '운영자 계정 이메일 중복 체크'
   },
   
@@ -252,6 +252,7 @@ export interface AdminProfileRes {
   loginId: string;
   name: string;
   role: string;
+  roleName?: String;
   affiliation?: string;
   createdAt: string;
 }
@@ -272,11 +273,6 @@ export interface AdminPasswordChangeReq {
 
 // 비밀번호 변경 응답은 ApiResponse<void> 사용
 
-// 계정 관련 타입들은 account.ts에서 import하여 사용
-export type {
-  OperatorAccount,
-  UserAccount
-} from './account.js';
 
 
 

@@ -1,4 +1,6 @@
 // API URL 상수 정의
+import { ParsedQs } from 'qs';
+
 export const API_URLS = {
   // 인증 관련
   AUTH: {
@@ -88,26 +90,26 @@ export const API_URLS = {
       STATUS: '/openapi/status', 
     },
     // 운영자 계정 관리 (S-Admin 전용)
-    OPERATOR_ACCOUNT: {
-      LIST: '/operator-accounts',
-      DETAIL: '/operator-accounts/:adminId',
-      CREATE: '/operator-accounts',
-      UPDATE: '/operator-accounts/:adminId',
-      DELETE: '/operator-accounts/:adminId',
-      PASSWORD_CHANGE: '/operator-accounts/:adminId/password',
-      ROLE_UPDATE: '/operator-accounts/:adminId/role',
-      CHECK_EMAIL: '/operator-accounts/email/check',
+    ADMIN_ACCOUNT: {
+      LIST: '/accounts/admin',
+      DETAIL: '/accounts/admin/:adminId',
+      CREATE: '/accounts/admin',
+      UPDATE: '/accounts/admin/:adminId',
+      DELETE: '/accounts/admin/:adminId',
+      PASSWORD_CHANGE: '/accounts/admin/:adminId/password',
+      ROLE_UPDATE: '/accounts/admin/:adminId/role',
+      CHECK_EMAIL: '/accounts/admin/email/check',
     },
     // 사용자 계정 관리 (일반 Admin도 접근 가능)
     USER_ACCOUNT: {
-      LIST: '/user-accounts',
-      DETAIL: '/user-accounts/:userId',
-      CREATE: '/user-accounts',
-      UPDATE: '/user-accounts/:userId',
-      DELETE: '/user-accounts/:userId',
-      PASSWORD_CHANGE: '/user-accounts/:userId/password',
-      STATUS_UPDATE: '/user-accounts/:userId/status',
-      CHECK_EMAIL: '/user-accounts/email/check',
+      LIST: '/accounts/user',
+      DETAIL: '/accounts/user/:userId',
+      CREATE: '/accounts/user',
+      UPDATE: '/accounts/user/:userId',
+      DELETE: '/accounts/user/:userId',
+      PASSWORD_CHANGE: '/accounts/user/:userId/password',
+      STATUS_UPDATE: '/accounts/user/:userId/status',
+      CHECK_EMAIL: '/accounts/user/email/check',
     },
   },
   
@@ -279,14 +281,14 @@ export const FULL_API_URLS = {
     },
     // 운영자 계정 관리 (S-Admin 전용)
     OPERATOR_ACCOUNT: {
-      LIST: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.LIST),
-      DETAIL: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.DETAIL),
-      CREATE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.CREATE),
-      UPDATE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.UPDATE),
-      DELETE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.DELETE),
-      PASSWORD_CHANGE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.PASSWORD_CHANGE),
-      ROLE_UPDATE: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.ROLE_UPDATE),
-      CHECK_EMAIL: getAdminUrl(API_URLS.ADMIN.OPERATOR_ACCOUNT.CHECK_EMAIL),
+      LIST: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.LIST),
+      DETAIL: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.DETAIL),
+      CREATE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.CREATE),
+      UPDATE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.UPDATE),
+      DELETE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.DELETE),
+      PASSWORD_CHANGE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.PASSWORD_CHANGE),
+      ROLE_UPDATE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.ROLE_UPDATE),
+      CHECK_EMAIL: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.CHECK_EMAIL),
     },
     // 사용자 계정 관리 (일반 Admin도 접근 가능)
     USER_ACCOUNT: {
@@ -373,6 +375,7 @@ export interface ApiResponse<T = any> {
 export interface PaginationReq {
   page?: number;
   limit?: number;
+  [key: string]: string | number | boolean | ParsedQs | (string | ParsedQs)[] | undefined;
 }
 
 export interface PaginationRes<T> {

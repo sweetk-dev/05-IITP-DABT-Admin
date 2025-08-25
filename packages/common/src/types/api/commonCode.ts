@@ -139,6 +139,7 @@ export const COMMON_CODE_GROUPS = {
   // 시스템 관리
   SYS_ADMIN_ROLES: 'sys_admin_roles',      // 관리자 역할 코드
   SYS_DATA_STATUS: 'sys_data_status',      // 데이터 상태 코드
+  SYS_WORK_TYPES: 'sys_work_type',        // 작업 유형 코드
   
   // FAQ 관련
   FAQ_TYPE: 'faq_type',                    // FAQ 유형
@@ -152,8 +153,32 @@ export const COMMON_CODE_GROUPS = {
   NOTICE_TYPE: 'notice_type',              // 공지사항 유형
 } as const;
 
+
+// Admin Rolde Code ID 상수들
+export const CODE_SYS_ADMIN_ROLES = {
+  SUPER_ADMIN: 'S-ADMIN',  // 최고 관리자
+  ADMIN: 'ADMIN',          // 관리자
+  EDITOR: 'EDITOR',        // 에디터 
+  VIEWER: 'VIEWER'         // 뷰어
+} as const;
+
+
+
+export const CODE_SYS_WORK_TYPES = {
+  BATCH: 'SYS-BACH',            // 배치 작업
+  MANUAL: 'SYS-MANUAL',        // 수동 작업
+  USER: 'BY-USER'      // 사용자 작업
+} as const;
+
+
 // Common Code Group ID 타입
 export type CommonCodeGroupId = typeof COMMON_CODE_GROUPS[keyof typeof COMMON_CODE_GROUPS];
+
+
+
+
+
+
 
 // 공통 코드 기본 정보 (사용자용 - 단순 조회)
 export interface CommonCode {

@@ -26,6 +26,18 @@ export interface AdminFaqItem {
   updatedBy?: string;
 }
 
+
+export interface AdminFaqListItem {
+  faqId: number;
+  faqType: string;
+  question: string;
+  hitCnt: number;
+  sortOrder: number;
+  useYn: string;
+  createdAt: string;
+}
+
+
 // FAQ 목록 조회 (사용자용)
 export interface UserFaqListQuery extends PaginationReq {
   faqType?: string;
@@ -54,7 +66,7 @@ export interface AdminFaqListQuery extends PaginationReq {
   useYn?: string;
 }
 
-export type AdminFaqListRes = PaginationRes<AdminFaqItem>;
+export type AdminFaqListRes = PaginationRes<AdminFaqListItem>;
 
 export interface AdminFaqDetailParams {
   faqId: string;

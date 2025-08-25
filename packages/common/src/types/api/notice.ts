@@ -8,8 +8,22 @@ export interface UserNoticeItem {
   content: string;
   noticeType: 'G' | 'S' | 'E';
   pinnedYn: 'Y' | 'N';
+  startDt?: string;
+  endDt?: string;
   postedAt: string;
 }
+
+
+export interface UserNoticeListItem {
+  noticeId: number;
+  title: string;
+  noticeType: 'G' | 'S' | 'E';
+  pinnedYn: 'Y' | 'N';
+  startDt?: string;
+  endDt?: string;
+  postedAt: string;
+}
+
 
 // 관리자용 공지사항 아이템 (전체 정보)
 export interface AdminNoticeItem {
@@ -28,6 +42,20 @@ export interface AdminNoticeItem {
   updatedAt?: string;
 }
 
+
+export interface AdminNoticeListItem {
+  noticeId: number;
+  title: string;
+  noticeType: 'G' | 'S' | 'E';
+  pinnedYn: 'Y' | 'N';
+  publicYn: 'Y' | 'N';
+  postedAt: string;
+  startDt?: string;
+  endDt?: string;
+  createdAt: string;
+}
+
+
 // 공지사항 목록 조회 (사용자용)
 export interface UserNoticeListQuery extends PaginationReq {
   noticeType?: 'G' | 'S' | 'E';
@@ -35,7 +63,7 @@ export interface UserNoticeListQuery extends PaginationReq {
   includeExpired?: boolean;
 }
 
-export type UserNoticeListRes = PaginationRes<UserNoticeItem>;
+export type UserNoticeListRes = PaginationRes<UserNoticeListItem>;
 
 export interface UserNoticeDetailParams {
   noticeId: string;
@@ -58,7 +86,7 @@ export interface AdminNoticeListQuery extends PaginationReq {
   search?: string;
 }
 
-export type AdminNoticeListRes = PaginationRes<AdminNoticeItem>;
+export type AdminNoticeListRes = PaginationRes<AdminNoticeListItem>;
 
 export interface AdminNoticeDetailParams {
   noticeId: string;

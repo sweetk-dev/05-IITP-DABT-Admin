@@ -7,7 +7,8 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { loginAdmin } from '../../api';
 import { ROUTES } from '../../routes';
 import { isAdminAuthenticated } from '../../store/auth';
-import { useTheme } from '../../theme/mui';
+import { clearLoginInfoByType } from '../../store/user';
+import { useTheme } from '@mui/material/styles';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 export default function AdminLogin() {
@@ -25,7 +26,7 @@ export default function AdminLogin() {
     if (isAdminAuthenticated()) {
       setIsRedirecting(true);
       // 세션에 저장된 returnTo가 있으면 해당 페이지로, 없으면 관리자 대시보드로
-      let targetPath = ROUTES.ADMIN.DASHBOARD;
+      let targetPath: string = ROUTES.ADMIN.DASHBOARD;
       try {
         const saved = sessionStorage.getItem('returnTo');
         if (saved) {
@@ -41,6 +42,9 @@ export default function AdminLogin() {
   const handleAdminLogin = async (loginId: string, password: string) => {
     setLoading(true);
     setError(null);
+
+    // Admin 로그인 시 기존 User 정보 정리 (Admin 우선권 확보)
+    clearLoginInfoByType('U');
 
     try {
       const res = await loginAdmin({ loginId, password });

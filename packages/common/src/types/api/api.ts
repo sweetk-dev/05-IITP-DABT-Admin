@@ -280,7 +280,7 @@ export const FULL_API_URLS = {
       STATUS: getAdminUrl(API_URLS.ADMIN.OPEN_API.STATUS),
     },
     // 운영자 계정 관리 (S-Admin 전용)
-    OPERATOR_ACCOUNT: {
+    ADMIN_ACCOUNT: {
       LIST: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.LIST),
       DETAIL: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.DETAIL),
       CREATE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.CREATE),

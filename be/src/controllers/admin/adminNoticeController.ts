@@ -6,6 +6,7 @@ import { extractUserIdFromRequest, normalizeErrorMessage } from '../../utils/com
 import { getNoticeListAdmin, getNoticeDetailAdmin, createNoticeAdmin, updateNoticeAdmin, deleteNoticeAdmin } from '../../services/admin/adminNoticeService';
 import { toAdminNoticeItem } from '../../mappers/noticeMapper';
 import { getNumberQuery, getStringQuery, getBooleanQuery } from '../../utils/queryParsers';
+import { getActorTag } from '../../utils/auth';
 
 export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNoticeListQuery>, res: Response) => {
   try {
@@ -19,7 +20,7 @@ export const getNoticeListForAdmin = async (req: Request<{}, {}, {}, AdminNotice
     const search = getStringQuery(req.query, 'search');
 
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
 
     const repoResult = await getNoticeListAdmin({
@@ -80,7 +81,7 @@ export const createNoticeForAdmin = async (req: Request<{}, {}, AdminNoticeCreat
     logApiCall('POST', API_URLS.ADMIN.NOTICE.CREATE, ADMIN_API_MAPPING as any, '공지사항 생성 (관리자용)');
 
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
 
     const { title, content, noticeType, pinnedYn, publicYn, startDt, endDt } = req.body as any;
@@ -115,7 +116,7 @@ export const updateNoticeForAdmin = async (req: Request<{ noticeId: string }, {}
     logApiCall('PUT', API_URLS.ADMIN.NOTICE.UPDATE, ADMIN_API_MAPPING as any, '공지사항 수정 (관리자용)');
 
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
     const { noticeId } = req.params;
     if (!noticeId) return sendError(res, ErrorCode.INVALID_PARAMETER);

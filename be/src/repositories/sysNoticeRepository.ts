@@ -89,7 +89,7 @@ export class SysNoticeRepository {
    */
   static async createNotice(data: SysNoticeCreationAttributes): Promise<SysNoticeAttributes> {
     const notice = await SysNotice.create(data);
-    return notice.toJSON();
+    return notice;
   }
 
   /**

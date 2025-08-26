@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { Sequelize } from 'sequelize';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 
 export interface SysFaqAttributes {
   faqId?: number;
@@ -44,7 +45,7 @@ export function initSysFaq(sequelize: Sequelize) {
       faqType: {
         type: DataTypes.STRING(12),
         allowNull: false,
-        field: 'faq_type',
+        field: COMMON_CODE_GROUPS.FAQ_TYPE,
         comment: 'FAQ 유형, "faq_type" comm code 참조',
       },
       question: {
@@ -110,7 +111,7 @@ export function initSysFaq(sequelize: Sequelize) {
       updatedAt: 'updated_at',
       indexes: [
         {
-          fields: ['faq_type', 'sort_order', 'use_yn'],
+          fields: [COMMON_CODE_GROUPS.FAQ_TYPE, 'sort_order', 'use_yn'],
           name: 'idx_sys_faq_type_sort',
         },
       ],

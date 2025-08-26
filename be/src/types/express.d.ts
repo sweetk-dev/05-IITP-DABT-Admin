@@ -7,6 +7,7 @@ declare global {
         userId: number;
         userType: UserType;
         actorTag?: string;
+        admRole?: string;  // Admin용 역할 코드
       };
       requestId?: string;
     }

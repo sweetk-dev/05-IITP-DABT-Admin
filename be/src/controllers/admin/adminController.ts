@@ -9,11 +9,7 @@ import {
   API_URLS,
   isValidPassword 
 } from '@iitp-dabt/common';
-import { 
-  findAdminById, 
-  updateAdmin, 
-  updateAdminPassword 
-} from '../../repositories/sysAdmAccountRepository';
+import { adminService } from '../../services/admin/adminService';
 import { 
   sendSuccess, 
   sendError, 
@@ -23,9 +19,9 @@ import {
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
 import { 
-  extractUserIdFromRequest,
-  normalizeErrorMessage
+  extractUserIdFromRequest
 } from '../../utils/commonUtils';
+import { BusinessError, ResourceError } from '../../utils/customErrors';
 
 /**
  * 관리자 프로필 조회
@@ -42,27 +38,45 @@ export const getAdminProfile = async (req: Request, res: Response) => {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    const admin = await findAdminById(adminId);
+    const admin = await adminService.getAdminById(adminId);
     if (!admin) {
       return sendError(res, ErrorCode.ADMIN_NOT_FOUND);
     }
 
     const response: AdminProfileRes = {
-      adminId: admin.admId,
+      adminId: admin.adminId,
       loginId: admin.loginId,
       name: admin.name,
       affiliation: admin.affiliation,
-      role: admin.roles,
-      createdAt: admin.createdAt.toISOString()
+      role: admin.role,
+      roleName: admin.roleName,
+      createdAt: admin.createdAt
     };
 
     sendSuccess(res, response, undefined, 'ADMIN_PROFILE_VIEW', {
-      adminId: admin.admId,
+      adminId: admin.adminId,
       name: admin.name,
       affiliation: admin.affiliation
     });
   } catch (error) {
     appLogger.error('관리자 프로필 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.ADMIN_NOT_FOUND) {
+        return sendError(res, ErrorCode.ADMIN_NOT_FOUND);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
+        return sendDatabaseError(res, '조회', '관리자 프로필');
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
     sendDatabaseError(res, '조회', '관리자 프로필');
   }
 };
@@ -89,17 +103,8 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
       return sendValidationError(res, 'name', '이름이 필요합니다.');
     }
 
-    const admin = await findAdminById(adminId);
-    if (!admin) {
-      return sendError(res, ErrorCode.ADMIN_NOT_FOUND);
-    }
-
-    // 프로필 업데이트
-    await updateAdmin(adminId, {
-      name: name,
-      affiliation: affiliation,
-      updatedBy: 'BY-ADMIN'
-    });
+    // ✅ service를 통해 프로필 업데이트 처리
+    await adminService.updateAdminProfile(adminId, { name, affiliation });
 
     appLogger.info('관리자 프로필 업데이트 성공', {
       adminId: adminId,
@@ -114,6 +119,23 @@ export const updateAdminProfile = async (req: Request<{}, {}, AdminProfileUpdate
     });
   } catch (error) {
     appLogger.error('관리자 프로필 업데이트 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.ADMIN_NOT_FOUND) {
+        return sendError(res, ErrorCode.ADMIN_NOT_FOUND);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
+        return sendDatabaseError(res, '업데이트', '관리자 프로필');
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
     sendDatabaseError(res, '업데이트', '관리자 프로필');
   }
 };
@@ -148,22 +170,8 @@ export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChan
       return sendError(res, ErrorCode.USER_PASSWORD_TOO_WEAK);
     }
 
-    const admin = await findAdminById(adminId);
-    if (!admin) {
-      return sendError(res, ErrorCode.ADMIN_NOT_FOUND);
-    }
-
-    // 현재 비밀번호 확인
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, admin.password);
-    if (!isCurrentPasswordValid) {
-      return sendError(res, ErrorCode.ACCOUNT_PASSWORD_INVALID);
-    }
-
-    // 새 비밀번호 해시화
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-    // 비밀번호 업데이트
-    await updateAdminPassword(adminId, hashedNewPassword, 'BY-ADMIN');
+    // ✅ service를 통해 비밀번호 변경 처리
+    await adminService.changeAdminPassword(adminId, currentPassword, newPassword);
 
     appLogger.info('관리자 비밀번호 변경 성공', {
       adminId: adminId
@@ -174,6 +182,23 @@ export const changeAdminPassword = async (req: Request<{}, {}, AdminPasswordChan
     });
   } catch (error) {
     appLogger.error('관리자 비밀번호 변경 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.ADMIN_NOT_FOUND) {
+        return sendError(res, ErrorCode.ADMIN_NOT_FOUND);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
+        return sendDatabaseError(res, '변경', '관리자 비밀번호');
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
     sendDatabaseError(res, '변경', '관리자 비밀번호');
   }
 }; 

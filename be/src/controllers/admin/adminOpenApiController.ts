@@ -10,14 +10,14 @@ import {
   extendOpenApiKey,
   getOpenApiStats
 } from '../../services/admin/adminOpenApiService';
-import { updateAuthKey as updateOpenApiAuthKeyRepo } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
 import { 
-  extractUserIdFromRequest,
-  normalizeErrorMessage
+  extractUserIdFromRequest
 } from '../../utils/commonUtils';
 import { getNumberQuery, getStringQuery } from '../../utils/queryParsers';
+import { BusinessError, ResourceError } from '../../utils/customErrors';
+import { getActorTag } from '../../utils/auth';
 import type {
   AdminOpenApiListQuery,
   AdminOpenApiListRes,
@@ -48,7 +48,7 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
     const status = getStringQuery(req.query, 'activeYn');
     
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -72,22 +72,27 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_LIST_VIEW', { adminId, count: response.items.length }, true);
   } catch (error) {
     appLogger.error('관리자 OpenAPI 목록 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
-      }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+    
+    // ✅ customErrors 처리
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
         return sendDatabaseError(res, '조회', 'OpenAPI 목록');
       }
+      return sendError(res, error.errorCode, error.message);
     }
+    
+    if (error instanceof ResourceError) {
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
 /**
  * OpenAPI 상세 조회 (관리자용)
- * API: GET /api/admin/open-api/:apiId
+ * API: GET /api/admin/open-api/:keyId
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.OPEN_API.DETAIL}`]
  */
 export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailParams>, res: Response) => {
@@ -96,7 +101,6 @@ export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailPa
 
     const { keyId } = req.params;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -107,25 +111,28 @@ export const getOpenApiDetailForAdmin = async (req: Request<AdminOpenApiDetailPa
     }
     
     const api = await getOpenApiDetail(parseInt(keyId));
-    if (!api) {
-      return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
-    }
-
     const response: AdminOpenApiDetailRes = { authKey: toAdminOpenApiKeyItem(api) };
-
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_DETAIL_VIEW', { adminId, keyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 상세 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.OPEN_API_NOT_FOUND) {
+        return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
         return sendDatabaseError(res, '조회', 'OpenAPI 상세');
       }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
@@ -140,36 +147,39 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
 
     const apiData = req.body;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    if (!apiData.userId || !apiData.keyName || !apiData.keyDesc) {
-      return sendValidationError(res, 'general', '사용자 ID, 키 이름, 키 설명은 필수입니다.');
+    if (!apiData.userId || !apiData.keyName) {
+      return sendValidationError(res, 'general', '사용자 ID와 키 이름은 필수입니다.');
     }
 
-    const newApi = await createOpenApi(apiData, actorTag);
-
-    const response: AdminOpenApiCreateRes = {
-      keyId: newApi.keyId,
-      authKey: newApi.authKey
+    const result = await createOpenApi(apiData, actorTag);
+    const response: AdminOpenApiCreateRes = { 
+      keyId: result.keyId, 
+      authKey: result.authKey 
     };
-
-    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_CREATED', { adminId, apiId: response.keyId });
+    sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_CREATED', { adminId, userId: apiData.userId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 생성 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.OPEN_API_CREATE_FAILED) {
+        return sendError(res, ErrorCode.OPEN_API_CREATE_FAILED);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
-        return sendDatabaseError(res, '생성', 'OpenAPI');
-      }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.OPEN_API_CREATE_FAILED);
+    
+    if (error instanceof ResourceError) {
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
@@ -178,39 +188,45 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
  * API: PUT /api/admin/open-api/:apiId
  * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.OPEN_API.UPDATE}`]
  */
-export const updateOpenApiForAdmin = async (req: Request<{ keyId: string }, {}, AdminOpenApiUpdateReq>, res: Response) => {
+export const updateOpenApiForAdmin = async (req: Request<{ apiId: string }, {}, AdminOpenApiUpdateReq>, res: Response) => {
   try {
     logApiCall('PUT', API_URLS.ADMIN.OPEN_API.UPDATE, ADMIN_API_MAPPING as any, 'OpenAPI 수정 (관리자용)');
 
-    const { keyId } = req.params;
+    const { apiId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    if (!keyId) {
+    if (!apiId) {
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    const updatedApi = await updateOpenApi(parseInt(keyId), {
-      ...updateData
-    }, actorTag);
-    sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_UPDATED', { adminId, keyId });
+    await updateOpenApi(parseInt(apiId), updateData, actorTag);
+    sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_UPDATED', { adminId, keyId: apiId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.OPEN_API_NOT_FOUND) {
+        return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
-        return sendDatabaseError(res, '수정', 'OpenAPI');
-      }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.OPEN_API_UPDATE_FAILED);
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.OPEN_API_UPDATE_FAILED) {
+        return sendError(res, ErrorCode.OPEN_API_UPDATE_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
@@ -228,7 +244,7 @@ export const deleteOpenApiForAdmin = async (
 
     const { keyId } = req.params;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -253,16 +269,24 @@ export const deleteOpenApiForAdmin = async (
     sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_DELETED', { adminId, keyId: parsedKeyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.OPEN_API_NOT_FOUND) {
+        return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
-        return sendDatabaseError(res, '삭제', 'OpenAPI');
-      }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.OPEN_API_DELETE_FAILED);
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.OPEN_API_DELETE_FAILED) {
+        return sendError(res, ErrorCode.OPEN_API_DELETE_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
@@ -278,7 +302,7 @@ export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, { s
     const { keyId } = req.params;
     const extendData = req.body;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -292,25 +316,37 @@ export const extendOpenApiAdmin = async (req: Request<{ keyId: string }, {}, { s
       return sendValidationError(res, 'period', '시작일과 종료일이 필요합니다.');
     }
 
-    // 기간 업데이트 (updatedBy는 adminId)
-    const ok = await updateOpenApiAuthKeyRepo(parseInt(keyId), { startDt: new Date(extendData.startDt), endDt: new Date(extendData.endDt), updatedBy: actorTag });
-    if (!ok) {
-      return sendError(res, ErrorCode.OPEN_API_UPDATE_FAILED);
-    }
-    const response: AdminOpenApiExtendRes = { newStartDt: new Date(extendData.startDt).toISOString(), newEndDt: new Date(extendData.endDt).toISOString() } as any;
+    // ✅ service를 통해 키 기간 연장 처리
+    const result = await extendOpenApiKey(parseInt(keyId), {
+      startDt: extendData.startDt,
+      endDt: extendData.endDt
+    }, actorTag);
+    
+    const response: AdminOpenApiExtendRes = { 
+      startDt: result.startDt?.toISOString(), 
+      endDt: result.endDt?.toISOString() 
+    };
 
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_EXTENDED', { adminId, keyId, startDt: extendData.startDt, endDt: extendData.endDt });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 키 기간 연장 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.OPEN_API_NOT_FOUND) {
+        return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
-        return sendDatabaseError(res, '연장', 'OpenAPI 키');
-      }
+      return sendError(res, error.errorCode, error.message);
     }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.OPEN_API_UPDATE_FAILED) {
+        return sendError(res, ErrorCode.OPEN_API_UPDATE_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
     sendError(res, ErrorCode.OPEN_API_EXTENDED_FAILED);
   }
 };
@@ -343,15 +379,20 @@ export const statusOpenApiAdmin = async (req: Request, res: Response) => {
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_STATUS_VIEW', { adminId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 상태 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
-      }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+    
+    // ✅ customErrors 처리
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
         return sendDatabaseError(res, '조회', 'OpenAPI 상태');
       }
+      return sendError(res, error.errorCode, error.message);
     }
+    
+    if (error instanceof ResourceError) {
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
     sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
   }
 };

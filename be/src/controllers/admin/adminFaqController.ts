@@ -10,6 +10,7 @@ import {
 } from '../../services/admin/adminFaqService';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
+import { getActorTag } from '../../utils/auth';
 import { 
   extractUserIdFromRequest,
   normalizeErrorMessage
@@ -92,7 +93,7 @@ export const getFaqDetailForAdmin = async (req: Request<AdminFaqDetailParams>, r
 
     const { faqId } = req.params;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -136,7 +137,7 @@ export const createFaqForAdmin = async (req: Request<{}, {}, AdminFaqCreateReq>,
 
     const faqData = req.body;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -180,7 +181,7 @@ export const updateFaqForAdmin = async (req: Request<{ faqId: string }, {}, Admi
     const { faqId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -219,7 +220,6 @@ export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Re
 
     const { faqId } = req.params;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -229,7 +229,7 @@ export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Re
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    await deleteFaq(parseInt(faqId), actorTag);
+    await deleteFaq(parseInt(faqId));
 
     sendSuccess(res, undefined, undefined, 'ADMIN_FAQ_DELETED', { adminId, faqId });
   } catch (error) {

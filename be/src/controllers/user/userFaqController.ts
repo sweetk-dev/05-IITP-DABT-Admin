@@ -69,8 +69,10 @@ export const getFaqDetailForUser = async (req: Request<UserFaqDetailParams>, res
 
     const { faqId } = req.params;
     const keyId = parseInt(faqId);
-
-    const domain = await getUserFaqDetail(keyId);
+    // 클라이언트가 명시적으로 조회수 증가를 건너뛰고자 할 때 지원 (세션 뷰 방지 등)
+    const skipHitHeader = (req.headers['x-skip-hit'] as string | undefined)?.toLowerCase() === 'true';
+    const skipHitQuery = String((req.query as any)?.skipHit || '').toLowerCase() === 'true';
+    const domain = await getUserFaqDetail(keyId, skipHitHeader || skipHitQuery);
     const result: UserFaqDetailRes = { faq: toUserFaqItem(domain as any) } as any;
 
     sendSuccess(res, result, undefined, 'USER_FAQ_DETAIL_VIEW', { faqId });

@@ -2,7 +2,8 @@ import {
   UserOpenApiListReq, 
   UserOpenApiCreateReq, 
   UserOpenApiCreateRes, 
-  UserOpenApiExtendReq
+  UserOpenApiExtendReq,
+  CODE_SYS_WORK_TYPES
 } from '@iitp-dabt/common';
 import type { OpenApiAuthKeyAttributes } from '../../models/openApiAuthKey';
 import { 
@@ -14,6 +15,7 @@ import {
 } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
 import { generateAuthKey } from '../../utils/authKeyGenerator';
+import { act } from 'react';
 
 export class UserOpenApiService {
   /**
@@ -66,7 +68,7 @@ export class UserOpenApiService {
       keyDesc: keyDesc,
       startDt: startDt ? new Date(startDt) : undefined,
       endDt: endDt ? new Date(endDt) : undefined,
-      createdBy: `U:${userId}`
+      createdBy: CODE_SYS_WORK_TYPES.USER
     });
 
     appLogger.info('사용자 OpenAPI 인증키 생성 성공', {
@@ -96,7 +98,7 @@ export class UserOpenApiService {
       throw new Error('접근 권한이 없습니다.');
     }
 
-    const success = await deleteAuthKey(keyId, `U:${userId}`);
+    const success = await deleteAuthKey(keyId, CODE_SYS_WORK_TYPES.USER);
     if (!success) {
       throw new Error('인증키 삭제에 실패했습니다.');
     }
@@ -127,7 +129,7 @@ export class UserOpenApiService {
       throw new Error('접근 권한이 없습니다.');
     }
 
-    const success = await updateAuthKey(keyId, { startDt: new Date(range.startDt), endDt: new Date(range.endDt), updatedBy: `U:${userId}` });
+    const success = await updateAuthKey(keyId, { startDt: new Date(range.startDt), endDt: new Date(range.endDt), updatedBy: CODE_SYS_WORK_TYPES.USER });
     if (!success) {
       throw new Error('인증키 기간 연장에 실패했습니다.');
     }

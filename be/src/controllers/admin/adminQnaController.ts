@@ -15,6 +15,8 @@ import {
   normalizeErrorMessage
 } from '../../utils/commonUtils';
 import { getNumberQuery, getStringQuery } from '../../utils/queryParsers';
+import { BusinessError, ResourceError } from '../../utils/customErrors';
+import { getActorTag } from '../../utils/auth';
 import type {
   AdminQnaListQuery,
   AdminQnaListRes,
@@ -40,7 +42,7 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListQu
     const status = getStringQuery(req.query, 'status');
     
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -64,15 +66,20 @@ export const getQnaListForAdmin = async (req: Request<{}, {}, {}, AdminQnaListQu
     sendSuccess(res, response, undefined, 'ADMIN_QNA_LIST_VIEW', { adminId, count: response.items.length }, true);
   } catch (error) {
     appLogger.error('관리자 QnA 목록 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
-      }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+    
+    // ✅ customErrors 처리
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
         return sendDatabaseError(res, '조회', 'QnA 목록');
       }
+      return sendError(res, error.errorCode, error.message);
     }
+    
+    if (error instanceof ResourceError) {
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
@@ -102,16 +109,24 @@ export const getQnaDetailForAdmin = async (req: Request<AdminQnaDetailParams>, r
     sendSuccess(res, response, undefined, 'ADMIN_QNA_DETAIL_VIEW', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 상세 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.QNA_NOT_FOUND) {
+        return sendError(res, ErrorCode.QNA_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
         return sendDatabaseError(res, '조회', 'QnA 상세');
       }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.QNA_NOT_FOUND);
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
@@ -127,7 +142,7 @@ export const answerQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
     const { qnaId } = req.params;
     const { answer } = req.body;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -145,16 +160,24 @@ export const answerQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
     sendSuccess(res, undefined, undefined, 'ADMIN_QNA_ANSWERED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 답변 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.QNA_NOT_FOUND) {
+        return sendError(res, ErrorCode.QNA_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
-        return sendDatabaseError(res, '답변', 'QnA');
-      }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.QNA_ANSWER_FAILED);
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.QNA_ANSWER_FAILED) {
+        return sendError(res, ErrorCode.QNA_ANSWER_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
@@ -170,7 +193,7 @@ export const updateQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
     const { qnaId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -184,16 +207,24 @@ export const updateQnaForAdmin = async (req: Request<{ qnaId: string }, {}, Admi
     sendSuccess(res, undefined, undefined, 'ADMIN_QNA_UPDATED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.QNA_NOT_FOUND) {
+        return sendError(res, ErrorCode.QNA_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
-        return sendDatabaseError(res, '수정', 'QnA');
-      }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.QNA_UPDATE_FAILED);
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.QNA_UPDATE_FAILED) {
+        return sendError(res, ErrorCode.QNA_UPDATE_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
 
@@ -208,7 +239,7 @@ export const deleteQnaForAdmin = async (req: Request<{ qnaId: string }>, res: Re
 
     const { qnaId } = req.params;
     const adminId = extractUserIdFromRequest(req);
-    const actorTag = req.user?.actorTag!;
+    const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
@@ -222,15 +253,23 @@ export const deleteQnaForAdmin = async (req: Request<{ qnaId: string }>, res: Re
     sendSuccess(res, undefined, undefined, 'ADMIN_QNA_DELETED', { adminId, qnaId });
   } catch (error) {
     appLogger.error('관리자 QnA 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
-    if (error instanceof Error) {
-      const errorMsg = normalizeErrorMessage(error);
-      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
-        return sendValidationError(res, 'general', errorMsg);
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.QNA_NOT_FOUND) {
+        return sendError(res, ErrorCode.QNA_NOT_FOUND);
       }
-      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
-        return sendDatabaseError(res, '삭제', 'QnA');
-      }
+      return sendError(res, error.errorCode, error.message);
     }
-    sendError(res, ErrorCode.QNA_DELETE_FAILED);
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.QNA_DELETE_FAILED) {
+        return sendError(res, ErrorCode.QNA_DELETE_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 }; 

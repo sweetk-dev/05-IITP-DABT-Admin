@@ -3,7 +3,8 @@ import {
   UserQnaDetailRes,
   UserQnaCreateReq,
   UserQnaCreateRes,
-  UserQnaHomeRes
+  UserQnaHomeRes,
+  CODE_SYS_WORK_TYPES
 } from '@iitp-dabt/common';
 import { 
   findQnas,
@@ -13,6 +14,7 @@ import {
 } from '../../repositories/sysQnaRepository';
 import { appLogger } from '../../utils/logger';
 import { QnaSource, toUserQnaItem } from '../../mappers/qnaMapper';
+import { act } from 'react';
 
 /**
  * 사용자 Q&A 목록 조회 (비즈니스 로직)
@@ -55,7 +57,7 @@ export const getUserQnaList = async (
 /**
  * 사용자 Q&A 상세 조회 (비즈니스 로직)
  */
-export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<QnaSource> => {
+export const getUserQnaDetail = async (userId: number, qnaId: number, skipHit: boolean = false): Promise<QnaSource> => {
   try {
     const qna = await findQnaById(qnaId);
     // 공개 상세: 비공개(secretYn='Y')는 소유자만 접근, 공개(secretYn='N')는 모두 접근
@@ -65,8 +67,8 @@ export const getUserQnaDetail = async (userId: number, qnaId: number): Promise<Q
     if (qna.secretYn === 'Y' && Number(qna.userId) !== Number(userId)) {
       throw new Error('Q&A를 찾을 수 없거나 접근 권한이 없습니다.');
     }
-    // 조회수 증가: 공개 QnA이며, 작성자 본인이 아닐 때만 증가
-    if (qna.secretYn === 'N' && Number(qna.userId) !== Number(userId)) {
+    // 조회수 증가: 공개 QnA이며, 작성자 본인이 아니고, skipHit가 아닌 경우만 증가
+    if (!skipHit && qna.secretYn === 'N' && Number(qna.userId) !== Number(userId)) {
       const current = (qna as any).hitCnt || 0;
       await qna.update({ hitCnt: current + 1, updatedAt: new Date() });
     }
@@ -91,8 +93,8 @@ export const createUserQna = async (userId: number, createData: UserQnaCreateReq
       title: createData.title,
       content: createData.content,
       secretYn: createData.secretYn || 'N',
-      writerName: createData.writerName || `User_${userId}`,
-      createdBy: `U:${userId}`
+      writerName: createData.writerName || '',
+      createdBy: CODE_SYS_WORK_TYPES.USER
     } as any);
 
     appLogger.info('사용자 Q&A 생성 서비스 성공', { userId, qnaId: (created as any).qnaId });
@@ -126,5 +128,5 @@ export const deleteUserQna = async (userId: number, qnaId: number): Promise<void
   if (!qna || Number((qna as any).userId) !== Number(userId)) {
     throw new Error('삭제 권한이 없습니다.');
   }
-  await deleteQnaRepo(qnaId, `U:${userId}`);
+  await deleteQnaRepo(qnaId, CODE_SYS_WORK_TYPES.USER);
 };

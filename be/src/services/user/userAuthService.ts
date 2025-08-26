@@ -1,11 +1,12 @@
 import { ErrorCode } from '@iitp-dabt/common';
-import { findUserByEmail, updateLatestLoginAt } from '../../repositories/openApiUserRepository';
+import { openApiUserRepository } from '../../repositories/openApiUserRepository';
 import { createLog } from '../../repositories/sysLogUserAccessRepository';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getDecryptedEnv } from '../../utils/decrypt';
 import { appLogger } from '../../utils/logger';
 import { generateAccessToken, generateRefreshToken, verifyToken } from '../../utils/jwt';
+import { ResourceError, BusinessError, ValidationError } from '../../utils/customErrors';
 
 export interface LoginResult {
   token: string;
@@ -32,7 +33,7 @@ export interface RefreshResult {
 export const loginUser = async (email: string, password: string, ipAddr?: string, userAgent?: string): Promise<LoginResult> => {
   try {
     // 사용자 계정 조회
-    const user = await findUserByEmail(email);
+    const user = await openApiUserRepository.findUserByEmail(email);
     if (!user) {
       // 로그인 실패 로그 기록
       await createLog({
@@ -44,7 +45,12 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
         ipAddr,
         userAgent
       });
-      throw new Error('USER_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.USER_NOT_FOUND,
+        '존재하지 않는 사용자 계정입니다.',
+        'user',
+        email
+      );
     }
 
     // 비밀번호 검증
@@ -60,7 +66,11 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
         ipAddr,
         userAgent
       });
-      throw new Error('ACCOUNT_PASSWORD_INVALID');
+      throw new ValidationError(
+        ErrorCode.ACCOUNT_PASSWORD_INVALID,
+        '비밀번호가 올바르지 않습니다.',
+        'password'
+      );
     }
 
     // 계정 상태 확인
@@ -75,14 +85,23 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
         ipAddr,
         userAgent
       });
-      throw new Error('ACCOUNT_INACTIVE');
+      throw new ResourceError(
+        ErrorCode.ACCOUNT_INACTIVE,
+        '비활성화된 계정입니다.',
+        'user',
+        user.userId
+      );
     }
 
     // JWT 토큰 생성
     const jwtSecret = getDecryptedEnv('JWT_SECRET');
     if (!jwtSecret) {
       appLogger.error('JWT_SECRET is not configured');
-      throw new Error('JWT_SECRET_NOT_CONFIGURED');
+      throw new BusinessError(
+        ErrorCode.SYS_INTERNAL_SERVER_ERROR,
+        'JWT 설정이 올바르지 않습니다.',
+        { originalError: 'JWT_SECRET_NOT_CONFIGURED' }
+      );
     }
 
     // Access Token과 Refresh Token 생성
@@ -96,7 +115,7 @@ export const loginUser = async (email: string, password: string, ipAddr?: string
     const refreshToken = generateRefreshToken(tokenPayload);
 
     // 최근 로그인 시간 업데이트
-    await updateLatestLoginAt(user.userId);
+    await openApiUserRepository.updateLatestLoginAt(user.userId);
 
     // 로그인 성공 로그 기록
     await createLog({
@@ -147,7 +166,7 @@ export const refreshUserToken = async (refreshToken: string, ipAddr?: string, us
     if (!payload.email) {
       throw new Error('INVALID_REFRESH_TOKEN');
     }
-    const user = await findUserByEmail(payload.email);
+    const user = await openApiUserRepository.findUserByEmail(payload.email);
     if (!user) {
       throw new Error('USER_NOT_FOUND');
     }

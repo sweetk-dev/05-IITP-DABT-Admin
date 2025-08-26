@@ -7,6 +7,8 @@ import {
   deleteFaq as deleteFaqRepo 
 } from '../../repositories/sysFaqRepository';
 import { appLogger } from '../../utils/logger';
+import { ErrorCode } from '@iitp-dabt/common';
+import { ResourceError, BusinessError } from '../../utils/customErrors';
 
 export interface FaqListParams {
   page: number;
@@ -80,7 +82,11 @@ export const getFaqList = async (params: FaqListParams): Promise<FaqListResult> 
     };
   } catch (error) {
     appLogger.error('FAQ 목록 조회 중 오류 발생', { error, params });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'FAQ 목록 조회 중 오류가 발생했습니다.',
+      { params, originalError: error }
+    );
   }
 };
 
@@ -91,12 +97,24 @@ export const getFaqDetail = async (faqId: number) => {
   try {
     const faq = await findFaqById(faqId);
     if (!faq) {
-      throw new Error('FAQ_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.FAQ_NOT_FOUND,
+        'FAQ를 찾을 수 없습니다.',
+        'faq',
+        faqId
+      );
     }
     return faq;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('FAQ 상세 조회 중 오류 발생', { error, faqId });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'FAQ 상세 조회 중 오류가 발생했습니다.',
+      { faqId, originalError: error }
+    );
   }
 };
 
@@ -131,30 +149,54 @@ export const updateFaq = async (faqId: number, updateData: FaqUpdateData, actorT
     });
 
     if (!updatedFaq) {
-      throw new Error('FAQ_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.FAQ_NOT_FOUND,
+        'FAQ를 찾을 수 없습니다.',
+        'faq',
+        faqId
+      );
     }
 
     appLogger.info('FAQ 수정 성공', { faqId, actorTag });
     return updatedFaq;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('FAQ 수정 중 오류 발생', { error, faqId, updateData, actorTag });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'FAQ 수정 중 오류가 발생했습니다.',
+      { faqId, updateData, originalError: error }
+    );
   }
 };
 
 /**
  * FAQ 삭제 (관리자용)
  */
-export const deleteFaq = async (faqId: number, _actorTag: string) => {
+export const deleteFaq = async (faqId: number) => {
   try {
     const ok = await deleteFaqRepo(faqId);
-    if (!ok) throw new Error('FAQ_NOT_FOUND');
+    if (!ok) throw new ResourceError(
+      ErrorCode.FAQ_NOT_FOUND,
+      'FAQ를 찾을 수 없습니다.',
+      'faq',
+      faqId
+    );
 
     appLogger.info('FAQ 삭제 성공', { faqId });
     return ok;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('FAQ 삭제 중 오류 발생', { error, faqId });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'FAQ 삭제 중 오류가 발생했습니다.',
+      { faqId, originalError: error }
+    );
   }
 };
 

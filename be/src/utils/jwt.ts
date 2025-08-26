@@ -14,6 +14,7 @@ export interface TokenPayload {
   userType: 'U' | 'A'; // 사용자 타입 (User/Admin)
   email?: string;     // 이메일 (User용)
   loginId?: string;   // 로그인 ID (Admin용)
+  role?: string;      // 역할 코드 (Admin용)
   exp?: number;       // 만료 시간 (FE에서 접근 가능)
   iat?: number;       // 발급 시간 (FE에서 접근 가능)
 }

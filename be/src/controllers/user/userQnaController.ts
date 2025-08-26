@@ -99,7 +99,9 @@ export const getQnaDetailForUser = async (req: Request<UserQnaDetailParams>, res
     const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용
     const { qnaId } = req.params;
     const keyId = parseInt(qnaId);
-    const qna = await getUserQnaDetail(userId, keyId);
+    const skipHitHeader = (req.headers['x-skip-hit'] as string | undefined)?.toLowerCase() === 'true';
+    const skipHitQuery = String((req.query as any)?.skipHit || '').toLowerCase() === 'true';
+    const qna = await getUserQnaDetail(userId, keyId, skipHitHeader || skipHitQuery);
     const result: UserQnaDetailRes = { qna: { ...toUserQnaItem(qna), isMine: Number((qna as any).userId) === Number(userId) } as any } as any;
 
     sendSuccess(res, result, undefined, 'USER_QNA_DETAIL_VIEW', { userId, qnaId });
@@ -164,7 +166,7 @@ export const deleteQnaForUser = async (req: Request<UserQnaDeleteParams>, res: R
     }
     const keyId = parseInt(qnaId);
     const svc = await import('../../services/user/userQnaService');
-    await svc.deleteUserQna(userId, keyId);
+    await svc.deleteUserQna(userId, keyId );
     sendSuccess(res, undefined, undefined, 'USER_QNA_DELETED', { userId, qnaId: keyId });
   } catch (error) {
     appLogger.error('사용자 Q&A 삭제 중 오류 발생', { error, userId: extractUserIdFromRequest(req) });

@@ -7,23 +7,20 @@ import QnaTypeChip from '../../components/common/QnaTypeChip';
 import ThemedButton from '../../components/common/ThemedButton';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-// import { ROUTES } from '../../routes';
 import ThemedCard from '../../components/common/ThemedCard';
 import ListItemCard from '../../components/common/ListItemCard';
-// import PageTitle from '../components/common/PageTitle';
-// import ThemedButton from '../components/common/ThemedButton';
 import CommonToast from '../../components/CommonToast';
 import ListScaffold from '../../components/common/ListScaffold';
 import SelectField from '../../components/common/SelectField';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
-// import { ArrowBack } from '@mui/icons-material';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { getUserQnaList, getUserQnaListByType, getCommonCodesByGroupId } from '../../api';
 import { formatLocaleDate } from '../../utils/date';
+import {COMMON_CODE_GROUPS} from '@iitp-dabt/common';
 
 export default function QnaList() {
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
@@ -57,7 +54,7 @@ export default function QnaList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.page, query.limit, query.qnaType]);
 
-  const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('qna_type'), autoFetch: true });
+  const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.QNA_TYPE), autoFetch: true });
 
   useEffect(() => {
     if (qnaTypeCodes) {

@@ -12,18 +12,16 @@ import {
 	Divider
 } from '@mui/material';
 import { getUserQnaList, getUserQnaDetail, getCommonCodesByGroupId } from '../../api';
-// import ErrorAlert from '../../components/ErrorAlert';
 import { ROUTES } from '../../routes';
 import { PAGINATION } from '../../constants/pagination';
 import ThemedButton from '../../components/common/ThemedButton';
 import CommonDialog from '../../components/CommonDialog';
 import { deleteUserQna } from '../../api';
 import { Delete as DeleteIcon } from '@mui/icons-material';
-// import { getThemeColors } from '../../theme';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
-// import type { UserQnaDetailRes } from '@iitp-dabt/common';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 // EmptyState handled by ListScaffold
 import StatusChip from '../../components/common/StatusChip';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
@@ -44,7 +42,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const [targetDeleteId, setTargetDeleteId] = useState<number | null>(null);
 	// QnA 유형 공통코드 로드 (라벨 표시용)
-	const { data: qnaTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('qna_type'), autoFetch: true });
+	const { data: qnaTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.QNA_TYPE), autoFetch: true });
 	
 	// Pagination 훅 사용
 	const pagination = usePagination({

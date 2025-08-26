@@ -68,7 +68,7 @@ export function getUserType(): 'U' | 'A' | null {
  */
 export function getAdminRole(): string {
   const userInfo = getUserInfo();
-  return userInfo?.role || '관리자';
+  return userInfo?.roleName || '관리자';
 }
 
 /**

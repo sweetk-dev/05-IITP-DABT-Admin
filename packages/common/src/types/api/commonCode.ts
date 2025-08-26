@@ -102,34 +102,34 @@ export const COMMON_CODE_API_MAPPING = {
   },
   [`POST ${API_URLS.COMMON_CODE.GROUP.CREATE}`]: {
     req: 'CommonCodeGroupCreateReq',
-    res: 'CommonCodeGroupCreateRes',
+    res: 'void',
     description: '그룹 생성 (관리자용)'
   },
   [`PUT ${API_URLS.COMMON_CODE.GROUP.UPDATE}`]: {
     req: 'CommonCodeGroupUpdateReq',
-    res: 'CommonCodeGroupUpdateRes',
+    res: 'void',
     description: '그룹 수정 (관리자용)'
   },
   [`DELETE ${API_URLS.COMMON_CODE.GROUP.DELETE}`]: {
     req: 'void',
-    res: 'CommonCodeGroupDeleteRes',
+    res: 'void',
     description: '그룹 삭제 (관리자용)'
   },
   
   // 관리자용 코드 관리 API
   [`POST ${API_URLS.COMMON_CODE.CODE.CREATE}`]: {
     req: 'CommonCodeCodeCreateReq',
-    res: 'CommonCodeCodeCreateRes',
+    res: 'void',
     description: '코드 생성 (관리자용)'
   },
   [`PUT ${API_URLS.COMMON_CODE.CODE.UPDATE}`]: {
     req: 'CommonCodeCodeUpdateReq',
-    res: 'CommonCodeCodeUpdateRes',
+    res: 'void',
     description: '코드 수정 (관리자용)'
   },
   [`DELETE ${API_URLS.COMMON_CODE.CODE.DELETE}`]: {
     req: 'void',
-    res: 'CommonCodeCodeDeleteRes',
+    res: 'void',
     description: '코드 삭제 (관리자용)'
   },
 } as const;
@@ -330,22 +330,6 @@ export interface CommonCodeByParentDetailRes {
 }
 
 
-
-// 공통 코드 생성 응답
-export interface CommonCodeCreateRes {
-  code: CommonCodeDetail;
-}
-
-// 공통 코드 수정 응답
-export interface CommonCodeUpdateRes {
-  affectedCount: number;
-}
-
-// 공통 코드 삭제 응답
-export interface CommonCodeDeleteRes {
-  affectedCount: number;
-}
-
 // === 관리자용 그룹 관리 API 타입들 ===
 
 // 그룹 정보 (코드 리스트 제외)
@@ -381,11 +365,7 @@ export interface CommonCodeGroupCreateReq {
   }>;
 }
 
-// 그룹 생성 응답
-export interface CommonCodeGroupCreateRes {
-  group: CommonCodeGroup;
-  codes: CommonCodeDetail[];
-}
+// 그룹 생성 응답은 ApiResponse<void> 사용
 
 // 그룹 수정 요청 (그룹명, 설명만 수정 가능)
 export interface CommonCodeGroupUpdateReq {
@@ -393,15 +373,9 @@ export interface CommonCodeGroupUpdateReq {
   codeDes?: string;
 }
 
-// 그룹 수정 응답
-export interface CommonCodeGroupUpdateRes {
-  affectedCount: number;
-}
+// 그룹 수정 응답은 ApiResponse<void> 사용
 
-// 그룹 삭제 응답
-export interface CommonCodeGroupDeleteRes {
-  affectedCount: number;
-}
+// 그룹 삭제 응답은 ApiResponse<void> 사용
 
 // === 관리자용 코드 관리 API 타입들 ===
 
@@ -415,10 +389,7 @@ export interface CommonCodeCodeCreateReq {
   codeDes?: string;
 }
 
-// 코드 생성 응답
-export interface CommonCodeCodeCreateRes {
-  code: CommonCodeDetail;
-}
+// 코드 생성 응답은 ApiResponse<void> 사용
 
 // 코드 수정 요청 (codeId는 수정 불가)
 export interface CommonCodeCodeUpdateReq {
@@ -432,10 +403,7 @@ export interface CommonCodeCodeUpdateRes {
   affectedCount: number;
 }
 
-// 코드 삭제 응답
-export interface CommonCodeCodeDeleteRes {
-  affectedCount: number;
-}
+// 코드 삭제 응답은 ApiResponse<void> 사용
 
 // === 계층 구조 조회 API 타입들 ===
 

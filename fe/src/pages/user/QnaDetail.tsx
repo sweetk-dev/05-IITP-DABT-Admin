@@ -15,6 +15,7 @@ import CommonToast from '../../components/CommonToast';
 import { getUserQnaDetail, getUserQnaList } from '../../api';
 import { SPACING } from '../../constants/spacing';
 import type { UserQnaItem } from '@iitp-dabt/common';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import PageHeader from '../../components/common/PageHeader';
 
 export default function QnaDetail() {
@@ -78,7 +79,7 @@ export default function QnaDetail() {
   }, [qna]);
 
   // Preload codes for this page once
-  useEffect(() => { fetchCodesByGroup('qna_type').catch(() => {}); }, [fetchCodesByGroup]);
+  useEffect(() => { fetchCodesByGroup(COMMON_CODE_GROUPS.QNA_TYPE).catch(() => {}); }, [fetchCodesByGroup]);
 
   const handleBackToList = () => { navigate('/qna'); };
   const handlePreviousQna = () => { if (currentIndex > 0) navigate(`/qna/${(allQnas[currentIndex - 1] as any).qnaId}`); };

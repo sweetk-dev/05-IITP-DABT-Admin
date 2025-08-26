@@ -12,6 +12,7 @@ import {
   AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
 import { getAdminRole } from '../store/user';
+import { isSAdmin } from '../utils/auth';
 import { ROUTES } from '../routes';
 import { useTheme } from '@mui/material/styles';
 
@@ -80,7 +81,7 @@ export default function AdminMenuBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const adminRole = getAdminRole();
-  const isSAdmin = adminRole === 'S-ADMIN';
+  const isSuperAdmin = isSAdmin(adminRole);
   const muiTheme = useTheme();
   const colors = {
     primary: muiTheme.palette.primary.main,
@@ -102,7 +103,7 @@ export default function AdminMenuBar() {
 
   // S-ADMIN 권한이 필요한 메뉴 필터링
   const visibleMenuItems = MENU_ITEMS.filter(item => 
-    !item.requiresSAdmin || isSAdmin
+    !item.requiresSAdmin || isSuperAdmin
   );
 
   useEffect(() => {

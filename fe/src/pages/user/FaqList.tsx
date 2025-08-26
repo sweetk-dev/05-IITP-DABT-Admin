@@ -4,14 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import ThemedCard from '../../components/common/ThemedCard';
 import ListScaffold from '../../components/common/ListScaffold';
-// import PageTitle from '../components/common/PageTitle';
-// import ThemedButton from '../components/common/ThemedButton';
 import { useQuerySync } from '../../hooks/useQuerySync';
-// import EmptyState from '../../components/common/EmptyState';
-// import LoadingSpinner from '../../components/LoadingSpinner';
-// import Pagination from '../../components/common/Pagination';
 import SelectField from '../../components/common/SelectField';
-// import ListTotal from '../../components/common/ListTotal';
 import { ExpandMore } from '@mui/icons-material';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
@@ -35,7 +29,7 @@ export default function FaqList() {
   const { query, setQuery } = useQuerySync({ page: 1, limit: pagination.pageSize, faqType: 'ALL', search: '', faqId: '' });
   const errorHandler: UseErrorHandlerResult = useErrorHandler();
 
-  const { data: faqTypeCodes, isLoading: faqTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('faq_type'), autoFetch: true });
+  const { data: faqTypeCodes, isLoading: faqTypeLoading } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.FAQ_TYPE), autoFetch: true });
 
   useEffect(() => {
     if (faqTypeCodes) {

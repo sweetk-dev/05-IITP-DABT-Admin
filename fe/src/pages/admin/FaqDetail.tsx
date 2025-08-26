@@ -1,5 +1,6 @@
 import { Box, CardContent, Typography, Alert, Chip } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common'; 
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -24,7 +25,7 @@ export default function AdminFaqDetail() {
   const faq = (data as any)?.faq || (data as any);
 
   // load type codes for label
-  const { data: faqTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('faq_type'), autoFetch: true });
+  const { data: faqTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.FAQ_TYPE), autoFetch: true });
   const faqTypeOptions = [{ value: '', label: '전체' }, ...((faqTypeCodes as any)?.codes || []).map((c: any) => ({ value: c.codeId, label: c.codeNm }))];
   const faqTypeLabel = faq ? (faqTypeOptions.find(o=>o.value===faq.faqType)?.label || faq.faqType) : '';
 

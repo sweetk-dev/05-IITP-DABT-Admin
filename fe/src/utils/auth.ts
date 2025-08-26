@@ -1,3 +1,5 @@
+import {CODE_SYS_ADMIN_ROLES} from '@iitp-dabt/common';
+
 /**
  * 프론트엔드 권한 관리 유틸리티
  * 백엔드 권한 체계와 동일하게 구현
@@ -9,7 +11,7 @@
  * @returns S-Admin 여부
  */
 export function isSAdmin(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN;
 }
 
 /**
@@ -18,7 +20,10 @@ export function isSAdmin(adminRole: string | null): boolean {
  * @returns 일반 Admin 여부
  */
 export function isAdmin(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN' || adminRole === 'ADMIN' || adminRole === 'EDITOR' || adminRole === 'VIEWER';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN 
+                      || adminRole === CODE_SYS_ADMIN_ROLES.ADMIN 
+                      || adminRole === CODE_SYS_ADMIN_ROLES.EDITOR 
+                      || adminRole === CODE_SYS_ADMIN_ROLES.VIEWER;
 }
 
 /**
@@ -28,7 +33,9 @@ export function isAdmin(adminRole: string | null): boolean {
  * @returns 콘텐츠 편집 권한 여부
  */
 export function hasContentEditPermission(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN' || adminRole === 'ADMIN' || adminRole === 'EDITOR';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN 
+          || adminRole === CODE_SYS_ADMIN_ROLES.ADMIN 
+          || adminRole === CODE_SYS_ADMIN_ROLES.EDITOR;
 }
 
 /**
@@ -37,7 +44,10 @@ export function hasContentEditPermission(adminRole: string | null): boolean {
  * @returns 읽기 권한 여부
  */
 export function hasReadPermission(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN' || adminRole === 'ADMIN' || adminRole === 'EDITOR' || adminRole === 'VIEWER';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN 
+          || adminRole === CODE_SYS_ADMIN_ROLES.ADMIN 
+          || adminRole === CODE_SYS_ADMIN_ROLES.EDITOR 
+          || adminRole === CODE_SYS_ADMIN_ROLES.VIEWER;
 }
 
 /**
@@ -48,7 +58,7 @@ export function hasReadPermission(adminRole: string | null): boolean {
  * @returns 운영자 계정 관리 권한 여부
  */
 export function hasAccountManagementPermission(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN;
 }
 
 /**
@@ -59,7 +69,10 @@ export function hasAccountManagementPermission(adminRole: string | null): boolea
  * @returns 사용자 계정 조회 권한 여부
  */
 export function hasUserAccountReadPermission(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN' || adminRole === 'ADMIN' || adminRole === 'EDITOR' || adminRole === 'VIEWER';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN 
+                        || adminRole === CODE_SYS_ADMIN_ROLES.ADMIN 
+                        || adminRole === CODE_SYS_ADMIN_ROLES.EDITOR 
+                        || adminRole === CODE_SYS_ADMIN_ROLES.VIEWER;
 }
 
 /**
@@ -70,7 +83,7 @@ export function hasUserAccountReadPermission(adminRole: string | null): boolean 
  * @returns 사용자 계정 편집 권한 여부
  */
 export function hasUserAccountEditPermission(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN' || adminRole === 'ADMIN';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN || adminRole === CODE_SYS_ADMIN_ROLES.ADMIN;
 }
 
 /**
@@ -82,7 +95,7 @@ export function hasUserAccountEditPermission(adminRole: string | null): boolean 
  * @returns 시스템 설정 권한 여부
  */
 export function hasSystemConfigPermission(adminRole: string | null): boolean {
-  return adminRole === 'S-ADMIN';
+  return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN;
 }
 
 /**

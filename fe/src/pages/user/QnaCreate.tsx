@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   Switch,
 } from '@mui/material';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import { createUserQna, getCommonCodesByGroupId } from '../../api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
@@ -45,7 +46,7 @@ export const QnaCreate: React.FC<QnaCreateProps> = ({ id = 'qna-create' }) => {
 
   // QNA 유형 공통코드 로드 (QnaList와 동일 소스 사용)
   const { data: qnaTypeCodes, isLoading: qnaTypeLoading } = useDataFetching<any>({
-    fetchFunction: () => getCommonCodesByGroupId('qna_type'),
+    fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.QNA_TYPE),
     autoFetch: true
   });
 

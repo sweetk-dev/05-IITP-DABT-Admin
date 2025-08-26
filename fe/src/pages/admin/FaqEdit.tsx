@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Box, CardContent, TextField, Alert } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -39,7 +40,7 @@ export default function AdminFaqEdit() {
   }, [detail]);
 
   // load FAQ type codes
-  const { data: faqTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('faq_type'), autoFetch: true });
+  const { data: faqTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.FAQ_TYPE), autoFetch: true });
   const faqTypeOptions = [{ value: '', label: '선택하세요' }, ...((faqTypeCodes as any)?.codes || []).map((c: any) => ({ value: c.codeId, label: c.codeNm }))];
 
   const handleBack = () => navigate(ROUTES.ADMIN.FAQ.DETAIL.replace(':id', String(faqId)));

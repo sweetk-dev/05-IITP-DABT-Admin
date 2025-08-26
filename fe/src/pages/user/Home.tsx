@@ -17,6 +17,7 @@ import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getHomeNoticeList, getHomeFaqList, getHomeQnaList, getCommonCodesByGroupId } from '../../api';
 import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import { useCommonCode } from '../../hooks/useCommonCode';
 import { ROUTES } from '../../routes';
 
@@ -61,10 +62,10 @@ export default function Home() {
     fetchFunction: getHomeQnaList
   });
   // QnA 유형 공통코드 로드 (라벨 표시용)
-  const { data: qnaTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId('qna_type'), autoFetch: true });
+  const { data: qnaTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.QNA_TYPE), autoFetch: true });
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   // Preload qna_type once for this page
-  useEffect(() => { fetchCodesByGroup('qna_type').catch(() => {}); }, [fetchCodesByGroup]);
+  useEffect(() => { fetchCodesByGroup(COMMON_CODE_GROUPS.QNA_TYPE).catch(() => {}); }, [fetchCodesByGroup]);
   
   const handleContentClick = (type: 'notice' | 'faq' | 'qna', id: number) => {
     if (type === 'faq') {

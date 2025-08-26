@@ -99,9 +99,7 @@ export const sendSuccess = (
       });
     } else {
       // 204 No Content (단건 조회에서 데이터가 없는 경우)
-      res.status(204).json({
-        success: true
-      });
+      res.status(204).end(); // body 없이 응답
     }
   } else {
     // 정상 데이터 응답

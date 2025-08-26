@@ -10,16 +10,21 @@ type StatusKind =
   | 'inactive'
   | 'expired'
   | 'warning'
-  | 'default';
+  | 'default'
+  | 'success'
+  | 'error'
+  | 'info'
+  | 'primary';
 
 interface StatusChipProps {
   id?: string;
   kind: StatusKind;
   label?: string;
   size?: 'small' | 'medium';
+  sx?: any;
 }
 
-export default function StatusChip({ id, kind, label, size = 'small' }: StatusChipProps) {
+export default function StatusChip({ id, kind, label, size = 'small', sx }: StatusChipProps) {
   const theme = useTheme();
   const getProps = () => {
     switch (kind) {
@@ -52,6 +57,14 @@ export default function StatusChip({ id, kind, label, size = 'small' }: StatusCh
       }
       case 'warning':
         return { color: 'warning' as const, text: label || '주의' };
+      case 'success':
+        return { color: 'success' as const, text: label || '성공' };
+      case 'error':
+        return { color: 'error' as const, text: label || '오류' };
+      case 'info':
+        return { color: 'info' as const, text: label || '정보' };
+      case 'primary':
+        return { color: 'primary' as const, text: label || '주요' };
       default:
         return { color: 'default' as const, text: label || '상태' };
     }
@@ -72,7 +85,7 @@ export default function StatusChip({ id, kind, label, size = 'small' }: StatusCh
     );
   }
   const p = getProps() as any;
-  return <Chip id={id} size={size} label={p.text} color={p.color} icon={p.icon} sx={{ fontWeight: 700, ...(p.sx || {}) }} />;
+  return <Chip id={id} size={size} label={p.text} color={p.color} icon={p.icon} sx={{ fontWeight: 700, ...(p.sx || {}), ...(sx || {}) }} />;
 }
 
 

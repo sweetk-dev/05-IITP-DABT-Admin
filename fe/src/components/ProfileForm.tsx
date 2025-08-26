@@ -24,8 +24,8 @@ import ThemedButton from './common/ThemedButton';
 import ThemedCard from './common/ThemedCard';
 import LoadingSpinner from './LoadingSpinner';
 import { usePasswordValidation } from '../hooks/usePasswordValidation';
-import { useInputWithTrim } from '../hooks/useInputWithTrim';
 import { PAGE_SPACING } from '../constants/spacing';
+import { hasMenuAccess } from '../utils/auth';
 
 interface ProfileData {
   name?: string;
@@ -33,6 +33,7 @@ interface ProfileData {
   email?: string;
   loginId?: string;
   role?: string;
+  roleName?: string;
   createdAt?: string;
   [key: string]: any;
 }
@@ -69,9 +70,9 @@ export default function ProfileForm({
   const [saving, setSaving] = useState(false);
   const [nameError, setNameError] = useState('');
   
-  // trim 처리가 적용된 입력 필드들
-  const nameInput = useInputWithTrim('');
-  const affiliationInput = useInputWithTrim('');
+  // 편집용 상태
+  const [nameValue, setNameValue] = useState('');
+  const [affiliationValue, setAffiliationValue] = useState('');
   
   // 비밀번호 변경 모달 상태
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -89,22 +90,22 @@ export default function ProfileForm({
   // 프로필 데이터가 변경되면 편집 데이터 초기화
   useEffect(() => {
     if (profileData) {
-      nameInput.onChange(profileData.name || '');
-      affiliationInput.onChange(profileData.affiliation || '');
+      setNameValue(profileData.name || '');
+      setAffiliationValue(profileData.affiliation || '');
     }
-  }, [profileData, nameInput, affiliationInput]);
+  }, [profileData]);
 
   // 편집 모드 시작
   const handleStartEdit = () => {
-    nameInput.onChange(profileData?.name || '');
-    affiliationInput.onChange(profileData?.affiliation || '');
+    setNameValue(profileData?.name || '');
+    setAffiliationValue(profileData?.affiliation || '');
     setIsEditing(true);
   };
 
   // 정보 변경 저장
   const handleSaveProfile = async () => {
     // 이름 필수 검증 (사용자, 관리자 모두)
-    const trimmedName = nameInput.getTrimmedValue();
+    const trimmedName = nameValue.trim();
     if (!trimmedName) {
       setNameError('이름을 입력해 주세요.');
       return;
@@ -113,13 +114,14 @@ export default function ProfileForm({
 
     setSaving(true);
     try {
-      await onSaveProfile({ 
+      const result = await onSaveProfile({ 
         name: trimmedName, 
-        affiliation: affiliationInput.getTrimmedValue() // 소속은 선택적 (빈 값 허용)
+        affiliation: affiliationValue.trim() // 소속은 선택적 (빈 값 허용)
       });
+    
       setIsEditing(false);
     } catch (err) {
-      console.error('Profile update error:', err);
+      console.error('[ProfileForm] Profile update error:', err);
     } finally {
       setSaving(false);
     }
@@ -127,8 +129,8 @@ export default function ProfileForm({
 
   // 편집 취소
   const handleCancelEdit = () => {
-    nameInput.onChange(profileData?.name || '');
-    affiliationInput.onChange(profileData?.affiliation || '');
+    setNameValue(profileData?.name || '');
+    setAffiliationValue(profileData?.affiliation || '');
     setNameError(''); // 에러 메시지 초기화
     setIsEditing(false);
   };
@@ -254,7 +256,7 @@ export default function ProfileForm({
             </Typography>
             {showRole && displayData?.role && (
               <Chip 
-                label={displayData.role} 
+                label={displayData.roleName} 
                 sx={{ 
                   mb: 3,
                   bgcolor: colors.chip,
@@ -352,8 +354,8 @@ export default function ProfileForm({
                     label="이름"
                     fullWidth
                     margin="none"
-                    value={nameInput.value}
-                    onChange={(e) => nameInput.onChange(e.target.value)}
+                    value={nameValue}
+                    onChange={(e) => setNameValue(e.target.value)}
                     error={!!nameError}
                     helperText={nameError}
                     disabled={saving}
@@ -376,8 +378,8 @@ export default function ProfileForm({
                     label="소속"
                     fullWidth
                     margin="none"
-                    value={affiliationInput.value}
-                    onChange={(e) => affiliationInput.onChange(e.target.value)}
+                    value={affiliationValue}
+                    onChange={(e) => setAffiliationValue(e.target.value)}
                     disabled={saving}
                     sx={{ mb: PAGE_SPACING.PROFILE.FIELD_BOTTOM }}
                   />
@@ -409,7 +411,7 @@ export default function ProfileForm({
                     역할
                   </Typography>
                   <Typography variant="body1" sx={{ py: 1 }}>
-                    {displayData?.role || '-'}
+                    {displayData?.roleName || '-'}
                   </Typography>
                 </Grid>
               )}
@@ -437,6 +439,115 @@ export default function ProfileForm({
           </ThemedCard>
         </Grid>
       </Grid>
+
+      {/* Admin 권한 정보 섹션 */}
+      {theme === 'admin' && displayData?.role && (
+        <Grid container spacing={4} sx={{ mt: 1 }}>
+          <Grid item xs={12}>
+            <ThemedCard sx={{ p: 3 }}>
+              <Typography 
+                variant="h6" 
+                gutterBottom 
+                sx={{ 
+                  mb: 2,
+                  color: colors.text,
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  pb: 1,
+                  borderBottom: `1px solid ${colors.border}`
+                }}
+              >
+                메뉴 접근 권한
+              </Typography>
+              
+              <Grid container spacing={1.5}>
+                {/* 실제 사이드바 메뉴들과 일치 */}
+                {[
+                  { key: 'dashboard', label: '대시보드', readOnly: true },
+                  { key: 'openapi', label: 'Open API 인증 키관리', readOnly: false },
+                  { key: 'qna', label: 'Q&A 관리', readOnly: false },
+                  { key: 'faq', label: 'FAQ 관리', readOnly: false },
+                  { key: 'notice', label: '공지 관리', readOnly: false },
+                  { key: 'user-management', label: '사용자 관리', readOnly: false },
+                  { key: 'operator-management', label: '운영자 관리', readOnly: false, superAdminOnly: true },
+                  { key: 'code-management', label: '코드 관리', readOnly: false, superAdminOnly: true },
+                ].map((menu) => {
+                  const hasAccess = hasMenuAccess(displayData.role || null, menu.key);
+                  const canEdit = hasAccess && !menu.readOnly;
+                  
+                  // SUPER_ADMIN 전용 메뉴는 S-ADMIN이 아니면 표시하지 않음
+                  if (menu.superAdminOnly && displayData.role !== 'S-ADMIN') {
+                    return null;
+                  }
+                  
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={menu.key}>
+                      <Box sx={{ 
+                        p: 1.5, 
+                        border: `1px solid ${colors.border}`, 
+                        borderRadius: 1, 
+                        textAlign: 'left',
+                        minHeight: '70px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        backgroundColor: menu.superAdminOnly ? colors.primary + '10' : 'transparent'
+                      }}>
+                        <Typography variant="body2" sx={{ 
+                          color: colors.text, 
+                          fontWeight: 600, 
+                          fontSize: '0.9rem',
+                          mb: 0.5
+                        }}>
+                          {menu.label}
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                          <Typography variant="caption" sx={{ 
+                            fontWeight: 'bold',
+                            fontSize: '0.75rem',
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 0.5,
+                            backgroundColor: hasAccess ? 'success.light' : 'error.light',
+                            color: hasAccess ? 'success.contrastText' : 'error.contrastText'
+                          }}>
+                            {hasAccess ? '접근 가능' : '접근 불가'}
+                          </Typography>
+                          
+                          {hasAccess && !menu.readOnly && (
+                            <Typography variant="caption" sx={{ 
+                              fontWeight: 'bold',
+                              fontSize: '0.75rem',
+                              px: 1,
+                              py: 0.25,
+                              borderRadius: 0.5,
+                              backgroundColor: canEdit ? 'info.light' : 'warning.light',
+                              color: canEdit ? 'info.contrastText' : 'warning.contrastText'
+                            }}>
+                              {canEdit ? '편집 가능' : '조회만'}
+                            </Typography>
+                          )}
+                          
+                          {hasAccess && menu.readOnly && (
+                            <Typography variant="caption" sx={{ 
+                              color: 'text.secondary',
+                              fontStyle: 'italic',
+                              fontSize: '0.7rem'
+                            }}>
+                              조회 전용
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </ThemedCard>
+          </Grid>
+        </Grid>
+      )}
 
       {/* 비밀번호 변경 모달 */}
       <Dialog 

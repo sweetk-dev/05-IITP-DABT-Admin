@@ -7,7 +7,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserProfile from './pages/user/UserProfile';
 const AdminProfile = lazy(() => import('./pages/admin/AdminProfile'));
-import { Dashboard } from './pages/user/Dashboard';
+import Dashboard from './pages/user/Dashboard';
 import { QnaCreate } from './pages/user/QnaCreate';
 import { QnaHistory } from './pages/user/QnaHistory';
 import { OpenApiManagement } from './pages/user/OpenApiManagement';
@@ -96,56 +96,49 @@ function App() {
             {/* 관리자 로그인 */}
             <Route path={ROUTES.ADMIN.LOGIN} element={<AdminLogin />} />
             
-            {/* 관리자 페이지 (로그인 필요) */}
+            {/* Admin 페이지들 - Layout 사용하면서 독립적 동작 */}
             <Route path="/admin" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
             <Route path="/admin/" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
-            <Route path="/admin/*" element={
-              <AdminProtectedRoute>
-                <Suspense fallback={<LoadingSpinner loading={true} />}>
-                  <Routes>
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="profile" element={<AdminProfile />} />
-                    
-                    {/* 사용자 관리 */}
-                    <Route path="users" element={<UserManagement />} />
-                    <Route path="users/:id" element={<UserDetail />} />
-                    
-                    {/* 운영자 관리 */}
-                    <Route path="operators" element={<OperatorManagement />} />
-                    <Route path="operators/:id" element={<div>OperatorDetail</div>} />
-                    
-                    {/* 코드 관리 */}
-                    <Route path="code" element={<CodeManagement />} />
-                    
-                    {/* 기존 관리자 페이지들 */}
-                    <Route path="openapi/clients" element={<AdminOpenApiClients />} />
-                    <Route path="openapi/clients/:id" element={<AdminOpenApiDetail />} />
-                    <Route path="openapi/clients/:id/edit" element={<AdminOpenApiEdit />} />
-                    <Route path="openapi/requests" element={<AdminOpenApiRequests />} />
-                    <Route path="openapi/requests/:id" element={<ApiRequestDetail />} />
-                    <Route path="notices" element={<AdminNoticeList />} />
-                    <Route path="notices/create" element={<AdminNoticeCreate />} />
-                    <Route path="notices/:id" element={<AdminNoticeDetail />} />
-                    <Route path="notices/:id/edit" element={<AdminNoticeEdit />} />
-                    <Route path="faqs" element={<AdminFaqList />} />
-                    <Route path="faqs/create" element={<AdminFaqCreate />} />
-                    <Route path="faqs/:id" element={<AdminFaqDetail />} />
-                    <Route path="faqs/:id/edit" element={<AdminFaqEdit />} />
-                    <Route path="qnas" element={<AdminQnaList />} />
-                    <Route path="qnas/:id" element={<AdminQnaDetail />} />
-                    <Route path="qnas/:id/edit" element={<AdminQnaEdit />} />
-                    <Route path="qnas/:id/reply" element={<AdminQnaReply />} />
-                    
-                    {/* 관리자 경로에서 인증되지 않은 경우 로그인으로 리다이렉트 */}
-                    <Route path="*" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
-                  </Routes>
-                </Suspense>
-              </AdminProtectedRoute>
-            } />
+            
+            {/* Admin Dashboard */}
+            <Route path={ROUTES.ADMIN.DASHBOARD} element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.PROFILE} element={<AdminProtectedRoute><AdminProfile /></AdminProtectedRoute>} />
+            
+            {/* 사용자 관리 */}
+            <Route path={ROUTES.ADMIN.USERS.LIST} element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.USERS.DETAIL} element={<AdminProtectedRoute><UserDetail /></AdminProtectedRoute>} />
+            
+            {/* 운영자 관리 */}
+            <Route path="/admin/operators" element={<AdminProtectedRoute><OperatorManagement /></AdminProtectedRoute>} />
+            <Route path="/admin/operators/:id" element={<AdminProtectedRoute><div>OperatorDetail</div></AdminProtectedRoute>} />
+            
+            {/* 코드 관리 */}
+            <Route path="/admin/code" element={<AdminProtectedRoute><CodeManagement /></AdminProtectedRoute>} />
+            
+            {/* 기존 관리자 페이지들 */}
+            <Route path={ROUTES.ADMIN.OPENAPI.CLIENTS} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiClients /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiDetail /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPENAPI.CLIENT_EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiEdit /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPENAPI.REQUESTS} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiRequests /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL} element={<AdminProtectedRoute><ApiRequestDetail /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.NOTICES.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminNoticeList /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.NOTICES.CREATE} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminNoticeCreate /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.NOTICES.DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminNoticeDetail /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.NOTICES.EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminNoticeEdit /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.FAQ.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminFaqList /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.FAQ.CREATE} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminFaqCreate /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.FAQ.DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminFaqDetail /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.FAQ.EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminFaqEdit /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.QNA.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaList /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.QNA.DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaDetail /></Suspense></AdminProtectedRoute>} />
+            <Route path="/admin/qnas/:id/edit" element={<AdminProtectedRoute><AdminQnaEdit /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.QNA.REPLY} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaReply /></Suspense></AdminProtectedRoute>} />
 
             {/* 404 - 홈으로 리다이렉트 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
+          
+
         </Routes>
       </BrowserRouter>
     </>

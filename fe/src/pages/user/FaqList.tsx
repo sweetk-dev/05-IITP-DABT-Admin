@@ -13,6 +13,7 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { getUserFaqList, getUserFaqListByType, getCommonCodesByGroupId, getUserFaqDetail } from '../../api';
 import type { UserFaqItem } from '@iitp-dabt/common';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
 
 export default function FaqList() {

@@ -7,6 +7,7 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { loginUser } from '../../api';
 import { ROUTES } from '../../routes';
 import { isUserAuthenticated } from '../../store/auth';
+import { clearLoginInfoByType } from '../../store/user';
 // import { getThemeColors } from '../../theme';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
@@ -45,6 +46,9 @@ export default function Login() {
   const handleLogin = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
+    
+    // User 로그인 시 기존 Admin 정보 정리 (User 우선권 확보)
+    clearLoginInfoByType('A');
 
     try {
       const res = await loginUser({ email, password });
@@ -65,7 +69,8 @@ export default function Login() {
               sessionStorage.removeItem('returnTo');
             }
           } catch {}
-          navigate(targetPath || ROUTES.USER.DASHBOARD, { replace: true });
+          // 사용자 로그인 성공 시 명시적으로 사용자 대시보드로 이동
+          navigate(targetPath || '/dashbd', { replace: true });
         },
         (errorMessage) => {
           setError(errorMessage);

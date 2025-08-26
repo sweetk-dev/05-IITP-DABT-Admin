@@ -23,7 +23,7 @@ export function PrivateRoute({ children }: { children: React.ReactNode }) {
 export function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   const isLoggedIn = isAdminAuthenticated();
   const location = useLocation();
-  
+
   // 토큰 유효성 검사 및 정리
   useEffect(() => {
     validateAndCleanTokens();

@@ -16,12 +16,11 @@ import {
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { ROUTES } from '../../routes';
-import { getAdminRole } from '../../store/user';
 import { hasMenuAccess } from '../../utils/auth';
 
 interface SideNavProps {
   open: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
   adminRole: string | null;
 }
 
@@ -33,12 +32,11 @@ interface SideNavItem {
   icon: React.ReactNode;
 }
 
-export default function SideNav({ open, onToggle, adminRole }: SideNavProps) {
-  const theme = useTheme();
+export default function SideNav({ open, adminRole }: SideNavProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
+  const theme = useTheme();
+  
   const items: SideNavItem[] = useMemo(() => [
     { id: 'sidenav-dashboard', key: 'dashboard', label: '대시보드', to: ROUTES.ADMIN.DASHBOARD, icon: <DashboardIcon /> },
     { id: 'sidenav-openapi', key: 'openapi', label: 'Open API 인증 키관리', to: ROUTES.ADMIN.OPENAPI.CLIENTS, icon: <OpenApiIcon /> },
@@ -56,7 +54,7 @@ export default function SideNav({ open, onToggle, adminRole }: SideNavProps) {
   const isActive = (to: string) => location.pathname === to || location.pathname.startsWith(to + '/');
 
   // 브라우저 크기에 따른 자동 접기 + 수동 접기/펼치기
-  const autoCollapsed = useMediaQuery('(max-width:1279px)');
+  const autoCollapsed = useMediaQuery(theme.breakpoints.down('lg'));
   const [collapsed, setCollapsed] = useState<boolean>(autoCollapsed);
   
   // open prop과 collapsed 상태를 통합하여 실제 표시 여부 결정

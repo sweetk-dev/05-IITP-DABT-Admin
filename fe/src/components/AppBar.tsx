@@ -4,8 +4,8 @@ import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Logo, HomeIconButton, DashboardIconButton } from './AppBarCommon';
 import { logoutUser, logoutAdmin } from '../api';
-import { clearLoginInfo } from '../store/user';
-import { getUserName, getUserType, getAdminRole } from '../store/user';
+import { clearLoginInfoByType } from '../store/user';
+import { getUserName, getUserType, getAdminRoleName } from '../store/user';
 import { ROUTES } from '../routes';
 import { AccountCircle, Menu as MenuIcon } from '@mui/icons-material';
 import ThemedButton from './common/ThemedButton';
@@ -44,7 +44,7 @@ export default function AppBar({
   const navigate = useNavigate();
   const userName = getUserName();
   const userType = getUserType();
-  const adminRole = getAdminRole();
+  const adminRoleName = getAdminRoleName();
 
   // 테마 결정
   const themeType = type === 'admin' || type === 'admin-login' ? 'admin' : 'user';
@@ -112,8 +112,9 @@ export default function AppBar({
     } catch (error) {
       console.error('Admin logout failed:', error);
     } finally {
-      clearLoginInfo();
-      navigate(ROUTES.ADMIN.LOGIN, { replace: true });
+      clearLoginInfoByType('A'); // 어드민 정보만 명시적으로 제거
+      // window.location을 사용하여 강제 페이지 이동 (React Router 우회)
+      window.location.href = ROUTES.ADMIN.LOGIN;
     }
   };
 
@@ -123,7 +124,7 @@ export default function AppBar({
     } catch (error) {
       console.error('User logout failed:', error);
     } finally {
-      clearLoginInfo();
+      clearLoginInfoByType('U'); // 사용자 정보만 명시적으로 제거
       navigate('/', { replace: true }); // 홈화면으로 이동
     }
   };
@@ -223,7 +224,7 @@ export default function AppBar({
                         {userName}
                       </Typography>
                       <Typography variant="caption" component="div" sx={{ opacity: 0.7, color: colors.textSecondary }}>
-                        {adminRole}
+                        {adminRoleName}
                       </Typography>
                     </Box>
                   </ThemedButton>

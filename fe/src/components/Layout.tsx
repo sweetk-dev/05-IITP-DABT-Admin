@@ -33,7 +33,7 @@ export default function Layout() {
 	const isUserLoggedIn = isUserAuthenticated();
 	const isAdminLoggedIn = isAdminAuthenticated();
 	const [sideNavOpen, setSideNavOpen] = useState(true);
-	const adminRole = getAdminRole();
+	const adminRole = getAdminRole(); // 권한 체크용 (예: 'S-ADMIN')
 	
 	//TODO:: Remove console logs in production
 	// This is for debugging purposes to see the current authentication state and path

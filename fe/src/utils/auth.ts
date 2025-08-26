@@ -40,7 +40,7 @@ export function hasContentEditPermission(adminRole: string | null): boolean {
 
 /**
  * 읽기 권한 확인 (모든 관리자)
- * @param adminRole 관리자 역할
+ * @param adminRole 관리자 역할 (role code)
  * @returns 읽기 권한 여부
  */
 export function hasReadPermission(adminRole: string | null): boolean {

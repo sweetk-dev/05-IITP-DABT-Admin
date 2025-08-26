@@ -17,6 +17,8 @@ export const ROUTES = {
     ABOUT: '/about',
     TERMS: '/terms',
     PRIVACY: '/privacy',
+    LOGIN: '/login',
+    REGISTER: '/register',
   },
 
   // 사용자 페이지 (로그인 필요)
@@ -55,6 +57,7 @@ export const ROUTES = {
       LIST: '/admin/qnas',
       DETAIL: '/admin/qnas/:id',
       REPLY: '/admin/qnas/:id/reply',
+      CREATE: '/admin/qnas/create',
     },
     
     // 사용자 관리
@@ -69,6 +72,7 @@ export const ROUTES = {
     OPENAPI: {
       CLIENTS: '/admin/openapi/clients',
       CLIENT_DETAIL: '/admin/openapi/clients/:id',
+      CLIENT_EDIT: '/admin/openapi/clients/:id/edit',
       REQUESTS: '/admin/openapi/requests',
       REQUEST_DETAIL: '/admin/openapi/requests/:id',
     },
@@ -90,6 +94,17 @@ export const ROUTES = {
     OPERATORS: {
       LIST: '/admin/account',
       DETAIL: '/admin/account/:id',
+    },
+
+    // 관리자 계정 관리
+    ACCOUNT: {
+      LIST: '/admin/account',
+      DETAIL: '/admin/account/:adminId',
+      CREATE: '/admin/account/create',
+      UPDATE: '/admin/account/:adminId/edit',
+      DELETE: '/admin/account/:adminId/delete',
+      CHECK_EMAIL: '/admin/account/check-email',
+      PASSWORD_CHANGE: '/admin/account/:adminId/password',
     },
 
     // 코드 관리 (S-Admin 전용)

@@ -11,8 +11,7 @@ import { getUserNoticeList } from '../../api';
 import ListItemCard from '../../components/common/ListItemCard';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import { useErrorHandler, type UseErrorHandlerResult } from '../../hooks/useErrorHandler';
-
-interface NoticeItem { noticeId: number; title: string; content: string; noticeType: string; postedAt: string; pinnedYn?: 'Y' | 'N'; }
+import type { UserNoticeListItem } from '@iitp-dabt/common';
 
 export default function NoticeList() {
   const navigate = useNavigate();
@@ -79,15 +78,14 @@ export default function NoticeList() {
           wrapInCard={false}
         >
           <Stack id="notice-list-stack" spacing={SPACING.MEDIUM}>
-            {noticeData?.items.map((notice: NoticeItem) => (
+            {noticeData?.items.map((notice: UserNoticeListItem) => (
               <ListItemCard id={`notice-item-${notice.noticeId}`} key={notice.noticeId} onClick={() => handleNoticeClick(notice.noticeId)}>
                 <Box id={`notice-item-header-${notice.noticeId}`} sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
                   <Chip label={getNoticeTypeLabel(notice.noticeType)} color={getNoticeTypeColor(notice.noticeType) as any} size="small" sx={{ mr: SPACING.MEDIUM }} />
                   {notice.pinnedYn === 'Y' && <Chip label="고정" color="warning" size="small" sx={{ mr: SPACING.MEDIUM }} />}
                   <Typography id={`notice-item-date-${notice.noticeId}`} variant="caption" sx={{ color: colors.textSecondary, ml: 'auto' }}>{formatDate(notice.postedAt)}</Typography>
                 </Box>
-                <Typography id={`notice-item-title-${notice.noticeId}`} variant="subtitle1" sx={{ color: colors.text, fontWeight: 600, mb: SPACING.SMALL }}>{notice.title}</Typography>
-                <Typography id={`notice-item-content-${notice.noticeId}`} variant="body2" sx={{ color: colors.textSecondary, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }}>{notice.content}</Typography>
+                <Typography id={`notice-item-title-${notice.noticeId}`} variant="subtitle1" sx={{ color: colors.text, fontWeight: 600 }}>{notice.title}</Typography>
               </ListItemCard>
             ))}
           </Stack>

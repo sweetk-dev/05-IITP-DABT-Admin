@@ -105,14 +105,6 @@ export async function publicApiFetch<T = any>(
       });
     }
     
-    // 204 No Content 처리
-    if (res.status === 204) {
-      return enhanceApiResponse<T>({ 
-        success: true, 
-        data: undefined 
-      });
-    }
-    
     return enhanceApiResponse<T>(data);
   } catch (e: any) {
     clearTimeout(id);
@@ -161,6 +153,15 @@ export async function apiFetch<T = any>(
     });
     
     clearTimeout(id);
+    
+    // 204 No Content 처리 - JSON 파싱 전에 체크
+    if (res.status === 204) {
+      return enhanceApiResponse<T>({ 
+        success: true, 
+        data: undefined 
+      });
+    }
+    
     const data = await res.json();
     
     if (!res.ok) {

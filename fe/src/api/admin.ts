@@ -34,6 +34,7 @@ export async function loginAdmin(params: AdminLoginReq): Promise<ApiResponse<Adm
       name: response.data.admin.name,
       userType: 'A' as const,
       role: response.data.admin.role,
+      roleName: response.data.admin.roleName
     };
     saveLoginInfo(userInfo, response.data.token, response.data.refreshToken);
   }

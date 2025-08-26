@@ -8,7 +8,7 @@ export interface CommonDialogProps {
   title?: string;
   message: string;
   onClose: () => void;
-  onConfirm?: () => void;
+  onConfirm?: () => void | Promise<void>;
   showCancel?: boolean;
   confirmText?: string;
   cancelText?: string;
@@ -35,7 +35,7 @@ export default function CommonDialog({
       try {
         // onConfirm이 Promise를 반환하는 경우를 처리
         const result = onConfirm();
-        if (result && typeof result.then === 'function') {
+        if (result && typeof result === 'object' && typeof (result as any).then === 'function') {
           await result;
         }
       } catch (error) {

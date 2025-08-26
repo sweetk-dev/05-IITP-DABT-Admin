@@ -10,10 +10,8 @@ import type {
   CommonCodeByParentRes,
   CommonCodeByParentDetailRes,
   CommonCodeCreateReq,
-  CommonCodeCreateRes,
   CommonCodeUpdateReq,
-  CommonCodeUpdateRes,
-  CommonCodeDeleteRes
+  CommonCodeCodeUpdateRes
 } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 import { enhanceApiResponse } from '../utils/apiResponseHandler';
@@ -112,8 +110,8 @@ export async function getCommonCodesByParentDetail(grpId: string, parentCodeId?:
 /**
  * 공통 코드 생성 (관리자 전용)
  */
-export async function createCommonCode(codeData: CommonCodeCreateReq): Promise<ApiResponse<CommonCodeCreateRes>> {
-  return apiFetch<CommonCodeCreateRes>(FULL_API_URLS.COMMON_CODE.CODE.CREATE.replace(':grpId', codeData.grpId), {
+export async function createCommonCode(codeData: CommonCodeCreateReq): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.COMMON_CODE.CODE.CREATE.replace(':grpId', codeData.grpId), {
     method: 'POST',
     body: JSON.stringify(codeData),
   });
@@ -122,11 +120,11 @@ export async function createCommonCode(codeData: CommonCodeCreateReq): Promise<A
 /**
  * 공통 코드 수정 (관리자 전용)
  */
-export async function updateCommonCode(grpId: string, codeId: string, updateData: CommonCodeUpdateReq): Promise<ApiResponse<CommonCodeUpdateRes>> {
+export async function updateCommonCode(grpId: string, codeId: string, updateData: CommonCodeUpdateReq): Promise<ApiResponse<CommonCodeCodeUpdateRes>> {
   const url = FULL_API_URLS.COMMON_CODE.CODE.UPDATE
     .replace(':grpId', grpId)
     .replace(':codeId', codeId);
-  return apiFetch<CommonCodeUpdateRes>(url, {
+  return apiFetch<CommonCodeCodeUpdateRes>(url, {
     method: 'PUT',
     body: JSON.stringify(updateData),
   });
@@ -135,9 +133,9 @@ export async function updateCommonCode(grpId: string, codeId: string, updateData
 /**
  * 공통 코드 삭제 (관리자 전용)
  */
-export async function deleteCommonCode(grpId: string, codeId: string): Promise<ApiResponse<CommonCodeDeleteRes>> {
+export async function deleteCommonCode(grpId: string, codeId: string): Promise<ApiResponse<void>> {
   const url = FULL_API_URLS.COMMON_CODE.CODE.DELETE
     .replace(':grpId', grpId)
     .replace(':codeId', codeId);
-  return apiFetch<CommonCodeDeleteRes>(url, { method: 'DELETE' });
+  return apiFetch<void>(url, { method: 'DELETE' });
 } 

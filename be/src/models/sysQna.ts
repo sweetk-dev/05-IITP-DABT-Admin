@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import type { Sequelize } from 'sequelize';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 
 export interface SysQnaAttributes {
   qnaId?: number;
@@ -66,7 +67,7 @@ export function initSysQna(sequelize: Sequelize) {
       qnaType: {
         type: DataTypes.STRING(32),
         allowNull: false,
-        field: 'qna_type',
+        field: COMMON_CODE_GROUPS.QNA_TYPE,
         comment: '질문 유형, "qna_type" comm code 참조',
       },
       title: {
@@ -171,7 +172,7 @@ export function initSysQna(sequelize: Sequelize) {
       paranoid: true, // 논리 삭제 사용
       indexes: [
         {
-          fields: ['qna_type', 'secret_yn'],
+          fields: [COMMON_CODE_GROUPS.QNA_TYPE, 'secret_yn'],
           name: 'idx_sys_qna_type_screct',
         },
       ],

@@ -10,6 +10,7 @@ import { generateAccessToken } from '../utils/jwt';
 interface JwtPayload {
   userId: number;
   userType: 'U' | 'A';
+  role?: string;  // Admin용 역할 코드
   iat: number;
   exp: number;
 }
@@ -37,7 +38,8 @@ export const authMiddleware: RequestHandler<any, any, any, any> = async (req, re
       req.user = {
         userId: decoded.userId,
         userType: decoded.userType,
-        actorTag: `${decoded.userType}:${decoded.userId}`
+        actorTag: `${decoded.userType}:${decoded.userId}`,
+        admRole: decoded.role || undefined
       };
 
       // Sliding-session: Access Token 만료 임박 시 신규 토큰 발급 후 헤더로 전달
@@ -46,7 +48,11 @@ export const authMiddleware: RequestHandler<any, any, any, any> = async (req, re
         const timeLeft = (decoded.exp || 0) - nowSec;
         const REFRESH_THRESHOLD_SEC = 120; // 2분 미만 남으면 재발급
         if (timeLeft > 0 && timeLeft <= REFRESH_THRESHOLD_SEC) {
-          const newAccess = generateAccessToken({ userId: decoded.userId, userType: decoded.userType });
+          const newAccess = generateAccessToken({ 
+            userId: decoded.userId, 
+            userType: decoded.userType,
+            role: decoded.role 
+          });
           res.setHeader('X-New-Access-Token', newAccess);
           res.setHeader('X-Token-Refreshed', 'true');
           // FE가 읽을 수 있도록 CORS 노출 헤더 설정

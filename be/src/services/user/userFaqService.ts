@@ -43,17 +43,19 @@ export const getUserFaqList = async (params: UserFaqListQuery): Promise<{ faqs: 
 /**
  * 사용자 FAQ 상세 조회 (비즈니스 로직)
  */
-export const getUserFaqDetail = async (faqId: number): Promise<SysFaq> => {
+export const getUserFaqDetail = async (faqId: number, skipHit: boolean = false): Promise<SysFaq> => {
   try {
     const faq = await findFaqById(faqId);
     if (!faq || faq.useYn !== 'Y') {
       throw new Error('FAQ를 찾을 수 없습니다.');
     }
     
-    // 조회수 증가
-    await incrementHitCount(faqId);
-    // 메모리 상에서도 증가 반영
-    (faq as any).hitCnt = (faq as any).hitCnt + 1;
+    // 조회수 증가 (skipHit가 아닌 경우에만)
+    if (!skipHit) {
+      await incrementHitCount(faqId);
+      // 메모리 상에서도 증가 반영
+      (faq as any).hitCnt = (faq as any).hitCnt + 1;
+    }
     
     appLogger.info('사용자 FAQ 상세 조회 서비스 호출', { faqId });
     

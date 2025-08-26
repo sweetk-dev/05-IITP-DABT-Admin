@@ -8,6 +8,8 @@ import {
 } from '../../repositories/sysQnaRepository';
 import type { SysQna } from '../../models/sysQna';
 import { appLogger } from '../../utils/logger';
+import { ErrorCode, } from '@iitp-dabt/common';
+import { ResourceError, BusinessError } from '../../utils/customErrors';
 
 export interface QnaListParams {
   page: number;
@@ -75,7 +77,11 @@ export const getQnaList = async (params: QnaListParams): Promise<QnaListResult> 
     };
   } catch (error) {
     appLogger.error('QnA 목록 조회 중 오류 발생', { error, params });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'QnA 목록 조회 중 오류가 발생했습니다.',
+      { params, originalError: error }
+    );
   }
 };
 
@@ -86,19 +92,31 @@ export const getQnaDetail = async (qnaId: number): Promise<SysQna> => {
   try {
     const qna = await findQnaById(qnaId);
     if (!qna) {
-      throw new Error('QNA_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.QNA_NOT_FOUND,
+        'QnA를 찾을 수 없습니다.',
+        'qna',
+        qnaId
+      );
     }
     return qna;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('QnA 상세 조회 중 오류 발생', { error, qnaId });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'QnA 상세 조회 중 오류가 발생했습니다.',
+      { qnaId, originalError: error }
+    );
   }
 };
 
 /**
  * QnA 답변 (관리자용)
  */
-export const answerQna = async (qnaId: number, answerData: QnaAnswerData, actorTag: string) => {
+export const answerQna = async (qnaId: number, answerData: QnaAnswerData, actorTag: string): Promise<SysQna> => {
   try {
     const answeredQna = await answerQnaRepo(qnaId, {
       answerContent: answerData.answer,
@@ -106,21 +124,33 @@ export const answerQna = async (qnaId: number, answerData: QnaAnswerData, actorT
     });
 
     if (!answeredQna) {
-      throw new Error('QNA_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.QNA_NOT_FOUND,
+        'QnA를 찾을 수 없습니다.',
+        'qna',
+        qnaId
+      );
     }
 
     appLogger.info('QnA 답변 성공', { qnaId, actorTag });
     return answeredQna;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('QnA 답변 중 오류 발생', { error, qnaId, answerData, actorTag });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.QNA_ANSWER_FAILED,
+      'QnA 답변 중 오류가 발생했습니다.',
+      { qnaId, answerData, actorTag, originalError: error }
+    );
   }
 };
 
 /**
  * QnA 수정 (관리자용)
  */
-export const updateQna = async (qnaId: number, updateData: QnaUpdateData, actorTag: string) => {
+export const updateQna = async (qnaId: number, updateData: QnaUpdateData, actorTag: string): Promise<SysQna> => {
   try {
     const updatedQna = await updateQnaRepo(qnaId, {
       ...updateData,
@@ -129,32 +159,56 @@ export const updateQna = async (qnaId: number, updateData: QnaUpdateData, actorT
     });
 
     if (!updatedQna) {
-      throw new Error('QNA_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.QNA_NOT_FOUND,
+        'QnA를 찾을 수 없습니다.',
+        'qna',
+        qnaId
+      );
     }
 
     appLogger.info('QnA 수정 성공', { qnaId, actorTag });
     return updatedQna;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('QnA 수정 중 오류 발생', { error, qnaId, updateData, actorTag });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.QNA_UPDATE_FAILED,
+      'QnA 수정 중 오류가 발생했습니다.',
+      { qnaId, updateData, actorTag, originalError: error }
+    );
   }
 };
 
 /**
  * QnA 삭제 (관리자용)
  */
-export const deleteQna = async (qnaId: number, actorTag: string) => {
+export const deleteQna = async (qnaId: number, actorTag: string): Promise<SysQna> => {
   try {
     const deletedQna = await deleteQnaRepo(qnaId, actorTag);
 
     if (!deletedQna) {
-      throw new Error('QNA_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.QNA_NOT_FOUND,
+        'QnA를 찾을 수 없습니다.',
+        'qna',
+        qnaId
+      );
     }
 
     appLogger.info('QnA 삭제 성공', { qnaId, actorTag });
     return deletedQna;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('QnA 삭제 중 오류 발생', { error, qnaId, actorTag });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.QNA_DELETE_FAILED,
+      'QnA 삭제 중 오류가 발생했습니다.',
+      { qnaId, actorTag, originalError: error }
+    );
   }
 }; 

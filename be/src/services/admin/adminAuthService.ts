@@ -1,9 +1,12 @@
 import { ErrorCode } from '@iitp-dabt/common';
-import { findAdminByLoginId, updateLatestLoginAt } from '../../repositories/sysAdmAccountRepository';
+import { sysAdmAccountRepository } from '../../repositories/sysAdmAccountRepository';
 import { createLog } from '../../repositories/sysLogUserAccessRepository';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { getDecryptedEnv } from '../../utils/decrypt';
 import { appLogger } from '../../utils/logger';
 import { generateAccessToken, generateRefreshToken, verifyToken } from '../../utils/jwt';
+import { ResourceError, BusinessError, ValidationError } from '../../utils/customErrors';
 
 export interface LoginResult {
   token: string;
@@ -31,7 +34,7 @@ export interface RefreshResult {
 export const loginAdmin = async (loginId: string, password: string, ipAddr?: string, userAgent?: string): Promise<LoginResult> => {
   try {
     // 관리자 계정 조회
-    const admin = await findAdminByLoginId(loginId);
+    const admin = await sysAdmAccountRepository.findAdminByLoginId(loginId);
     if (!admin) {
       // 로그인 실패 로그 기록
       await createLog({
@@ -43,7 +46,12 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
         ipAddr,
         userAgent
       });
-      throw new Error('ADMIN_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.ADMIN_NOT_FOUND,
+        '존재하지 않는 관리자 계정입니다.',
+        'admin',
+        loginId
+      );
     }
 
     // 비밀번호 검증
@@ -59,7 +67,11 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
         ipAddr,
         userAgent
       });
-      throw new Error('ADMIN_PASSWORD_INVALID');
+      throw new ValidationError(
+        ErrorCode.ACCOUNT_PASSWORD_INVALID,
+        '비밀번호가 올바르지 않습니다.',
+        'password'
+      );
     }
 
     // 계정 상태 확인
@@ -74,21 +86,27 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
         ipAddr,
         userAgent
       });
-      throw new Error('ACCOUNT_INACTIVE');
+      throw new ResourceError(
+        ErrorCode.ACCOUNT_INACTIVE,
+        '비활성화된 계정입니다.',
+        'admin',
+        admin.admId
+      );
     }
 
     // Access Token과 Refresh Token 생성
     const tokenPayload = {
       userId: admin.admId,
       userType: 'A' as const,
-      loginId: admin.loginId
+      loginId: admin.loginId,
+      role: admin.roles
     };
 
     const token = generateAccessToken(tokenPayload);
     const refreshToken = generateRefreshToken(tokenPayload);
 
     // 최근 로그인 시간 업데이트
-    await updateLatestLoginAt(admin.admId);
+    await sysAdmAccountRepository.updateLatestLoginAt(admin.admId);
 
     // 로그인 성공 로그 기록
     await createLog({
@@ -111,19 +129,15 @@ export const loginAdmin = async (loginId: string, password: string, ipAddr?: str
       roleCode: admin.roles
     };
   } catch (error) {
-    if (error instanceof Error) {
-      switch (error.message) {
-        case 'ADMIN_NOT_FOUND':
-          throw new Error(ErrorCode.ADMIN_NOT_FOUND.toString());
-        case 'ADMIN_PASSWORD_INVALID':
-          throw new Error(ErrorCode.ACCOUNT_PASSWORD_INVALID.toString());
-        case 'ACCOUNT_INACTIVE':
-          throw new Error(ErrorCode.ACCOUNT_INACTIVE.toString());
-        case 'JWT_SECRET_NOT_CONFIGURED':
-          throw new Error(ErrorCode.UNKNOWN_ERROR.toString());
-      }
+    if (error instanceof ResourceError || error instanceof ValidationError) {
+      throw error;
     }
-    throw error;
+    appLogger.error('관리자 로그인 중 오류 발생', { error, loginId, ipAddr });
+    throw new BusinessError(
+      ErrorCode.LOGIN_FAILED,
+      '관리자 로그인 중 오류가 발생했습니다.',
+      { loginId, ipAddr, originalError: error }
+    );
   }
 };
 
@@ -140,7 +154,7 @@ export const refreshAdminToken = async (refreshToken: string, ipAddr?: string, u
     if (!payload.loginId) {
       throw new Error('INVALID_REFRESH_TOKEN');
     }
-    const admin = await findAdminByLoginId(payload.loginId);
+    const admin = await sysAdmAccountRepository.findAdminByLoginId(payload.loginId);
     if (!admin) {
       throw new Error('ADMIN_NOT_FOUND');
     }
@@ -149,7 +163,8 @@ export const refreshAdminToken = async (refreshToken: string, ipAddr?: string, u
     const tokenPayload = {
       userId: admin.admId,
       userType: 'A' as const,
-      loginId: admin.loginId
+      loginId: admin.loginId,
+      role: admin.roles
     };
 
     const newToken = generateAccessToken(tokenPayload);

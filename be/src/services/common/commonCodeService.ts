@@ -10,7 +10,7 @@ import {
 } from '../../repositories/sysCommonCodeRepository';
 import { SysCommonCode, SysCommonCodeAttributes } from '../../models/sysCommonCode';
 import { appLogger } from '../../utils/logger';
-import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
+import { COMMON_CODE_GROUPS, CODE_SYS_WORK_TYPES } from '@iitp-dabt/common';
 
 /**
  * 그룹 ID로 공통 코드 목록 조회
@@ -79,7 +79,7 @@ export async function createCommonCode(codeData: SysCommonCodeAttributes, create
   try {
     const newCode = await createCommonCodeRepo({
       ...codeData,
-      createdBy: createdBy || 'SYS-MANUAL'
+      createdBy: createdBy || CODE_SYS_WORK_TYPES.MANUAL
     });
     appLogger.info(`Created common code: ${codeData.grpId}/${codeData.codeId}`);
     return newCode;
@@ -96,7 +96,7 @@ export async function updateCommonCodeById(grpId: string, codeId: string, update
   try {
     const affectedCount = await updateCommonCode(grpId, codeId, {
       ...updateData,
-      updatedBy: updatedBy || 'SYS-MANUAL'
+      updatedBy: updatedBy || CODE_SYS_WORK_TYPES.MANUAL
     });
     appLogger.info(`Updated common code: ${grpId}/${codeId}, affected rows: ${affectedCount}`);
     return affectedCount;
@@ -111,7 +111,7 @@ export async function updateCommonCodeById(grpId: string, codeId: string, update
  */
 export async function deleteCommonCodeById(grpId: string, codeId: string, deletedBy?: string): Promise<number> {
   try {
-    const affectedCount = await deleteCommonCode(grpId, codeId, deletedBy || 'SYS-MANUAL');
+    const affectedCount = await deleteCommonCode(grpId, codeId, deletedBy || CODE_SYS_WORK_TYPES.MANUAL);
     appLogger.info(`Deleted common code: ${grpId}/${codeId}, affected rows: ${affectedCount}`);
     return affectedCount;
   } catch (error) {

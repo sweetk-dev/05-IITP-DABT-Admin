@@ -46,7 +46,8 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
       admin: {
         adminId: result.userId,
         name: result.name || '',
-        role: roleName
+        role: result.roleCode || '',
+        roleName: roleName 
       }
     };
     sendSuccess(res, response, undefined, 'ADMIN_LOGIN', { userId: result.userId, loginId });

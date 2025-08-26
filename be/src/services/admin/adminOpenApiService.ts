@@ -8,6 +8,8 @@ import {
 } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
 import { generateAuthKey } from '../../utils/authKeyGenerator';
+import { ErrorCode, AdminOpenApiKeyListItem } from '@iitp-dabt/common';
+import { ResourceError, BusinessError } from '../../utils/customErrors';
 
 export interface OpenApiListParams {
   page: number;
@@ -66,7 +68,11 @@ export const getOpenApiList = async (params: OpenApiListParams) => {
     };
   } catch (error) {
     appLogger.error('OpenAPI 목록 조회 중 오류 발생', { error, params });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'OpenAPI 목록 조회 중 오류가 발생했습니다.',
+      { params, originalError: error }
+    );
   }
 };
 
@@ -77,12 +83,24 @@ export const getOpenApiDetail = async (apiId: number) => {
   try {
     const api = await findAuthKeyById(apiId);
     if (!api) {
-      throw new Error('OPEN_API_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.OPEN_API_NOT_FOUND,
+        'OpenAPI를 찾을 수 없습니다.',
+        'openApi',
+        apiId
+      );
     }
     return api;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('OpenAPI 상세 조회 중 오류 발생', { error, apiId });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'OpenAPI 상세 조회 중 오류가 발생했습니다.',
+      { apiId, originalError: error }
+    );
   }
 };
 
@@ -106,7 +124,11 @@ export const createOpenApi = async (apiData: OpenApiCreateData, actorTag: string
     return { keyId: newKey.keyId, authKey };
   } catch (error) {
     appLogger.error('OpenAPI 생성 중 오류 발생', { error, apiData, actorTag });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.OPEN_API_CREATE_FAILED,
+      'OpenAPI 생성 중 오류가 발생했습니다.',
+      { apiData, actorTag, originalError: error }
+    );
   }
 };
 
@@ -115,20 +137,42 @@ export const createOpenApi = async (apiData: OpenApiCreateData, actorTag: string
  */
 export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData, actorTag: string) => {
   try {
+    const existingApi = await findAuthKeyById(apiId);
+    if (!existingApi) {
+      throw new ResourceError(
+        ErrorCode.OPEN_API_NOT_FOUND,
+        '수정할 OpenAPI를 찾을 수 없습니다.',
+        'openApi',
+        apiId
+      );
+    }
+
     const updatedApi = await updateOpenApiAuthKeyRepo(apiId, {
       ...updateData,
       updatedBy: actorTag
     });
 
     if (!updatedApi) {
-      throw new Error('OPEN_API_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.OPEN_API_NOT_FOUND,
+        '수정할 OpenAPI를 찾을 수 없습니다.',
+        'openApi',
+        apiId
+      );
     }
 
     appLogger.info('OpenAPI 수정 성공', { apiId, actorTag });
     return updatedApi;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('OpenAPI 수정 중 오류 발생', { error, apiId, updateData, actorTag });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.OPEN_API_UPDATE_FAILED,
+      'OpenAPI 수정 중 오류가 발생했습니다.',
+      { apiId, updateData, actorTag, originalError: error }
+    );
   }
 };
 
@@ -140,14 +184,26 @@ export const deleteOpenApi = async (apiId: number, actorTag: string) => {
     const deletedApi = await deleteOpenApiAuthKeyRepo(apiId, actorTag);
 
     if (!deletedApi) {
-      throw new Error('OPEN_API_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.OPEN_API_NOT_FOUND,
+        '삭제할 OpenAPI를 찾을 수 없습니다.',
+        'openApi',
+        apiId
+      );
     }
 
     appLogger.info('OpenAPI 삭제 성공', { apiId, actorTag });
     return deletedApi;
   } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
     appLogger.error('OpenAPI 삭제 중 오류 발생', { error, apiId, actorTag });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.OPEN_API_DELETE_FAILED,
+      'OpenAPI 삭제 중 오류가 발생했습니다.',
+      { apiId, actorTag, originalError: error }
+    );
   }
 };
 
@@ -159,7 +215,12 @@ export const extendOpenApiKey = async (keyId: number, range: { startDt: string; 
     // 기존 키 조회
     const existingKey = await findAuthKeyById(keyId);
     if (!existingKey) {
-      throw new Error('OPEN_API_NOT_FOUND');
+      throw new ResourceError(
+        ErrorCode.OPEN_API_NOT_FOUND,
+        '연장할 OpenAPI 키를 찾을 수 없습니다.',
+        'openApi',
+        keyId
+      );
     }
 
     // 기간 업데이트 (시작/종료를 직접 세팅)
@@ -174,14 +235,25 @@ export const extendOpenApiKey = async (keyId: number, range: { startDt: string; 
     });
 
     if (!updatedOk) {
-      throw new Error('OPEN_API_UPDATE_FAILED');
+      throw new BusinessError(
+        ErrorCode.OPEN_API_UPDATE_FAILED,
+        'OpenAPI 키 기간 연장 중 오류가 발생했습니다.',
+        { keyId, actorTag, range }
+      );
     }
 
     appLogger.info('OpenAPI 키 기간 연장 성공', { keyId, actorTag, newStartDate, newEndDate });
     return { startDt: newStartDate, endDt: newEndDate };
   } catch (error) {
+    if (error instanceof ResourceError || error instanceof BusinessError) {
+      throw error;
+    }
     appLogger.error('OpenAPI 키 기간 연장 중 오류 발생', { error, keyId, actorTag, range });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.OPEN_API_UPDATE_FAILED,
+      'OpenAPI 키 기간 연장 중 오류가 발생했습니다.',
+      { keyId, actorTag, range, originalError: error }
+    );
   }
 };
 
@@ -220,6 +292,10 @@ export const getOpenApiStats = async () => {
     };
   } catch (error) {
     appLogger.error('OpenAPI 상태 통계 조회 중 오류 발생', { error });
-    throw error;
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'OpenAPI 상태 통계 조회 중 오류가 발생했습니다.',
+      { originalError: error }
+    );
   }
 };

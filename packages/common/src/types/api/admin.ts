@@ -87,6 +87,11 @@ export const ADMIN_API_MAPPING = {
     res: 'void',
     description: '관리자 QnA 삭제'
   },
+   [`GET ${API_URLS.ADMIN.QNA.STATUS}`]: {
+    // no params/query/body
+    res: 'AdminQnaStatusRes',
+    description: '관리자 QnA 상태(통계) 조회'
+  },
   
   // 공지사항 관리
   [`GET ${API_URLS.ADMIN.NOTICE.LIST}`]: {

@@ -194,4 +194,5 @@ export interface AdminOpenApiStatsRes {
   active: number;
   expired: number;
   inactive: number;
-} 
+  pending: number;    //허가 대기 중 count 
+ } 

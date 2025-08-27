@@ -89,9 +89,3 @@ export async function changeAdminPassword(params: AdminPasswordChangeReq): Promi
     body: JSON.stringify(params),
   });
 }
-
-// TODO: Admin FAQ, QnA, Account 관리 API 함수들 추가 예정
-// export async function getAdminFaqList(params: AdminFaqListReq): Promise<ApiResponse<AdminFaqListRes>> { ... }
-// export async function createAdminFaq(params: AdminFaqCreateReq): Promise<ApiResponse<AdminFaqCreateRes>> { ... }
-// export async function getAdminQnaList(params: AdminQnaListReq): Promise<ApiResponse<AdminQnaListRes>> { ... }
-// export async function getAdminAccountList(params: AdminAccountListReq): Promise<ApiResponse<AdminAccountListRes>> { ... } 

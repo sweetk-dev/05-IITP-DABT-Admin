@@ -59,7 +59,7 @@ export default function SideNav({ open, adminRole }: SideNavProps) {
   
   // open prop과 collapsed 상태를 통합하여 실제 표시 여부 결정
   const isCollapsed = !open || collapsed;
-  const widthPx = isCollapsed ? 72 : 240;
+  const widthPx = isCollapsed ? 80 : 260;
 
   // 수동 토글 핸들러
   const handleManualToggle = () => {
@@ -103,7 +103,7 @@ export default function SideNav({ open, adminRole }: SideNavProps) {
       </Box>
 
       {/* 메인 메뉴 (상위 6개) */}
-      <List dense sx={{ py: 1 }}>
+      <List sx={{ py: 1 }}>
         {visibleItems.slice(0, 6).map(item => {
           const active = isActive(item.to);
           const content = (
@@ -112,21 +112,62 @@ export default function SideNav({ open, adminRole }: SideNavProps) {
               selected={active}
               onClick={() => navigate(item.to)}
               sx={{
-                borderRadius: 1,
-                mx: 1,
-                my: 0.5,
+                borderRadius: 2,
+                mx: 1.5,
+                my: 1,
+                py: isCollapsed ? 2 : 1.5,
+                minHeight: isCollapsed ? 64 : 48,
+                flexDirection: isCollapsed ? 'column' : 'row',
                 '&.Mui-selected': {
-                  bgcolor: theme.palette.action.selected,
+                  bgcolor: 'primary.light',
+                  color: 'primary.contrastText',
                   borderLeft: `4px solid ${theme.palette.primary.main}`,
+                  '& .MuiListItemIcon-root': {
+                    color: 'primary.contrastText',
+                  },
+                  '& .MuiListItemText-root': {
+                    color: 'primary.contrastText',
+                  }
                 },
+                '&:hover': {
+                  bgcolor: active ? 'primary.light' : 'action.hover',
+                }
               }}
             >
-              <ListItemIcon sx={{ minWidth: 36, justifyContent: 'center' }}>{item.icon}</ListItemIcon>
-              {!isCollapsed && <ListItemText primary={item.label} />}
+              <ListItemIcon sx={{ 
+                minWidth: isCollapsed ? 'auto' : 40, 
+                justifyContent: 'center',
+                mb: isCollapsed ? 0.5 : 0,
+                '& svg': {
+                  fontSize: isCollapsed ? '1.5rem' : '1.25rem'
+                }
+              }}>
+                {item.icon}
+              </ListItemIcon>
+              {!isCollapsed && (
+                <ListItemText 
+                  primary={item.label}
+                  primaryTypographyProps={{
+                    fontSize: '0.9rem',
+                    fontWeight: active ? 600 : 500
+                  }}
+                />
+              )}
+              {isCollapsed && (
+                <Box sx={{ 
+                  fontSize: '0.7rem', 
+                  fontWeight: active ? 600 : 500,
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                  mt: 0.5
+                }}>
+                  {item.label}
+                </Box>
+              )}
             </ListItemButton>
           );
           return (
-            <Tooltip key={item.id} title={item.label} placement="right" enterDelay={600}>
+            <Tooltip key={item.id} title={!isCollapsed ? '' : item.label} placement="right" enterDelay={600}>
               {content}
             </Tooltip>
           );
@@ -137,7 +178,7 @@ export default function SideNav({ open, adminRole }: SideNavProps) {
       <Divider sx={{ mx: 1 }} />
 
       {/* 시스템 메뉴 (나머지) */}
-      <List dense sx={{ py: 1 }}>
+      <List sx={{ py: 1 }}>
         {visibleItems.slice(6).map(item => {
           const active = isActive(item.to);
           const content = (
@@ -146,21 +187,62 @@ export default function SideNav({ open, adminRole }: SideNavProps) {
               selected={active}
               onClick={() => navigate(item.to)}
               sx={{
-                borderRadius: 1,
-                mx: 1,
-                my: 0.5,
+                borderRadius: 2,
+                mx: 1.5,
+                my: 1,
+                py: isCollapsed ? 2 : 1.5,
+                minHeight: isCollapsed ? 64 : 48,
+                flexDirection: isCollapsed ? 'column' : 'row',
                 '&.Mui-selected': {
-                  bgcolor: theme.palette.action.selected,
+                  bgcolor: 'secondary.light',
+                  color: 'secondary.contrastText',
                   borderLeft: `4px solid ${theme.palette.secondary.main}`,
+                  '& .MuiListItemIcon-root': {
+                    color: 'secondary.contrastText',
+                  },
+                  '& .MuiListItemText-root': {
+                    color: 'secondary.contrastText',
+                  }
                 },
+                '&:hover': {
+                  bgcolor: active ? 'secondary.light' : 'action.hover',
+                }
               }}
             >
-              <ListItemIcon sx={{ minWidth: 36, justifyContent: 'center' }}>{item.icon}</ListItemIcon>
-              {!isCollapsed && <ListItemText primary={item.label} />}
+              <ListItemIcon sx={{ 
+                minWidth: isCollapsed ? 'auto' : 40, 
+                justifyContent: 'center',
+                mb: isCollapsed ? 0.5 : 0,
+                '& svg': {
+                  fontSize: isCollapsed ? '1.5rem' : '1.25rem'
+                }
+              }}>
+                {item.icon}
+              </ListItemIcon>
+              {!isCollapsed && (
+                <ListItemText 
+                  primary={item.label}
+                  primaryTypographyProps={{
+                    fontSize: '0.9rem',
+                    fontWeight: active ? 600 : 500
+                  }}
+                />
+              )}
+              {isCollapsed && (
+                <Box sx={{ 
+                  fontSize: '0.7rem', 
+                  fontWeight: active ? 600 : 500,
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                  mt: 0.5
+                }}>
+                  {item.label}
+                </Box>
+              )}
             </ListItemButton>
           );
           return (
-            <Tooltip key={item.id} title={item.label} placement="right" enterDelay={600}>
+            <Tooltip key={item.id} title={!isCollapsed ? '' : item.label} placement="right" enterDelay={600}>
               {content}
             </Tooltip>
           );

@@ -1,14 +1,15 @@
 import React from 'react';
 import { Box, Breadcrumbs, Typography, Link } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES, ROUTE_META } from '../../routes';
+import { ROUTES, ROUTE_META, ROUTE_GROUPS } from '../../routes';
 
 interface AdminPageHeaderProps {
   id?: string;
-  actionsRight?: React.ReactNode;
 }
 
-export default function AdminPageHeader({ id = 'admin-page-header', actionsRight }: AdminPageHeaderProps) {
+export default function AdminPageHeader({ 
+  id = 'admin-page-header'
+}: AdminPageHeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,74 +18,74 @@ export default function AdminPageHeader({ id = 'admin-page-header', actionsRight
   const makeCrumbs = () => {
     const crumbs: Array<{ label: string; to?: string }> = [];
 
-    // 1) 단일 페이지 (프로필 등)
-    if (path.startsWith(ROUTES.ADMIN.PROFILE)) {
-      crumbs.push({ label: '관리자 프로필' });
-      return crumbs;
-    }
-
-    // 2) ROUTE_META 기반 동적 처리
-    const getMetaInfo = (currentPath: string) => {
-      // 정확한 경로 매칭 시도
-      let meta = (ROUTE_META as any)[currentPath];
-      
-      // 정확한 매칭이 없으면 패턴 매칭 시도
-      if (!meta) {
-        // 동적 라우트 패턴 매칭 (예: /admin/users/:id → /admin/users)
-        const basePath = currentPath.replace(/\/[^\/]+$/, ''); // 마지막 세그먼트 제거
-        meta = (ROUTE_META as any)[basePath];
+    // ROUTE_GROUPS 기반 브레드크럼 생성
+    const findRouteInGroups = (currentPath: string) => {
+      for (const [groupKey, group] of Object.entries(ROUTE_GROUPS)) {
+        // 어드민 관련 그룹만 처리
+        if (!groupKey.startsWith('ADMIN')) continue;
         
-        if (meta) {
-          // 상세/편집/답변 페이지 구분
-          if (currentPath.endsWith('/edit')) {
-            return { ...meta, title: `${meta.title} 편집` };
-          } else if (currentPath.endsWith('/reply')) {
-            return { ...meta, title: `${meta.title} 답변` };
-          } else if (currentPath.includes('/')) {
-            return { ...meta, title: `${meta.title} 상세` };
+        for (const route of group.routes) {
+          // 정확한 매칭
+          if (route.path === currentPath) {
+            return { group, route, groupKey };
+          }
+          
+          // 동적 라우트 매칭 (예: /admin/openapi/clients/:id)
+          const pathPattern = route.path.replace(/:[^/]+/g, '[^/]+');
+          const regex = new RegExp(`^${pathPattern}$`);
+          if (regex.test(currentPath)) {
+            return { group, route, groupKey };
+          }
+          
+          // 베이스 패스 매칭 (상세 페이지용)
+          if (currentPath.startsWith(route.path + '/')) {
+            return { group, route, groupKey, isDetail: true };
           }
         }
       }
-      
-      return meta;
+      return null;
     };
 
-    // 현재 경로의 메타 정보 가져오기
-    const currentMeta = getMetaInfo(path);
+    const routeInfo = findRouteInGroups(path);
     
-    if (currentMeta) {
-      // 리스트 페이지인 경우
-      if (path === currentMeta.path || path === currentMeta.listPath) {
-        crumbs.push({ label: currentMeta.title });
-        return crumbs;
-      }
+    if (routeInfo) {
+      const { route, isDetail } = routeInfo;
       
-      // 상세/편집/답변 페이지인 경우
-      const basePath = path.replace(/\/[^\/]+$/, '');
-      const baseMeta = getMetaInfo(basePath);
-      
-      if (baseMeta) {
-        crumbs.push({ label: baseMeta.title, to: basePath });
+      // 메인 페이지명 (예: "공지사항 관리", "FAQ 관리")
+      if (isDetail) {
+        crumbs.push({ label: route.title, to: route.path });
         
         // 상세 페이지 구분
         if (path.endsWith('/edit')) {
           crumbs.push({ label: '편집' });
         } else if (path.endsWith('/reply')) {
           crumbs.push({ label: '답변' });
-        } else if (path.includes('/')) {
+        } else if (path.endsWith('/create')) {
+          crumbs.push({ label: '생성' });
+        } else {
           crumbs.push({ label: '상세' });
         }
-        return crumbs;
+      } else {
+        // 목록 페이지는 페이지명만 표시
+        crumbs.push({ label: route.title });
       }
+      
+      return crumbs;
     }
 
-    // 3) 대시보드
+    // 대시보드 특별 처리
     if (path === ROUTES.ADMIN.DASHBOARD) {
       crumbs.push({ label: '대시보드' });
       return crumbs;
     }
 
-    // 4) 알 수 없는 경로
+    // 프로필 특별 처리
+    if (path.startsWith(ROUTES.ADMIN.PROFILE)) {
+      crumbs.push({ label: '관리자 프로필' });
+      return crumbs;
+    }
+
+    // 알 수 없는 경로 (fallback)
     crumbs.push({ label: '알 수 없는 페이지' });
     return crumbs;
   };
@@ -93,36 +94,69 @@ export default function AdminPageHeader({ id = 'admin-page-header', actionsRight
   const title = crumbs[crumbs.length - 1]?.label || '관리자';
 
   return (
-    <Box id={id} sx={{
-      position: 'sticky',
-      top: 'calc(var(--header-height-px, 64px))',
-      zIndex: 1000,
-      bgcolor: 'background.default',
-      borderBottom: theme => `1px solid ${theme.palette.divider}`,
-    }}>
-      <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 1 }}>
-        <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 0.5 }}>
-          {crumbs.map((c, idx) => {
-            const isLast = idx === crumbs.length - 1;
-            if (isLast || !c.to) return (
-              <Typography key={idx} color="text.primary" fontWeight={700}>{c.label}</Typography>
-            );
-            return (
-              <Link key={idx} underline="hover" color="inherit" onClick={() => navigate(c.to!)} sx={{ cursor: 'pointer' }}>
-                {c.label}
-              </Link>
-            );
-          })}
-        </Breadcrumbs>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h6" fontWeight={800}>{title}</Typography>
-          <Box id="admin-page-actions" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {actionsRight}
-          </Box>
+    <>
+      {/* 브레드크럼 영역 - 상세/편집 페이지에서만 표시 (경로가 2개 이상일 때) */}
+      {crumbs.length > 1 && (
+        <Box id={id} sx={{ 
+          px: 3, 
+          py: 1.5,
+          backgroundColor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          mb: 2
+        }}>
+          <Breadcrumbs 
+            aria-label="breadcrumb" 
+            sx={{ 
+              '& .MuiBreadcrumbs-separator': {
+                color: 'text.secondary',
+                fontSize: '0.65rem'
+              }
+            }}
+          >
+            {crumbs.map((crumb, index) => {
+              const isLast = index === crumbs.length - 1;
+              
+              if (isLast || !crumb.to) {
+                return (
+                  <Typography 
+                    key={index} 
+                    color="text.secondary" 
+                    sx={{ 
+                      fontSize: '0.65rem',
+                      fontWeight: isLast ? 500 : 400,
+                      lineHeight: 1.2
+                    }}
+                  >
+                    {crumb.label}
+                  </Typography>
+                );
+              }
+              
+              return (
+                <Link
+                  key={index}
+                  color="text.secondary"
+                  onClick={() => navigate(crumb.to!)}
+                  sx={{ 
+                    cursor: 'pointer', 
+                    textDecoration: 'none',
+                    fontSize: '0.65rem',
+                    fontWeight: 400,
+                    lineHeight: 1.2,
+                    '&:hover': { 
+                      textDecoration: 'underline',
+                      color: 'primary.main'
+                    }
+                  }}
+                >
+                  {crumb.label}
+                </Link>
+              );
+            })}
+          </Breadcrumbs>
         </Box>
-      </Box>
-    </Box>
+      )}
+    </>
   );
 }
-
-

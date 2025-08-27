@@ -166,33 +166,63 @@ export async function apiFetch<T = any>(
     
     if (!res.ok) {
       if (res.status === 401) {
-        // 401 에러 시 토큰 제거하고 사용자 타입에 따라 적절한 로그인 페이지로 리다이렉트
-        // 사용자 정보까지 정리하여 헤더/레이아웃이 즉시 비로그인 상태로 전환되도록 함
+        // 401 에러 시 Refresh Token으로 갱신 시도
+        try {
+          const refreshToken = getRefreshToken();
+          const userType = getUserType();
+          if (refreshToken) {
+            const refreshUrl = userType === 'A' ? FULL_API_URLS.AUTH.ADMIN.REFRESH : FULL_API_URLS.AUTH.USER.REFRESH;
+            const refreshRes = await fetch(`${API_BASE_URL}${refreshUrl}`, { 
+              method: 'POST', 
+              headers: { 'Content-Type': 'application/json' }, 
+              body: JSON.stringify({ refreshToken }) 
+            });
+            
+            if (refreshRes.ok) {
+              const refreshData = await refreshRes.json();
+              const newAccess = refreshData?.data?.token || refreshData?.token;
+              const newRefresh = refreshData?.data?.refreshToken || refreshData?.refreshToken || refreshToken;
+              
+              if (newAccess) {
+                saveTokens(newAccess, newRefresh);
+                // 갱신된 토큰으로 원래 요청 재시도
+                const retryHeaders = {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${newAccess}`
+                } as Record<string, string>;
+                
+                const retryRes = await fetch(`${API_BASE_URL}${path}`, { 
+                  ...options, 
+                  headers: { ...(options?.headers || {}), ...retryHeaders }, 
+                  signal: controller.signal 
+                });
+                
+                if (retryRes.ok) {
+                  const retryData = await retryRes.json();
+                  return enhanceApiResponse<T>(retryData);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.log('Refresh token 갱신 실패:', error);
+        }
+        
+        // Refresh Token 갱신 실패 시에만 로그인 페이지로 리다이렉트
         clearLoginInfo();
         const userType = getUserType();
-        // 서버가 FE 공통 포맷으로 에러 코드를 내려주는 경우 우선 사용
-        const serverErrorCode = data?.errorCode as number | undefined;
         const redirectTo = (userType === 'A') ? ROUTES.ADMIN.LOGIN : ROUTES.PUBLIC.LOGIN;
+        
         try {
           const returnTo = window.location.pathname + window.location.search + window.location.hash;
           sessionStorage.setItem('returnTo', returnTo);
         } catch {}
-        // TOKEN_REQUIRED, TOKEN_EXPIRED, INVALID_TOKEN, UNAUTHORIZED 모두 로그인 화면으로 보냄
-        if (
-          serverErrorCode === ErrorCode.TOKEN_REQUIRED ||
-          serverErrorCode === ErrorCode.TOKEN_EXPIRED ||
-          serverErrorCode === ErrorCode.INVALID_TOKEN ||
-          serverErrorCode === ErrorCode.UNAUTHORIZED ||
-          serverErrorCode === undefined
-        ) {
-          window.location.href = redirectTo;
-        } else {
-          window.location.href = redirectTo;
-        }
+        
+        window.location.href = redirectTo;
         return enhanceApiResponse<T>({ 
           success: false, 
           errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',
-          errorCode: serverErrorCode ?? ErrorCode.UNAUTHORIZED
+          errorCode: ErrorCode.UNAUTHORIZED
         });
       }
       

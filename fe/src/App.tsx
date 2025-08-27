@@ -103,19 +103,19 @@ function App() {
             {/* Admin Dashboard */}
             <Route path={ROUTES.ADMIN.DASHBOARD} element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.PROFILE} element={<AdminProtectedRoute><AdminProfile /></AdminProtectedRoute>} />
-            
-            {/* 사용자 관리 */}
+                    
+                    {/* 사용자 관리 */}
             <Route path={ROUTES.ADMIN.USERS.LIST} element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.USERS.DETAIL} element={<AdminProtectedRoute><UserDetail /></AdminProtectedRoute>} />
-            
-            {/* 운영자 관리 */}
+                    
+                    {/* 운영자 관리 */}
             <Route path="/admin/operators" element={<AdminProtectedRoute><OperatorManagement /></AdminProtectedRoute>} />
             <Route path="/admin/operators/:id" element={<AdminProtectedRoute><div>OperatorDetail</div></AdminProtectedRoute>} />
-            
-            {/* 코드 관리 */}
+                    
+                    {/* 코드 관리 */}
             <Route path="/admin/code" element={<AdminProtectedRoute><CodeManagement /></AdminProtectedRoute>} />
-            
-            {/* 기존 관리자 페이지들 */}
+                    
+                    {/* 기존 관리자 페이지들 */}
             <Route path={ROUTES.ADMIN.OPENAPI.CLIENTS} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiClients /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiDetail /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.OPENAPI.CLIENT_EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiEdit /></Suspense></AdminProtectedRoute>} />
@@ -134,7 +134,8 @@ function App() {
             <Route path="/admin/qnas/:id/edit" element={<AdminProtectedRoute><AdminQnaEdit /></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.QNA.REPLY} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaReply /></Suspense></AdminProtectedRoute>} />
 
-            {/* 404 - 홈으로 리다이렉트 */}
+            {/* 404 - 경로에 따라 적절한 페이지로 리다이렉트 */}
+            <Route path="/admin/*" element={<Navigate to={ROUTES.ADMIN.LOGIN} replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
           

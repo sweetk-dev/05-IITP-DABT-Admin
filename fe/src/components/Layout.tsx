@@ -49,8 +49,9 @@ export default function Layout() {
 	
 	useEffect(() => {
 		// 토큰/유저정보 변경 또는 라우트 이동 시 토큰 정리
+		// 무한 루프 방지를 위해 한 번만 실행
 		validateAndCleanTokens();
-	}, [location.pathname]);
+	}, []); // 의존성 배열을 빈 배열로 변경하여 한 번만 실행
 
 	let appBarType: 'user' | 'public' | 'auth' | 'admin-login' | 'admin';
 
@@ -95,7 +96,6 @@ export default function Layout() {
 						<Box sx={{ display: 'flex', flex: 1, minHeight: 0 }}>
 							<SideNav open={sideNavOpen} onToggle={handleSideNavToggle} adminRole={adminRole} />
 							<Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-								<AdminPageHeader />
 								<Box
 									component="main"
 									id="main-content"

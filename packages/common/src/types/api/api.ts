@@ -70,6 +70,7 @@ export const API_URLS = {
       ANSWER: '/qna/:qnaId/answer',
       UPDATE: '/qna/:qnaId',
       DELETE: '/qna/:qnaId',
+      STATUS: '/qna/status',
     },
     // 공지사항 관리
     NOTICE: {
@@ -262,6 +263,7 @@ export const FULL_API_URLS = {
       ANSWER: getAdminUrl(API_URLS.ADMIN.QNA.ANSWER),
       UPDATE: getAdminUrl(API_URLS.ADMIN.QNA.UPDATE),
       DELETE: getAdminUrl(API_URLS.ADMIN.QNA.DELETE),
+      STATUS: getAdminUrl(API_URLS.ADMIN.QNA.STATUS),
     },
     NOTICE: {
       LIST: getAdminUrl(API_URLS.ADMIN.NOTICE.LIST),

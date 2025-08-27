@@ -1,6 +1,7 @@
 import { ErrorCode } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 import { getUserType } from '../store/user';
+import { removeTokensByType } from '../store/auth';
 
 // 에러 코드별 FE 전용 응답 설정
 export function enhanceApiResponse<T>(response: any): ApiResponse<T> {
@@ -89,8 +90,10 @@ export function handleApiResponse<T>(
     
     // 자동 로그아웃 처리
     if (response.autoLogout) {
-      //console.log('자동 로그아웃 처리');
-      // localStorage 정리는 validateAndCleanTokens에서 처리됨
+      console.log('자동 로그아웃 처리 - 토큰 정보 제거');
+      // 토큰 에러 발생 시 해당 사용자 타입의 토큰 정보 자동 제거
+      const userType = getUserType();
+      removeTokensByType(userType === 'A' ? 'A' : 'U');
     }
     
     // 팝업 표시

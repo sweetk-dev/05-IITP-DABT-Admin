@@ -107,3 +107,37 @@ export async function answerQna(qnaId: number, answerData: {
   }
   return null;
 } 
+
+
+/**
+ * QnA 상태 통계 조회
+ */
+export async function getQnaStats(): Promise<{
+  total: number;
+  answered: number;
+  unanswered: number; 
+}> {
+  const total = await SysQna.count({
+    where: { delYn: 'N' }
+  });
+
+  const answered = await SysQna.count({
+    where: {
+      delYn: 'N',
+      answeredYn: 'Y'
+    }
+  });
+
+  const unanswered = await SysQna.count({
+    where: {
+      delYn: 'N',
+      answeredYn: 'N'
+    }
+  });
+
+  return {
+    total,
+    answered,
+    unanswered 
+  };
+}

@@ -11,7 +11,8 @@ import {
   getQnaDetailForAdmin,
   answerQnaForAdmin,
   updateQnaForAdmin,
-  deleteQnaForAdmin
+  deleteQnaForAdmin,
+  statusQnaForAdmin
 } from '../controllers/admin/adminQnaController';
 import { getAdminProfile, updateAdminProfile, changeAdminPassword } from '../controllers/admin/adminController';
 import {
@@ -73,6 +74,7 @@ router.get<AdminQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.admin,
 router.post<AdminQnaDetailParams>('/qna/:qnaId(\\d+)/answer', ...routerMiddleware.admin, answerQnaForAdmin as any);
 router.put<AdminQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.admin, updateQnaForAdmin as any);
 router.delete<AdminQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.admin, deleteQnaForAdmin as any);
+router.get(API_URLS.ADMIN.QNA.STATUS, ...routerMiddleware.admin, statusQnaForAdmin as any);
 
 // Notice 관리
 router.get(API_URLS.ADMIN.NOTICE.LIST, ...routerMiddleware.admin, getNoticeListForAdmin);

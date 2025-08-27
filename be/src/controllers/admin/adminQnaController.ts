@@ -6,7 +6,8 @@ import {
   getQnaDetail, 
   answerQna, 
   updateQna, 
-  deleteQna 
+  deleteQna,
+  getQnaStatus
 } from '../../services/admin/adminQnaService';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
@@ -23,7 +24,8 @@ import type {
   AdminQnaDetailParams,
   AdminQnaDetailRes,
   AdminQnaAnswerReq,
-  AdminQnaUpdateReq
+  AdminQnaUpdateReq,
+  AdminQnaStatusRes
 } from '@iitp-dabt/common';
 import { toAdminQnaItem, toAdminQnaDetailItem } from '../../mappers/qnaMapper';
 
@@ -272,4 +274,42 @@ export const deleteQnaForAdmin = async (req: Request<{ qnaId: string }>, res: Re
     // 기타 예상치 못한 에러
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
-}; 
+};
+
+
+export const statusQnaForAdmin = async (req: Request, res: Response) => {
+  try {
+    logApiCall('GET', API_URLS.ADMIN.QNA.STATUS, ADMIN_API_MAPPING as any, 'QnA 상태(통계) 조회 (관리자용)');
+
+    const adminId = extractUserIdFromRequest(req);
+    
+    if (!adminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    const status = await getQnaStatus();
+    const response: AdminQnaStatusRes = { 
+      total: status.total,
+      answered: status.answered,
+      unanswered: status.unanswered
+     };
+    sendSuccess(res, response, undefined, 'ADMIN_QNA_STATUS_VIEW', { adminId });
+  } catch (error) {
+    appLogger.error('관리자 QnA 상태(통계) 조회 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    
+    // ✅ customErrors 처리
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.DATABASE_ERROR) {
+        return sendDatabaseError(res, '조회', 'QnA 상태(통계)');
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof ResourceError) {
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
+  }
+};

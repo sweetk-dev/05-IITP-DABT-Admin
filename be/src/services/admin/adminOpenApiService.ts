@@ -4,7 +4,8 @@ import {
   findAuthKeyById, 
   createAuthKey as createOpenApiAuthKeyRepo, 
   updateAuthKey as updateOpenApiAuthKeyRepo, 
-  deleteAuthKey as deleteOpenApiAuthKeyRepo 
+  deleteAuthKey as deleteOpenApiAuthKeyRepo,
+  getAuthKeyStats
 } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
 import { generateAuthKey } from '../../utils/authKeyGenerator';
@@ -16,6 +17,7 @@ export interface OpenApiListParams {
   limit: number;
   search?: string;
   status?: string;
+  pendingOnly?: boolean;
 }
 
 export interface OpenApiCreateData {
@@ -30,6 +32,7 @@ export interface OpenApiUpdateData {
   keyName?: string;
   keyDesc?: string;
   status?: string;
+  rejectReason?: string;
 }
 
 /**
@@ -37,27 +40,17 @@ export interface OpenApiUpdateData {
  */
 export const getOpenApiList = async (params: OpenApiListParams) => {
   try {
-    const { page, limit, search, status } = params;
+    const { page, limit, search, status, pendingOnly = false } = params;
     const offset = (page - 1) * limit;
 
-    // 검색 조건 구성
-    const whereConditions: any = {};
-    
-    if (search) {
-      whereConditions[Op.or] = [
-        { keyName: { [Op.like]: `%${search}%` } },
-        { keyDesc: { [Op.like]: `%${search}%` } }
-      ];
-    }
-    
-    if (status) {
-      whereConditions.status = status;
-    }
-
+    // Repository에서 모든 조건을 직접 처리하도록 개선
     const result = await findAuthKeysByUserId(0, {
       page,
       limit,
-      includeInactive: true
+      includeInactive: !pendingOnly, // pendingOnly가 true면 inactive 포함, false면 active만
+      pendingOnly,
+      activeYn: status, // status 파라미터를 activeYn으로 전달
+      searchKeyword: search // search 파라미터를 searchKeyword로 전달
     });
 
     return {
@@ -147,10 +140,28 @@ export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData
       );
     }
 
-    const updatedApi = await updateOpenApiAuthKeyRepo(apiId, {
-      ...updateData,
+    const updateFields: any = {
       updatedBy: actorTag
-    });
+    };
+
+    if (updateData.keyName !== undefined) {
+      updateFields.keyName = updateData.keyName;
+    }
+
+    if (updateData.keyDesc !== undefined) {
+      updateFields.keyDesc = updateData.keyDesc;
+    }
+
+    if (updateData.status !== undefined) {
+      updateFields.activeYn = updateData.status === 'ACTIVE' ? 'Y' : 'N';
+    }
+
+    // rejectReason이 있으면 keyRejectReason으로 매핑
+    if ((updateData as any).rejectReason !== undefined) {
+      updateFields.keyRejectReason = (updateData as any).rejectReason;
+    }
+
+    const updatedApi = await updateOpenApiAuthKeyRepo(apiId, updateFields);
 
     if (!updatedApi) {
       throw new ResourceError(
@@ -262,33 +273,16 @@ export const extendOpenApiKey = async (keyId: number, range: { startDt: string; 
  */
 export const getOpenApiStats = async () => {
   try {
-    // 전체 키 수 조회
-    const totalKeys = await findAuthKeysByUserId(0, {
-      page: 1,
-      limit: 1000, // 충분히 큰 수로 설정
-      includeInactive: true
-    });
-    const allKeys = totalKeys.authKeys;
+    // getAuthKeyStats 함수를 사용하여 전체 통계 조회 (성능 최적화)
+    // userId = 0으로 설정하여 모든 사용자의 키를 대상으로 함
+    const stats = await getAuthKeyStats(0, true); // includeUnlimited = true로 설정하여 모든 키 포함
     
-    // 상태별 통계 계산
-    const activeKeys = allKeys.filter((key) => key.activeYn === 'Y').length;
-    const expiredKeys = allKeys.filter((key) => {
-      if (!key.endDt) return false;
-      return new Date(key.endDt) < new Date();
-    }).length;
-    const suspendedKeys = allKeys.filter((key) => key.activeYn === 'N').length;
-    
-    // 사용량 통계 (hitCnt 기준)
-    const totalUsage = allKeys.reduce((sum: number, key: any) => sum + (key.hitCnt || 0), 0);
-    const averageUsage = allKeys.length > 0 ? Math.round(totalUsage / allKeys.length) : 0;
-
     return {
-      totalKeys: allKeys.length,
-      activeKeys,
-      expiredKeys,
-      suspendedKeys,
-      totalUsage,
-      averageUsage
+      totalKeys: stats.total,
+      activeKeys: stats.active,
+      expiredKeys: stats.expired,
+      inactive: stats.inactive,
+      pending:stats.pending 
     };
   } catch (error) {
     appLogger.error('OpenAPI 상태 통계 조회 중 오류 발생', { error });

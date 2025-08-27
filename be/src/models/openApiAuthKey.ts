@@ -11,6 +11,7 @@ export interface OpenApiAuthKeyAttributes {
   delYn: string;
   keyName: string;
   keyDesc: string;
+  keyRejectReason?: string;
   activeAt?: Date;
   latestAccAt?: Date;
   createdAt: Date;
@@ -25,6 +26,7 @@ export type OpenApiAuthKeyCreationAttributes = Optional<OpenApiAuthKeyAttributes
   'keyId' |
   'startDt' |
   'endDt' |
+  'keyRejectReason' |
   'activeAt' | 
   'latestAccAt' | 
   'createdAt' |
@@ -44,6 +46,7 @@ export class OpenApiAuthKey extends Model<OpenApiAuthKeyAttributes, OpenApiAuthK
   public delYn!: string;
   public keyName!: string;
   public keyDesc!: string;
+  public keyRejectReason?: string;
   public activeAt?: Date;
   public latestAccAt?: Date;
   public createdAt!: Date;
@@ -123,6 +126,12 @@ export function initOpenApiAuthKey(sequelize: Sequelize) {
         field: 'key_desc',
         comment: 'api key 사용 목적',
       },
+      keyRejectReason: {
+        type: DataTypes.STRING(1000),
+        allowNull: true,
+        field: 'key_reject_reason',
+        comment: 'API 키 거절 사유',
+      },
       activeAt: {
         type: DataTypes.DATE,
         field: 'active_at',
@@ -185,6 +194,14 @@ export function initOpenApiAuthKey(sequelize: Sequelize) {
         {
           fields: ['user_id', 'start_dt', 'end_dt'],
           name: 'idx_open_api_auth_key_user_date',
+        },
+        {
+          fields: ['user_id', 'del_yn', 'active_yn'],
+          name: 'idx_open_api_auth_key_user_status',
+        },
+        {
+          fields: ['user_id', 'del_yn', 'active_yn', 'start_dt', 'end_dt'],
+          name: 'idx_open_api_auth_key_user_status_date',
         },
       ],
     }

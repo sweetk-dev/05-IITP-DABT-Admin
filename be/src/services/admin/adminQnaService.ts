@@ -4,7 +4,8 @@ import {
   findQnaById, 
   answerQna as answerQnaRepo, 
   updateQna as updateQnaRepo, 
-  deleteQna as deleteQnaRepo 
+  deleteQna as deleteQnaRepo,
+  getQnaStats  
 } from '../../repositories/sysQnaRepository';
 import type { SysQna } from '../../models/sysQna';
 import { appLogger } from '../../utils/logger';
@@ -212,3 +213,24 @@ export const deleteQna = async (qnaId: number, actorTag: string): Promise<SysQna
     );
   }
 }; 
+
+/**
+ * QnA 상태(통계) 조회 (관리자용)
+ */
+export const getQnaStatus = async (): Promise<{ total: number; answered: number; unanswered: number }> => {
+  try {
+    const stats = await getQnaStats();
+    return {
+      total: stats.total,
+      answered: stats.answered,
+      unanswered: stats.unanswered
+    };
+  } catch (error) {
+    appLogger.error('QnA 상태 통계 조회 중 오류 발생', { error });
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'QnA 상태 통계 조회 중 오류가 발생했습니다.',
+      { originalError: error }
+    );
+  }
+};

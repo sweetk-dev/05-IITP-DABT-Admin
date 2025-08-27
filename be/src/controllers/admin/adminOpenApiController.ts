@@ -42,23 +42,45 @@ export const getOpenApiListForAdmin = async (req: Request<{}, {}, {}, AdminOpenA
   try {
     logApiCall('GET', API_URLS.ADMIN.OPEN_API.LIST, ADMIN_API_MAPPING as any, 'OpenAPI 목록 조회 (관리자용)');
 
-    const page = getNumberQuery(req.query, 'page', 1)!;
-    const limit = getNumberQuery(req.query, 'limit', 10)!;
-    const search = getStringQuery(req.query, 'searchKeyword');
-    const status = getStringQuery(req.query, 'activeYn');
-    
     const adminId = extractUserIdFromRequest(req);
     const actorTag = getActorTag(req);
     
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
+    
+    const page = getNumberQuery(req.query, 'page', 1)!;
+    const limit = getNumberQuery(req.query, 'limit', 10)!;
+    const search = getStringQuery(req.query, 'searchKeyword');
+    const status = getStringQuery(req.query, 'activeYn');
+    const pendingOnlyParam = getStringQuery(req.query, 'pendingOnly');
+    
+    // pendingOnly 파라미터 검증 및 기본값 설정
+    let pendingOnly = false;
+    if (pendingOnlyParam === 'true') {
+      pendingOnly = true;
+    } else if (pendingOnlyParam === 'false') {
+      pendingOnly = false;
+    }
+    // pendingOnlyParam이 undefined, null, 또는 다른 값인 경우 기본값 false 사용
 
+    // 디버깅을 위한 로깅
+    appLogger.info('OpenAPI 목록 조회 파라미터', { 
+      page, 
+      limit, 
+      search, 
+      activeYn: status,
+      pendingOnlyParam, 
+      pendingOnly,
+      adminId
+    });
+    
     const result = await getOpenApiList({
       page,
       limit,
       search,
-      status
+      status,
+      pendingOnly
     });
 
     const response: AdminOpenApiListRes = {
@@ -373,7 +395,8 @@ export const statusOpenApiAdmin = async (req: Request, res: Response) => {
       total: stats.totalKeys,
       active: stats.activeKeys,
       expired: stats.expiredKeys,
-      inactive: stats.suspendedKeys
+      inactive: stats.inactive,
+      pending: stats.pending
     };
 
     sendSuccess(res, response, undefined, 'ADMIN_OPEN_API_STATUS_VIEW', { adminId });

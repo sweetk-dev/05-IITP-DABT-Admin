@@ -12,6 +12,7 @@ export interface AdminOpenApiKeyItem {
   delYn: string;
   keyName: string;
   keyDesc: string;
+  keyRejectReason?: string; // 반려 사유
   activeAt?: string;
   latestAccAt?: string;
   createdAt: string;
@@ -51,6 +52,7 @@ export interface UserOpenApiKeyItem {
   endDt?: string;
   keyName: string;
   keyDesc: string;
+  keyRejectReason?: string; // 반려 사유
   activeAt?: string;
   latestAccAt?: string;
   createdAt: string;
@@ -119,6 +121,7 @@ export interface AdminOpenApiListQuery {
   userId?: number;
   activeYn?: string;
   searchKeyword?: string;
+  pendingOnly?: boolean; //허가 대기 중인 인증키만 조회
 }
 
 export type AdminOpenApiListRes = PaginationRes<AdminOpenApiKeyListItem>;
@@ -154,6 +157,7 @@ export interface AdminOpenApiUpdateReq {
   startDt?: string;
   endDt?: string;
   activeYn?: string;
+  rejectReason?: string; // 반려 사유 (activeYn이 'N'으로 변경될 때 필수)
   updatedBy: string;
 }
 

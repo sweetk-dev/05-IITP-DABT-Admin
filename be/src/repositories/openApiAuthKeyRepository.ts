@@ -1,5 +1,5 @@
 import { OpenApiAuthKey, OpenApiAuthKeyCreationAttributes } from '../models/openApiAuthKey';
-import { Op } from 'sequelize';
+import { Op, literal } from 'sequelize';
 
 /**
  * 인증 키로 조회
@@ -133,6 +133,9 @@ export async function findAuthKeysByUserId(userId: number, options: {
   page?: number;
   limit?: number;
   includeInactive?: boolean;
+  pendingOnly?: boolean;
+  activeYn?: string;
+  searchKeyword?: string;
 }): Promise<{
   authKeys: OpenApiAuthKey[];
   total: number;
@@ -142,12 +145,38 @@ export async function findAuthKeysByUserId(userId: number, options: {
   const offset = (page - 1) * limit;
 
   const whereClause: any = {
-    userId,
     delYn: 'N'
   };
 
-  if (!options.includeInactive) {
+  // userId가 0이 아닌 경우에만 userId 조건 추가 (0은 모든 사용자를 의미)
+  if (userId !== 0) {
+    whereClause.userId = userId;
+  }
+
+  // pendingOnly가 true인 경우 pending 상태만 조회
+  if (options.pendingOnly) {
+    whereClause.activeYn = 'N';
+    whereClause.activeAt = { [Op.is]: null };
+  } else if (options.activeYn) {
+    // activeYn이 명시적으로 설정된 경우
+    if (options.activeYn === 'Y') {
+      whereClause.activeYn = 'Y';
+    } else if (options.activeYn === 'N') {
+      whereClause.activeYn = 'N';
+    }
+    // activeYn이 '' (전체)인 경우는 조건 추가하지 않음
+  } else if (!options.includeInactive) {
+    // pendingOnly가 false이고 activeYn이 설정되지 않았고 includeInactive가 false인 경우 활성 상태만
     whereClause.activeYn = 'Y';
+  }
+  // pendingOnly가 false이고 activeYn이 ''이거나 includeInactive가 true인 경우 모든 상태 포함
+
+  // 검색 조건 추가
+  if (options.searchKeyword) {
+    whereClause[Op.or] = [
+      { keyName: { [Op.like]: `%${options.searchKeyword}%` } },
+      { keyDesc: { [Op.like]: `%${options.searchKeyword}%` } }
+    ];
   }
 
   const { count, rows } = await OpenApiAuthKey.findAndCountAll({
@@ -182,13 +211,37 @@ export async function findExpiredAuthKeys(): Promise<OpenApiAuthKey[]> {
 export async function updateAuthKey(keyId: number, updateData: {
   startDt?: Date;
   endDt?: Date;
+  activeYn?: string;
+  keyRejectReason?: string;
   updatedBy: string;
 }): Promise<boolean> {
-  const [affectedRows] = await OpenApiAuthKey.update({
-    startDt: updateData.startDt,
-    endDt: updateData.endDt,
+  const updateFields: any = {
     updatedBy: updateData.updatedBy
-  }, {
+  };
+
+  if (updateData.startDt !== undefined) {
+    updateFields.startDt = updateData.startDt;
+  }
+
+  if (updateData.endDt !== undefined) {
+    updateFields.endDt = updateData.endDt;
+  }
+
+  if (updateData.activeYn !== undefined) {
+    updateFields.activeYn = updateData.activeYn;
+    
+    // activeYn이 'Y'로 설정되면 거절 사유 초기화 및 활성화 시간 설정
+    if (updateData.activeYn === 'Y') {
+      updateFields.keyRejectReason = null;
+      updateFields.activeAt = new Date();
+    }
+  }
+
+  if (updateData.keyRejectReason !== undefined) {
+    updateFields.keyRejectReason = updateData.keyRejectReason;
+  }
+
+  const [affectedRows] = await OpenApiAuthKey.update(updateFields, {
     where: { 
       keyId,
       delYn: 'N'
@@ -251,52 +304,79 @@ export async function isValidAuthKey(authKey: string, includeUnlimited: boolean 
 
 /**
  * 인증 키 통계 조회
- * @param userId 사용자 ID
+ * @param userId 사용자 ID (0일 경우 모든 사용자 대상)
  * @param includeUnlimited 기간이 설정되지 않은 키도 포함할지 여부 (관리자용)
  */
 export async function getAuthKeyStats(userId: number, includeUnlimited: boolean = false): Promise<{
   total: number;
   active: number;
   expired: number;
+  inactive: number;
+  pending: number;   //허가 대기 중 count
 }> {
   const currDate = new Date();
   
-  const activeWhereClause: any = {
-    userId, 
-    delYn: 'N', 
-    activeYn: 'Y'
-  };
-
-  if (includeUnlimited) {
-    activeWhereClause[Op.or] = [
-      {
-        startDt: { [Op.lte]: currDate },
-        endDt: { [Op.gte]: currDate }
-      },
-      {
-        startDt: { [Op.is]: null },
-        endDt: { [Op.is]: null }
-      }
-    ];
-  } else {
-    activeWhereClause.startDt = { [Op.lte]: currDate };
-    activeWhereClause.endDt = { [Op.gte]: currDate };
-  }
+  // userId가 0일 경우 모든 사용자 대상, 그렇지 않으면 특정 사용자 대상
+  const whereClause = userId === 0 ? { delYn: 'N' } : { userId, delYn: 'N' };
   
-  const [total, active, expired] = await Promise.all([
-    OpenApiAuthKey.count({ where: { userId, delYn: 'N' } }),
-    OpenApiAuthKey.count({ where: activeWhereClause }),
-    OpenApiAuthKey.count({ 
-      where: { 
-        userId, 
-        delYn: 'N', 
-        activeYn: 'Y',
-        endDt: { [Op.lt]: currDate }
-      } 
-    })
-  ]);
+  // SQL Injection 방지를 위해 Sequelize의 안전한 방법 사용
+  // includeUnlimited가 true일 때만 기간이 설정되지 않은 키를 포함하도록 조건 분리
+  let activeCase = `
+        SUM(CASE 
+          WHEN active_yn = 'Y' AND start_dt IS NOT NULL AND end_dt IS NOT NULL 
+               AND start_dt <= :currDate AND end_dt >= :currDate THEN 1
+          ELSE 0 
+        END)
+      `;
+  
+  if (includeUnlimited) {
+    activeCase = `
+        SUM(CASE 
+          WHEN active_yn = 'Y' AND start_dt IS NOT NULL AND end_dt IS NOT NULL 
+               AND start_dt <= :currDate AND end_dt >= :currDate THEN 1
+          WHEN active_yn = 'Y' AND start_dt IS NULL AND end_dt IS NULL THEN 1
+          ELSE 0 
+        END)
+      `;
+  }
 
-  return { total, active, expired };
+  const result = await OpenApiAuthKey.findOne({
+    where: whereClause,
+    attributes: [
+      [literal(`COUNT(*)`), 'total'],
+      [literal(activeCase), 'active'],
+      [literal(`
+        SUM(CASE 
+          WHEN active_yn = 'Y' AND end_dt IS NOT NULL AND end_dt < :currDate THEN 1
+          ELSE 0 
+        END)
+      `), 'expired'],
+      [literal(`
+        SUM(CASE 
+          WHEN active_yn = 'N' AND active_at IS NOT NULL THEN 1
+          ELSE 0 
+        END)
+      `), 'inactive'],
+      [literal(`
+        SUM(CASE 
+          WHEN active_yn = 'N' AND active_at IS NULL THEN 1
+          ELSE 0 
+        END)
+      `), 'pending']
+    ],
+    replacements: {
+      currDate: currDate.toISOString().split('T')[0]
+    },
+    raw: true
+  });
+
+  return {
+    total: Number((result as any)?.total || 0),
+    active: Number((result as any)?.active || 0),
+    expired: Number((result as any)?.expired || 0),
+    inactive: Number((result as any)?.inactive || 0),
+    pending: Number((result as any)?.pending || 0)
+  };
 }
 
 /**

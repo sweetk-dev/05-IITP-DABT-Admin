@@ -166,6 +166,7 @@ export interface AdminQnaUpdateReq {
 // 삭제 응답은 ApiResponse<void> 사용
 
 export interface AdminQnaStatusRes  {
-  totalQnas: number;
-  unansweredQnas: number;  
+  total: number;
+  answered: number;
+  unanswered: number;
 }

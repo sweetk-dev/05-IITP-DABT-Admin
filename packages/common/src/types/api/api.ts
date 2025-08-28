@@ -58,6 +58,7 @@ export const API_URLS = {
     // FAQ 관리
     FAQ: {
       LIST: '/faq',
+      LIST_DELETE: '/faq/delete',
       DETAIL: '/faq/:faqId',
       CREATE: '/faq',
       UPDATE: '/faq/:faqId',
@@ -66,6 +67,7 @@ export const API_URLS = {
     // QnA 관리
     QNA: {
       LIST: '/qna',
+      LIST_DELETE: '/qna/delete',
       DETAIL: '/qna/:qnaId',
       ANSWER: '/qna/:qnaId/answer',
       UPDATE: '/qna/:qnaId',
@@ -75,6 +77,7 @@ export const API_URLS = {
     // 공지사항 관리
     NOTICE: {
       LIST: '/notice',
+      LIST_DELETE: '/notice/delete',
       DETAIL: '/notice/:noticeId',
       CREATE: '/notice',
       UPDATE: '/notice/:noticeId',
@@ -83,6 +86,7 @@ export const API_URLS = {
     // OpenAPI 인증키 관리
     OPEN_API: {
       LIST: '/openapi/keys',
+      LIST_DELETE: '/openapi/keys/delete',
       DETAIL: '/openapi/keys/:keyId',
       CREATE: '/openapi/keys',
       UPDATE: '/openapi/keys/:keyId',
@@ -93,6 +97,7 @@ export const API_URLS = {
     // 운영자 계정 관리 (S-Admin 전용)
     ADMIN_ACCOUNT: {
       LIST: '/accounts/admin',
+      LIST_DELETE: '/accounts/admin/delete',
       DETAIL: '/accounts/admin/:adminId',
       CREATE: '/accounts/admin',
       UPDATE: '/accounts/admin/:adminId',
@@ -104,6 +109,7 @@ export const API_URLS = {
     // 사용자 계정 관리 (일반 Admin도 접근 가능)
     USER_ACCOUNT: {
       LIST: '/accounts/user',
+      LIST_DELETE: '/accounts/user/delete',
       DETAIL: '/accounts/user/:userId',
       CREATE: '/accounts/user',
       UPDATE: '/accounts/user/:userId',
@@ -167,6 +173,7 @@ export const API_URLS = {
     // 관리자용 그룹 관리 API
     GROUP: {
       LIST: '/admin/groups',           // GET
+      LIST_DELETE: '/admin/groups/delete', // POST
       CREATE: '/admin/group',          // POST
       UPDATE: '/admin/group/:grpId',  // PUT
       DELETE: '/admin/group/:grpId',  // DELETE
@@ -174,6 +181,7 @@ export const API_URLS = {
     
     // 관리자용 코드 관리 API
     CODE: {
+      LIST_DELETE: '/admin/:grpId/codes/delete', // POST
       CREATE: '/admin/:grpId/code',        // POST
       UPDATE: '/admin/:grpId/:codeId',    // PUT
       DELETE: '/admin/:grpId/:codeId',    // DELETE
@@ -252,6 +260,7 @@ export const FULL_API_URLS = {
     },
     FAQ: {
       LIST: getAdminUrl(API_URLS.ADMIN.FAQ.LIST),
+      LIST_DELETE: getAdminUrl(API_URLS.ADMIN.FAQ.LIST_DELETE),
       DETAIL: getAdminUrl(API_URLS.ADMIN.FAQ.DETAIL),
       CREATE: getAdminUrl(API_URLS.ADMIN.FAQ.CREATE),
       UPDATE: getAdminUrl(API_URLS.ADMIN.FAQ.UPDATE),
@@ -259,6 +268,7 @@ export const FULL_API_URLS = {
     },
     QNA: {
       LIST: getAdminUrl(API_URLS.ADMIN.QNA.LIST),
+      LIST_DELETE: getAdminUrl(API_URLS.ADMIN.QNA.LIST_DELETE),
       DETAIL: getAdminUrl(API_URLS.ADMIN.QNA.DETAIL),
       ANSWER: getAdminUrl(API_URLS.ADMIN.QNA.ANSWER),
       UPDATE: getAdminUrl(API_URLS.ADMIN.QNA.UPDATE),
@@ -267,6 +277,7 @@ export const FULL_API_URLS = {
     },
     NOTICE: {
       LIST: getAdminUrl(API_URLS.ADMIN.NOTICE.LIST),
+      LIST_DELETE: getAdminUrl(API_URLS.ADMIN.NOTICE.LIST_DELETE),
       DETAIL: getAdminUrl(API_URLS.ADMIN.NOTICE.DETAIL),
       CREATE: getAdminUrl(API_URLS.ADMIN.NOTICE.CREATE),
       UPDATE: getAdminUrl(API_URLS.ADMIN.NOTICE.UPDATE),
@@ -274,6 +285,7 @@ export const FULL_API_URLS = {
     },
     OPEN_API: {
       LIST: getAdminUrl(API_URLS.ADMIN.OPEN_API.LIST),
+      LIST_DELETE: getAdminUrl(API_URLS.ADMIN.OPEN_API.LIST_DELETE),
       DETAIL: getAdminUrl(API_URLS.ADMIN.OPEN_API.DETAIL),
       CREATE: getAdminUrl(API_URLS.ADMIN.OPEN_API.CREATE),
       UPDATE: getAdminUrl(API_URLS.ADMIN.OPEN_API.UPDATE),
@@ -284,6 +296,7 @@ export const FULL_API_URLS = {
     // 운영자 계정 관리 (S-Admin 전용)
     ADMIN_ACCOUNT: {
       LIST: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.LIST),
+      LIST_DELETE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE),
       DETAIL: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.DETAIL),
       CREATE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.CREATE),
       UPDATE: getAdminUrl(API_URLS.ADMIN.ADMIN_ACCOUNT.UPDATE),
@@ -295,6 +308,7 @@ export const FULL_API_URLS = {
     // 사용자 계정 관리 (일반 Admin도 접근 가능)
     USER_ACCOUNT: {
       LIST: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.LIST),
+      LIST_DELETE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE),
       DETAIL: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.DETAIL),
       CREATE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.CREATE),
       UPDATE: getAdminUrl(API_URLS.ADMIN.USER_ACCOUNT.UPDATE),
@@ -351,6 +365,7 @@ export const FULL_API_URLS = {
     // 관리자용 그룹 관리 API
     GROUP: {
       LIST: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.LIST),           // GET
+      LIST_DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.LIST_DELETE), // DELETE
       CREATE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.CREATE),       // POST
       UPDATE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.UPDATE),       // PUT
       DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.DELETE),       // DELETE
@@ -358,6 +373,7 @@ export const FULL_API_URLS = {
     
     // 관리자용 코드 관리 API
     CODE: {
+      LIST_DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.LIST_DELETE), // DELETE
       CREATE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.CREATE),        // POST
       UPDATE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.UPDATE),        // PUT
       DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.DELETE),        // DELETE

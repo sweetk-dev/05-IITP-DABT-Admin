@@ -336,18 +336,23 @@ export interface CommonCodeByParentDetailRes {
 export interface CommonCodeGroup {
   grpId: string;
   grpNm: string;
-  codeDes?: string;
   codeCount: number;
   createdAt?: string;
   updatedAt?: string;
-  createdBy?: string;
-  updatedBy?: string;
 }
 
 // 그룹 리스트 조회 응답
 export interface CommonCodeGroupsRes {
   groups: CommonCodeGroup[];
 }
+
+
+// 그룹 목록 일괄 삭제 요청 (관리자용)
+export interface CommonCodeGroupListDeleteReq {
+  grpIds: string[]; 
+}
+// CommonCodeGroupListDeleteRes는 ApiResponse<void> 사용
+
 
 // 그룹 생성 요청 (코드 리스트 포함)
 export interface CommonCodeGroupCreateReq {
@@ -378,6 +383,16 @@ export interface CommonCodeGroupUpdateReq {
 // 그룹 삭제 응답은 ApiResponse<void> 사용
 
 // === 관리자용 코드 관리 API 타입들 ===
+
+
+// 코드 목록 일괄 삭제 요청 (관리자용)
+export interface CommonCodeListDeleteParams {
+  grpId: string;  
+}
+export interface CommonCodeListDeleteReq {
+  codeIds: string [];
+}
+// CommonCodeListDeleteRes는 ApiResponse<void> 사용
 
 // 코드 생성 요청
 export interface CommonCodeCodeCreateReq {

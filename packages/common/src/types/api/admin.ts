@@ -38,6 +38,11 @@ export const ADMIN_API_MAPPING = {
     res: 'AdminFaqListRes',
     description: '관리자 FAQ 목록 조회'
   },
+  [`DELETE ${API_URLS.ADMIN.FAQ.LIST_DELETE}`]: {
+    body: 'AdminFaqListDeleteReq',
+    res: 'void',
+    description: '관리자 FAQ 목록 일괄 삭제'
+  },
   [`GET ${API_URLS.ADMIN.FAQ.DETAIL}`]: {
     params: 'AdminFaqDetailParams',
     res: 'AdminFaqDetailRes',
@@ -64,6 +69,11 @@ export const ADMIN_API_MAPPING = {
     query: 'AdminQnaListQuery',
     res: 'AdminQnaListRes',
     description: '관리자 QnA 목록 조회'
+  },
+  [`DELETE ${API_URLS.ADMIN.QNA.LIST_DELETE}`]: {
+    body: 'AdminQnaListDeleteReq',
+    res: 'void',
+    description: '관리자 QnA 목록 일괄 삭제'
   },
   [`GET ${API_URLS.ADMIN.QNA.DETAIL}`]: {
     params: 'AdminQnaDetailParams',
@@ -99,6 +109,11 @@ export const ADMIN_API_MAPPING = {
     res: 'AdminNoticeListRes',
     description: '관리자 공지사항 목록 조회'
   },
+  [`DELETE ${API_URLS.ADMIN.NOTICE.LIST_DELETE}`]: {
+    body: 'AdminNoticeListDeleteReq',
+    res: 'void',
+    description: '관리자 공지사항 목록 일괄 삭제'
+  },
   [`GET ${API_URLS.ADMIN.NOTICE.DETAIL}`]: {
     params: 'AdminNoticeDetailParams',
     res: 'AdminNoticeDetailRes',
@@ -126,6 +141,11 @@ export const ADMIN_API_MAPPING = {
     query: 'AdminOpenApiListQuery',
     res: 'AdminOpenApiListRes',
     description: '관리자 OpenAPI 키 목록 조회'
+  },
+  [`DELETE ${API_URLS.ADMIN.OPEN_API.LIST_DELETE}`]: {
+    body: 'AdminOpenApiListDeleteReq',
+    res: 'void',
+    description: '관리자 OpenAPI 키 목록 일괄 삭제'
   },
   [`GET ${API_URLS.ADMIN.OPEN_API.DETAIL}`]: {
     params: 'AdminOpenApiDetailParams',
@@ -165,6 +185,11 @@ export const ADMIN_API_MAPPING = {
     query: 'AdminAccountListQuery',
     res: 'AdminAccountListRes',
     description: '운영자 계정 목록 조회'
+  },
+  [`DELETE ${API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE}`]: {
+    body: 'AdminAccountListDeleteReq',
+    res: 'void',
+    description: '운영자 계정 목록 일괄 삭제'
   },
   [`GET ${API_URLS.ADMIN.ADMIN_ACCOUNT.DETAIL}`]: {
     params: 'AdminAccountDetailParams',
@@ -210,6 +235,11 @@ export const ADMIN_API_MAPPING = {
     query: 'UserAccountListQuery',
     res: 'UserAccountListRes',
     description: '사용자 계정 목록 조회'
+  },
+  [`DELETE ${API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE}`]: {
+    body: 'UserAccountListDeleteReq',
+    res: 'void',
+    description: '사용자 계정 목록 일괄 삭제'
   },
   [`GET ${API_URLS.ADMIN.USER_ACCOUNT.DETAIL}`]: {
     params: 'UserAccountDetailParams',

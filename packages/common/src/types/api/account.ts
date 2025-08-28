@@ -50,6 +50,14 @@ export interface AdminAccountListRes extends PaginationRes<AdminAccountListItem>
   items: AdminAccountListItem[];
 }
 
+// 운영자 계정 목록 일괄 삭제
+export interface AdminAccountListDeleteReq {
+  adminIds: number[];
+}
+
+// AdminAccountListDeleteRes는 ApiResponse<void> 사용
+
+
 // 운영자 계정 상세 조회
 export interface AdminAccountDetailParams {
   adminId: string;
@@ -174,6 +182,14 @@ export interface UserAccountListRes extends PaginationRes<UserAccountListItem> {
   // PaginationRes의 items를 users로 오버라이드
   items: UserAccountListItem[];
 }
+
+
+// 사용자 계정 목록 일괄 삭제
+export interface UserAccountListDeleteReq {
+  userIds: number[];  
+}
+// UserAccountListDeleteRes는 ApiResponse<void> 사용
+
 
 // 사용자 계정 상세 조회
 export interface UserAccountDetailParams {

@@ -68,6 +68,13 @@ export interface AdminFaqListQuery extends PaginationReq {
 
 export type AdminFaqListRes = PaginationRes<AdminFaqListItem>;
 
+
+// FAQ 목록 일괄 삭제 (관리자용)
+export interface AdminFaqListDeleteReq {
+  faqIds: number[]; 
+}
+// AdminFaqListDeleteRes는 ApiResponse<void> 사용
+
 export interface AdminFaqDetailParams {
   faqId: string;
 }

@@ -43,10 +43,29 @@ export function useDataFetching<T>({
       
       // ApiResponse 구조 처리
       if (response.success && response.data) {
-        // 빈 배열/빈 객체/모든 배열 필드가 빈 경우 empty 처리
-        if (Array.isArray(response.data) && response.data.length === 0) {
-          setState({ status: 'empty' });
-        } else if (typeof response.data === 'object' && response.data !== null) {
+        // 페이징 응답 구조 확인 (items, total, page, limit, totalPages 필드가 있는 경우)
+        if (response.data && typeof response.data === 'object' && 'items' in response.data) {
+          const paginationData = response.data as any;
+          
+          // items가 배열이고 total이 0보다 크면 데이터가 있는 것으로 간주
+          if (Array.isArray(paginationData.items) && paginationData.total > 0) {
+            setState({ status: 'success', data: response.data });
+          } else if (Array.isArray(paginationData.items) && paginationData.total === 0) {
+            setState({ status: 'empty' });
+          } else {
+            setState({ status: 'success', data: response.data });
+          }
+        }
+        // 일반 배열 응답 처리
+        else if (Array.isArray(response.data)) {
+          if (response.data.length === 0) {
+            setState({ status: 'empty' });
+          } else {
+            setState({ status: 'success', data: response.data });
+          }
+        }
+        // 일반 객체 응답 처리
+        else if (typeof response.data === 'object' && response.data !== null) {
           const values = Object.values(response.data as any);
           const arrayValues = values.filter(v => Array.isArray(v)) as any[];
           const allArraysEmpty = arrayValues.length > 0 && arrayValues.every(arr => arr.length === 0);

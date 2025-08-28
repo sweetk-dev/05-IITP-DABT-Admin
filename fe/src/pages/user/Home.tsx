@@ -36,13 +36,10 @@ export default function Home() {
   const isUserLoggedIn = isUserAuthenticated();
   const isAdminLoggedIn = isAdminAuthenticated();
   
-  // 디버깅용 로그
-  console.log('[Home] 인증 상태:', { userType, isUserLoggedIn, isAdminLoggedIn });
-  
   // 토큰이 유효하지 않으면 API 호출 건너뛰기
   const shouldFetchData = isUserLoggedIn || isAdminLoggedIn;
   
-  // 공지사항 데이터 페칭
+  // 공지사항 데이터 페칭 (홈화면은 인증 여부와 관계없이 표시)
   const {
     data: notices,
     isLoading: noticesLoading,
@@ -51,7 +48,7 @@ export default function Home() {
     refetch: refetchNotices
   } = useDataFetching({
     fetchFunction: getHomeNoticeList,
-    autoFetch: shouldFetchData // 인증된 경우에만 자동 호출
+    autoFetch: true // 홈화면은 항상 공지사항 표시
   });
 
   // FAQ 데이터 페칭
@@ -90,7 +87,6 @@ export default function Home() {
   };
 
   const handleSectionClick = (type: 'notice' | 'faq' | 'qna') => {
-    console.log('🏠 [Home] Section clicked:', type);
     // 섹션 클릭 시 해당 데이터를 새로고침
     switch (type) {
       case 'notice':

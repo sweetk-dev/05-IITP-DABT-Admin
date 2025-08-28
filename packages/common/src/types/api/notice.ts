@@ -88,6 +88,13 @@ export interface AdminNoticeListQuery extends PaginationReq {
 
 export type AdminNoticeListRes = PaginationRes<AdminNoticeListItem>;
 
+
+// 공지사항 목록 일괄 삭제 (관리자용)
+export interface AdminNoticeListDeleteReq {
+  noticeIds: number[];  
+}
+// AdminNoticeListDeleteRes는 ApiResponse<void> 사용
+
 export interface AdminNoticeDetailParams {
   noticeId: string;
 }

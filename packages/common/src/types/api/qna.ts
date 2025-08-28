@@ -132,6 +132,13 @@ export interface AdminQnaListQuery extends PaginationReq {
 
 export type AdminQnaListRes = PaginationRes<AdminQnaListItem>;
 
+
+// Q&A 목록 일괄 삭제 (관리자용)
+export interface AdminQnaListDeleteReq {
+  qnaIds: number[];   
+}
+// AdminQnaListDeleteRes는 ApiResponse<void> 사용
+
 export interface AdminQnaDetailParams {
   qnaId: string;
 }

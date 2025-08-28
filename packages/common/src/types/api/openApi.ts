@@ -126,6 +126,14 @@ export interface AdminOpenApiListQuery {
 
 export type AdminOpenApiListRes = PaginationRes<AdminOpenApiKeyListItem>;
 
+
+// Admin OpenAPI 인증키 목록 일괄 삭제
+export interface AdminOpenApiListDeleteReq {
+  keyIds: number[];   
+}
+// AdminOpenApiListDeleteRes는 ApiResponse<void> 사용
+
+
 // Admin OpenAPI 인증키 상세 조회
 export interface AdminOpenApiDetailParams {
   keyId: string;

@@ -81,6 +81,18 @@ export async function deleteAdminAccount(adminId: number): Promise<ApiResponse<v
   return apiFetch<void>(url, { method: 'DELETE' });
 }
 
+
+/**
+ * 운영자 계정 일괄 삭제 (S-Admin 전용)
+ */
+export async function deleteAdminAccountList(adminIds: (number | string)[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE, {
+    method: 'DELETE',
+    body: JSON.stringify({ adminIds }),
+  });
+}
+
+
 /**
  * 관리자 계정 비밀번호 변경
  */
@@ -186,5 +198,15 @@ export async function checkUserEmail(params: UserAccountCheckEmailReq): Promise<
   return apiFetch<UserAccountCheckEmailRes>(FULL_API_URLS.ADMIN.USER_ACCOUNT.CHECK_EMAIL, {
     method: 'POST',
     body: JSON.stringify(params),
+  });
+}
+
+/**
+ * 사용자 계정 일괄 삭제
+ */
+export async function deleteUserAccountList(userIds: (number | string)[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE, {
+    method: 'DELETE',
+    body: JSON.stringify({ userIds }),
   });
 }

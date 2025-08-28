@@ -69,3 +69,13 @@ export async function deleteAdminNotice(noticeId: number): Promise<ApiResponse<v
   const url = FULL_API_URLS.ADMIN.NOTICE.DELETE.replace(':noticeId', noticeId.toString());
   return apiFetch<void>(url, { method: 'DELETE' });
 }
+
+/**
+ * 공지사항 일괄 삭제 (관리자용)
+ */
+export async function deleteAdminNoticeList(noticeIds: (number | string)[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.NOTICE.LIST_DELETE, {
+    method: 'DELETE',
+    body: JSON.stringify({ noticeIds }),
+  });
+}

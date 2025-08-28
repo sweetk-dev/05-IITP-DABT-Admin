@@ -137,4 +137,14 @@ export async function getAdminQnaStats(): Promise<ApiResponse<AdminQnaStatusRes>
   return apiFetch<AdminQnaStatusRes>(FULL_API_URLS.ADMIN.QNA.STATUS, {
     method: 'GET'
   });
+}
+
+/**
+ * Q&A 일괄 삭제 (관리자용)
+ */
+export async function deleteAdminQnaList(qnaIds: (number | string)[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.QNA.LIST_DELETE, {
+    method: 'DELETE',
+    body: JSON.stringify({ qnaIds }),
+  });
 } 

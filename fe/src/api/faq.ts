@@ -102,3 +102,13 @@ export async function deleteAdminFaq(faqId: number): Promise<ApiResponse<void>> 
   });
 }
 
+/**
+ * FAQ 일괄 삭제 (관리자용)
+ */
+export async function deleteAdminFaqList(faqIds: (number | string)[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.FAQ.LIST_DELETE, {
+    method: 'DELETE',
+    body: JSON.stringify({ faqIds }),
+  });
+}
+

@@ -6,6 +6,7 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { getAdminOpenApiList, deleteAdminOpenApi } from '../../api';
+import { deleteAdminOpenApiList } from '../../api/openApi';
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import StatusChip from '../../components/common/StatusChip';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -63,20 +64,6 @@ export default function AdminOpenApiClients() {
 
   const toggleAll = (checked: boolean) => setSelected(checked ? items.map((k: any)=>k.keyId) : []);
   const toggleRow = (id: number) => setSelected(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
-
-  const handleBulkDelete = async () => {
-    try {
-      for (const id of selected) { 
-        await deleteAdminOpenApi(id); 
-      }
-      setSelected([]); 
-      refetch();
-      setError(null); // 에러 메시지 초기화
-    } catch (error) {
-      console.error('OpenAPI 키 삭제 중 오류:', error);
-      setError('OpenAPI 키 삭제 중 오류가 발생했습니다.');
-    }
-  };
 
   // API 요청 처리 화면으로 이동
   const handleGoToRequests = () => {
@@ -164,15 +151,27 @@ export default function AdminOpenApiClients() {
           }
         }}
         wrapInCard={false}
-        actionsRight={
-          <ThemedButton 
-            variant="outlined" 
-            onClick={handleBulkDelete} 
-            disabled={selected.length === 0}
-          >
-            선택 삭제
-          </ThemedButton>
-        }
+        selectable={{
+          enabled: true,
+          items: items,
+          getId: (item) => item.keyId,
+          onSelectionChange: (selected) => setSelected(selected as number[]),
+          renderCheckbox: true,
+          deleteConfig: {
+            apiFunction: async (ids: (number | string)[]) => {
+              // LIST_DELETE API 호출 - 일괄 삭제
+              await deleteAdminOpenApiList(ids);
+            },
+            confirmTitle: 'OpenAPI 키 삭제 확인',
+            confirmMessage: '선택된 OpenAPI 키들을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+            successMessage: '선택된 OpenAPI 키들이 삭제되었습니다.',
+            errorMessage: 'OpenAPI 키 삭제 중 오류가 발생했습니다.',
+            onDeleteSuccess: () => {
+              refetch();
+            }
+          }
+        }}
+
       >
         <DataTable
           id="admin-openapi-table"

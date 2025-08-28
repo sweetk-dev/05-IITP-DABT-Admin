@@ -1,6 +1,7 @@
 import { Box, CardContent, Typography, Chip, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { COMMON_CODE_GROUPS } from '@iitp-dabt/common'; 
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -41,12 +42,18 @@ export default function AdminFaqDetail() {
 
   return (
     <Box id="admin-faq-detail-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-faq-detail-header" title="FAQ 상세" onBack={handleBack} actionsRight={
-        <>
-          <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">수정</ThemedButton>
-          <ThemedButton variant="dangerSoft" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
-        </>
-      } />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-faq-detail-header" 
+        title="FAQ 상세" 
+        actionsRight={
+          <>
+            <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">수정</ThemedButton>
+            <ThemedButton variant="dangerSoft" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
+          </>
+        } 
+      />
 
       {/* 에러 알림 */}
       {error && (
@@ -123,23 +130,11 @@ export default function AdminFaqDetail() {
                   <Typography variant="subtitle2" color="text.secondary">수정자</Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>{faq.updatedBy || '-'}</Typography>
                 </Grid>
-                {faq.deletedAt && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">삭제일</Typography>
-                    <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(faq.deletedAt)}</Typography>
-                  </Grid>
-                )}
-                {faq.deletedBy && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">삭제자</Typography>
-                    <Typography variant="body1" sx={{ mb: 1 }}>{faq.deletedBy}</Typography>
-                  </Grid>
-                )}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">삭제 여부</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">사용 여부</Typography>
                   <StatusChip 
-                    kind={faq.delYn === 'N' ? 'success' : 'error'} 
-                    label={faq.delYn === 'N' ? '활성' : '삭제됨'}
+                    kind={faq.useYn === 'Y' ? 'success' : 'error'} 
+                    label={faq.useYn === 'Y' ? '활성' : '비활성'}
                     sx={{ mb: 1 }}
                   />
                 </Grid>

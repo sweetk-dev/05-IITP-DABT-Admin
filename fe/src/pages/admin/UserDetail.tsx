@@ -1,5 +1,6 @@
 import { Box, CardContent, Typography, Chip, Stack, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -57,10 +58,11 @@ export default function UserDetail() {
 
   return (
     <Box id="admin-user-detail-page" sx={{ p: SPACING.LARGE }}>
+      <AdminPageHeader />
+      
       <PageHeader 
         id="admin-user-detail-header" 
         title="사용자 상세" 
-        onBack={() => navigate('/admin/users')}
         actionsRight={
           canEdit ? (
             <>

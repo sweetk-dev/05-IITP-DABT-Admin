@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Box, Stack, Chip, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ListScaffold from '../../components/common/ListScaffold';
 import ListItemCard from '../../components/common/ListItemCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
-import { getAdminFaqList } from '../../api/faq';
+import { getAdminFaqList, deleteAdminFaq, deleteAdminFaqList } from '../../api/faq';
 import { getCommonCodesByGroupId } from '../../api';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
@@ -161,24 +161,9 @@ export default function FaqList() {
     }
   };
 
-  // 전체 선택/해제
-  const handleSelectAll = (checked: boolean) => {
-    if (checked && faqData?.items) {
-      setSelectedFaqs(faqData.items.map((faq: AdminFaqListItem) => faq.faqId));
-    } else {
-      setSelectedFaqs([]);
-    }
-  };
 
-  // 선택된 FAQ 삭제
-  const handleDeleteSelected = () => {
-    if (selectedFaqs.length === 0) return;
-    
-    // TODO: 실제 삭제 API 호출
-    console.log('삭제할 FAQ IDs:', selectedFaqs);
-    setSelectedFaqs([]);
-    refetch();
-  };
+
+
 
   return (
     <Box id="admin-faq-list-page">
@@ -205,16 +190,7 @@ export default function FaqList() {
                 FAQ 추가
               </ThemedButton>
             )}
-             {hasContentEditPermission(adminRole) && (
-              <ThemedButton
-                variant="danger"
-                startIcon={<DeleteIcon />}
-                onClick={handleDeleteSelected}
-                disabled={selectedFaqs.length === 0}
-              >
-                선택 삭제 ({selectedFaqs.length})
-              </ThemedButton>
-            )}
+
           </Box>
         }
                  filters={[
@@ -247,6 +223,27 @@ export default function FaqList() {
           }
         }}
         wrapInCard={false}
+                  selectable={{
+            enabled: true,
+            items: faqData?.items || [],
+            getId: (faq) => faq.faqId,
+            onSelectionChange: (selected) => setSelectedFaqs(selected as number[]),
+            renderCheckbox: true,
+            deleteConfig: {
+              apiFunction: async (ids: (number | string)[]) => {
+                // LIST_DELETE API 호출 - 일괄 삭제
+                await deleteAdminFaqList(ids);
+              },
+              confirmTitle: 'FAQ 삭제 확인',
+              confirmMessage: '선택된 FAQ들을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+              successMessage: '선택된 FAQ들이 삭제되었습니다.',
+              errorMessage: 'FAQ 삭제 중 오류가 발생했습니다.',
+              onDeleteSuccess: () => {
+                // 삭제 성공 후 목록 새로고침
+                refetch();
+              }
+            }
+          }}
       >
         <Stack id="faq-list-stack" spacing={SPACING.MEDIUM}>
           {faqData?.items.map((faq: AdminFaqListItem) => (

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import ThemedButton from '../../components/common/ThemedButton';
 import ListItemCard from '../../components/common/ListItemCard';
 import ListScaffold from '../../components/common/ListScaffold';
@@ -14,8 +14,7 @@ import { ROUTES } from '../../routes';
 import { hasUserAccountEditPermission } from '../../utils/auth';
 import { getAdminRole } from '../../store/user';
 import { formatYmdHm } from '../../utils/date';
-import { getUserAccountList, deleteUserAccount } from '../../api/account';
-import type { UserAccountListItem } from '@iitp-dabt/common';
+import { getUserAccountList, deleteUserAccountList } from '../../api/account';
 
 export default function UserManagement() {
   const navigate = useNavigate();
@@ -25,15 +24,13 @@ export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-  const [sortField, setSortField] = useState<'name' | 'createdAt' | 'status'>('createdAt');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [error, setError] = useState<string | null>(null);
 
   // 페이징
   const { currentPage, pageSize, handlePageChange, handlePageSizeChange } = usePagination();
 
   // API 호출 - 실제 API 함수를 래핑하여 useDataFetching에 전달
-  const { data: userData, isLoading, isError, refetch } = useDataFetching({
+  const { data: userData, isLoading, refetch } = useDataFetching({
     fetchFunction: () => getUserAccountList({
       search: searchTerm,
       status: selectedStatus,
@@ -52,32 +49,9 @@ export default function UserManagement() {
     }
   };
 
-  // 전체 선택 처리
-  const handleSelectAll = (checked: boolean) => {
-    if (checked && userData?.data?.items) {
-      setSelectedUsers(userData.data.items.map(user => user.userId));
-    } else {
-      setSelectedUsers([]);
-    }
-  };
 
-  // 선택된 사용자 삭제 - 실제 API 호출
-  const handleDeleteSelected = async () => {
-    if (selectedUsers.length === 0) return;
-    
-    try {
-      // 실제 API 호출
-      for (const userId of selectedUsers) {
-        await deleteUserAccount(userId);
-      }
-      setSelectedUsers([]);
-      refetch(); // 목록 새로고침
-      setError(null); // 에러 메시지 초기화
-    } catch (error) {
-      console.error('사용자 삭제 중 오류:', error);
-      setError('사용자 삭제 중 오류가 발생했습니다.');
-    }
-  };
+
+
 
   // 검색 처리
   const handleSearch = (term: string) => {
@@ -89,16 +63,6 @@ export default function UserManagement() {
   const handleStatusFilter = (status: string) => {
     setSelectedStatus(status);
     handlePageChange(1); // Reset to first page on status filter
-  };
-
-  // 정렬 처리
-  const handleSort = (field: 'name' | 'createdAt' | 'status') => {
-    if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
   };
 
   // 사용자 클릭 처리
@@ -121,7 +85,7 @@ export default function UserManagement() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusKind = (status: string) => {
     switch (status) {
       case 'A': return 'success';
       case 'I': return 'warning';
@@ -130,21 +94,11 @@ export default function UserManagement() {
     }
   };
 
-  // 정렬된 사용자 목록
-  const sortedUsers = userData?.data?.items ? [...userData.data.items].sort((a, b) => {
-    let aValue: any = a[sortField];
-    let bValue: any = b[sortField];
-    
-    if (sortField === 'createdAt') {
-      aValue = new Date(aValue).getTime();
-      bValue = new Date(bValue).getTime();
-    }
-    
-    if (sortDirection === 'asc') {
-      return aValue > bValue ? 1 : -1;
-    } else {
-      return aValue < bValue ? 1 : -1;
-    }
+  // 정렬된 사용자 목록 (생성일 기준 내림차순)
+  const sortedUsers = userData?.items ? [...userData.items].sort((a, b) => {
+    const aValue = new Date(a.createdAt).getTime();
+    const bValue = new Date(b.createdAt).getTime();
+    return bValue - aValue; // 최신순
   }) : [];
 
   return (
@@ -154,9 +108,13 @@ export default function UserManagement() {
       {/* 에러 알림 */}
       {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
       
-        <ListScaffold
-        searchValue={searchTerm}
-        onSearch={handleSearch}
+      <ListScaffold
+        title="사용자 관리"
+        search={{
+          value: searchTerm,
+          onChange: handleSearch,
+          placeholder: "사용자명 또는 로그인 ID로 검색"
+        }}
         filters={[
           {
             label: '상태',
@@ -173,47 +131,71 @@ export default function UserManagement() {
         actionsRight={
           <Box sx={{ display: 'flex', gap: 1 }}>
             {hasUserAccountEditPermission(adminRole) && (
-                <ThemedButton
-                variant="danger"
-                startIcon={<DeleteIcon />}
-                onClick={handleDeleteSelected}
-                disabled={selectedUsers.length === 0}
-              >
-                선택 삭제 ({selectedUsers.length})
+              <ThemedButton variant="primary" startIcon={<AddIcon />} onClick={handleCreateUser}>
+                사용자 추가
               </ThemedButton>
             )}
-            {hasUserAccountEditPermission(adminRole) && (
-              <ThemedButton variant="primary" startIcon={<AddIcon />} onClick={handleCreateUser}>
-                  사용자 추가
-                </ThemedButton>
-              )}
           </Box>
         }
         pagination={{
           page: currentPage,
-          totalPages: userData?.data?.totalPages || 1,
+          totalPages: userData?.totalPages || 1,
           pageSize,
           onPageChange: handlePageChange,
           onPageSizeChange: handlePageSizeChange
         }}
-        selectable={{
-          selected: selectedUsers,
-          onToggleAll: handleSelectAll,
-          onToggleRow: handleUserSelect
-        }}
+        total={userData?.total}
         loading={isLoading}
-        emptyMessage="등록된 사용자가 없습니다."
+        emptyText={userData?.items && userData.items.length > 0 ? undefined : "등록된 사용자가 없습니다."}
+        selectable={{
+          enabled: true,
+          items: userData?.items || [],
+          getId: (user) => user.userId,
+          onSelectionChange: (selected) => setSelectedUsers(selected as number[]),
+          renderCheckbox: true,
+          deleteConfig: {
+            apiFunction: async (ids: (number | string)[]) => {
+              // LIST_DELETE API 호출 - 일괄 삭제
+              await deleteUserAccountList(ids);
+            },
+            confirmTitle: '사용자 삭제 확인',
+            confirmMessage: '선택된 사용자들을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+            successMessage: '선택된 사용자들이 삭제되었습니다.',
+            errorMessage: '사용자 삭제 중 오류가 발생했습니다.',
+            onDeleteSuccess: () => {
+              // 삭제 성공 후 목록 새로고침
+              refetch();
+            }
+          }
+        }}
       >
         {sortedUsers.map((user) => (
           <ListItemCard
             key={user.userId}
             onClick={() => handleUserClick(user.userId)}
-            selectable={{
-              selected: selectedUsers.includes(user.userId),
-              onToggle: (checked: boolean) => handleUserSelect(user.userId, checked)
-            }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+              {/* 체크박스 */}
+              <Box 
+                onClick={(e) => e.stopPropagation()} 
+                sx={{ mr: 2 }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedUsers.includes(user.userId)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleUserSelect(user.userId, e.target.checked);
+                      }}
+                      size="small"
+                    />
+                  }
+                  label=""
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </Box>
+              
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h6" component="div">
                   {user.name}
@@ -225,8 +207,8 @@ export default function UserManagement() {
               
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <StatusChip
+                  kind={getStatusKind(user.status)}
                   label={getStatusLabel(user.status)}
-                  color={getStatusColor(user.status)}
                   size="small"
                 />
                 <Typography variant="body2" color="text.secondary">
@@ -239,7 +221,7 @@ export default function UserManagement() {
             </Box>
           </ListItemCard>
         ))}
-        </ListScaffold>
+      </ListScaffold>
     </Box>
   );
 }

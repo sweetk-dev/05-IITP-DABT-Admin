@@ -3,6 +3,7 @@ import QnaTypeChip from '../../components/common/QnaTypeChip';
 import StatusChip from '../../components/common/StatusChip';
 import ErrorAlert from '../../components/ErrorAlert';
 import { useNavigate, useParams } from 'react-router-dom';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -33,10 +34,18 @@ export default function AdminQnaDetail() {
 
   return (
     <Box id="admin-qna-detail-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-qna-detail-header" title="Q&A 상세" onBack={handleBack} actionsRight={<>
-        <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">답변/수정</ThemedButton>
-        <ThemedButton variant="dangerSoft" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
-      </>} />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-qna-detail-header" 
+        title="Q&A 상세" 
+        actionsRight={
+          <>
+            <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">답변/수정</ThemedButton>
+            <ThemedButton variant="dangerSoft" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
+          </>
+        } 
+      />
 
       {/* 에러 알림 */}
       {error && (

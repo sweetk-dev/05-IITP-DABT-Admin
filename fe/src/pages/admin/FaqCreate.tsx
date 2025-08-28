@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Box, CardContent, TextField, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -65,7 +66,12 @@ export default function AdminFaqCreate() {
 
   return (
     <Box id="admin-faq-create-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-faq-create-header" title="FAQ 등록" onBack={handleBack} />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-faq-create-header" 
+        title="FAQ 등록" 
+      />
       <ThemedCard>
         <CardContent>
           {error && (

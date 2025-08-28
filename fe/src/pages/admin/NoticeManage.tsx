@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Box, Stack, Chip, Typography, Checkbox, FormControlLabel } from '@mui/material';
+import { Box, Stack, Chip, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ListScaffold from '../../components/common/ListScaffold';
 import ListItemCard from '../../components/common/ListItemCard';
@@ -11,32 +11,31 @@ import { SPACING } from '../../constants/spacing';
 import { ROUTES } from '../../routes';
 import { hasContentEditPermission } from '../../utils/auth';
 import { getAdminRole } from '../../store/user';
+import { getAdminNoticeList, deleteAdminNoticeList } from '../../api/notice';
+import { useDataFetching } from '../../hooks/useDataFetching';
+import { usePagination } from '../../hooks/usePagination';
+import { PAGINATION } from '../../constants/pagination';
+import { formatYmdHm } from '../../utils/date';
+import type { AdminNoticeListItem, AdminNoticeListQuery } from '@iitp-dabt/common';
 
-// 임시 공지사항 데이터
-const mockNotices = [
-  {
-    noticeId: 1,
-    title: '시스템 점검 안내',
-    content: '정기 시스템 점검이 예정되어 있습니다.',
-    noticeType: 'S',
-    publicYn: 'Y',
-    postedAt: '2024-01-15T10:00:00Z',
-    startDt: '2024-01-15T00:00:00Z',
-    endDt: '2024-01-20T23:59:59Z',
-    createdAt: '2024-01-15T09:00:00Z'
-  },
-  {
-    noticeId: 2,
-    title: '새로운 기능 업데이트',
-    content: '사용자 편의를 위한 새로운 기능이 추가되었습니다.',
-    noticeType: 'G',
-    publicYn: 'Y',
-    postedAt: '2024-01-14T14:00:00Z',
-    startDt: '2024-01-14T00:00:00Z',
-    endDt: null,
-    createdAt: '2024-01-14T13:00:00Z'
+// 공지사항 타입별 라벨
+const getNoticeTypeLabel = (type: string) => {
+  switch (type) {
+    case 'G': return '일반';
+    case 'S': return '시스템';
+    case 'E': return '긴급';
+    default: return type;
   }
-];
+};
+
+// 공지사항 상태별 라벨
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'Y': return '공개';
+    case 'N': return '비공개';
+    default: return status;
+  }
+};
 
 export default function NoticeManage() {
   const navigate = useNavigate();
@@ -53,58 +52,45 @@ export default function NoticeManage() {
   // 에러 상태
   const [error, setError] = useState<string | null>(null);
   
-  // 필터링된 공지사항
-  const filteredNotices = mockNotices.filter(notice => {
-    const matchesSearch = !searchTerm || 
-      notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      notice.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || notice.noticeType === filterType;
-    const matchesStatus = filterStatus === 'all' || notice.publicYn === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
+  // 페이지네이션
+  const pagination = usePagination({ initialLimit: PAGINATION.DEFAULT_PAGE_SIZE });
+  
+  // API 데이터 페칭
+  const {
+    data: noticeData,
+    isLoading,
+    isError,
+    refetch,
+    status
+  } = useDataFetching({
+    fetchFunction: () => getAdminNoticeList({
+      page: pagination.currentPage,
+      limit: pagination.pageSize,
+      ...(searchTerm && { searchTerm }),
+      ...(filterType !== 'all' && { noticeType: filterType }),
+      ...(filterStatus !== 'all' && { publicYn: filterStatus })
+    } as AdminNoticeListQuery),
+    dependencies: [pagination.currentPage, pagination.pageSize, searchTerm, filterType, filterStatus]
   });
 
-  // 개별 공지사항 선택/해제
-  const handleNoticeSelect = (noticeId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedNotices(prev => [...prev, noticeId]);
-    } else {
-      setSelectedNotices(prev => prev.filter(id => id !== noticeId));
-    }
+  // error 상태 추출 - useDataFetching의 state에서 error 추출
+  const apiError = status === 'error' ? (noticeData as any)?.error : undefined;
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    pagination.handlePageChange(page);
   };
 
-  // 전체 선택/해제
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedNotices(filteredNotices.map(notice => notice.noticeId));
-    } else {
-      setSelectedNotices([]);
-    }
+  // 검색 핸들러
+  const handleSearch = () => {
+    pagination.handlePageChange(1);
+    refetch();
   };
 
-  // 선택된 공지사항 삭제
-  const handleDeleteSelected = async () => {
-    if (selectedNotices.length === 0) return;
-    
-    try {
-      // TODO: 실제 삭제 API 호출
-      console.log('삭제할 공지사항 IDs:', selectedNotices);
-      setSelectedNotices([]);
-      setError(null); // 에러 메시지 초기화
-    } catch (error) {
-      console.error('공지사항 삭제 중 오류:', error);
-      setError('공지사항 삭제 중 오류가 발생했습니다.');
-    }
-  };
-
-  // 공지사항 타입별 라벨
-  const getNoticeTypeLabel = (type: string) => {
-    switch (type) {
-      case 'G': return '일반';
-      case 'S': return '시스템';
-      case 'E': return '긴급';
-      default: return type;
-    }
-  };
+  // 필터 변경 시 자동 refetch
+  useEffect(() => {
+    refetch();
+  }, [filterType, filterStatus, refetch]);
 
   // 공지사항 타입별 색상
   const getNoticeTypeColor = (type: string): 'primary' | 'info' | 'error' | 'default' => {
@@ -117,55 +103,51 @@ export default function NoticeManage() {
   };
 
   const handleNoticeClick = (noticeId: number) => {
-    navigate(`/admin/notices/${noticeId}`);
+    navigate(ROUTES.ADMIN.NOTICES.DETAIL.replace(':id', String(noticeId)));
   };
 
   const handleCreateNotice = () => {
     navigate(ROUTES.ADMIN.NOTICES.CREATE);
   };
 
-  const isEmpty = filteredNotices.length === 0;
+  // 에러 상태 통합
+  const finalError = error || apiError;
+  
+  // 빈 상태
+  const isEmpty = status !== 'loading' && (!noticeData?.items || noticeData.items.length === 0);
 
   return (
     <Box id="admin-notice-manage-page">
       <AdminPageHeader />
 
       {/* 에러 알림 */}
-      {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
+      {finalError && <ErrorAlert error={finalError} onClose={() => setError(null)} />}
 
       <Box sx={{ p: SPACING.LARGE }}>
         <ListScaffold
           title="공지사항 관리"
-          loading={false}
-          emptyText={isEmpty ? '등록된 공지사항이 없습니다.' : ''}
+          loading={status === 'loading'}
+          emptyText={noticeData?.items && noticeData.items.length > 0 ? undefined : '등록된 공지사항이 없습니다.'}
           search={{
             value: searchTerm,
             onChange: setSearchTerm,
             placeholder: '공지사항 제목으로 검색...'
           }}
-          actionsRight={
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {hasContentEditPermission(adminRole) && selectedNotices.length > 0 && (
-                <ThemedButton
-                  variant="danger"
-                  startIcon={<DeleteIcon />}
-                  onClick={handleDeleteSelected}
-                >
-                  선택 삭제 ({selectedNotices.length})
-                </ThemedButton>
-              )}
-              {hasContentEditPermission(adminRole) && (
-                <ThemedButton
-                  variant="primary"
-                  startIcon={<AddIcon />}
-                  onClick={handleCreateNotice}
-                >
-                  공지사항 추가
-                </ThemedButton>
-              )}
-            </Box>
-          }
-          filters={[
+                  actionsRight={
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {hasContentEditPermission(adminRole) && (
+              <ThemedButton
+                variant="primary"
+                startIcon={<AddIcon />}
+                onClick={handleCreateNotice}
+              >
+                공지사항 추가
+              </ThemedButton>
+            )}
+          </Box>
+        }
+
+                  filters={[
             {
               label: '타입',
               value: filterType,
@@ -188,36 +170,35 @@ export default function NoticeManage() {
               onChange: (value: string) => setFilterStatus(value as 'all' | 'Y' | 'N')
             }
           ]}
-          total={filteredNotices.length}
-          wrapInCard={false}
+          total={noticeData?.total || 0}
+        selectable={{
+          enabled: true,
+          items: noticeData?.items || [],
+          getId: (notice) => notice.noticeId,
+          onSelectionChange: (selected) => setSelectedNotices(selected as number[]),
+          renderCheckbox: true,
+          deleteConfig: {
+            apiFunction: async (ids: (number | string)[]) => {
+              await deleteAdminNoticeList(ids);
+            },
+            confirmTitle: '공지사항 삭제 확인',
+            confirmMessage: '선택된 공지사항들을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+            successMessage: '선택된 공지사항들이 삭제되었습니다.',
+            errorMessage: '공지사항 삭제 중 오류가 발생했습니다.',
+            onDeleteSuccess: () => {
+              refetch();
+            }
+          }
+        }}
         >
           <Stack id="notice-list-stack" spacing={SPACING.MEDIUM}>
-            {filteredNotices.map((notice) => (
+            {(noticeData?.items || []).map((notice: AdminNoticeListItem) => (
               <ListItemCard 
-                id={`notice-item-${notice.noticeId}`} 
                 key={notice.noticeId} 
                 onClick={() => handleNoticeClick(notice.noticeId)}
               >
                 <Box id={`notice-item-header-${notice.noticeId}`} sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
-                  <Box 
-                    onClick={(e) => e.stopPropagation()} 
-                    sx={{ mr: SPACING.SMALL }}
-                  >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={selectedNotices.includes(notice.noticeId)}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handleNoticeSelect(notice.noticeId, e.target.checked);
-                          }}
-                          size="small"
-                        />
-                      }
-                      label=""
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </Box>
+                  
                   <Chip 
                     id={`notice-item-type-${notice.noticeId}`}
                     label={getNoticeTypeLabel(notice.noticeType)} 
@@ -249,13 +230,7 @@ export default function NoticeManage() {
                   {notice.title}
                 </Typography>
                 
-                <Typography 
-                  id={`notice-item-content-${notice.noticeId}`} 
-                  variant="body2" 
-                  sx={{ color: 'text.secondary', mb: SPACING.SMALL }}
-                >
-                  {notice.content}
-                </Typography>
+
                 
                 {notice.startDt && (
                   <Typography 

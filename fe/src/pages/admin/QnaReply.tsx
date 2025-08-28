@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -103,7 +104,12 @@ export default function AdminQnaReply() {
 
   return (
     <Box id="admin-qna-reply-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-qna-reply-header" title="Q&A 답변/수정" onBack={handleBack} />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-qna-reply-header" 
+        title="Q&A 답변/수정" 
+      />
       
       {/* 에러 알림 */}
       {(error || fetchError) && (

@@ -1,6 +1,7 @@
 import { Box, CardContent, Typography, Stack, Grid } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -38,11 +39,19 @@ export default function AdminOpenApiDetail() {
 
   return (
     <Box id="admin-openapi-detail-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-openapi-detail-header" title="OpenAPI 상세" onBack={handleBack} actionsRight={<>
-        <ThemedButton variant="outlined" onClick={()=>setExtendOpen(true)} buttonSize="cta">기간연장</ThemedButton>
-        <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">수정</ThemedButton>
-        <ThemedButton variant="dangerSoft" onClick={async ()=>{ const res = await deleteAdminOpenApi(keyId); handleApiResponse(res as any, ()=>{ setToast({ open: true, message: '인증키가 삭제되었습니다.', 'severity': 'success' }); setTimeout(()=>navigate(ROUTES.ADMIN.OPENAPI.CLIENTS), 800); }); }} buttonSize="cta">삭제</ThemedButton>
-      </>} />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-openapi-detail-header" 
+        title="OpenAPI 상세" 
+        actionsRight={
+          <>
+            <ThemedButton variant="outlined" onClick={()=>setExtendOpen(true)} buttonSize="cta">기간연장</ThemedButton>
+            <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">수정</ThemedButton>
+            <ThemedButton variant="dangerSoft" onClick={async ()=>{ const res = await deleteAdminOpenApi(keyId); handleApiResponse(res as any, ()=>{ setToast({ open: true, message: '인증키가 삭제되었습니다.', 'severity': 'success' }); setTimeout(()=>navigate(ROUTES.ADMIN.OPENAPI.CLIENTS), 800); }); }} buttonSize="cta">삭제</ThemedButton>
+          </>
+        } 
+      />
 
       {/* 에러 알림 */}
       {error && (

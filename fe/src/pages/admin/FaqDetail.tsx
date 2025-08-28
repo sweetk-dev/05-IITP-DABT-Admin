@@ -1,28 +1,31 @@
-import { Box, CardContent, Typography, Alert, Chip } from '@mui/material';
+import { Box, CardContent, Typography, Chip, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { COMMON_CODE_GROUPS } from '@iitp-dabt/common'; 
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
+import StatusChip from '../../components/common/StatusChip';
+import ErrorAlert from '../../components/ErrorAlert';
 import { SPACING } from '../../constants/spacing';
 import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminFaq, getAdminFaqDetail, getCommonCodesByGroupId } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import { formatYmdHm } from '../../utils/date';
+import type { AdminFaqDetailRes } from '@iitp-dabt/common';
 
 export default function AdminFaqDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const faqId = Number(id);
 
-  const { data, isLoading, isEmpty, isError } = useDataFetching({
+  const { data, isLoading, isEmpty, isError, error } = useDataFetching({
     fetchFunction: () => getAdminFaqDetail(faqId),
     dependencies: [faqId],
     autoFetch: !!faqId
   });
 
-  const faq = (data as any)?.faq || (data as any);
+  const faq = (data as AdminFaqDetailRes)?.faq;
 
   // load type codes for label
   const { data: faqTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.FAQ_TYPE), autoFetch: true });
@@ -45,22 +48,102 @@ export default function AdminFaqDetail() {
         </>
       } />
 
+      {/* 에러 알림 */}
+      {error && (
+        <ErrorAlert 
+          error={error} 
+          onClose={() => {}} 
+        />
+      )}
+
       <ThemedCard>
         <CardContent>
           {isLoading ? (
             <Typography variant="body2">불러오는 중...</Typography>
-          ) : isError ? (
-            <Alert severity="error">상세를 불러오는 중 오류가 발생했습니다.</Alert>
           ) : isEmpty || !faq ? (
             <Typography variant="body2" color="text.secondary">데이터가 없습니다.</Typography>
           ) : (
             <>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>{faq.question}</Typography>
-                <Chip size="small" label={faqTypeLabel} color="primary" />
-              </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>{formatYmdHm(faq.createdAt)}</Typography>
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{faq.answer}</Typography>
+              {/* 기본 정보 */}
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>기본 정보</Typography>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">FAQ ID</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{faq.faqId}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">FAQ 유형</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{faq.faqType}</Typography>
+                    <Chip size="small" label={faqTypeLabel} color="primary" />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">정렬순서</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{faq.sortOrder || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">사용여부</Typography>
+                  <StatusChip 
+                    kind={faq.useYn === 'Y' ? 'success' : 'default'} 
+                    label={faq.useYn === 'Y' ? '사용' : '미사용'}
+                    sx={{ mb: 1 }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="text.secondary">질문</Typography>
+                  <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>{faq.question}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="text.secondary">답변</Typography>
+                  <Typography variant="body1" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>{faq.answer}</Typography>
+                </Grid>
+              </Grid>
+
+              {/* 관리 정보 */}
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>관리 정보</Typography>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">생성일</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {faq.createdAt ? formatYmdHm(faq.createdAt) : '-'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">생성자</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{faq.createdBy || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">수정일</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {faq.updatedAt ? formatYmdHm(faq.updatedAt) : '-'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">수정자</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{faq.updatedBy || '-'}</Typography>
+                </Grid>
+                {faq.deletedAt && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">삭제일</Typography>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(faq.deletedAt)}</Typography>
+                  </Grid>
+                )}
+                {faq.deletedBy && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">삭제자</Typography>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{faq.deletedBy}</Typography>
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">삭제 여부</Typography>
+                  <StatusChip 
+                    kind={faq.delYn === 'N' ? 'success' : 'error'} 
+                    label={faq.delYn === 'N' ? '활성' : '삭제됨'}
+                    sx={{ mb: 1 }}
+                  />
+                </Grid>
+              </Grid>
             </>
           )}
         </CardContent>

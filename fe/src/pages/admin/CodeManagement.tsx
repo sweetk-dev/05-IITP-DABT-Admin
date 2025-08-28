@@ -3,6 +3,7 @@ import { Box, CardContent, Stack } from '@mui/material';
 import { 
   Code as CodeIcon,
   Add as AddIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getAdminRole } from '../../store/user';
@@ -14,53 +15,12 @@ import ListScaffold from '../../components/common/ListScaffold';
 import ThemedButton from '../../components/common/ThemedButton';
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import StatusChip from '../../components/common/StatusChip';
+import ErrorAlert from '../../components/ErrorAlert';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { formatYmdHm } from '../../utils/date';
-
-// 임시 코드 데이터 (실제로는 API에서 가져옴)
-const mockCodes = [
-  {
-    id: 1,
-    groupId: 'USER_STATUS',
-    codeId: 'ACTIVE',
-    codeNm: '활성',
-    description: '사용자 활성 상태',
-    sortOrder: 1,
-    useYn: 'Y',
-    createdAt: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: 2,
-    groupId: 'USER_STATUS',
-    codeId: 'INACTIVE',
-    codeNm: '비활성',
-    description: '사용자 비활성 상태',
-    sortOrder: 2,
-    useYn: 'Y',
-    createdAt: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: 3,
-    groupId: 'ADMIN_ROLE',
-    codeId: 'S-ADMIN',
-    codeNm: 'S-ADMIN',
-    description: '최고 관리자 역할',
-    sortOrder: 1,
-    useYn: 'Y',
-    createdAt: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: 4,
-    groupId: 'ADMIN_ROLE',
-    codeId: 'ADMIN',
-    codeNm: 'ADMIN',
-    description: '일반 관리자 역할',
-    sortOrder: 2,
-    useYn: 'Y',
-    createdAt: '2024-01-01T00:00:00Z'
-  }
-];
+import { getCommonCodesByTypeDetail } from '../../api/commonCode';
+import type { CommonCodeByTypeDetailRes } from '@iitp-dabt/common';
 
 export default function CodeManagement() {
   const navigate = useNavigate();
@@ -79,6 +39,7 @@ export default function CodeManagement() {
   const [limit, setLimit] = useState(10);
   const [selected, setSelected] = useState<Array<number>>([]);
   const [sort, setSort] = useState('sortOrder-asc');
+  const [error, setError] = useState<string | null>(null);
   
   const { query, setQuery } = useQuerySync({ 
     page: 1, 
@@ -98,32 +59,83 @@ export default function CodeManagement() {
     if (query.sort) setSort(query.sort);
   }, [query.page, query.limit, query.search, query.groupId, query.useYn, query.sort]);
 
-  // 임시 데이터 페칭 (실제로는 API 호출)
+  // 실제 API 호출 - 관리자용 코드 목록 조회
   const { data, isLoading, isEmpty, isError, refetch } = useDataFetching({
-    fetchFunction: () => {
-      // 실제로는 API 호출
-      return Promise.resolve({
-        codes: mockCodes,
-        total: mockCodes.length,
-        totalPages: Math.ceil(mockCodes.length / limit)
-      });
-    },
-    dependencies: [page, limit, search, groupId, useYn, sort]
+    fetchFunction: () => getCommonCodesByTypeDetail('A'), // 'A' = Admin 타입
+    dependencies: []
   });
 
-  const codes = (data as any)?.codes || [];
-  const totalPages = (data as any)?.totalPages || 0;
+  // 필터링된 코드 목록
+  const filteredCodes = React.useMemo(() => {
+    if (!data?.data?.codes) return [];
+    
+    let codes = data.data.codes;
+    
+    // 검색 필터
+    if (search) {
+      codes = codes.filter(code => 
+        code.grpId?.toLowerCase().includes(search.toLowerCase()) ||
+        code.codeId?.toLowerCase().includes(search.toLowerCase()) ||
+        code.codeNm?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    // 그룹 ID 필터
+    if (groupId) {
+      codes = codes.filter(code => code.grpId === groupId);
+    }
+    
+    // 사용여부 필터
+    if (useYn) {
+      codes = codes.filter(code => code.useYn === useYn);
+    }
+    
+    return codes;
+  }, [data?.data?.codes, search, groupId, useYn]);
+
+  // 정렬된 코드 목록
+  const sortedCodes = React.useMemo(() => {
+    const [key, order] = sort.split('-');
+    
+    return [...filteredCodes].sort((a, b) => {
+      let aValue: any = a[key as keyof typeof a];
+      let bValue: any = b[key as keyof typeof b];
+      
+      if (key === 'createdAt') {
+        aValue = new Date(aValue || '').getTime();
+        bValue = new Date(bValue || '').getTime();
+      } else if (key === 'sortOrder') {
+        aValue = Number(aValue) || 0;
+        bValue = Number(bValue) || 0;
+      }
+      
+      if (order === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+  }, [filteredCodes, sort]);
+
+  // 페이징 처리
+  const paginatedCodes = React.useMemo(() => {
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    return sortedCodes.slice(startIndex, endIndex);
+  }, [sortedCodes, page, limit]);
+
+  const totalPages = Math.ceil(sortedCodes.length / limit);
 
   const columns: Array<DataTableColumn<any>> = [
     { 
-      key: 'groupId', 
+      key: 'grpId', 
       header: '그룹 ID', 
       render: (r) => (
         <span 
           style={{ cursor: 'pointer', color: '#1976d2' }} 
           onClick={() => navigate(`/admin/code/${r.id}`)}
         >
-          {r.groupId}
+          {r.grpId}
         </span>
       ) 
     },
@@ -149,14 +161,20 @@ export default function CodeManagement() {
     }
   ];
 
-  const toggleAll = (checked: boolean) => setSelected(checked ? codes.map((c: any) => c.id) : []);
+  const toggleAll = (checked: boolean) => setSelected(checked ? paginatedCodes.map((c: any) => c.id) : []);
   const toggleRow = (id: number) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
   const handleBulkDelete = async () => {
-    // 실제로는 API 호출
-    console.log('선택된 코드 삭제:', selected);
-    setSelected([]); 
-    refetch();
+    try {
+      // TODO: 실제 삭제 API 호출
+      console.log('선택된 코드 삭제:', selected);
+      setSelected([]); 
+      refetch();
+      setError(null); // 에러 메시지 초기화
+    } catch (error) {
+      console.error('코드 삭제 중 오류:', error);
+      setError('코드 삭제 중 오류가 발생했습니다.');
+    }
   };
 
   const handleCreateCode = () => {
@@ -222,9 +240,12 @@ export default function CodeManagement() {
         ]} 
       />
       
+      {/* 에러 알림 */}
+      {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
+      
       <ListScaffold
-        title=""
-        total={(data as any)?.total}
+        title="코드 관리"
+        total={sortedCodes.length}
         loading={isLoading}
         errorText={isError ? '코드 목록을 불러오는 중 오류가 발생했습니다.' : ''}
         emptyText={isEmpty ? '표시할 코드가 없습니다.' : ''}
@@ -273,7 +294,7 @@ export default function CodeManagement() {
           <DataTable
             id="admin-code-table"
             columns={columns}
-            rows={codes}
+            rows={paginatedCodes}
             getRowId={(r) => r.id}
             selectedIds={selected}
             onToggleRow={(id) => toggleRow(id as number)}

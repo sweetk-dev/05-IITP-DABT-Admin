@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   Box, 
   Grid, 
   Typography, 
@@ -13,7 +13,7 @@ import {
   Tooltip
 } from '@mui/material';
 import { 
-  QuestionAnswer as QnaIcon, 
+  QuestionAnswer as QnaIcon,
   Key as KeyIcon,
   Add as AddIcon,
   History as HistoryIcon,
@@ -46,7 +46,7 @@ interface DashboardProps {
 
 function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
   const navigate = useNavigate();
-  
+
   // 테마 설정 (사용자 페이지는 'user' 테마)
   const theme: 'user' | 'admin' = 'user';
   const colors = getThemeColors(theme);
@@ -115,7 +115,7 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
       {errorMessage && (
         <Box sx={{ mb: SPACING.ERROR_ALERT_BOTTOM }}>
           <ErrorAlert error={errorMessage} />
-        </Box>
+                </Box>
       )}
 
       <Grid container spacing={SPACING.LARGE}>
@@ -166,7 +166,7 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
                               {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
                               <Typography component="span" variant="body1" sx={{ fontWeight: 600 }}>
                                 {qna.title}
-                              </Typography>
+                </Typography>
                             </Box>
                           }
                           secondary={`${formatYmdHm(qna.createdAt)} • ${qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}`}
@@ -183,9 +183,9 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
               ) : (
                 <EmptyState message="현재 답변 대기 중인 문의가 없습니다." minHeight={400} />
               )}
-            </CardContent>
-          </ThemedCard>
-        </Grid>
+              </CardContent>
+            </ThemedCard>
+      </Grid>
 
         {/* API 인증키 관리 섹션 */}
         <Grid item xs={12} md={6}>
@@ -218,14 +218,14 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography variant="body1" sx={{ fontWeight: 700, lineHeight: 1 }}>
                               API Key: {authKey.authKey.substring(0, 36)}...
-                            </Typography>
+                  </Typography>
                             <Tooltip title="복사">
                               <IconButton id={`dash-copy-key-${authKey.keyId}`} size="small" onClick={() => handleCopyKey(authKey.authKey)}>
                                 <CopyIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
                             <StatusChip kind={getOpenApiKeyStatus(authKey)} />
-                          </Box>
+                </Box>
                         }
                         secondary={`유효기간: ${authKey.startDt} ~ ${authKey.endDt}`}
                       />
@@ -235,12 +235,12 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
               ) : (
                 <EmptyState message="발행된 인증키가 없습니다." minHeight={400} />
               )}
-            </CardContent>
-          </ThemedCard>
-        </Grid>
+              </CardContent>
+            </ThemedCard>
+          </Grid>
       </Grid>
     </Box>
   );
-}
+} 
 
 export default UserDashboard; 

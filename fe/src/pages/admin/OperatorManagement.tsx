@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import ThemedButton from '../../components/common/ThemedButton';
 import ListItemCard from '../../components/common/ListItemCard';
@@ -14,7 +14,7 @@ import { ROUTES } from '../../routes';
 import { hasAccountManagementPermission } from '../../utils/auth';
 import { getAdminRole } from '../../store/user';
 import { formatYmdHm } from '../../utils/date';
-import { getAdminAccountList, deleteAdminAccount } from '../../api/account';
+import { getAdminAccountList, deleteAdminAccountList } from '../../api/account';
 import type { AdminAccountListItem } from '@iitp-dabt/common';
 
 export default function OperatorManagement() {
@@ -51,33 +51,6 @@ export default function OperatorManagement() {
       setSelectedOperators(prev => [...prev, adminId]);
     } else {
       setSelectedOperators(prev => prev.filter(id => id !== adminId));
-    }
-  };
-
-  // 전체 선택 처리
-  const handleSelectAll = (checked: boolean) => {
-    if (checked && operatorData?.data?.items) {
-      setSelectedOperators(operatorData.data.items.map(operator => operator.adminId));
-    } else {
-      setSelectedOperators([]);
-    }
-  };
-
-  // 선택된 운영자 삭제 - 실제 API 호출
-  const handleDeleteSelected = async () => {
-    if (selectedOperators.length === 0) return;
-    
-    try {
-      // 실제 API 호출
-      for (const adminId of selectedOperators) {
-        await deleteAdminAccount(adminId);
-      }
-      setSelectedOperators([]);
-      refetch(); // 목록 새로고침
-      setError(null); // 에러 메시지 초기화
-    } catch (error) {
-      console.error('운영자 삭제 중 오류:', error);
-      setError('운영자 삭제 중 오류가 발생했습니다.');
     }
   };
 
@@ -129,7 +102,7 @@ export default function OperatorManagement() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'default' => {
     switch (status) {
       case 'A': return 'success';
       case 'I': return 'warning';
@@ -148,7 +121,7 @@ export default function OperatorManagement() {
   };
 
   // 정렬된 운영자 목록
-  const sortedOperators = operatorData?.data?.items ? [...operatorData.data.items].sort((a, b) => {
+  const sortedOperators = operatorData?.items ? [...operatorData.items].sort((a: AdminAccountListItem, b: AdminAccountListItem) => {
     let aValue: any = a[sortField];
     let bValue: any = b[sortField];
     
@@ -171,9 +144,13 @@ export default function OperatorManagement() {
       {/* 에러 알림 */}
       {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
       
-        <ListScaffold
-        searchValue={searchTerm}
-        onSearch={handleSearch}
+      <ListScaffold
+        title="운영자 관리"
+        search={{
+          value: searchTerm,
+          onChange: handleSearch,
+          placeholder: '운영자 이름 또는 로그인 ID로 검색'
+        }}
         filters={[
           {
             label: '상태',
@@ -200,47 +177,70 @@ export default function OperatorManagement() {
         actionsRight={
           <Box sx={{ display: 'flex', gap: 1 }}>
             {hasAccountManagementPermission(adminRole) && (
-                <ThemedButton
-                variant="danger"
-                startIcon={<DeleteIcon />}
-                onClick={handleDeleteSelected}
-                disabled={selectedOperators.length === 0}
-              >
-                선택 삭제 ({selectedOperators.length})
+              <ThemedButton variant="primary" startIcon={<AddIcon />} onClick={handleCreateOperator}>
+                운영자 추가
               </ThemedButton>
             )}
-            {hasAccountManagementPermission(adminRole) && (
-              <ThemedButton variant="primary" startIcon={<AddIcon />} onClick={handleCreateOperator}>
-                  운영자 추가
-                </ThemedButton>
-              )}
           </Box>
         }
         pagination={{
           page: currentPage,
-          totalPages: operatorData?.data?.totalPages || 1,
+          totalPages: operatorData?.totalPages || 1,
           pageSize,
           onPageChange: handlePageChange,
           onPageSizeChange: handlePageSizeChange
         }}
-        selectable={{
-          selected: selectedOperators,
-          onToggleAll: handleSelectAll,
-          onToggleRow: handleOperatorSelect
-        }}
+        total={operatorData?.total}
         loading={isLoading}
-        emptyMessage="등록된 운영자가 없습니다."
+        emptyText={operatorData?.items && operatorData.items.length > 0 ? undefined : "등록된 운영자가 없습니다."}
+        selectable={{
+          enabled: true,
+          items: operatorData?.items || [],
+          getId: (operator) => operator.adminId,
+          onSelectionChange: (selected) => setSelectedOperators(selected as number[]),
+          renderCheckbox: true,
+          deleteConfig: {
+            apiFunction: async (ids: (number | string)[]) => {
+              // LIST_DELETE API 호출 - 일괄 삭제
+              await deleteAdminAccountList(ids);
+            },
+            confirmTitle: '운영자 삭제 확인',
+            confirmMessage: '선택된 운영자들을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+            successMessage: '선택된 운영자들이 삭제되었습니다.',
+            errorMessage: '운영자 삭제 중 오류가 발생했습니다.',
+            onDeleteSuccess: () => {
+              refetch();
+            }
+          }
+        }}
       >
         {sortedOperators.map((operator) => (
           <ListItemCard
             key={operator.adminId}
             onClick={() => handleOperatorClick(operator.adminId)}
-            selectable={{
-              selected: selectedOperators.includes(operator.adminId),
-              onToggle: (checked: boolean) => handleOperatorSelect(operator.adminId, checked)
-            }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+              {/* 체크박스 */}
+              <Box
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                sx={{ mr: 2 }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedOperators.includes(operator.adminId)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        e.stopPropagation();
+                        handleOperatorSelect(operator.adminId, e.target.checked);
+                      }}
+                      size="small"
+                    />
+                  }
+                  label=""
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                />
+              </Box>
+              
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h6" component="div">
                   {operator.name}
@@ -253,7 +253,7 @@ export default function OperatorManagement() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <StatusChip
                   label={getStatusLabel(operator.status)}
-                  color={getStatusColor(operator.status)}
+                  kind={getStatusColor(operator.status)}
                   size="small"
                 />
                 <Typography variant="body2" color="text.secondary">
@@ -266,7 +266,7 @@ export default function OperatorManagement() {
             </Box>
           </ListItemCard>
         ))}
-        </ListScaffold>
+      </ListScaffold>
     </Box>
   );
 }

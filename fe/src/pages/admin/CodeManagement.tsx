@@ -19,7 +19,7 @@ import ErrorAlert from '../../components/ErrorAlert';
 import { useQuerySync } from '../../hooks/useQuerySync';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { formatYmdHm } from '../../utils/date';
-import { getCommonCodesByTypeDetail } from '../../api/commonCode';
+import { getCommonCodesByTypeDetail, deleteCommonCodeGroupList, deleteCommonCodeList } from '../../api/commonCode';
 import type { CommonCodeByTypeDetailRes } from '@iitp-dabt/common';
 
 export default function CodeManagement() {
@@ -164,19 +164,6 @@ export default function CodeManagement() {
   const toggleAll = (checked: boolean) => setSelected(checked ? paginatedCodes.map((c: any) => c.id) : []);
   const toggleRow = (id: number) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
-  const handleBulkDelete = async () => {
-    try {
-      // TODO: 실제 삭제 API 호출
-      console.log('선택된 코드 삭제:', selected);
-      setSelected([]); 
-      refetch();
-      setError(null); // 에러 메시지 초기화
-    } catch (error) {
-      console.error('코드 삭제 중 오류:', error);
-      setError('코드 삭제 중 오류가 발생했습니다.');
-    }
-  };
-
   const handleCreateCode = () => {
     navigate('/admin/code/create');
   };
@@ -248,7 +235,27 @@ export default function CodeManagement() {
         total={sortedCodes.length}
         loading={isLoading}
         errorText={isError ? '코드 목록을 불러오는 중 오류가 발생했습니다.' : ''}
-        emptyText={isEmpty ? '표시할 코드가 없습니다.' : ''}
+        emptyText={sortedCodes && sortedCodes.length > 0 ? undefined : '표시할 코드가 없습니다.'}
+        selectable={{
+          enabled: true,
+          items: sortedCodes,
+          getId: (code) => code.id,
+          onSelectionChange: (selected) => setSelected(selected as number[]),
+          renderCheckbox: true,
+          deleteConfig: {
+            apiFunction: async (ids: (number | string)[]) => {
+              // LIST_DELETE API 호출 - 일괄 삭제
+              await deleteCommonCodeList(ids);
+            },
+            confirmTitle: '코드 삭제 확인',
+            confirmMessage: '선택된 코드들을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+            successMessage: '선택된 코드들이 삭제되었습니다.',
+            errorMessage: '코드 삭제 중 오류가 발생했습니다.',
+            onDeleteSuccess: () => {
+              refetch();
+            }
+          }
+        }}
         pagination={{ 
           page, 
           totalPages, 
@@ -278,16 +285,7 @@ export default function CodeManagement() {
                   코드 추가
                 </ThemedButton>
               )}
-              {canManage && (
-                <ThemedButton 
-                  variant="dangerSoft" 
-                  onClick={handleBulkDelete} 
-                  disabled={selected.length === 0} 
-                  buttonSize="cta"
-                >
-                  선택 삭제
-                </ThemedButton>
-              )}
+
             </Stack>
           </Stack>
           
@@ -295,7 +293,7 @@ export default function CodeManagement() {
             id="admin-code-table"
             columns={columns}
             rows={paginatedCodes}
-            getRowId={(r) => r.id}
+            getRowId={(r) => r.codeId}
             selectedIds={selected}
             onToggleRow={(id) => toggleRow(id as number)}
             onToggleAll={toggleAll}

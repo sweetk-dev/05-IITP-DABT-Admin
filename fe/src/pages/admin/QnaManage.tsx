@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Box, Stack, Chip, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+
 import { ROUTES, ROUTE_META } from '../../routes';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ListScaffold from '../../components/common/ListScaffold';
@@ -10,7 +10,7 @@ import ThemedButton from '../../components/common/ThemedButton';
 import StatusChip from '../../components/common/StatusChip';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
-import { getAdminQnaList } from '../../api/qna';
+import { getAdminQnaList, deleteAdminQnaList } from '../../api/qna';
 import { getCommonCodesByGroupId } from '../../api';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
@@ -145,24 +145,9 @@ export default function QnaManage() {
     }
   };
 
-  // 전체 선택/해제
-  const handleSelectAll = (checked: boolean) => {
-    if (checked && qnaData?.items) {
-      setSelectedQnas(qnaData.items.map((qna: AdminQnaListItem) => qna.qnaId));
-    } else {
-      setSelectedQnas([]);
-    }
-  };
 
-  // 선택된 Q&A 삭제
-  const handleDeleteSelected = () => {
-    if (selectedQnas.length === 0) return;
-    
-    // TODO: 실제 삭제 API 호출
-    console.log('삭제할 Q&A IDs:', selectedQnas);
-    setSelectedQnas([]);
-    refetch();
-  };
+
+
 
   const handleQnaClick = (qnaId: number) => {
     navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(qnaId)));
@@ -196,18 +181,7 @@ export default function QnaManage() {
             onChange: setSearchTerm,
             placeholder: 'Q&A 제목 또는 작성자로 검색'
           }}
-          actionsRight={
-            hasContentEditPermission(adminRole) && (
-              <ThemedButton
-                variant="danger"
-                startIcon={<DeleteIcon />}
-                onClick={handleDeleteSelected}
-                disabled={selectedQnas.length === 0}
-              >
-                선택 삭제 ({selectedQnas.length})
-              </ThemedButton>
-            )
-          }
+
           filters={[
             {
               label: '타입',
@@ -238,6 +212,26 @@ export default function QnaManage() {
             }
           }}
           wrapInCard={false}
+          selectable={{
+            enabled: true,
+            items: qnaData?.items || [],
+            getId: (qna) => qna.qnaId,
+            onSelectionChange: (selected) => setSelectedQnas(selected as number[]),
+            renderCheckbox: true,
+            deleteConfig: {
+              apiFunction: async (ids: (number | string)[]) => {
+                // LIST_DELETE API 호출 - 일괄 삭제
+                await deleteAdminQnaList(ids);
+              },
+              confirmTitle: 'Q&A 삭제 확인',
+              confirmMessage: '선택된 Q&A들을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.',
+              successMessage: '선택된 Q&A들이 삭제되었습니다.',
+              errorMessage: 'Q&A 삭제 중 오류가 발생했습니다.',
+              onDeleteSuccess: () => {
+                refetch();
+              }
+            }
+          }}
         >
           <Stack id="qna-list-stack" spacing={SPACING.MEDIUM}>
             {qnaData?.items.map((qna: AdminQnaListItem) => (

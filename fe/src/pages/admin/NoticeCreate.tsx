@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Box, CardContent, TextField, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -64,7 +65,12 @@ export default function AdminNoticeCreate() {
 
   return (
     <Box id="admin-notice-create-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-notice-create-header" title="공지 등록" onBack={handleBack} />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-notice-create-header" 
+        title="공지 등록" 
+      />
       <ThemedCard>
         <CardContent>
           {error && (

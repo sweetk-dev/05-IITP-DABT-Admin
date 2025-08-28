@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -88,7 +89,12 @@ export default function CodeCreate() {
 
   return (
     <Box id="admin-code-create-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-code-create-header" title="공통 코드 등록" onBack={handleBack} />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-code-create-header" 
+        title="공통 코드 등록" 
+      />
       <ThemedCard>
         <CardContent>
           {error && (

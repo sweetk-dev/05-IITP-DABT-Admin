@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
@@ -93,7 +94,12 @@ export default function AdminNoticeEdit() {
 
   return (
     <Box id="admin-notice-edit-page" sx={{ p: SPACING.LARGE }}>
-      <PageHeader id="admin-notice-edit-header" title="공지 수정" onBack={handleBack} />
+      <AdminPageHeader />
+      
+      <PageHeader 
+        id="admin-notice-edit-header" 
+        title="공지 수정" 
+      />
       
       {/* 에러 알림 */}
       {(error || fetchError) && (

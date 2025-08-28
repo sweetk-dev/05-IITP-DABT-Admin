@@ -32,6 +32,7 @@ const AdminQnaList = lazy(() => import('./pages/admin/QnaManage'));
 const AdminNoticeList = lazy(() => import('./pages/admin/NoticeManage'));
 const AdminOpenApiClients = lazy(() => import('./pages/admin/OpenApiManage'));
 const AdminOpenApiRequests = lazy(() => import('./pages/admin/OpenApiRequests'));
+const AdminOpenApiRequestDetail = lazy(() => import('./pages/admin/OpenApiRequestDetail'));
 const AdminOpenApiDetail = lazy(() => import('./pages/admin/OpenApiDetail'));
 const AdminOpenApiEdit = lazy(() => import('./pages/admin/OpenApiEdit'));
 const AdminNoticeCreate = lazy(() => import('./pages/admin/NoticeCreate'));
@@ -46,6 +47,10 @@ const AdminQnaReply = lazy(() => import('./pages/admin/QnaReply'));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
 const OperatorManagement = lazy(() => import('./pages/admin/OperatorManagement'));
 const CodeManagement = lazy(() => import('./pages/admin/CodeManagement'));
+
+// 새로 추가된 Admin Edit 페이지들
+const OperatorEdit = lazy(() => import('./pages/admin/OperatorEdit'));
+const UserEdit = lazy(() => import('./pages/admin/UserEdit'));
 
 import LoadingSpinner from './components/LoadingSpinner';
 
@@ -107,10 +112,12 @@ function App() {
                     {/* 사용자 관리 */}
             <Route path={ROUTES.ADMIN.USERS.LIST} element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.USERS.DETAIL} element={<AdminProtectedRoute><UserDetail /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.USERS.EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><UserEdit /></Suspense></AdminProtectedRoute>} />
                     
                     {/* 운영자 관리 */}
             <Route path="/admin/operators" element={<AdminProtectedRoute><OperatorManagement /></AdminProtectedRoute>} />
             <Route path="/admin/operators/:id" element={<AdminProtectedRoute><div>OperatorDetail</div></AdminProtectedRoute>} />
+            <Route path="/admin/operators/:id/edit" element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><OperatorEdit /></Suspense></AdminProtectedRoute>} />
                     
                     {/* 코드 관리 */}
             <Route path="/admin/code" element={<AdminProtectedRoute><CodeManagement /></AdminProtectedRoute>} />
@@ -120,7 +127,7 @@ function App() {
             <Route path={ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiDetail /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.OPENAPI.CLIENT_EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiEdit /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.OPENAPI.REQUESTS} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiRequests /></Suspense></AdminProtectedRoute>} />
-            <Route path={ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL} element={<AdminProtectedRoute><ApiRequestDetail /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiRequestDetail /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.NOTICES.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminNoticeList /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.NOTICES.CREATE} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminNoticeCreate /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.NOTICES.DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminNoticeDetail /></Suspense></AdminProtectedRoute>} />

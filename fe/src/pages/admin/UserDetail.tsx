@@ -1,32 +1,18 @@
-import { Box, CardContent, Typography, Alert, Chip, Stack, Grid } from '@mui/material';
+import { Box, CardContent, Typography, Chip, Stack, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import StatusChip from '../../components/common/StatusChip';
+import ErrorAlert from '../../components/ErrorAlert';
 import { SPACING } from '../../constants/spacing';
 import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { formatYmdHm } from '../../utils/date';
 import { getAdminRole } from '../../store/user';
 import { hasUserAccountEditPermission } from '../../utils/auth';
-
-// 임시 사용자 상세 데이터 (실제로는 API에서 가져옴)
-const mockUserDetail = {
-  id: 1,
-  name: '홍길동',
-  email: 'hong@example.com',
-  phone: '010-1234-5678',
-  status: 'ACTIVE',
-  lastLoginAt: '2024-01-15T10:30:00Z',
-  openApiKeyCount: 2,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-15T10:30:00Z',
-  openApiKeys: [
-    { id: 1, name: '개발용 API 키', key: 'dev_1234567890abcdef', status: 'ACTIVE', createdAt: '2024-01-01T00:00:00Z' },
-    { id: 2, name: '운영용 API 키', key: 'prod_0987654321fedcba', status: 'ACTIVE', createdAt: '2024-01-10T00:00:00Z' }
-  ]
-};
+import { getUserAccountDetail } from '../../api/account';
+import type { UserAccountDetailRes } from '@iitp-dabt/common';
 
 export default function UserDetail() {
   const navigate = useNavigate();
@@ -35,14 +21,14 @@ export default function UserDetail() {
   const adminRole = getAdminRole();
   const canEdit = hasUserAccountEditPermission(adminRole);
 
-  // 임시 데이터 페칭 (실제로는 API 호출)
-  const { data, isLoading, isEmpty, isError } = useDataFetching({
-    fetchFunction: () => Promise.resolve({ user: mockUserDetail }),
+  // 실제 API 호출
+  const { data, isLoading, isEmpty, isError, error } = useDataFetching({
+    fetchFunction: () => getUserAccountDetail(userId),
     dependencies: [userId],
     autoFetch: !!userId
   });
 
-  const user = (data as any)?.user || (data as any);
+  const user = (data as UserAccountDetailRes)?.user;
 
   const handleEdit = () => navigate(`/admin/users/${userId}/edit`);
   const handleDelete = async () => {
@@ -53,18 +39,18 @@ export default function UserDetail() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return '활성';
-      case 'INACTIVE': return '비활성';
-      case 'SUSPENDED': return '정지';
+      case 'A': return '활성';
+      case 'I': return '비활성';
+      case 'S': return '정지';
       default: return status;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'success';
-      case 'INACTIVE': return 'warning';
-      case 'SUSPENDED': return 'error';
+      case 'A': return 'success';
+      case 'I': return 'warning';
+      case 'S': return 'error';
       default: return 'default';
     }
   };
@@ -74,6 +60,7 @@ export default function UserDetail() {
       <PageHeader 
         id="admin-user-detail-header" 
         title="사용자 상세" 
+        onBack={() => navigate('/admin/users')}
         actionsRight={
           canEdit ? (
             <>
@@ -84,12 +71,18 @@ export default function UserDetail() {
         } 
       />
 
+      {/* 에러 알림 */}
+      {error && (
+        <ErrorAlert 
+          error={error} 
+          onClose={() => {}} 
+        />
+      )}
+
       <ThemedCard>
         <CardContent>
           {isLoading ? (
             <Typography variant="body2">불러오는 중...</Typography>
-          ) : isError ? (
-            <Alert severity="error">사용자 상세를 불러오는 중 오류가 발생했습니다.</Alert>
           ) : isEmpty || !user ? (
             <Typography variant="body2" color="text.secondary">사용자 정보가 없습니다.</Typography>
           ) : (
@@ -98,16 +91,16 @@ export default function UserDetail() {
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>기본 정보</Typography>
               <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">사용자 ID</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{user.userId}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">로그인 ID</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{user.loginId}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">이름</Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>{user.name}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">이메일</Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>{user.email}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">전화번호</Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>{user.phone || '-'}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">상태</Typography>
@@ -117,6 +110,14 @@ export default function UserDetail() {
                     sx={{ mb: 1 }}
                   />
                 </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">소속</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{user.affiliation || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">비고</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{user.note || '-'}</Typography>
+                </Grid>
               </Grid>
 
               {/* 계정 정보 */}
@@ -124,57 +125,71 @@ export default function UserDetail() {
               <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">가입일</Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(user.createdAt)}</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {user.createdAt ? formatYmdHm(user.createdAt) : '-'}
+                  </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">최근 로그인</Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(user.lastLoginAt)}</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {user.latestLoginAt ? formatYmdHm(user.latestLoginAt) : '-'}
+                  </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">마지막 수정일</Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(user.updatedAt)}</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {user.updatedAt ? formatYmdHm(user.updatedAt) : '-'}
+                  </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">API 키 수</Typography>
                   <Chip 
-                    label={user.openApiKeyCount} 
+                    label={user.keyCount || 0} 
                     size="small" 
                     color="primary"
                     sx={{ mb: 1 }}
                   />
                 </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">최근 API 키 생성일</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {user.latestKeyCreatedAt ? formatYmdHm(user.latestKeyCreatedAt) : '-'}
+                  </Typography>
+                </Grid>
               </Grid>
 
-              {/* API 키 정보 */}
-              {user.openApiKeys && user.openApiKeys.length > 0 && (
-                <>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>API 키 정보</Typography>
-                  <Stack spacing={1}>
-                    {user.openApiKeys.map((key: any) => (
-                      <Box key={key.id} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                        <Grid container spacing={2} alignItems="center">
-                          <Grid item xs={12} sm={4}>
-                            <Typography variant="subtitle2" color="text.secondary">키 이름</Typography>
-                            <Typography variant="body2">{key.name}</Typography>
-                          </Grid>
-                          <Grid item xs={12} sm={4}>
-                            <Typography variant="subtitle2" color="text.secondary">상태</Typography>
-                            <StatusChip 
-                              kind={key.status === 'ACTIVE' ? 'success' : 'default'} 
-                              label={key.status === 'ACTIVE' ? '활성' : '비활성'}
-                              size="small"
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={4}>
-                            <Typography variant="subtitle2" color="text.secondary">생성일</Typography>
-                            <Typography variant="body2">{formatYmdHm(key.createdAt)}</Typography>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                    ))}
-                  </Stack>
-                </>
-              )}
+              {/* 관리 정보 */}
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>관리 정보</Typography>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">생성자</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{user.createdBy || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">수정자</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{user.updatedBy || '-'}</Typography>
+                </Grid>
+                {user.deletedAt && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">삭제일</Typography>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(user.deletedAt)}</Typography>
+                  </Grid>
+                )}
+                {user.deletedBy && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">삭제자</Typography>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{user.deletedBy}</Typography>
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">삭제 여부</Typography>
+                  <StatusChip 
+                    kind={user.delYn === 'N' ? 'success' : 'error'} 
+                    label={user.delYn === 'N' ? '활성' : '삭제됨'}
+                    sx={{ mb: 1 }}
+                  />
+                </Grid>
+              </Grid>
             </>
           )}
         </CardContent>

@@ -92,8 +92,10 @@ export const ROUTES = {
 
     // 운영자 관리 (S-Admin 전용)
     OPERATORS: {
-      LIST: '/admin/account',
-      DETAIL: '/admin/account/:id',
+      LIST: '/admin/operators',
+      CREATE: '/admin/operators/create',
+      DETAIL: '/admin/operators/:id',
+      EDIT: '/admin/operators/:id/edit',
     },
 
     // 관리자 계정 관리
@@ -110,6 +112,9 @@ export const ROUTES = {
     // 코드 관리 (S-Admin 전용)
     CODE: {
       LIST: '/admin/code',
+      CREATE: '/admin/code/create',
+      DETAIL: '/admin/code/:id',
+      EDIT: '/admin/code/:id/edit',
     },
   },
 
@@ -165,10 +170,38 @@ export const RouteUtils = {
   },
 
   /**
+   * 관리자 FAQ 생성 라우트 생성
+   */
+  createAdminFaqCreateRoute: (): string => {
+    return ROUTES.ADMIN.FAQ.CREATE;
+  },
+
+  /**
+   * 관리자 FAQ 상세 라우트 생성
+   */
+  createAdminFaqDetailRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.FAQ.DETAIL, { id });
+  },
+
+  /**
    * 관리자 Q&A 상세 라우트 생성
    */
   createAdminQnaDetailRoute: (id: string | number): string => {
     return RouteUtils.createDynamicRoute(ROUTES.ADMIN.QNA.DETAIL, { id });
+  },
+
+  /**
+   * 관리자 Q&A 생성 라우트 생성
+   */
+  createAdminQnaCreateRoute: (): string => {
+    return ROUTES.ADMIN.QNA.CREATE;
+  },
+
+  /**
+   * 관리자 Q&A 답변 라우트 생성
+   */
+  createAdminQnaReplyRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.QNA.REPLY, { id });
   },
 
   /**
@@ -179,6 +212,20 @@ export const RouteUtils = {
   },
 
   /**
+   * 관리자 사용자 생성 라우트 생성
+   */
+  createAdminUserCreateRoute: (): string => {
+    return ROUTES.ADMIN.USERS.CREATE;
+  },
+
+  /**
+   * 관리자 사용자 편집 라우트 생성
+   */
+  createAdminUserEditRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.USERS.EDIT, { id });
+  },
+
+  /**
    * 관리자 공지사항 편집 라우트 생성
    */
   createAdminNoticeEditRoute: (id: string | number): string => {
@@ -186,10 +233,80 @@ export const RouteUtils = {
   },
 
   /**
+   * 관리자 공지사항 생성 라우트 생성
+   */
+  createAdminNoticeCreateRoute: (): string => {
+    return ROUTES.ADMIN.NOTICES.CREATE;
+  },
+
+  /**
+   * 관리자 공지사항 상세 라우트 생성
+   */
+  createAdminNoticeDetailRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.NOTICES.DETAIL, { id });
+  },
+
+  /**
    * 관리자 OpenAPI 클라이언트 상세 라우트 생성
    */
   createAdminOpenApiClientDetailRoute: (id: string | number): string => {
     return RouteUtils.createDynamicRoute(ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL, { id });
+  },
+
+  /**
+   * 관리자 OpenAPI 클라이언트 편집 라우트 생성
+   */
+  createAdminOpenApiClientEditRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.OPENAPI.CLIENT_EDIT, { id });
+  },
+
+  /**
+   * 관리자 OpenAPI 요청 상세 라우트 생성
+   */
+  createAdminOpenApiRequestDetailRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL, { id });
+  },
+
+  /**
+   * 관리자 운영자 편집 라우트 생성
+   */
+  createAdminOperatorEditRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.OPERATORS.EDIT, { id });
+  },
+
+  /**
+   * 관리자 운영자 생성 라우트 생성
+   */
+  createAdminOperatorCreateRoute: (): string => {
+    return ROUTES.ADMIN.OPERATORS.CREATE;
+  },
+
+  /**
+   * 관리자 운영자 상세 라우트 생성
+   */
+  createAdminOperatorDetailRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.OPERATORS.DETAIL, { id });
+  },
+
+  /**
+   * 관리자 코드 생성 라우트 생성
+   */
+  createAdminCodeCreateRoute: (): string => {
+    return ROUTES.ADMIN.CODE.CREATE;
+  },
+
+  /**
+   * 관리자 코드 상세 라우트 생성
+   */
+  createAdminCodeDetailRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.CODE.DETAIL, { id });
+  },
+
+  /**
+   * 관리자 코드 편집 라우트 생성
+   */
+  createAdminCodeEditRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.CODE.EDIT, { id });
   },
 };
 
@@ -430,13 +547,45 @@ export const ROUTE_META = {
     requiresAdmin: true,
     showInNav: false,
   },
-  // 운영자 관련
-  [ROUTES.ADMIN.OPERATORS.DETAIL]: {
-    title: '운영자 상세',
-    requiresAuth: true,
-    requiresAdmin: true,
-    showInNav: false,
-  },
+           // 운영자 관련
+    [ROUTES.ADMIN.OPERATORS.CREATE]: {
+      title: '운영자 생성',
+      requiresAuth: true,
+      requiresAdmin: true,
+      showInNav: false,
+    },
+    [ROUTES.ADMIN.OPERATORS.DETAIL]: {
+      title: '운영자 상세',
+      requiresAuth: true,
+      requiresAdmin: true,
+      showInNav: false,
+    },
+    [ROUTES.ADMIN.OPERATORS.EDIT]: {
+      title: '운영자 편집',
+      requiresAuth: true,
+      requiresAdmin: true,
+      showInNav: false,
+    },
+
+   // 코드 관련
+   [ROUTES.ADMIN.CODE.CREATE]: {
+     title: '코드 생성',
+     requiresAuth: true,
+     requiresAdmin: true,
+     showInNav: false,
+   },
+   [ROUTES.ADMIN.CODE.DETAIL]: {
+     title: '코드 상세',
+     requiresAuth: true,
+     requiresAdmin: true,
+     showInNav: false,
+   },
+   [ROUTES.ADMIN.CODE.EDIT]: {
+     title: '코드 편집',
+     requiresAuth: true,
+     requiresAdmin: true,
+     showInNav: false,
+   },
   // 사용자 페이지 관련
   [ROUTES.USER.FAQ_DETAIL]: {
     title: 'FAQ 상세',
@@ -532,12 +681,17 @@ export const ROUTE_GROUPS = {
       { path: ROUTES.ADMIN.OPENAPI.REQUESTS, title: 'OpenAPI 요청 관리' },
       { path: ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL, title: 'OpenAPI 요청 상세' },
       { path: ROUTES.ADMIN.NOTICES.LIST, title: '공지사항 관리' },
-      { path: ROUTES.ADMIN.NOTICES.CREATE, title: '공지사항 생성' },
-      { path: ROUTES.ADMIN.NOTICES.EDIT, title: '공지사항 편집' },
-      { path: ROUTES.ADMIN.NOTICES.DETAIL, title: '공지사항 상세' },
-      { path: ROUTES.ADMIN.OPERATORS.LIST, title: '운영자 관리' },
-      { path: ROUTES.ADMIN.OPERATORS.DETAIL, title: '운영자 상세' },
-      { path: ROUTES.ADMIN.CODE.LIST, title: '코드 관리' },
+             { path: ROUTES.ADMIN.NOTICES.CREATE, title: '공지사항 생성' },
+       { path: ROUTES.ADMIN.NOTICES.EDIT, title: '공지사항 편집' },
+       { path: ROUTES.ADMIN.NOTICES.DETAIL, title: '공지사항 상세' },
+       { path: ROUTES.ADMIN.OPERATORS.LIST, title: '운영자 관리' },
+       { path: ROUTES.ADMIN.OPERATORS.CREATE, title: '운영자 생성' },
+       { path: ROUTES.ADMIN.OPERATORS.DETAIL, title: '운영자 상세' },
+       { path: ROUTES.ADMIN.OPERATORS.EDIT, title: '운영자 편집' },
+       { path: ROUTES.ADMIN.CODE.LIST, title: '코드 관리' },
+       { path: ROUTES.ADMIN.CODE.CREATE, title: '코드 생성' },
+       { path: ROUTES.ADMIN.CODE.DETAIL, title: '코드 상세' },
+       { path: ROUTES.ADMIN.CODE.EDIT, title: '코드 편집' },
       { path: ROUTES.ADMIN.SETTINGS, title: '시스템 설정' },
     ],
   },
@@ -578,7 +732,9 @@ export const ROUTE_GROUPS = {
       { path: ROUTES.ADMIN.USERS.EDIT, title: '사용자 편집' },
       { path: ROUTES.ADMIN.USERS.DETAIL, title: '사용자 상세' },
       { path: ROUTES.ADMIN.OPERATORS.LIST, title: '운영자 관리' },
+      { path: ROUTES.ADMIN.OPERATORS.CREATE, title: '운영자 생성' },
       { path: ROUTES.ADMIN.OPERATORS.DETAIL, title: '운영자 상세' },
+      { path: ROUTES.ADMIN.OPERATORS.EDIT, title: '운영자 편집' },
     ],
   },
   ADMIN_SYSTEM: {
@@ -587,9 +743,12 @@ export const ROUTE_GROUPS = {
       { path: ROUTES.ADMIN.OPENAPI.CLIENTS, title: 'OpenAPI 인증 키 관리' },
       { path: ROUTES.ADMIN.OPENAPI.CLIENT_DETAIL, title: 'OpenAPI 클라이언트 상세' },
       { path: ROUTES.ADMIN.OPENAPI.REQUESTS, title: 'OpenAPI 요청 관리' },
-      { path: ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL, title: 'OpenAPI 요청 상세' },
-      { path: ROUTES.ADMIN.CODE.LIST, title: '코드 관리' },
-      { path: ROUTES.ADMIN.SETTINGS, title: '시스템 설정' },
+             { path: ROUTES.ADMIN.OPENAPI.REQUEST_DETAIL, title: 'OpenAPI 요청 상세' },
+       { path: ROUTES.ADMIN.CODE.LIST, title: '코드 관리' },
+       { path: ROUTES.ADMIN.CODE.CREATE, title: '코드 생성' },
+       { path: ROUTES.ADMIN.CODE.DETAIL, title: '코드 상세' },
+       { path: ROUTES.ADMIN.CODE.EDIT, title: '코드 편집' },
+       { path: ROUTES.ADMIN.SETTINGS, title: '시스템 설정' },
     ],
   },
   USER_CONTENT: {

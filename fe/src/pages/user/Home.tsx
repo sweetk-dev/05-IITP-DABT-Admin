@@ -20,6 +20,8 @@ import type { UserNoticeItem, UserFaqItem, UserQnaItem } from '@iitp-dabt/common
 import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import { useCommonCode } from '../../hooks/useCommonCode';
 import { ROUTES } from '../../routes';
+import { isUserAuthenticated, isAdminAuthenticated } from '../../store/auth';
+import { getUserType } from '../../store/user';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -29,6 +31,17 @@ export default function Home() {
   const openApiDocUrl = OPEN_API_DOC_URL;
   const { fetchCodesByGroup } = useCommonCode();
   
+  // 인증 상태 체크 (Layout과 동일한 로직 사용)
+  const userType = getUserType();
+  const isUserLoggedIn = isUserAuthenticated();
+  const isAdminLoggedIn = isAdminAuthenticated();
+  
+  // 디버깅용 로그
+  console.log('[Home] 인증 상태:', { userType, isUserLoggedIn, isAdminLoggedIn });
+  
+  // 토큰이 유효하지 않으면 API 호출 건너뛰기
+  const shouldFetchData = isUserLoggedIn || isAdminLoggedIn;
+  
   // 공지사항 데이터 페칭
   const {
     data: notices,
@@ -37,7 +50,8 @@ export default function Home() {
     isError: noticesError,
     refetch: refetchNotices
   } = useDataFetching({
-    fetchFunction: getHomeNoticeList
+    fetchFunction: getHomeNoticeList,
+    autoFetch: shouldFetchData // 인증된 경우에만 자동 호출
   });
 
   // FAQ 데이터 페칭

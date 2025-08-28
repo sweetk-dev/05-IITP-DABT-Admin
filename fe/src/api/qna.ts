@@ -15,6 +15,7 @@ import type {
   AdminQnaUpdateReq,
   // AdminQnaUpdateRes,
   // AdminQnaDeleteRes
+  AdminQnaStatusRes
 } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 
@@ -126,5 +127,14 @@ export async function deleteAdminQna(qnaId: number): Promise<ApiResponse<void>> 
   const url = FULL_API_URLS.ADMIN.QNA.DELETE.replace(':qnaId', qnaId.toString());
   return apiFetch<void>(url, {
     method: 'DELETE'
+  });
+}
+
+/**
+ * Q&A 통계 조회 (관리자용)
+ */
+export async function getAdminQnaStats(): Promise<ApiResponse<AdminQnaStatusRes>> {
+  return apiFetch<AdminQnaStatusRes>(FULL_API_URLS.ADMIN.QNA.STATUS, {
+    method: 'GET'
   });
 } 

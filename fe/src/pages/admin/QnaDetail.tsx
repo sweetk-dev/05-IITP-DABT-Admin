@@ -1,6 +1,7 @@
-import { Box, CardContent, Typography, Alert, Chip, Stack } from '@mui/material';
+import { Box, CardContent, Typography, Chip, Stack, Grid } from '@mui/material';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
 import StatusChip from '../../components/common/StatusChip';
+import ErrorAlert from '../../components/ErrorAlert';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
@@ -11,14 +12,20 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminQna, getAdminQnaDetail } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import { formatYmdHm } from '../../utils/date';
+import type { AdminQnaDetailRes } from '@iitp-dabt/common';
 
 export default function AdminQnaDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const qnaId = Number(id);
 
-  const { data, isLoading, isEmpty, isError } = useDataFetching({ fetchFunction: ()=> getAdminQnaDetail(qnaId), dependencies: [qnaId], autoFetch: !!qnaId });
-  const qna = (data as any)?.qna || (data as any);
+  const { data, isLoading, isEmpty, isError, error } = useDataFetching({ 
+    fetchFunction: ()=> getAdminQnaDetail(qnaId), 
+    dependencies: [qnaId], 
+    autoFetch: !!qnaId 
+  });
+  
+  const qna = (data as AdminQnaDetailRes)?.qna;
 
   const handleBack = () => navigate(ROUTES.ADMIN.QNA.LIST);
   const handleEdit = () => navigate(ROUTES.ADMIN.QNA.REPLY.replace(':id', String(qnaId)));
@@ -30,31 +37,134 @@ export default function AdminQnaDetail() {
         <ThemedButton variant="outlined" onClick={handleEdit} buttonSize="cta">답변/수정</ThemedButton>
         <ThemedButton variant="dangerSoft" onClick={handleDelete} buttonSize="cta">삭제</ThemedButton>
       </>} />
+
+      {/* 에러 알림 */}
+      {error && (
+        <ErrorAlert 
+          error={error} 
+          onClose={() => {}} 
+        />
+      )}
+
       <ThemedCard>
         <CardContent>
           {isLoading ? (
             <Typography variant="body2">불러오는 중...</Typography>
-          ) : isError ? (
-            <Alert severity="error">상세를 불러오는 중 오류가 발생했습니다.</Alert>
           ) : isEmpty || !qna ? (
             <Typography variant="body2" color="text.secondary">데이터가 없습니다.</Typography>
           ) : (
             <>
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                {/* 순서: 유형 → 상태 → 비공개 */}
-                <QnaTypeChip typeId={qna.qnaType} />
-                <Chip size="small" label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'} color={qna.answeredYn === 'Y' ? 'success' : 'warning'} />
-                {qna.secretYn === 'Y' && (<StatusChip kind="private" />)}
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>{formatYmdHm(qna.postedAt)}</Typography>
-              </Stack>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>{qna.title}</Typography>
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: SPACING.MEDIUM }}>{qna.content}</Typography>
+              {/* 기본 정보 */}
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>기본 정보</Typography>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Q&A ID</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{qna.qnaId}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">사용자 ID</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{qna.userId}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">Q&A 유형</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{qna.qnaType}</Typography>
+                    <QnaTypeChip typeId={qna.qnaType} />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">답변 상태</Typography>
+                  <Chip 
+                    size="small" 
+                    label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'} 
+                    color={qna.answeredYn === 'Y' ? 'success' : 'warning'} 
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">비공개 여부</Typography>
+                  {qna.secretYn === 'Y' ? (
+                    <StatusChip kind="private" />
+                  ) : (
+                    <Typography variant="body1" sx={{ mb: 1 }}>공개</Typography>
+                  )}
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="text.secondary">제목</Typography>
+                  <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>{qna.title}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="text.secondary">내용</Typography>
+                  <Typography variant="body1" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>{qna.content}</Typography>
+                </Grid>
+              </Grid>
+
+              {/* 답변 정보 */}
               {qna.answeredYn === 'Y' && qna.answerContent && (
                 <>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>답변</Typography>
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{qna.answerContent}</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>답변 정보</Typography>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2" color="text.secondary">답변자</Typography>
+                      <Typography variant="body1" sx={{ mb: 1 }}>{qna.answeredBy || '-'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2" color="text.secondary">답변일</Typography>
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        {qna.answeredAt ? formatYmdHm(qna.answeredAt) : '-'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" color="text.secondary">답변 내용</Typography>
+                      <Typography variant="body1" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>{qna.answerContent}</Typography>
+                    </Grid>
+                  </Grid>
                 </>
               )}
+
+              {/* 관리 정보 */}
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>관리 정보</Typography>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">등록일</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {qna.postedAt ? formatYmdHm(qna.postedAt) : '-'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">등록자</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{qna.postedBy || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">수정일</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {qna.updatedAt ? formatYmdHm(qna.updatedAt) : '-'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">수정자</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{qna.updatedBy || '-'}</Typography>
+                </Grid>
+                {qna.deletedAt && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">삭제일</Typography>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(qna.deletedAt)}</Typography>
+                  </Grid>
+                )}
+                {qna.deletedBy && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">삭제자</Typography>
+                    <Typography variant="body1" sx={{ mb: 1 }}>{qna.deletedBy}</Typography>
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" color="text.secondary">삭제 여부</Typography>
+                  <StatusChip 
+                    kind={qna.delYn === 'N' ? 'success' : 'error'} 
+                    label={qna.delYn === 'N' ? '활성' : '삭제됨'}
+                    sx={{ mb: 1 }}
+                  />
+                </Grid>
+              </Grid>
             </>
           )}
         </CardContent>

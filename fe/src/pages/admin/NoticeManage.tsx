@@ -1,302 +1,285 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Card, CardContent, CardActions, Button, Chip, TextField, InputAdornment } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Stack, Chip, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import {
-  Announcement as NoticeIcon,
-  Add as AddIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon
-} from '@mui/icons-material';
-import { ROUTES, ROUTE_META } from '../../routes';
-import { getThemeColors } from '../../theme';
-import ListHeader from '../../components/common/ListHeader';
-import ThemedCard from '../../components/common/ThemedCard';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import ListScaffold from '../../components/common/ListScaffold';
+import ListItemCard from '../../components/common/ListItemCard';
 import ThemedButton from '../../components/common/ThemedButton';
-import StatusChip from '../../components/common/StatusChip';
+import ErrorAlert from '../../components/ErrorAlert';
+import { SPACING } from '../../constants/spacing';
+import { ROUTES } from '../../routes';
+import { hasContentEditPermission } from '../../utils/auth';
+import { getAdminRole } from '../../store/user';
+
+// 임시 공지사항 데이터
+const mockNotices = [
+  {
+    noticeId: 1,
+    title: '시스템 점검 안내',
+    content: '정기 시스템 점검이 예정되어 있습니다.',
+    noticeType: 'S',
+    publicYn: 'Y',
+    postedAt: '2024-01-15T10:00:00Z',
+    startDt: '2024-01-15T00:00:00Z',
+    endDt: '2024-01-20T23:59:59Z',
+    createdAt: '2024-01-15T09:00:00Z'
+  },
+  {
+    noticeId: 2,
+    title: '새로운 기능 업데이트',
+    content: '사용자 편의를 위한 새로운 기능이 추가되었습니다.',
+    noticeType: 'G',
+    publicYn: 'Y',
+    postedAt: '2024-01-14T14:00:00Z',
+    startDt: '2024-01-14T00:00:00Z',
+    endDt: null,
+    createdAt: '2024-01-14T13:00:00Z'
+  }
+];
 
 export default function NoticeManage() {
   const navigate = useNavigate();
+  const adminRole = getAdminRole();
 
-  // ROUTE_META에서 페이지 정보 동적 가져오기
-  const pageMeta = (ROUTE_META as any)[ROUTES.ADMIN.NOTICES.LIST];
-  const pageTitle = pageMeta?.title || '공지사항 관리';
-
-  const theme: 'user' | 'admin' = 'admin';
-  const colors = getThemeColors(theme);
-
-  // 임시 공지사항 데이터 (실제로는 API에서 가져옴)
-  const [notices, setNotices] = useState([
-    {
-      id: 1,
-      title: '시스템 점검 안내',
-      content: '2024년 1월 20일 새벽 2시부터 4시까지 시스템 점검이 진행됩니다.',
-      category: '시스템',
-      status: '활성',
-      priority: '높음',
-      createdAt: '2024-01-15',
-      updatedAt: '2024-01-15'
-    },
-    {
-      id: 2,
-      title: 'OpenAPI 서비스 이용 안내',
-      content: 'OpenAPI 서비스 이용 시 주의사항을 안내드립니다.',
-      category: '서비스',
-      status: '활성',
-      priority: '보통',
-      createdAt: '2024-01-14',
-      updatedAt: '2024-01-14'
-    },
-    {
-      id: 3,
-      title: '개인정보 처리방침 개정',
-      content: '개인정보 처리방침이 개정되었습니다. 자세한 내용은 첨부파일을 참고하세요.',
-      category: '정책',
-      status: '비활성',
-      priority: '높음',
-      createdAt: '2024-01-13',
-      updatedAt: '2024-01-13'
-    }
-  ]);
-
+  // 검색 및 필터 상태
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('전체');
-  const [selectedStatus, setSelectedStatus] = useState('전체');
+  const [filterType, setFilterType] = useState<'all' | 'G' | 'S' | 'E'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'Y' | 'N'>('all');
+  
+  // 선택된 공지사항 항목들
+  const [selectedNotices, setSelectedNotices] = useState<number[]>([]);
+  
+  // 에러 상태
+  const [error, setError] = useState<string | null>(null);
+  
+  // 필터링된 공지사항
+  const filteredNotices = mockNotices.filter(notice => {
+    const matchesSearch = !searchTerm || 
+      notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      notice.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === 'all' || notice.noticeType === filterType;
+    const matchesStatus = filterStatus === 'all' || notice.publicYn === filterStatus;
+    return matchesSearch && matchesType && matchesStatus;
+  });
 
-  const categories = ['전체', '시스템', '서비스', '정책', '기타'];
-  const statuses = ['전체', '활성', '비활성'];
+  // 개별 공지사항 선택/해제
+  const handleNoticeSelect = (noticeId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedNotices(prev => [...prev, noticeId]);
+    } else {
+      setSelectedNotices(prev => prev.filter(id => id !== noticeId));
+    }
+  };
+
+  // 전체 선택/해제
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedNotices(filteredNotices.map(notice => notice.noticeId));
+    } else {
+      setSelectedNotices([]);
+    }
+  };
+
+  // 선택된 공지사항 삭제
+  const handleDeleteSelected = async () => {
+    if (selectedNotices.length === 0) return;
+    
+    try {
+      // TODO: 실제 삭제 API 호출
+      console.log('삭제할 공지사항 IDs:', selectedNotices);
+      setSelectedNotices([]);
+      setError(null); // 에러 메시지 초기화
+    } catch (error) {
+      console.error('공지사항 삭제 중 오류:', error);
+      setError('공지사항 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 공지사항 타입별 라벨
+  const getNoticeTypeLabel = (type: string) => {
+    switch (type) {
+      case 'G': return '일반';
+      case 'S': return '시스템';
+      case 'E': return '긴급';
+      default: return type;
+    }
+  };
+
+  // 공지사항 타입별 색상
+  const getNoticeTypeColor = (type: string): 'primary' | 'info' | 'error' | 'default' => {
+    switch (type) {
+      case 'G': return 'primary';
+      case 'S': return 'info';
+      case 'E': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const handleNoticeClick = (noticeId: number) => {
+    navigate(`/admin/notices/${noticeId}`);
+  };
 
   const handleCreateNotice = () => {
     navigate(ROUTES.ADMIN.NOTICES.CREATE);
   };
 
-  const handleEditNotice = (id: number) => {
-    navigate(`${ROUTES.ADMIN.NOTICES.EDIT}/${id}`);
-  };
-
-  const handleViewNotice = (id: number) => {
-    navigate(`${ROUTES.ADMIN.NOTICES.DETAIL}/${id}`);
-  };
-
-  const handleDeleteNotice = (id: number) => {
-    setNotices(notices.filter(notice => notice.id !== id));
-  };
-
-  const filteredNotices = notices.filter(notice => {
-    const matchesSearch = notice.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         notice.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === '전체' || notice.category === selectedCategory;
-    const matchesStatus = selectedStatus === '전체' || notice.status === selectedStatus;
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
-  const getStatusColor = (status: string) => {
-    return status === '활성' ? 'success' : 'error';
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case '시스템':
-        return 'error';
-      case '서비스':
-        return 'primary';
-      case '정책':
-        return 'warning';
-      default:
-        return 'default';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case '높음':
-        return 'error';
-      case '보통':
-        return 'warning';
-      case '낮음':
-        return 'success';
-      default:
-        return 'default';
-    }
-  };
+  const isEmpty = filteredNotices.length === 0;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <ThemedCard sx={{ mb: 3 }}>
-        <ListHeader
-          title={pageTitle}
-          icon={<NoticeIcon />}
+    <Box id="admin-notice-manage-page">
+      <AdminPageHeader />
+
+      {/* 에러 알림 */}
+      {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
+
+      <Box sx={{ p: SPACING.LARGE }}>
+        <ListScaffold
+          title="공지사항 관리"
+          loading={false}
+          emptyText={isEmpty ? '등록된 공지사항이 없습니다.' : ''}
+          search={{
+            value: searchTerm,
+            onChange: setSearchTerm,
+            placeholder: '공지사항 제목으로 검색...'
+          }}
           actionsRight={
-            <ThemedButton
-              variant="primary"
-              startIcon={<AddIcon />}
-              onClick={handleCreateNotice}
-            >
-              공지사항 추가
-            </ThemedButton>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {hasContentEditPermission(adminRole) && selectedNotices.length > 0 && (
+                <ThemedButton
+                  variant="danger"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDeleteSelected}
+                >
+                  선택 삭제 ({selectedNotices.length})
+                </ThemedButton>
+              )}
+              {hasContentEditPermission(adminRole) && (
+                <ThemedButton
+                  variant="primary"
+                  startIcon={<AddIcon />}
+                  onClick={handleCreateNotice}
+                >
+                  공지사항 추가
+                </ThemedButton>
+              )}
+            </Box>
           }
-        />
-      </ThemedCard>
-
-      {/* 검색 및 필터 */}
-      <ThemedCard sx={{ mb: 3 }}>
-        <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                placeholder="제목 또는 내용으로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <TextField
-                select
-                fullWidth
-                label="카테고리"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                SelectProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <FilterIcon />
-                    </InputAdornment>
-                  ),
-                }}
+          filters={[
+            {
+              label: '타입',
+              value: filterType,
+              options: [
+                { value: 'all', label: '전체' },
+                { value: 'G', label: '일반' },
+                { value: 'S', label: '시스템' },
+                { value: 'E', label: '긴급' }
+              ],
+              onChange: (value: string) => setFilterType(value as 'all' | 'G' | 'S' | 'E')
+            },
+            {
+              label: '공개여부',
+              value: filterStatus,
+              options: [
+                { value: 'all', label: '전체' },
+                { value: 'Y', label: '공개' },
+                { value: 'N', label: '비공개' }
+              ],
+              onChange: (value: string) => setFilterStatus(value as 'all' | 'Y' | 'N')
+            }
+          ]}
+          total={filteredNotices.length}
+          wrapInCard={false}
+        >
+          <Stack id="notice-list-stack" spacing={SPACING.MEDIUM}>
+            {filteredNotices.map((notice) => (
+              <ListItemCard 
+                id={`notice-item-${notice.noticeId}`} 
+                key={notice.noticeId} 
+                onClick={() => handleNoticeClick(notice.noticeId)}
               >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <TextField
-                select
-                fullWidth
-                label="상태"
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                SelectProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <FilterIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              >
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <Typography variant="body2" color="text.secondary">
-                총 {filteredNotices.length}개
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </ThemedCard>
-
-      {/* 공지사항 목록 */}
-      <Grid container spacing={3}>
-        {filteredNotices.map((notice) => (
-          <Grid item xs={12} md={6} lg={4} key={notice.id}>
-            <ThemedCard>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Chip
-                      label={notice.category}
-                      size="small"
-                      color={getCategoryColor(notice.category) as any}
-                      variant="outlined"
-                    />
-                    <Chip
-                      label={notice.priority}
-                      size="small"
-                      color={getPriorityColor(notice.priority) as any}
-                      variant="outlined"
+                <Box id={`notice-item-header-${notice.noticeId}`} sx={{ display: 'flex', alignItems: 'center', mb: SPACING.SMALL }}>
+                  <Box 
+                    onClick={(e) => e.stopPropagation()} 
+                    sx={{ mr: SPACING.SMALL }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedNotices.includes(notice.noticeId)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleNoticeSelect(notice.noticeId, e.target.checked);
+                          }}
+                          size="small"
+                        />
+                      }
+                      label=""
+                      onClick={(e) => e.stopPropagation()}
                     />
                   </Box>
-                  <StatusChip
-                    label={notice.status}
-                    kind={getStatusColor(notice.status)}
+                  <Chip 
+                    id={`notice-item-type-${notice.noticeId}`}
+                    label={getNoticeTypeLabel(notice.noticeType)} 
+                    color={getNoticeTypeColor(notice.noticeType)} 
                     size="small"
+                    sx={{ mr: SPACING.MEDIUM }} 
                   />
+                  <Chip 
+                    id={`notice-item-status-${notice.noticeId}`}
+                    label={notice.publicYn === 'Y' ? '공개' : '비공개'} 
+                    color={notice.publicYn === 'Y' ? 'success' : 'default'} 
+                    size="small"
+                    sx={{ mr: SPACING.MEDIUM }} 
+                  />
+                  <Typography 
+                    id={`notice-item-date-${notice.noticeId}`} 
+                    variant="caption" 
+                    sx={{ color: 'text.secondary', ml: 'auto' }}
+                  >
+                    {new Date(notice.postedAt).toLocaleDateString()}
+                  </Typography>
                 </Box>
-                <Typography variant="h6" gutterBottom sx={{ color: colors.text, minHeight: 48 }}>
+                
+                <Typography 
+                  id={`notice-item-title-${notice.noticeId}`} 
+                  variant="subtitle1" 
+                  sx={{ color: 'text.primary', fontWeight: 600, mb: SPACING.SMALL }}
+                >
                   {notice.title}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
-                  {notice.content.length > 100 ? `${notice.content.substring(0, 100)}...` : notice.content}
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    생성: {notice.createdAt}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    수정: {notice.updatedAt}
-                  </Typography>
-                </Box>
-              </CardContent>
-              <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                <ThemedButton
-                  variant="outlined"
-                  size="small"
-                  onClick={() => handleViewNotice(notice.id)}
+                
+                <Typography 
+                  id={`notice-item-content-${notice.noticeId}`} 
+                  variant="body2" 
+                  sx={{ color: 'text.secondary', mb: SPACING.SMALL }}
                 >
-                  보기
-                </ThemedButton>
-                <Box>
-                  <ThemedButton
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleEditNotice(notice.id)}
-                    sx={{ mr: 1 }}
+                  {notice.content}
+                </Typography>
+                
+                {notice.startDt && (
+                  <Typography 
+                    id={`notice-item-period-${notice.noticeId}`} 
+                    variant="caption" 
+                    sx={{ color: 'text.secondary', display: 'block' }}
                   >
-                    편집
-                  </ThemedButton>
-                  <ThemedButton
-                    variant="dangerOutlined"
-                    size="small"
-                    onClick={() => handleDeleteNotice(notice.id)}
-                  >
-                    삭제
-                  </ThemedButton>
-                </Box>
-              </CardActions>
-            </ThemedCard>
-          </Grid>
-        ))}
-      </Grid>
-
-      {filteredNotices.length === 0 && (
-        <ThemedCard>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <NoticeIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              공지사항이 없습니다
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {searchTerm || selectedCategory !== '전체' || selectedStatus !== '전체' ? '검색 조건을 변경해보세요.' : '새로운 공지사항을 추가해보세요.'}
-            </Typography>
-          </CardContent>
-        </ThemedCard>
-      )}
+                    게시기간: {new Date(notice.startDt).toLocaleDateString()} 
+                    {notice.endDt && ` ~ ${new Date(notice.endDt).toLocaleDateString()}`}
+                  </Typography>
+                )}
+                
+                <Typography 
+                  id={`notice-item-created-${notice.noticeId}`} 
+                  variant="caption" 
+                  sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}
+                >
+                  작성일: {new Date(notice.createdAt).toLocaleDateString()}
+                </Typography>
+              </ListItemCard>
+            ))}
+          </Stack>
+        </ListScaffold>
+      </Box>
     </Box>
   );
 }
-
-

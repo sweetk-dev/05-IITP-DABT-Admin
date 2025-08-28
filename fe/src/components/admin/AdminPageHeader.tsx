@@ -57,7 +57,7 @@ export default function AdminPageHeader({
         
         // 상세 페이지 구분
         if (path.endsWith('/edit')) {
-          crumbs.push({ label: '편집' });
+          crumbs.push({ label: '수정' });
         } else if (path.endsWith('/reply')) {
           crumbs.push({ label: '답변' });
         } else if (path.endsWith('/create')) {
@@ -99,18 +99,18 @@ export default function AdminPageHeader({
       {crumbs.length > 1 && (
         <Box id={id} sx={{ 
           px: 3, 
-          py: 1.5,
-          backgroundColor: 'background.paper',
+          py: 2,
           borderBottom: '1px solid',
           borderColor: 'divider',
           mb: 2
         }}>
           <Breadcrumbs 
             aria-label="breadcrumb" 
+            separator={<Typography sx={{ color: 'secondary.dark', mx: 1, fontWeight: 600 }}>/</Typography>}
             sx={{ 
               '& .MuiBreadcrumbs-separator': {
-                color: 'text.secondary',
-                fontSize: '0.65rem'
+                color: 'secondary.dark',
+                mx: 1
               }
             }}
           >
@@ -121,11 +121,11 @@ export default function AdminPageHeader({
                 return (
                   <Typography 
                     key={index} 
-                    color="text.secondary" 
+                    color="secondary.dark" 
                     sx={{ 
-                      fontSize: '0.65rem',
-                      fontWeight: isLast ? 500 : 400,
-                      lineHeight: 1.2
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      lineHeight: 1.4
                     }}
                   >
                     {crumb.label}
@@ -136,17 +136,17 @@ export default function AdminPageHeader({
               return (
                 <Link
                   key={index}
-                  color="text.secondary"
+                  color="secondary.main"
                   onClick={() => navigate(crumb.to!)}
                   sx={{ 
                     cursor: 'pointer', 
                     textDecoration: 'none',
-                    fontSize: '0.65rem',
-                    fontWeight: 400,
-                    lineHeight: 1.2,
+                    fontSize: '0.875rem',
+                    fontWeight: 700,
+                    lineHeight: 1.4,
                     '&:hover': { 
                       textDecoration: 'underline',
-                      color: 'primary.main'
+                      color: 'secondary.dark'
                     }
                   }}
                 >

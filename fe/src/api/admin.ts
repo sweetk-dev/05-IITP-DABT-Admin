@@ -89,3 +89,22 @@ export async function changeAdminPassword(params: AdminPasswordChangeReq): Promi
     body: JSON.stringify(params),
   });
 }
+
+/**
+ * Admin Dashboard 통계 조회 (QNA + OpenAPI 통합)
+ */
+export async function getAdminDashboardStats(): Promise<ApiResponse<any>> {
+  // QNA와 OpenAPI 통계를 병렬로 조회
+  const [qnaStats, openApiStats] = await Promise.all([
+    apiFetch<any>(FULL_API_URLS.ADMIN.QNA.STATUS, { method: 'GET' }),
+    apiFetch<any>(FULL_API_URLS.ADMIN.OPEN_API.STATUS, { method: 'GET' })
+  ]);
+  
+  return {
+    success: qnaStats.success && openApiStats.success,
+    data: {
+      qna: qnaStats.data,
+      openApi: openApiStats.data
+    }
+  };
+}

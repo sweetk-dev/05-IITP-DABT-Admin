@@ -138,4 +138,24 @@ export async function deleteCommonCode(grpId: string, codeId: string): Promise<A
     .replace(':grpId', grpId)
     .replace(':codeId', codeId);
   return apiFetch<void>(url, { method: 'DELETE' });
+}
+
+/**
+ * 공통 코드 그룹 일괄 삭제 (관리자 전용)
+ */
+export async function deleteCommonCodeGroupList(groupIds: string[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.COMMON_CODE.GROUP.LIST_DELETE, {
+    method: 'DELETE',
+    body: JSON.stringify({ groupIds }),
+  });
+}
+
+/**
+ * 공통 코드 일괄 삭제 (관리자 전용)
+ */
+export async function deleteCommonCodeList(grpId: string, codeIds: string[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.COMMON_CODE.CODE.LIST_DELETE.replace(':grpId', grpId), {
+    method: 'DELETE',
+    body: JSON.stringify({ codeIds }),
+  });
 } 

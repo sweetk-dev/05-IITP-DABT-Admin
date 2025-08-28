@@ -118,19 +118,29 @@ export default function SideNav({ open, adminRole }: SideNavProps) {
                 py: isCollapsed ? 2 : 1.5,
                 minHeight: isCollapsed ? 64 : 48,
                 flexDirection: isCollapsed ? 'column' : 'row',
+                transition: 'all 0.2s ease-in-out',
                 '&.Mui-selected': {
-                  bgcolor: 'primary.light',
-                  color: 'primary.contrastText',
+                  bgcolor: `${theme.palette.primary.main} !important`,
+                  color: '#ffffff !important',
                   borderLeft: `4px solid ${theme.palette.primary.main}`,
                   '& .MuiListItemIcon-root': {
-                    color: 'primary.contrastText',
+                    color: '#ffffff !important',
                   },
                   '& .MuiListItemText-root': {
-                    color: 'primary.contrastText',
+                    color: '#ffffff !important',
                   }
                 },
                 '&:hover': {
-                  bgcolor: active ? 'primary.light' : 'action.hover',
+                  bgcolor: active ? `${theme.palette.primary.main} !important` : `${theme.palette.primary.main}20 !important`,
+                  color: active ? '#ffffff !important' : theme.palette.text.primary,
+                  transform: 'translateX(2px)',
+                  transition: 'all 0.2s ease-in-out',
+                  '& .MuiListItemIcon-root': {
+                    color: active ? '#ffffff !important' : theme.palette.primary.main,
+                  },
+                  '& .MuiListItemText-root': {
+                    color: active ? '#ffffff !important' : theme.palette.text.primary,
+                  }
                 }
               }}
             >
@@ -193,19 +203,29 @@ export default function SideNav({ open, adminRole }: SideNavProps) {
                 py: isCollapsed ? 2 : 1.5,
                 minHeight: isCollapsed ? 64 : 48,
                 flexDirection: isCollapsed ? 'column' : 'row',
+                transition: 'all 0.2s ease-in-out',
                 '&.Mui-selected': {
-                  bgcolor: 'secondary.light',
-                  color: 'secondary.contrastText',
+                  bgcolor: `${theme.palette.secondary.main} !important`,
+                  color: '#ffffff !important',
                   borderLeft: `4px solid ${theme.palette.secondary.main}`,
                   '& .MuiListItemIcon-root': {
-                    color: 'secondary.contrastText',
+                    color: '#ffffff !important',
                   },
                   '& .MuiListItemText-root': {
-                    color: 'secondary.contrastText',
+                    color: '#ffffff !important',
                   }
                 },
                 '&:hover': {
-                  bgcolor: active ? 'secondary.light' : 'action.hover',
+                  bgcolor: active ? `${theme.palette.secondary.main} !important` : `${theme.palette.secondary.main}20 !important`,
+                  color: active ? '#ffffff !important' : theme.palette.text.primary,
+                  transform: 'translateX(2px)',
+                  transition: 'all 0.2s ease-in-out',
+                  '& .MuiListItemIcon-root': {
+                    color: active ? '#ffffff !important' : theme.palette.secondary.main,
+                  },
+                  '& .MuiListItemText-root': {
+                    color: active ? '#ffffff !important' : theme.palette.text.primary,
+                  }
                 }
               }}
             >

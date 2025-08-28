@@ -155,4 +155,14 @@ export async function getAdminOpenApiStats(userId?: number): Promise<ApiResponse
   return apiFetch<AdminOpenApiStatsRes>(url, {
     method: 'GET',
   });
+}
+
+/**
+ * 관리자 OpenAPI 인증키 일괄 삭제
+ */
+export async function deleteAdminOpenApiList(keyIds: (number | string)[]): Promise<ApiResponse<void>> {
+  return apiFetch<void>(FULL_API_URLS.ADMIN.OPEN_API.LIST_DELETE, {
+    method: 'DELETE',
+    body: JSON.stringify({ keyIds }),
+  });
 } 

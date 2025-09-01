@@ -28,6 +28,16 @@ export async function getCommonCodesByGroupId(grpId: string): Promise<ApiRespons
 }
 
 /**
+ * 공통 코드 그룹 목록 조회 (관리자용)
+ */
+export async function getCommonCodeGroups(): Promise<ApiResponse<any>> {
+  const response = await apiFetch<any>(FULL_API_URLS.COMMON_CODE.GROUP.LIST, {
+    method: 'GET',
+  });
+  return enhanceApiResponse(response);
+}
+
+/**
  * 그룹 ID로 공통 코드 목록 조회 (관리자용)
  */
 export async function getCommonCodesByGroupIdDetail(grpId: string): Promise<ApiResponse<CommonCodeByGroupDetailRes>> {
@@ -141,21 +151,23 @@ export async function deleteCommonCode(grpId: string, codeId: string): Promise<A
 }
 
 /**
- * 공통 코드 그룹 일괄 삭제 (관리자 전용)
+ * 공통 코드 일괄 삭제 (관리자용)
  */
-export async function deleteCommonCodeGroupList(groupIds: string[]): Promise<ApiResponse<void>> {
-  return apiFetch<void>(FULL_API_URLS.COMMON_CODE.GROUP.LIST_DELETE, {
+export async function deleteCommonCodeList(ids: (number | string)[]): Promise<ApiResponse<void>> {
+  const response = await apiFetch<void>(FULL_API_URLS.COMMON_CODE.CODE.LIST_DELETE, {
     method: 'DELETE',
-    body: JSON.stringify({ groupIds }),
+    body: JSON.stringify({ codeIds: ids }),
   });
+  return enhanceApiResponse(response);
 }
 
 /**
- * 공통 코드 일괄 삭제 (관리자 전용)
+ * 공통 코드 그룹 일괄 삭제 (관리자용)
  */
-export async function deleteCommonCodeList(grpId: string, codeIds: string[]): Promise<ApiResponse<void>> {
-  return apiFetch<void>(FULL_API_URLS.COMMON_CODE.CODE.LIST_DELETE.replace(':grpId', grpId), {
+export async function deleteCommonCodeGroupList(ids: (number | string)[]): Promise<ApiResponse<void>> {
+  const response = await apiFetch<void>(FULL_API_URLS.COMMON_CODE.GROUP.LIST_DELETE, {
     method: 'DELETE',
-    body: JSON.stringify({ codeIds }),
+    body: JSON.stringify({ groupIds: ids }),
   });
+  return enhanceApiResponse(response);
 } 

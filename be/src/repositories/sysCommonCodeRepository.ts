@@ -121,7 +121,7 @@ export const commonCodeRepository = {
     const [affectedCount] = await SysCommonCode.update({
       delYn: 'Y',
       deletedBy,
-      deletedAt: new Date()
+      deletedAt: new Date()  // ✅ Sequelize 모델 속성명 사용
     }, {
       where: {
         grpId,
@@ -137,7 +137,7 @@ export const commonCodeRepository = {
     const [affectedCount] = await SysCommonCode.update({
       delYn: 'Y',
       deletedBy,
-      deletedAt: new Date()
+      deletedAt: new Date()  // ✅ Sequelize 모델 속성명 사용
     }, {
       where: {
         grpId,
@@ -158,7 +158,7 @@ export const commonCodeRepository = {
       attributes: [
         'grpId',
         'grpNm',
-        [SysCommonCode.sequelize!.fn('COUNT', SysCommonCode.sequelize!.col('codeId')), 'count']
+        [SysCommonCode.sequelize!.fn('COUNT', SysCommonCode.sequelize!.col('code_id')), 'count']  // ✅ 'codeId' → 'code_id'로 수정
       ],
       where: {
         useYn: 'Y',
@@ -179,25 +179,56 @@ export const commonCodeRepository = {
   /**
    * 공통 코드 그룹 목록 조회
    */
-  async getCommonCodeGroups(): Promise<CodeGroupData[]> {
+  async getCommonCodeGroups(filters?: { search?: string; useYn?: string; sort?: string }): Promise<CodeGroupData[]> {
+    // ✅ 기본 where 조건
+    const whereCondition: any = {
+      delYn: 'N'
+    };
+
+    // ✅ useYn 필터링
+    if (filters?.useYn && filters.useYn !== '') {
+      whereCondition.useYn = filters.useYn;
+    } else {
+      whereCondition.useYn = 'Y'; // 기본값: 활성화된 그룹만
+    }
+
+    // ✅ 검색 필터링
+    if (filters?.search) {
+      whereCondition[Op.or] = [
+        { grpId: { [Op.like]: `%${filters.search}%` } },
+        { grpNm: { [Op.like]: `%${filters.search}%` } }
+      ];
+    }
+
+    // ✅ 정렬 조건
+    let orderCondition: any = [['grpId', 'ASC']]; // 기본 정렬
+    if (filters?.sort) {
+      const [key, order] = filters.sort.split('-');
+      if (key === 'grpNm') {
+        orderCondition = [['grpNm', order?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']];
+      } else if (key === 'createdAt') {
+        orderCondition = [['createdAt', order?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']];
+      }
+    }
+
     const result = await SysCommonCode.findAll({
       attributes: [
         'grpId',
         'grpNm',
-        [SysCommonCode.sequelize!.fn('COUNT', SysCommonCode.sequelize!.col('codeId')), 'codeCount'],
-        [SysCommonCode.sequelize!.fn('MIN', SysCommonCode.sequelize!.col('createdAt')), 'createdAt'],
-        [SysCommonCode.sequelize!.fn('MAX', SysCommonCode.sequelize!.col('updatedAt')), 'updatedAt']
+        'codeType',  // ✅ 추가: 코드 타입 정보 (선택적)
+        [SysCommonCode.sequelize!.fn('COUNT', SysCommonCode.sequelize!.col('code_id')), 'codeCount'],  // ✅ 'codeId' → 'code_id'로 수정
+        [SysCommonCode.sequelize!.fn('MIN', SysCommonCode.sequelize!.col('created_at')), 'createdAt'],  // ✅ 'createdAt' → 'created_at'으로 수정
+        [SysCommonCode.sequelize!.fn('MAX', SysCommonCode.sequelize!.col('updated_at')), 'updatedAt']   // ✅ 'updatedAt' → 'updated_at'으로 수정
       ],
-      where: {
-        delYn: 'N'
-      },
-      group: ['grpId', 'grpNm'],
-      order: [['grpId', 'ASC']]
+      where: whereCondition,
+      group: ['grpId', 'grpNm', 'codeType'],  // ✅ 추가: codeType 그룹핑
+      order: orderCondition
     });
 
     return result.map(item => ({
       grpId: item.grpId,
       grpNm: item.grpNm,
+      codeType: item.codeType || undefined,  // ✅ codeType이 없으면 undefined로 처리
       codeCount: parseInt(item.get('codeCount') as string),
       createdAt: item.get('createdAt') ? toIsoString(item.get('createdAt') as Date) : undefined,  
       updatedAt: item.get('updatedAt') ? toIsoString(item.get('updatedAt') as Date) : undefined
@@ -211,7 +242,7 @@ export const commonCodeRepository = {
     const [affectedCount] = await SysCommonCode.update({
       grpNm,
       updatedBy: updateBy,
-      updatedAt: new Date()
+      updatedAt: new Date()  // ✅ Sequelize 모델 속성명 사용
     }, {
       where: { 
         grpId,
@@ -230,7 +261,7 @@ export const commonCodeRepository = {
     const [affectedCount] = await SysCommonCode.update({
       delYn: 'Y',
       deletedBy,
-      deletedAt: new Date()
+      deletedAt: new Date()  // ✅ Sequelize 모델 속성명 사용
     }, {
       where: {
         grpId : { [Op.in] : grpIds }

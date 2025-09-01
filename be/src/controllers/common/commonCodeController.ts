@@ -29,6 +29,7 @@ import type {
   CommonCodeCreateReq,
   CommonCodeUpdateReq,
   CommonCodeListDeleteReq,
+  CommonCodeGroupReq,
   CommonCodeGroupsRes,
   CommonCodeGroupCreateReq,
   CommonCodeGroupUpdateReq,
@@ -218,11 +219,14 @@ export const getCodesByParent = async (req: Request<CommonCodeByParentReq>, res:
 /**
  * 공통 코드 그룹 목록 조회 (관리자용)
  */
-export const getCodeGroupsForAdmin = async (req: Request<CommonCodeByGroupReq>, res: Response) => {
+export const getCodeGroupsForAdmin = async (req: Request<{}, {}, {}, CommonCodeGroupReq>, res: Response) => {  // ✅ CommonCodeGroupReq 쿼리 파라미터 추가
   try {
     logApiCall('GET', API_URLS.COMMON_CODE.GROUP.LIST, COMMON_CODE_API_MAPPING as any, '코드 그룹 목록 조회 (관리자용)');
 
-    const groups = await commonCodeService.getCodeGroups( );
+    // ✅ 쿼리 파라미터 추출
+    const { search, useYn, sort } = req.query;
+    appLogger.info("===== CommonCodeGroupReq :: {} -==", search, useYn, sort)
+    const groups = await commonCodeService.getCodeGroups({ search, useYn, sort });
     
 
     const result: CommonCodeGroupsRes = { groups: groups };

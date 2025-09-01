@@ -30,8 +30,16 @@ export async function getCommonCodesByGroupId(grpId: string): Promise<ApiRespons
 /**
  * 공통 코드 그룹 목록 조회 (관리자용)
  */
-export async function getCommonCodeGroups(): Promise<ApiResponse<any>> {
-  const response = await apiFetch<any>(FULL_API_URLS.COMMON_CODE.GROUP.LIST, {
+export async function getCommonCodeGroups(filters?: { search?: string; useYn?: string; sort?: string }): Promise<ApiResponse<any>> {
+  // ✅ 쿼리 파라미터 구성
+  const queryParams = new URLSearchParams();
+  if (filters?.search) queryParams.append('search', filters.search);
+  if (filters?.useYn) queryParams.append('useYn', filters.useYn);
+  if (filters?.sort) queryParams.append('sort', filters.sort);
+  
+  const url = queryParams.toString() ? `${FULL_API_URLS.COMMON_CODE.GROUP.LIST}?${queryParams.toString()}` : FULL_API_URLS.COMMON_CODE.GROUP.LIST;
+  
+  const response = await apiFetch<any>(url, {
     method: 'GET',
   });
   return enhanceApiResponse(response);

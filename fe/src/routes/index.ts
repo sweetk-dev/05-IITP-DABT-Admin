@@ -56,6 +56,7 @@ export const ROUTES = {
     QNA: {
       LIST: '/admin/qnas',
       DETAIL: '/admin/qnas/:id',
+      EDIT: '/admin/qnas/:id/edit',
       REPLY: '/admin/qnas/:id/reply',
       CREATE: '/admin/qnas/create',
     },
@@ -196,6 +197,13 @@ export const RouteUtils = {
    */
   createAdminQnaCreateRoute: (): string => {
     return ROUTES.ADMIN.QNA.CREATE;
+  },
+
+  /**
+   * 관리자 Q&A 편집 라우트 생성
+   */
+  createAdminQnaEditRoute: (id: string | number): string => {
+    return RouteUtils.createDynamicRoute(ROUTES.ADMIN.QNA.EDIT, { id });
   },
 
   /**
@@ -485,6 +493,12 @@ export const ROUTE_META = {
     requiresAdmin: true,
     showInNav: false,
   },
+  [ROUTES.ADMIN.QNA.EDIT]: {
+    title: 'Q&A 편집',
+    requiresAuth: true,
+    requiresAdmin: true,
+    showInNav: false,
+  },
   [ROUTES.ADMIN.QNA.REPLY]: {
     title: 'Q&A 답변',
     requiresAuth: true,
@@ -672,6 +686,7 @@ export const ROUTE_GROUPS = {
       { path: ROUTES.ADMIN.FAQ.DETAIL, title: 'FAQ 상세' },
       { path: ROUTES.ADMIN.QNA.LIST, title: 'Q&A 관리' },
       { path: ROUTES.ADMIN.QNA.DETAIL, title: 'Q&A 상세' },
+      { path: ROUTES.ADMIN.QNA.EDIT, title: 'Q&A 편집' },
       { path: ROUTES.ADMIN.QNA.REPLY, title: 'Q&A 답변' },
       { path: ROUTES.ADMIN.USERS.LIST, title: '사용자 관리' },
       { path: ROUTES.ADMIN.USERS.CREATE, title: '사용자 생성' },
@@ -718,6 +733,7 @@ export const ROUTE_GROUPS = {
       { path: ROUTES.ADMIN.FAQ.DETAIL, title: 'FAQ 상세' },
       { path: ROUTES.ADMIN.QNA.LIST, title: 'Q&A 관리' },
       { path: ROUTES.ADMIN.QNA.DETAIL, title: 'Q&A 상세' },
+      { path: ROUTES.ADMIN.QNA.EDIT, title: 'Q&A 편집' },
       { path: ROUTES.ADMIN.QNA.REPLY, title: 'Q&A 답변' },
       { path: ROUTES.ADMIN.NOTICES.LIST, title: '공지사항 관리' },
       { path: ROUTES.ADMIN.NOTICES.CREATE, title: '공지사항 생성' },

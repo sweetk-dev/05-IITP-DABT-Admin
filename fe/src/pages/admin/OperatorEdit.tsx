@@ -11,12 +11,20 @@ import { ROUTES } from '../../routes';
 import { getAdminAccountDetail, updateAdminAccount } from '../../api/account';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import { useDataFetching } from '../../hooks/useDataFetching';
+import { getCommonCodesByGroupId } from '../../api';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import type { AdminAccountUpdateReq } from '@iitp-dabt/common';
 
 export default function OperatorEdit() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const operatorId = Number(id);
+
+  // 공통 코드 조회 (운영자 역할)
+  const { data: roleCodes, isLoading: roleLoading } = useDataFetching({ 
+    fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES), 
+    autoFetch: true 
+  });
 
   const { data, error: fetchError } = useDataFetching({
     fetchFunction: () => getAdminAccountDetail(operatorId),
@@ -27,7 +35,7 @@ export default function OperatorEdit() {
   const operator = (data as any)?.admin;
 
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'S' | 'A'>('A');
+  const [role, setRole] = useState<string>('');  // 하드코딩된 타입 제거
   const [affiliation, setAffiliation] = useState('');
   const [description, setDescription] = useState('');
   const [note, setNote] = useState('');
@@ -117,10 +125,13 @@ export default function OperatorEdit() {
               id="operator-role"
               value={role}
               label="역할"
-              onChange={(e) => setRole(e.target.value as 'S' | 'A')}
+              onChange={(e) => setRole(e.target.value)}
             >
-              <MenuItem value="S">슈퍼관리자</MenuItem>
-              <MenuItem value="A">일반관리자</MenuItem>
+              {roleCodes?.codes?.map((code: any) => (
+                <MenuItem key={code.codeId} value={code.codeId}>
+                  {code.codeNm}
+                </MenuItem>
+              ))}
             </Select>
             <FormHelperText>운영자의 권한 레벨을 설정합니다</FormHelperText>
           </FormControl>

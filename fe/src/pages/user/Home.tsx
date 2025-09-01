@@ -32,12 +32,12 @@ export default function Home() {
   const { fetchCodesByGroup } = useCommonCode();
   
   // 인증 상태 체크 (Layout과 동일한 로직 사용)
-  const userType = getUserType();
+  //const userType = getUserType();
   const isUserLoggedIn = isUserAuthenticated();
   const isAdminLoggedIn = isAdminAuthenticated();
   
   // 토큰이 유효하지 않으면 API 호출 건너뛰기
-  const shouldFetchData = isUserLoggedIn || isAdminLoggedIn;
+  //const shouldFetchData = isUserLoggedIn || isAdminLoggedIn;
   
   // 공지사항 데이터 페칭 (홈화면은 인증 여부와 관계없이 표시)
   const {

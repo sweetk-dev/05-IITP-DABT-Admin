@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
@@ -15,6 +15,8 @@ import { hasAccountManagementPermission } from '../../utils/auth';
 import { getAdminRole } from '../../store/user';
 import { formatYmdHm } from '../../utils/date';
 import { getAdminAccountList, deleteAdminAccountList } from '../../api/account';
+import { getCommonCodesByGroupId } from '../../api';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import type { AdminAccountListItem } from '@iitp-dabt/common';
 
 export default function OperatorManagement() {
@@ -32,6 +34,30 @@ export default function OperatorManagement() {
 
   // 페이징
   const { currentPage, pageSize, handlePageChange, handlePageSizeChange } = usePagination();
+
+  // 공통 코드 조회 (운영자 역할)
+  const { data: roleCodes, isLoading: roleLoading } = useDataFetching({ 
+    fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES), 
+    autoFetch: true 
+  });
+  
+  // 역할 옵션 생성
+  const [roleOptions, setRoleOptions] = useState<{ value: string; label: string }[]>([
+    { value: '', label: '전체' }
+  ]);
+  
+  useEffect(() => {
+    if (roleCodes?.codes) {
+      const options = [
+        { value: '', label: '전체' },
+        ...roleCodes.codes.map((code: any) => ({ 
+          value: code.codeId, 
+          label: code.codeNm 
+        }))
+      ];
+      setRoleOptions(options);
+    }
+  }, [roleCodes]);
 
   // API 호출 - 실제 API 함수를 래핑하여 useDataFetching에 전달
   const { data: operatorData, isLoading, isError, refetch } = useDataFetching({
@@ -113,11 +139,11 @@ export default function OperatorManagement() {
 
   // 역할 라벨
   const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'S': return '슈퍼관리자';
-      case 'A': return '일반관리자';
-      default: return role;
+    if (roleCodes?.codes) {
+      const roleCode = roleCodes.codes.find((code: any) => code.codeId === role);
+      return roleCode ? roleCode.codeNm : role;
     }
+    return role;
   };
 
   // 정렬된 운영자 목록
@@ -166,11 +192,7 @@ export default function OperatorManagement() {
           {
             label: '역할',
             value: selectedRole,
-            options: [
-              { value: '', label: '전체' },
-              { value: 'S', label: '슈퍼관리자' },
-              { value: 'A', label: '일반관리자' }
-            ],
+            options: roleOptions,
             onChange: handleRoleFilter
           }
         ]}

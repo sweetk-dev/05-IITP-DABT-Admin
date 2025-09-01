@@ -98,11 +98,11 @@ export default function AdminPageHeader({
       {/* 브레드크럼 영역 - 상세/편집 페이지에서만 표시 (경로가 2개 이상일 때) */}
       {crumbs.length > 1 && (
         <Box id={id} sx={{ 
-          px: 3, 
-          py: 2,
+          px: 2, 
+          py: 0.5,
           borderBottom: '1px solid',
           borderColor: 'divider',
-          mb: 2
+          mb: 0.5
         }}>
           <Breadcrumbs 
             aria-label="breadcrumb" 

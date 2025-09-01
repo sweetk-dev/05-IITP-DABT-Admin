@@ -42,6 +42,7 @@ const AdminFaqDetail = lazy(() => import('./pages/admin/FaqDetail'));
 const AdminFaqEdit = lazy(() => import('./pages/admin/FaqEdit'));
 const AdminQnaDetail = lazy(() => import('./pages/admin/QnaDetail'));
 const AdminQnaReply = lazy(() => import('./pages/admin/QnaReply'));
+const AdminQnaEdit = lazy(() => import('./pages/admin/QnaEdit'));
 
 // 새로 추가된 Admin 페이지들
 const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
@@ -53,13 +54,15 @@ const CodeGroupDetail = lazy(() => import('./pages/admin/CodeGroupDetail'));
 const OperatorEdit = lazy(() => import('./pages/admin/OperatorEdit'));
 const UserEdit = lazy(() => import('./pages/admin/UserEdit'));
 
+// 새로 추가된 Admin Detail 페이지들
+const UserDetail = lazy(() => import('./pages/admin/UserDetail'));
+const OperatorDetail = lazy(() => import('./pages/admin/OperatorDetail'));
+
+// 새로 추가된 Admin Create 페이지들
+const UserCreate = lazy(() => import('./pages/admin/UserCreate'));
+const OperatorCreate = lazy(() => import('./pages/admin/OperatorCreate'));
+
 import LoadingSpinner from './components/LoadingSpinner';
-
-// 임시 잔여 컴포넌트
-const UserDetail = () => <div>UserDetail</div>;
-const ApiRequestDetail = () => <div>ApiRequestDetail</div>;
-const AdminQnaEdit = () => <div>AdminQnaEdit</div>;
-
 function App() {
   console.log('[App] Rendering App component');
   
@@ -111,18 +114,20 @@ function App() {
             <Route path={ROUTES.ADMIN.PROFILE} element={<AdminProtectedRoute><AdminProfile /></AdminProtectedRoute>} />
                     
                     {/* 사용자 관리 */}
-            <Route path={ROUTES.ADMIN.USERS.LIST} element={<AdminProtectedRoute><UserManagement /></AdminProtectedRoute>} />
-            <Route path={ROUTES.ADMIN.USERS.DETAIL} element={<AdminProtectedRoute><UserDetail /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.USERS.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><UserManagement /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.USERS.CREATE} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><UserCreate /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.USERS.DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><UserDetail /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.USERS.EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><UserEdit /></Suspense></AdminProtectedRoute>} />
                     
                     {/* 운영자 관리 */}
-            <Route path="/admin/operators" element={<AdminProtectedRoute><OperatorManagement /></AdminProtectedRoute>} />
-            <Route path="/admin/operators/:id" element={<AdminProtectedRoute><div>OperatorDetail</div></AdminProtectedRoute>} />
-            <Route path="/admin/operators/:id/edit" element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><OperatorEdit /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPERATORS.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><OperatorManagement /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPERATORS.CREATE} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><OperatorCreate /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPERATORS.DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><OperatorDetail /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.OPERATORS.EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><OperatorEdit /></Suspense></AdminProtectedRoute>} />
                     
                     {/* 코드 관리 */}
-            <Route path="/admin/code" element={<AdminProtectedRoute><CodeManagement /></AdminProtectedRoute>} />
-            <Route path="/admin/code/group/:groupId" element={<AdminProtectedRoute><CodeGroupDetail /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.CODE.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><CodeManagement /></Suspense></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.CODE.GROUP_DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><CodeGroupDetail /></Suspense></AdminProtectedRoute>} />
                     
                     {/* 기존 관리자 페이지들 */}
             <Route path={ROUTES.ADMIN.OPENAPI.CLIENTS} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiClients /></Suspense></AdminProtectedRoute>} />
@@ -140,7 +145,7 @@ function App() {
             <Route path={ROUTES.ADMIN.FAQ.EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminFaqEdit /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.QNA.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaList /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.QNA.DETAIL} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaDetail /></Suspense></AdminProtectedRoute>} />
-            <Route path="/admin/qnas/:id/edit" element={<AdminProtectedRoute><AdminQnaEdit /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.QNA.EDIT} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaEdit /></Suspense></AdminProtectedRoute>} />
             <Route path={ROUTES.ADMIN.QNA.REPLY} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminQnaReply /></Suspense></AdminProtectedRoute>} />
 
             {/* 404 - 경로에 따라 적절한 페이지로 리다이렉트 */}

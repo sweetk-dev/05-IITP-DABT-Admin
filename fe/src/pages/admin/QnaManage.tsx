@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Box, Stack, Chip, Typography, Checkbox, FormControlLabel } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ROUTES, ROUTE_META } from '../../routes';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -24,15 +24,21 @@ import type { AdminQnaListItem, AdminQnaListQuery } from '@iitp-dabt/common';
 
 export default function QnaManage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const adminRole = getAdminRole();
 
   // ROUTE_META에서 페이지 정보 동적 가져오기
   const pageMeta = (ROUTE_META as any)[ROUTES.ADMIN.QNA.LIST];
 
+  // URL 쿼리 파라미터에서 초기 필터 값 읽기
+  const initialAnsweredYn = searchParams.get('answeredYn') || '';
+  const initialQnaType = searchParams.get('qnaType') || '';
+  const initialSearchTerm = searchParams.get('search') || '';
+
   // 검색 및 필터 상태
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  const [selectedCategory, setSelectedCategory] = useState(initialQnaType);
+  const [selectedStatus, setSelectedStatus] = useState(initialAnsweredYn);
   
   // 선택된 Q&A 항목들
   const [selectedQnas, setSelectedQnas] = useState<number[]>([]);
@@ -154,7 +160,7 @@ export default function QnaManage() {
   };
 
   const handleReplyQna = (qnaId: number) => {
-    navigate(`${ROUTES.ADMIN.QNA.REPLY}/${qnaId}`);
+    navigate(ROUTES.ADMIN.QNA.REPLY.replace(':id', qnaId.toString()));
   };
 
   const isEmpty = !qnaData?.items || qnaData.items.length === 0;

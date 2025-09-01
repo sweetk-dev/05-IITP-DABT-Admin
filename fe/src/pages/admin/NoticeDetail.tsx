@@ -12,6 +12,7 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { deleteAdminNotice, getAdminNoticeDetail } from '../../api';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import { formatYmdHm } from '../../utils/date';
+import { getNoticeTypeLabel, getNoticeTypeColor } from '../../constants/noticeTypes';  // ✅ 공통 상수 import
 import type { AdminNoticeDetailRes } from '@iitp-dabt/common';
 
 export default function AdminNoticeDetail() {
@@ -32,24 +33,6 @@ export default function AdminNoticeDetail() {
   const handleDelete = async () => {
     const res = await deleteAdminNotice(noticeId);
     handleApiResponse(res, () => navigate(ROUTES.ADMIN.NOTICES.LIST));
-  };
-
-  const getNoticeTypeLabel = (noticeType: string) => {
-    switch (noticeType) {
-      case 'G': return '일반';
-      case 'S': return '중요';
-      case 'E': return '긴급';
-      default: return noticeType;
-    }
-  };
-
-  const getNoticeTypeColor = (noticeType: string) => {
-    switch (noticeType) {
-      case 'G': return 'default';
-      case 'S': return 'warning';
-      case 'E': return 'error';
-      default: return 'default';
-    }
   };
 
   return (

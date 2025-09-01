@@ -13,6 +13,8 @@ import { formatYmdHm } from '../../utils/date';
 import { getAdminRole } from '../../store/user';
 import { hasAccountManagementPermission } from '../../utils/auth';
 import { getAdminAccountDetail } from '../../api/account';
+import { getCommonCodesByGroupId } from '../../api';
+import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import type { AdminAccountDetailRes } from '@iitp-dabt/common';
 
 export default function OperatorDetail() {
@@ -21,6 +23,12 @@ export default function OperatorDetail() {
   const operatorId = Number(id);
   const adminRole = getAdminRole();
   const canManage = hasAccountManagementPermission(adminRole);
+
+  // 공통 코드 조회 (운영자 역할)
+  const { data: roleCodes, isLoading: roleLoading } = useDataFetching({ 
+    fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES), 
+    autoFetch: true 
+  });
 
   // 실제 API 호출
   const { data, isLoading, isEmpty, isError, error } = useDataFetching({
@@ -57,11 +65,11 @@ export default function OperatorDetail() {
   };
 
   const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'S': return '슈퍼관리자';
-      case 'A': return '일반관리자';
-      default: return role;
+    if (roleCodes?.codes) {
+      const roleCode = roleCodes.codes.find((code: any) => code.codeId === role);
+      return roleCode ? roleCode.codeNm : role;
     }
+    return role;
   };
 
   const getRoleColor = (role: string) => {
@@ -120,14 +128,14 @@ export default function OperatorDetail() {
                   <Typography variant="subtitle2" color="text.secondary">이름</Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>{operator.name}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">역할</Typography>
-                  <StatusChip 
-                    kind={getRoleColor(operator.role) as any} 
-                    label={`${operator.role} (${getRoleLabel(operator.role)})`}
-                    sx={{ mb: 1 }}
-                  />
-                </Grid>
+                                 <Grid item xs={12} sm={6}>
+                   <Typography variant="subtitle2" color="text.secondary">역할</Typography>
+                   <StatusChip 
+                     kind={getRoleColor(operator.role) as any} 
+                     label={operator.roleName || operator.role}
+                     sx={{ mb: 1 }}
+                   />
+                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">상태</Typography>
                   <StatusChip 
@@ -159,27 +167,19 @@ export default function OperatorDetail() {
                     {operator.createdAt ? formatYmdHm(operator.createdAt) : '-'}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">최근 로그인</Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    {operator.latestLoginAt ? formatYmdHm(operator.latestLoginAt) : '-'}
-                  </Typography>
-                </Grid>
+                                 <Grid item xs={12} sm={6}>
+                   <Typography variant="subtitle2" color="text.secondary">최근 로그인</Typography>
+                   <Typography variant="body1" sx={{ mb: 1 }}>
+                     {operator.lastLoginAt ? formatYmdHm(operator.lastLoginAt) : '-'}
+                   </Typography>
+                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">마지막 수정일</Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>
                     {operator.updatedAt ? formatYmdHm(operator.updatedAt) : '-'}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">로그인 시도 횟수</Typography>
-                  <Chip 
-                    label={operator.loginFailCount || 0} 
-                    size="small" 
-                    color="info"
-                    sx={{ mb: 1 }}
-                  />
-                </Grid>
+                                 {/* 로그인 시도 횟수는 API에 없으므로 제거 */}
               </Grid>
 
               {/* 관리 정보 */}

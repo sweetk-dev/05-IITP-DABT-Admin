@@ -70,16 +70,16 @@ export default function CodeGroupDetail() {
 
   // 필터링된 코드 목록
   const filteredCodes = React.useMemo(() => {
-    if (!data?.data?.codes) return [];
+    if (!data?.codes) return [];
     
-    let codes = data.data.codes;
+    let codes = data.codes;
     
     // 검색 필터
     if (search) {
       codes = codes.filter((code: any) => 
         code.codeId?.toLowerCase().includes(search.toLowerCase()) ||
         code.codeNm?.toLowerCase().includes(search.toLowerCase()) ||
-        code.description?.toLowerCase().includes(search.toLowerCase())
+        code.codeDes?.toLowerCase().includes(search.toLowerCase())  // ✅ description → codeDes로 수정
       );
     }
     
@@ -89,7 +89,7 @@ export default function CodeGroupDetail() {
     }
     
     return codes;
-  }, [data?.data?.codes, search, useYn]);
+  }, [data?.codes, search, useYn]);
 
   // 정렬된 코드 목록
   const sortedCodes = React.useMemo(() => {
@@ -127,7 +127,7 @@ export default function CodeGroupDetail() {
   const columns: Array<DataTableColumn<any>> = [
     { key: 'codeId', header: '코드 ID' },
     { key: 'codeNm', header: '코드명' },
-    { key: 'description', header: '설명' },
+    { key: 'codeDes', header: '설명' },  // ✅ description → codeDes로 수정
     { key: 'sortOrder', header: '정렬순서' },
     { 
       key: 'useYn', 
@@ -266,7 +266,7 @@ export default function CodeGroupDetail() {
                     variant="outlined" 
                     startIcon={<EditIcon />} 
                     onClick={handleEditGroup}
-                    buttonSize="medium"
+                    buttonSize="default"
                   >
                     그룹 정보 수정
                   </ThemedButton>
@@ -274,7 +274,7 @@ export default function CodeGroupDetail() {
                     variant="primary" 
                     startIcon={<AddIcon />} 
                     onClick={handleCreateCode}
-                    buttonSize="cta"
+                    buttonSize="default"
                   >
                     코드 추가
                   </ThemedButton>

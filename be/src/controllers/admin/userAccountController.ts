@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import e, { Request, Response } from 'express';
 import { ErrorCode, ADMIN_API_MAPPING, API_URLS } from '@iitp-dabt/common';
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { getAdminRole, isAdmin, getActorTag } from '../../utils/auth';
@@ -16,6 +16,7 @@ import type {
   UserAccountUpdateParams,
   UserAccountUpdateReq,
   UserAccountDeleteParams,
+  UserAccountListDeleteReq,
   UserAccountPasswordChangeParams,
   UserAccountPasswordChangeReq,
   UserAccountStatusUpdateParams,
@@ -277,6 +278,54 @@ export const deleteUserAccount = async (req: Request<UserAccountDeleteParams>, r
     sendError(res, ErrorCode.ACCOUNT_DELETE_FAILED);
   }
 };
+
+
+/**
+ * 사용자 계정 목록 삭제 (일반 Admin도 접근 가능)
+ * API: POST /api/admin/accounts/user/delete
+ * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE}`] 
+ */
+export const deleteUserAccountList = async (req: Request<{}, {}, UserAccountListDeleteReq>, res: Response) => {
+  try {
+    logApiCall('POST', API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE, ADMIN_API_MAPPING as any, '사용자 계정 목록 삭제 (일반 Admin도 접근 가능)');
+
+    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    const adminRole = getAdminRole(req);
+    if (!isAdmin(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    }
+
+    const { userIds } = req.body;
+    const currentAdminId = extractUserIdFromRequest(req);
+    const actorTag = getActorTag(req);
+    
+    if (!currentAdminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return sendValidationError(res, 'general', '삭제할 사용자 ID 목록이 필요합니다.');
+    }
+
+    const deletedCount = await userAccountService.deleteUserAccountList(userIds, actorTag);
+
+    sendSuccess(res, { deletedCount }, undefined, 'USER_ACCOUNT_LIST_DELETED', { adminId: currentAdminId, requestedCount: userIds.length, deletedCount });
+  } catch (error) { 
+    appLogger.error('사용자 계정 목록 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '삭제', '사용자 계정 목록');
+      }
+    }
+    sendError(res, ErrorCode.ACCOUNT_DELETE_FAILED);
+  }
+};
+
+
 
 /**
  * 사용자 계정 비밀번호 변경 (일반 Admin도 접근 가능)

@@ -10,6 +10,9 @@ import {
 } from '../../repositories/sysFaqRepository';
 import { appLogger } from '../../utils/logger';
 import { toUserFaqItem } from '../../mappers/faqMapper';
+import { ErrorCode } from '@iitp-dabt/common';
+import { ResourceError, BusinessError } from '../../utils/customErrors';
+
 
 /**
  * 사용자 FAQ 목록 조회 (비즈니스 로직)

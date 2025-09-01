@@ -17,6 +17,7 @@ import type {
   AdminAccountUpdateParams,
   AdminAccountUpdateReq,
   AdminAccountDeleteParams,
+  AdminAccountListDeleteReq,
   AdminAccountPasswordChangeParams,
   AdminAccountPasswordChangeReq,
   AdminAccountRoleUpdateParams,
@@ -278,6 +279,56 @@ export const deleteAdminAccount = async (req: Request<AdminAccountDeleteParams>,
     sendError(res, ErrorCode.ACCOUNT_DELETE_FAILED);
   }
 };
+
+
+/** 
+ * 운영자 계정 목록 삭제 (S-Admin 전용)
+ * API: POST /api/admin/admin-accounts
+ * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE]}`]
+ */
+export const deleteAdminAccountList = async (req: Request<{}, {}, AdminAccountListDeleteReq>, res: Response) => { 
+  try {
+    logApiCall('POST', API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE, ADMIN_API_MAPPING as any, '운영자 계정 목록 삭제 (S-Admin 전용)');
+
+    // S-ADMIN 권한 체크
+    const adminRole = getAdminRole(req as any);
+    if (!isSAdmin(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, 'S-ADMIN 권한이 필요합니다.');
+    }
+
+    const data = req.body;
+    const currentAdminId = extractUserIdFromRequest(req);
+    const actorTag = getActorTag(req);
+    
+    if (!currentAdminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    if (!data.adminIds || data.adminIds.length === 0) {
+      return sendValidationError(res, 'general', '삭제할 운영자 계정 ID 목록은 필수입니다.');
+    }
+
+    await adminAccountService.deleteAdminAccountList(data, actorTag);
+
+    sendSuccess(res, null, undefined, 'ADMIN_ACCOUNT_LIST_DELETED', { adminId: currentAdminId, deletedCount: data.adminIds.length });
+  } catch (error) {
+    appLogger.error('운영자 계정 목록 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '삭제', '운영자 계정 목록');
+      }
+    }
+    sendError(res, ErrorCode.ACCOUNT_DELETE_FAILED);
+  }
+};
+
+
+
+
 
 /**
  * 운영자 계정 비밀번호 변경 (S-Admin 전용)

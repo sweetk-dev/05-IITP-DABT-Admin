@@ -73,6 +73,21 @@ export async function deleteFaq(faqId: number): Promise<boolean> {
   return deletedCount > 0;
 }
 
+
+/** * FAQ 다중 삭제
+ */
+export async function deleteFaqList(faqIds: number[]): Promise<number> {
+  const deletedCount = await SysFaq.destroy({
+    where: {
+      faqId: {
+        [Op.in]: faqIds
+      }
+    }
+  });
+  return deletedCount;
+}
+
+
 /**
  * FAQ 조회수 증가
  */

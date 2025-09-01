@@ -85,6 +85,22 @@ export async function deleteQna(qnaId: number, deletedBy?: string): Promise<SysQ
   return null;
 }
 
+
+/**
+ * QnA 다중 삭제
+ */
+export async function deleteQnaList(qnaIds: number[], deletedBy?: string): Promise<number> {
+  const deletedCount = await SysQna.update({
+    delYn: 'Y',
+    deletedBy,
+    deletedAt: new Date()
+  }, {
+    where: { qnaId: { [Op.in]: qnaIds } }
+  }).then(result => result[0]); // result is [affectedCount, affectedRows]
+  return deletedCount;
+} 
+
+
 /**
  * QnA 답변 등록/수정
  */

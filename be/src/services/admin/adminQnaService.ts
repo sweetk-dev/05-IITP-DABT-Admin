@@ -5,6 +5,7 @@ import {
   answerQna as answerQnaRepo, 
   updateQna as updateQnaRepo, 
   deleteQna as deleteQnaRepo,
+  deleteQnaList as deleteQnaListRepo, 
   getQnaStats  
 } from '../../repositories/sysQnaRepository';
 import type { SysQna } from '../../models/sysQna';
@@ -213,6 +214,34 @@ export const deleteQna = async (qnaId: number, actorTag: string): Promise<SysQna
     );
   }
 }; 
+
+
+/**
+ * QnA 목록 삭제 (관리자용)
+ */
+export const deleteQnaList = async (qnaIds: number[], actorTag: string): Promise<void> => {
+  try {
+    const deleteCount = await deleteQnaListRepo(qnaIds, actorTag);
+    if (deleteCount === 0) {
+      throw new ResourceError(
+        ErrorCode.QNA_NOT_FOUND,
+        '삭제할 QnA를 찾을 수 없습니다.',
+        'qna',
+        qnaIds.toString()
+      );
+    }
+  } catch (error) {
+    appLogger.error('QnA 목록 삭제 중 오류 발생', { error, qnaIds, actorTag });
+    throw new BusinessError(
+      ErrorCode.QNA_DELETE_FAILED,
+      'QnA 목록 삭제 중 오류가 발생했습니다.',
+      { qnaIds, actorTag, originalError: error }
+    );
+  }
+}
+
+
+
 
 /**
  * QnA 상태(통계) 조회 (관리자용)

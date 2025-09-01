@@ -4,7 +4,8 @@ import {
   findFaqById, 
   createFaq as createFaqRepo, 
   updateFaq as updateFaqRepo, 
-  deleteFaq as deleteFaqRepo 
+  deleteFaq as deleteFaqRepo, 
+  deleteFaqList as deleteFaqListRepo
 } from '../../repositories/sysFaqRepository';
 import { appLogger } from '../../utils/logger';
 import { ErrorCode } from '@iitp-dabt/common';
@@ -200,4 +201,26 @@ export const deleteFaq = async (faqId: number) => {
   }
 };
 
+
+/**
+ * FAQ 목록 삭제 (관리자용)
+ */
+export const deleteFaqList = async (faqIds: number[]) => {
+  try {
+    const deletedCount = await deleteFaqListRepo( faqIds);
+    if (deletedCount == 0) {
+      throw new ResourceError( ErrorCode.FAQ_NOT_FOUND, '삭제할 FAQ를 찾을 수 없습니다.', 'faq', faqIds.toString() );
+    }
+
+    appLogger.info('FAQ 목록 삭제 성공', { faqIds });
+    return true;
+  } catch (error) {
+    appLogger.error('FAQ 목록 삭제 중 오류 발생', { error, faqIds });
+    throw new BusinessError(
+      ErrorCode.DATABASE_ERROR,
+      'FAQ 목록 삭제 중 오류가 발생했습니다.',
+      { faqIds, originalError: error }
+    );
+  }
+};
 

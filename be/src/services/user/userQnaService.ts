@@ -14,7 +14,8 @@ import {
 } from '../../repositories/sysQnaRepository';
 import { appLogger } from '../../utils/logger';
 import { QnaSource, toUserQnaItem } from '../../mappers/qnaMapper';
-import { act } from 'react';
+import { ErrorCode } from '@iitp-dabt/common';
+import { ResourceError, BusinessError } from '../../utils/customErrors';
 
 /**
  * 사용자 Q&A 목록 조회 (비즈니스 로직)

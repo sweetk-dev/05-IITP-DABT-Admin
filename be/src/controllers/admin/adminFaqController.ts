@@ -6,7 +6,8 @@ import {
   getFaqDetail, 
   createFaq, 
   updateFaq, 
-  deleteFaq
+  deleteFaq,
+  deleteFaqList
 } from '../../services/admin/adminFaqService';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
@@ -23,7 +24,8 @@ import type {
   AdminFaqDetailRes,
   AdminFaqCreateReq,
   AdminFaqCreateRes,
-  AdminFaqUpdateReq
+  AdminFaqUpdateReq,
+  AdminFaqListDeleteReq
 } from '@iitp-dabt/common';
 import { toAdminFaqItem } from '../../mappers/faqMapper';
 
@@ -246,3 +248,42 @@ export const deleteFaqForAdmin = async (req: Request<{ faqId: string }>, res: Re
     sendError(res, ErrorCode.FAQ_DELETE_FAILED);
   }
 }; 
+
+
+/**
+ * FAQ 일괄 삭제 (관리자용)
+ * API: DELETE /api/admin/faq
+ * 매핑: ADMIN_API_MAPPING[`DELETE ${API_URLS.ADMIN.FAQ.LIST_DELETE}`]
+ */
+export const deleteFaqListForAdmin = async (req: Request<{}, {}, AdminFaqListDeleteReq>, res: Response) => {
+  try {
+    logApiCall('DELETE', API_URLS.ADMIN.FAQ.LIST_DELETE, ADMIN_API_MAPPING as any, 'FAQ 일괄 삭제 (관리자용)');
+
+    const { faqIds } = req.body;
+    const adminId = extractUserIdFromRequest(req);
+    
+    if (!adminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    if (!faqIds || !Array.isArray(faqIds) || faqIds.length === 0) {
+      return sendValidationError(res, 'faqIds', '삭제할 FAQ ID 목록을 제공해야 합니다.');
+    }
+
+    await deleteFaqList(faqIds);
+
+    sendSuccess(res, undefined, undefined, 'ADMIN_FAQ_LIST_DELETED', { adminId, count: faqIds.length });
+  } catch (error) {
+    appLogger.error('관리자 FAQ 일괄 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    if (error instanceof Error) {
+      const errorMsg = normalizeErrorMessage(error);
+      if (errorMsg.includes('validation') || errorMsg.includes('invalid')) {
+        return sendValidationError(res, 'general', errorMsg);
+      }
+      if (errorMsg.includes('database') || errorMsg.includes('connection')) {
+        return sendDatabaseError(res, '삭제', 'FAQ 목록');
+      }
+    }
+    sendError(res, ErrorCode.FAQ_DELETE_FAILED);
+  }
+};

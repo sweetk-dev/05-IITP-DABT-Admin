@@ -216,6 +216,25 @@ export const sysAdmAccountRepository = {
       }
     });
     return affectedRows > 0;
+  },
+
+  /**
+   * 운영자 계정 다중 삭제 (논리 삭제)
+   */
+  async deleteAdminList(adminIds: number[], actorTag: string): Promise<number> {
+    const [affectedRows] = await SysAdmAccount.update({
+      delYn: 'Y',
+      deletedBy: actorTag, 
+      deletedAt: new Date()
+    }, {
+      where: { 
+        admId: {
+          [Op.in]: adminIds
+        },
+        delYn: 'N'
+      }
+    });
+    return affectedRows ? affectedRows : 0;
   }
 
 } as const;

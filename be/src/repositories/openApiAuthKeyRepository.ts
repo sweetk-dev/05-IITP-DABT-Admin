@@ -183,7 +183,7 @@ export async function findAuthKeysByUserId(userId: number, options: {
     where: whereClause,
     limit,
     offset,
-    order: [['createdAt', 'DESC']]
+    order: [['created_at', 'DESC']]
   });
 
   return {
@@ -201,7 +201,8 @@ export async function findExpiredAuthKeys(): Promise<OpenApiAuthKey[]> {
       delYn: 'N',
       activeYn: 'Y',
       endDt: { [Op.lt]: new Date() }
-    }
+    },
+    order: [['created_at', 'DESC']]
   });
 }
 
@@ -447,7 +448,7 @@ export async function findOpenApiAuthKeys(options: {
 }> {
   const limit = options.limit || 10;
   const offset = options.offset || 0;
-  const order = options.order || [['createdAt', 'DESC']];
+  const order = options.order || [['created_at', 'DESC']];
 
   const { count, rows } = await OpenApiAuthKey.findAndCountAll({
     where: options.where || {},
@@ -565,3 +566,22 @@ export async function deleteOpenApiAuthKey(apiId: number, deletedBy: string): Pr
   }
   return null;
 } 
+
+
+/**
+ * OpenAPI 인증 키 다중 삭제 (관리자용)
+ */
+export async function deleteApiAKeyList(apiIds: number[], deletedBy: string): Promise<number> {
+  const deleteCount = await OpenApiAuthKey.update(
+    { delYn: 'Y', deletedBy },
+    {
+      where: {
+        keyId: {
+          [Op.in]: apiIds
+        },
+        delYn: 'N'
+      }
+    }
+  ).then(([affectedRows]) => affectedRows); 
+  return deleteCount; 
+}

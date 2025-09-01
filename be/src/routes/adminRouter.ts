@@ -4,7 +4,8 @@ import {
   getFaqDetailForAdmin,
   createFaqForAdmin,
   updateFaqForAdmin,
-  deleteFaqForAdmin
+  deleteFaqForAdmin,
+  deleteFaqListForAdmin
 } from '../controllers/admin/adminFaqController';
 import {
   getQnaListForAdmin,
@@ -12,6 +13,7 @@ import {
   answerQnaForAdmin,
   updateQnaForAdmin,
   deleteQnaForAdmin,
+  deleteQnaListForAdmin,
   statusQnaForAdmin
 } from '../controllers/admin/adminQnaController';
 import { getAdminProfile, updateAdminProfile, changeAdminPassword } from '../controllers/admin/adminController';
@@ -20,7 +22,8 @@ import {
   getNoticeDetailForAdmin,
   createNoticeForAdmin,
   updateNoticeForAdmin,
-  deleteNoticeForAdmin
+  deleteNoticeForAdmin,
+  deleteNoticeListForAdmin
 } from '../controllers/admin/adminNoticeController';
 import {
   getOpenApiListForAdmin,
@@ -28,6 +31,7 @@ import {
   createOpenApiForAdmin,
   updateOpenApiForAdmin,
   deleteOpenApiForAdmin,
+  deleteOpenApiListForAdmin,
   extendOpenApiAdmin,
   statusOpenApiAdmin
 } from '../controllers/admin/adminOpenApiController';
@@ -37,6 +41,7 @@ import {
   createAdminAccount,
   updateAdminAccount,
   deleteAdminAccount,
+  deleteAdminAccountList,
   changeAdminAccountPassword,
   updateAdminRole,
   checkAdminEmail
@@ -47,12 +52,31 @@ import {
   createUserAccount,
   updateUserAccount,
   deleteUserAccount,
+  deleteUserAccountList,
   changeUserPassword,
   updateUserStatus,
   checkUserEmail
 } from '../controllers/admin/userAccountController';
 import { routerMiddleware } from '../middleware';
-import { API_URLS, type AdminFaqDetailParams, type AdminQnaDetailParams, type AdminNoticeDetailParams, type AdminOpenApiDetailParams, type AdminOpenApiUpdateParams, type AdminOpenApiDeleteParams, type AdminOpenApiExtendParams, type AdminAccountDetailParams, type AdminAccountUpdateParams, type AdminAccountDeleteParams, type AdminAccountPasswordChangeParams, type AdminAccountRoleUpdateParams, type UserAccountDetailParams, type UserAccountUpdateParams, type UserAccountDeleteParams, type UserAccountPasswordChangeParams, type UserAccountStatusUpdateParams } from '@iitp-dabt/common';
+import { API_URLS, 
+  type AdminFaqDetailParams, 
+  type AdminQnaDetailParams, 
+  type AdminNoticeDetailParams, 
+  type AdminOpenApiDetailParams, 
+  type AdminOpenApiUpdateParams, 
+  type AdminOpenApiDeleteParams, 
+  type AdminOpenApiExtendParams, 
+  type AdminAccountDetailParams, 
+  type AdminAccountUpdateParams, 
+  type AdminAccountDeleteParams, 
+  type AdminAccountPasswordChangeParams, 
+  type AdminAccountRoleUpdateParams, 
+  type UserAccountDetailParams, 
+  type UserAccountUpdateParams, 
+  type UserAccountDeleteParams, 
+  type UserAccountPasswordChangeParams, 
+  type UserAccountStatusUpdateParams 
+} from '@iitp-dabt/common';
 
 const router = express.Router();
 
@@ -67,6 +91,7 @@ router.get<AdminFaqDetailParams>('/faq/:faqId(\\d+)', ...routerMiddleware.admin,
 router.post(API_URLS.ADMIN.FAQ.CREATE, ...routerMiddleware.admin, createFaqForAdmin);
 router.put<AdminFaqDetailParams>('/faq/:faqId(\\d+)', ...routerMiddleware.admin, updateFaqForAdmin as any);
 router.delete<AdminFaqDetailParams>('/faq/:faqId(\\d+)', ...routerMiddleware.admin, deleteFaqForAdmin as any);
+router.post(API_URLS.ADMIN.FAQ.LIST_DELETE, ...routerMiddleware.admin, deleteFaqListForAdmin as any);
 
 // QnA 관리
 router.get(API_URLS.ADMIN.QNA.LIST, ...routerMiddleware.admin, getQnaListForAdmin);
@@ -74,6 +99,7 @@ router.get<AdminQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.admin,
 router.post<AdminQnaDetailParams>('/qna/:qnaId(\\d+)/answer', ...routerMiddleware.admin, answerQnaForAdmin as any);
 router.put<AdminQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.admin, updateQnaForAdmin as any);
 router.delete<AdminQnaDetailParams>('/qna/:qnaId(\\d+)', ...routerMiddleware.admin, deleteQnaForAdmin as any);
+router.post(API_URLS.ADMIN.QNA.LIST_DELETE, ...routerMiddleware.admin, deleteQnaListForAdmin as any);
 router.get(API_URLS.ADMIN.QNA.STATUS, ...routerMiddleware.admin, statusQnaForAdmin as any);
 
 // Notice 관리
@@ -82,6 +108,7 @@ router.get<AdminNoticeDetailParams>('/notice/:noticeId(\\d+)', ...routerMiddlewa
 router.post(API_URLS.ADMIN.NOTICE.CREATE, ...routerMiddleware.admin, createNoticeForAdmin);
 router.put<AdminNoticeDetailParams>('/notice/:noticeId(\\d+)', ...routerMiddleware.admin, updateNoticeForAdmin as any);
 router.delete<AdminNoticeDetailParams>('/notice/:noticeId(\\d+)', ...routerMiddleware.admin, deleteNoticeForAdmin as any);
+router.post(API_URLS.ADMIN.NOTICE.LIST_DELETE, ...routerMiddleware.admin, deleteNoticeListForAdmin as any);
 
 // OpenAPI 관련
 router.get(API_URLS.ADMIN.OPEN_API.LIST, ...routerMiddleware.admin, getOpenApiListForAdmin);
@@ -89,6 +116,7 @@ router.get<AdminOpenApiDetailParams>('/openapi/keys/:keyId(\\d+)', ...routerMidd
 router.post(API_URLS.ADMIN.OPEN_API.CREATE, ...routerMiddleware.admin, createOpenApiForAdmin);
 router.put<AdminOpenApiUpdateParams>('/openapi/keys/:keyId(\\d+)', ...routerMiddleware.admin, updateOpenApiForAdmin as any);
 router.delete<AdminOpenApiDeleteParams>('/openapi/keys/:keyId(\\d+)', ...routerMiddleware.admin, deleteOpenApiForAdmin as any);
+router.post(API_URLS.ADMIN.OPEN_API.LIST_DELETE, ...routerMiddleware.admin, deleteOpenApiListForAdmin as any);
 router.post<AdminOpenApiExtendParams>('/openapi/keys/:keyId(\\d+)/extend', ...routerMiddleware.admin, extendOpenApiAdmin as any);
 router.get(API_URLS.ADMIN.OPEN_API.STATUS, ...routerMiddleware.admin, statusOpenApiAdmin);
 
@@ -98,6 +126,7 @@ router.get<AdminAccountDetailParams>('/admin-accounts/:adminId(\\d+)', ...router
 router.post(API_URLS.ADMIN.ADMIN_ACCOUNT.CREATE, ...routerMiddleware.admin, createAdminAccount);
 router.put<AdminAccountUpdateParams>('/admin-accounts/:adminId(\\d+)', ...routerMiddleware.admin, updateAdminAccount as any);
 router.delete<AdminAccountDeleteParams>('/admin-accounts/:adminId(\\d+)', ...routerMiddleware.admin, deleteAdminAccount as any);
+router.post(API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE, ...routerMiddleware.admin, deleteAdminAccountList as any);
 router.put<AdminAccountPasswordChangeParams>('/admin-accounts/:adminId(\\d+)/password', ...routerMiddleware.admin, changeAdminAccountPassword as any);
 router.put<AdminAccountRoleUpdateParams>('/admin-accounts/:adminId(\\d+)/role', ...routerMiddleware.admin, updateAdminRole as any);
 router.post(API_URLS.ADMIN.ADMIN_ACCOUNT.CHECK_EMAIL, ...routerMiddleware.admin, checkAdminEmail);
@@ -108,6 +137,7 @@ router.get<UserAccountDetailParams>('/user-accounts/:userId(\\d+)', ...routerMid
 router.post(API_URLS.ADMIN.USER_ACCOUNT.CREATE, ...routerMiddleware.admin, createUserAccount);
 router.put<UserAccountUpdateParams>('/user-accounts/:userId(\\d+)', ...routerMiddleware.admin, updateUserAccount as any);
 router.delete<UserAccountDeleteParams>('/user-accounts/:userId(\\d+)', ...routerMiddleware.admin, deleteUserAccount as any);
+router.post(API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE, ...routerMiddleware.admin, deleteUserAccountList as any);
 router.put<UserAccountPasswordChangeParams>('/user-accounts/:userId(\\d+)/password', ...routerMiddleware.admin, changeUserPassword as any);
 router.put<UserAccountStatusUpdateParams>('/user-accounts/:userId(\\d+)/status', ...routerMiddleware.admin, updateUserStatus as any);
 router.post(API_URLS.ADMIN.USER_ACCOUNT.CHECK_EMAIL, ...routerMiddleware.admin, checkUserEmail);

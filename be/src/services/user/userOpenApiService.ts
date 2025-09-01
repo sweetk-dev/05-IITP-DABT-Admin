@@ -15,7 +15,9 @@ import {
 } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
 import { generateAuthKey } from '../../utils/authKeyGenerator';
-import { act } from 'react';
+import { ErrorCode } from '@iitp-dabt/common';
+import { ResourceError, BusinessError } from '../../utils/customErrors';
+
 
 export class UserOpenApiService {
   /**

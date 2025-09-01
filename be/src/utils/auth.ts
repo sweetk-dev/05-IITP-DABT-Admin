@@ -30,6 +30,7 @@ export function isSAdmin(adminRole: string | null): boolean {
   return adminRole === CODE_SYS_ADMIN_ROLES.SUPER_ADMIN;
 }
 
+
 /**
  * 일반 Admin 권한 확인 (ADMIN, EDITOR, VIEWER 포함)
  * @param adminRole 관리자 역할

@@ -96,7 +96,7 @@ export const COMMON_CODE_API_MAPPING = {
   
   // 관리자용 그룹 관리 API
   [`GET ${API_URLS.COMMON_CODE.GROUP.LIST}`]: {
-    req: 'void',
+    req: 'CommonCodeGroupReq',
     res: 'CommonCodeGroupsRes',
     description: '그룹 리스트 조회 (관리자용)'
   },
@@ -336,12 +336,22 @@ export interface CommonCodeByParentDetailRes {
 export interface CommonCodeGroup {
   grpId: string;
   grpNm: string;
+  codeType?: 'B' | 'A' | 'S';  // ✅ code_type → codeType으로 변경, 선택적 필드로
   codeCount: number;
   createdAt?: string;
   updatedAt?: string;
 }
 
-// 그룹 리스트 조회 응답
+
+// 그룹 리스트 조회 요청 (관리자용)
+export interface CommonCodeGroupReq {
+  search?: string;  //그룹ID/그룹명
+  useYn?: string;  //Y, N
+  sort?: string;
+}
+
+
+// 그룹 리스트 조회 응답 (관리자용)
 export interface CommonCodeGroupsRes {
   groups: CommonCodeGroup[];
 }

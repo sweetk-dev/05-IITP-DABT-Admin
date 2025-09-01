@@ -10,6 +10,7 @@ import e from 'express';
 export interface CodeGroupData  {
   grpId: string;
   grpNm: string;
+  codeType?: 'B' | 'A' | 'S';  // ✅ 선택적 필드로 변경
   codeCount: number;
   createdAt?: string;
   updatedAt?: string;
@@ -18,7 +19,7 @@ export interface CodeGroupData  {
 
 export const commonCodeService = {
   /**
-   * 그룹 ID로 공통 코드 목록 조회
+   * 그룹 ID로 공통 코드 목록 조회fe
    */
   async getCodesByGroupId(grpId: string): Promise<SysCommonCode[]> {
     try {
@@ -182,9 +183,10 @@ export const commonCodeService = {
   /**
    * 공통 코드 그룹 목록 조회
    */
-  async getCodeGroups(): Promise<CodeGroupData[]> {
+  async getCodeGroups(filters?: { search?: string; useYn?: string; sort?: string }): Promise<CodeGroupData[]> {
     try {
-      const groups = await commonCodeRepository.getCommonCodeGroups();
+      appLogger.info("===== getCodeGroups :: {} -==", filters)
+      const groups = await commonCodeRepository.getCommonCodeGroups(filters);
       appLogger.info(`Retrieved ${groups.length} common code groups`);
       return groups;
     } catch (error) {

@@ -38,7 +38,7 @@ export const ADMIN_API_MAPPING = {
     res: 'AdminFaqListRes',
     description: '관리자 FAQ 목록 조회'
   },
-  [`DELETE ${API_URLS.ADMIN.FAQ.LIST_DELETE}`]: {
+  [`POST ${API_URLS.ADMIN.FAQ.LIST_DELETE}`]: {
     body: 'AdminFaqListDeleteReq',
     res: 'void',
     description: '관리자 FAQ 목록 일괄 삭제'
@@ -70,7 +70,7 @@ export const ADMIN_API_MAPPING = {
     res: 'AdminQnaListRes',
     description: '관리자 QnA 목록 조회'
   },
-  [`DELETE ${API_URLS.ADMIN.QNA.LIST_DELETE}`]: {
+  [`POST ${API_URLS.ADMIN.QNA.LIST_DELETE}`]: {
     body: 'AdminQnaListDeleteReq',
     res: 'void',
     description: '관리자 QnA 목록 일괄 삭제'
@@ -109,7 +109,7 @@ export const ADMIN_API_MAPPING = {
     res: 'AdminNoticeListRes',
     description: '관리자 공지사항 목록 조회'
   },
-  [`DELETE ${API_URLS.ADMIN.NOTICE.LIST_DELETE}`]: {
+  [`POST ${API_URLS.ADMIN.NOTICE.LIST_DELETE}`]: {
     body: 'AdminNoticeListDeleteReq',
     res: 'void',
     description: '관리자 공지사항 목록 일괄 삭제'
@@ -142,7 +142,7 @@ export const ADMIN_API_MAPPING = {
     res: 'AdminOpenApiListRes',
     description: '관리자 OpenAPI 키 목록 조회'
   },
-  [`DELETE ${API_URLS.ADMIN.OPEN_API.LIST_DELETE}`]: {
+  [`POST ${API_URLS.ADMIN.OPEN_API.LIST_DELETE}`]: {
     body: 'AdminOpenApiListDeleteReq',
     res: 'void',
     description: '관리자 OpenAPI 키 목록 일괄 삭제'
@@ -186,7 +186,7 @@ export const ADMIN_API_MAPPING = {
     res: 'AdminAccountListRes',
     description: '운영자 계정 목록 조회'
   },
-  [`DELETE ${API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE}`]: {
+  [`POST ${API_URLS.ADMIN.ADMIN_ACCOUNT.LIST_DELETE}`]: {
     body: 'AdminAccountListDeleteReq',
     res: 'void',
     description: '운영자 계정 목록 일괄 삭제'
@@ -236,7 +236,7 @@ export const ADMIN_API_MAPPING = {
     res: 'UserAccountListRes',
     description: '사용자 계정 목록 조회'
   },
-  [`DELETE ${API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE}`]: {
+  [`POST ${API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE}`]: {
     body: 'UserAccountListDeleteReq',
     res: 'void',
     description: '사용자 계정 목록 일괄 삭제'

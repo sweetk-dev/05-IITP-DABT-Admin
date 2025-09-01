@@ -365,18 +365,18 @@ export const FULL_API_URLS = {
     // 관리자용 그룹 관리 API
     GROUP: {
       LIST: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.LIST),           // GET
-      LIST_DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.LIST_DELETE), // DELETE
+      LIST_DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.LIST_DELETE), // POST
       CREATE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.CREATE),       // POST
       UPDATE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.UPDATE),       // PUT
       DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.GROUP.DELETE),       // DELETE
     },
     
     // 관리자용 코드 관리 API
-    CODE: {
-      LIST_DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.LIST_DELETE), // DELETE
+    CODE: {      
       CREATE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.CREATE),        // POST
       UPDATE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.UPDATE),        // PUT
       DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.DELETE),        // DELETE
+      LIST_DELETE: getCommonCodeUrl(API_URLS.COMMON_CODE.CODE.LIST_DELETE), // POST
     },
   }
 } as const;

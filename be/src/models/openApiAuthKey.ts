@@ -14,9 +14,9 @@ export interface OpenApiAuthKeyAttributes {
   keyRejectReason?: string;
   activeAt?: Date;
   latestAccAt?: Date;
-  createdAt: Date;
-  updatedAt?: Date;
-  deletedAt?: Date;
+  createdAt?: Date;  // Sequelize timestamps로 자동 생성
+  updatedAt?: Date;  // Sequelize timestamps로 자동 생성
+  deletedAt?: Date;  // Sequelize timestamps로 자동 생성
   createdBy: string;
   updatedBy?: string;
   deletedBy?: string;
@@ -142,24 +142,7 @@ export function initOpenApiAuthKey(sequelize: Sequelize) {
         field: 'latest_acc_at',
         comment: 'latest access time',
       },
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-        field: 'created_at',
-        comment: '레코드 생성 시각',
-      },
-      updatedAt: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-        field: 'updated_at',
-        comment: '레코드 수정 시각',
-      },
-      deletedAt: {
-        type: DataTypes.DATE,
-        field: 'deleted_at',
-        comment: '삭제 일시 (논리 삭제 시 기록)',
-      },
+      // createdAt, updatedAt, deletedAt은 timestamps: true 설정으로 자동 생성됨
       createdBy: {
         type: DataTypes.STRING(40),
         allowNull: false,

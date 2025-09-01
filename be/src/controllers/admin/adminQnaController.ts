@@ -7,6 +7,7 @@ import {
   answerQna, 
   updateQna, 
   deleteQna,
+  deleteQnaList,
   getQnaStatus
 } from '../../services/admin/adminQnaService';
 import { appLogger } from '../../utils/logger';
@@ -25,6 +26,7 @@ import type {
   AdminQnaDetailRes,
   AdminQnaAnswerReq,
   AdminQnaUpdateReq,
+  AdminQnaListDeleteReq,
   AdminQnaStatusRes
 } from '@iitp-dabt/common';
 import { toAdminQnaItem, toAdminQnaDetailItem } from '../../mappers/qnaMapper';
@@ -313,3 +315,46 @@ export const statusQnaForAdmin = async (req: Request, res: Response) => {
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
+
+
+// QnA 목록 삭제 (관리자용)
+export const deleteQnaListForAdmin = async (req: Request<{}, {}, AdminQnaListDeleteReq>, res: Response) => {
+  try {
+    logApiCall('DELETE', API_URLS.ADMIN.QNA.LIST_DELETE, ADMIN_API_MAPPING as any, 'QnA 목록 삭제 (관리자용)');
+
+    const { qnaIds } = req.body;
+    const adminId = extractUserIdFromRequest(req);
+    const actorTag = getActorTag(req);
+    
+    if (!adminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    if (!qnaIds || !Array.isArray(qnaIds) || qnaIds.length === 0) {
+      return sendValidationError(res, 'qnaIds', '삭제할 QnA ID 목록은 필수입니다.');
+    }
+
+    await deleteQnaList(qnaIds, actorTag);
+    sendSuccess(res, undefined, undefined, 'ADMIN_QNA_LIST_DELETED', { adminId, qnaIds: qnaIds.join(',') });
+  } catch (error) {
+    appLogger.error('관리자 QnA 목록 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.QNA_NOT_FOUND) {
+        return sendError(res, ErrorCode.QNA_NOT_FOUND);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.QNA_DELETE_FAILED) {
+        return sendError(res, ErrorCode.QNA_DELETE_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
+  }
+}

@@ -4,7 +4,7 @@ import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '
 import { loginAdmin, logout, refreshAdminToken } from '../../services/admin/adminAuthService';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
-import { getAdminRoleCodeName } from '../../services/common/commonCodeService';
+import { commonCodeService } from '../../services/common/commonCodeService';
 import { 
   extractUserIdFromRequest,
   extractUserTypeFromRequest,
@@ -38,7 +38,7 @@ export const adminLogin = async (req: Request<{}, {}, AdminLoginReq>, res: Respo
 
     const result = await loginAdmin(loginId, password, ipAddr, userAgent);
 
-    const roleName = result.roleCode ? await getAdminRoleCodeName(result.roleCode) : '관리자';
+    const roleName = result.roleCode ? await commonCodeService.getAdminRoleCodeName(result.roleCode) : '관리자';
 
     const response: AdminLoginRes = {
       token: result.token,

@@ -1,11 +1,8 @@
 import type { AdminOpenApiKeyItem, UserOpenApiKeyItem } from '@iitp-dabt/common';
 import type { OpenApiAuthKeyAttributes } from '../models/openApiAuthKey';
+import { toIsoString } from '../utils/timeUtils';
 
-function toIsoString(value?: Date | string | number): string | undefined {
-  if (!value) return undefined;
-  const d = value instanceof Date ? value : new Date(value);
-  return d.toISOString();
-}
+
 
 export type OpenApiSource = Pick<
   OpenApiAuthKeyAttributes,

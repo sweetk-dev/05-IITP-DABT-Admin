@@ -7,6 +7,7 @@ import {
   createOpenApi, 
   updateOpenApi, 
   deleteOpenApi,
+  deleteOpenApiList,
   extendOpenApiKey,
   getOpenApiStats
 } from '../../services/admin/adminOpenApiService';
@@ -29,7 +30,8 @@ import type {
   AdminOpenApiDeleteParams,
   AdminOpenApiExtendReq,
   AdminOpenApiExtendRes,
-  AdminOpenApiStatsRes
+  AdminOpenApiStatsRes,
+  AdminOpenApiListDeleteReq
 } from '@iitp-dabt/common';
 import { toAdminOpenApiKeyItem } from '../../mappers/openApiMapper';
 
@@ -311,6 +313,59 @@ export const deleteOpenApiForAdmin = async (
     sendError(res, ErrorCode.UNKNOWN_ERROR);
   }
 };
+
+
+
+/**
+ * OpenAPI 목록 삭제 (관리자용)
+ * API: POST /api/admin/open-api/key/delete
+ * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.OPEN_API.LIST_DELETE}`]
+ */
+export const deleteOpenApiListForAdmin = async (req: Request<{}, {}, AdminOpenApiListDeleteReq>, res: Response) => {
+  try {
+    logApiCall('POST', API_URLS.ADMIN.OPEN_API.LIST_DELETE, ADMIN_API_MAPPING as any, 'OpenAPI 목록 삭제 (관리자용)');
+
+    const adminId = extractUserIdFromRequest(req);
+    const actorTag = getActorTag(req);
+    
+    if (!adminId) {
+      return sendError(res, ErrorCode.UNAUTHORIZED);
+    }
+
+    const { keyIds } = req.body;
+    if (!keyIds || keyIds.length === 0) { 
+      return sendValidationError(res, 'keyIds', '삭제할 OpenAPI 인증키 ID 목록을 제공해야 합니다.');
+    }
+    await deleteOpenApiList(keyIds, actorTag);
+
+    sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_LIST_DELETED', { adminId, count: keyIds.length });
+  } catch (error) {
+    appLogger.error('관리자 OpenAPI 목록 삭제 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
+    
+    // ✅ customErrors 처리
+    if (error instanceof ResourceError) {
+      if (error.errorCode === ErrorCode.OPEN_API_NOT_FOUND) {
+        return sendError(res, ErrorCode.OPEN_API_NOT_FOUND);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    if (error instanceof BusinessError) {
+      if (error.errorCode === ErrorCode.OPEN_API_DELETE_FAILED) {
+        return sendError(res, ErrorCode.OPEN_API_DELETE_FAILED);
+      }
+      return sendError(res, error.errorCode, error.message);
+    }
+    
+    // 기타 예상치 못한 에러
+    sendError(res, ErrorCode.UNKNOWN_ERROR);
+  }
+};
+
+
+
+
+
 
 /**
  * OpenAPI 키 기간 연장 (관리자용)

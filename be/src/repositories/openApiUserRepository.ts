@@ -317,6 +317,25 @@ export const openApiUserRepository = {
     return affectedRows > 0;
   },
 
+
+  /**
+   * 사용자 계정 목록 삭제 (논리 삭제)
+   */
+  async deleteUserAccountList(userIds: number[], deletedBy: string): Promise<number> {
+    const [affectedCount] = await OpenApiUser.update({
+      delYn: 'Y',
+      deletedAt: new Date(),
+      deletedBy
+    }, {
+      where: { 
+        userId: { [Op.in]: userIds },
+        delYn: 'N'
+      }
+    });
+    return affectedCount; // 영향을 받은 행의 수 반환
+  },
+
+
   /**
    * 사용자의 OpenAPI 키 개수 조회
    */

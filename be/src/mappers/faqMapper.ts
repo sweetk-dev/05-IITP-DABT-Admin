@@ -1,11 +1,8 @@
 import type { AdminFaqItem, UserFaqItem } from '@iitp-dabt/common';
 import type { SysFaqAttributes } from '../models/sysFaq';
+import { toIsoString } from '../utils/timeUtils';
 
-function toIsoString(value?: Date | string | number): string | undefined {
-  if (!value) return undefined;
-  const d = value instanceof Date ? value : new Date(value);
-  return d.toISOString();
-}
+
 
 export type FaqSource = Pick<
   SysFaqAttributes,

@@ -1,6 +1,9 @@
 import SysNoticeRepository from '../../repositories/sysNoticeRepository';
 import { appLogger } from '../../utils/logger';
 import type { UserNoticeHomeRes } from '@iitp-dabt/common';
+import { ErrorCode } from '@iitp-dabt/common';
+import { ResourceError, BusinessError } from '../../utils/customErrors';
+
 
 export interface UserNoticeListParams {
   page?: number;

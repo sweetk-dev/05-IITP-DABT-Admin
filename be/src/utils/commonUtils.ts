@@ -4,6 +4,7 @@
  */
 
 import { Request } from 'express';
+import { getAdminRole, isSAdmin } from './auth';  
 
 /**
  * 사용자 타입 상수
@@ -57,6 +58,27 @@ export function isAdmin(userType: string | null): boolean {
 export function isUser(userType: string | null): boolean {
   return userType === USER_TYPE_GENERAL;
 }
+
+
+
+/**
+ * 슈퍼 관리자 여부 체크 
+ * @param req 
+ * @returns  { adminId: number, isSuper: boolean}
+ */
+export function checkSuperRole(req: Request): { adminId: number, isSuper: boolean} | null {
+  const adminId = extractUserIdFromRequest(req);
+  const adminRole = getAdminRole(req as any);
+
+   if (!adminId) { 
+    return  null;
+  }
+
+  const isSuper  = isSAdmin(adminRole);
+  return {adminId, isSuper };
+}
+
+
 
 /**
  * 숫자 파라미터 검증 및 변환

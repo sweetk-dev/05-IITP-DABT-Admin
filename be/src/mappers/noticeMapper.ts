@@ -1,11 +1,9 @@
 import type { AdminNoticeItem, UserNoticeItem } from '@iitp-dabt/common';
 import type { SysNoticeAttributes } from '../models/sysNotice';
+import { toIsoString } from '../utils/timeUtils';
 
-function toIsoString(value?: Date | string | number): string | undefined {
-  if (!value) return undefined;
-  const d = value instanceof Date ? value : new Date(value);
-  return d.toISOString();
-}
+
+
 
 type NoticeSource = Pick<
   SysNoticeAttributes,

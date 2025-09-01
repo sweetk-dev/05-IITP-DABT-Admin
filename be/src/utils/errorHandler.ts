@@ -137,3 +137,11 @@ export const sendDatabaseError = (res: Response, operation: string, entity: stri
     `${entity} ${operation} 중 데이터베이스 오류가 발생했습니다.`
   );
 }; 
+
+/**
+ * 관리자 권한 에러 전송 
+ */
+
+export const sendAdminRoleError = (res: Response) => {
+  sendError( res, ErrorCode.FORBIDDEN, '허용 권한이 필요합니다.');
+};

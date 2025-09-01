@@ -5,6 +5,7 @@ import {
   createAuthKey as createOpenApiAuthKeyRepo, 
   updateAuthKey as updateOpenApiAuthKeyRepo, 
   deleteAuthKey as deleteOpenApiAuthKeyRepo,
+  deleteApiAKeyList as deleteOpenApiListRepo,
   getAuthKeyStats
 } from '../../repositories/openApiAuthKeyRepository';
 import { appLogger } from '../../utils/logger';
@@ -47,7 +48,7 @@ export const getOpenApiList = async (params: OpenApiListParams) => {
     const result = await findAuthKeysByUserId(0, {
       page,
       limit,
-      includeInactive: !pendingOnly, // pendingOnly가 true면 inactive 포함, false면 active만
+      includeInactive: true, // 관리자는 기본적으로 모든 상태의 키를 볼 수 있도록 true로 설정
       pendingOnly,
       activeYn: status, // status 파라미터를 activeYn으로 전달
       searchKeyword: search // search 파라미터를 searchKeyword로 전달
@@ -217,6 +218,34 @@ export const deleteOpenApi = async (apiId: number, actorTag: string) => {
     );
   }
 };
+
+
+/**
+ * OpenAPI 목록 삭제 (관리자용)
+ */
+export const deleteOpenApiList = async (apiIds: number[], actorTag: string) => {
+  try {   
+    const deletedCount = await deleteOpenApiListRepo(apiIds, actorTag);
+    if (deletedCount == 0) {
+      throw new ResourceError( ErrorCode.OPEN_API_NOT_FOUND, '삭제할 OpenAPI를 찾을 수 없습니다.', 'openApi', apiIds.toString() );
+    }
+
+    appLogger.info('OpenAPI 목록 삭제 성공', { apiIds, actorTag });
+    return deletedCount;
+  } catch (error) {
+    if (error instanceof ResourceError) { 
+      throw error;
+    }
+    appLogger.error('OpenAPI 목록 삭제 중 오류 발생', { error, apiIds, actorTag });
+    throw new BusinessError(
+      ErrorCode.OPEN_API_DELETE_FAILED,
+      'OpenAPI 목록 삭제 중 오류가 발생했습니다.',
+      { apiIds, actorTag, originalError: error }
+    );
+  }
+};
+
+
 
 /**
  * OpenAPI 키 기간 연장 (관리자용)

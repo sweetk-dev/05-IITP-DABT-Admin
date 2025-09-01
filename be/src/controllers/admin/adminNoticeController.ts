@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { ErrorCode, ADMIN_API_MAPPING, API_URLS, type AdminNoticeListQuery, type AdminNoticeListRes, type AdminNoticeDetailParams, type AdminNoticeDetailRes, type AdminNoticeCreateReq, type AdminNoticeCreateRes, type AdminNoticeUpdateReq } from '@iitp-dabt/common';
+import { ErrorCode, ADMIN_API_MAPPING, API_URLS, type AdminNoticeListQuery, type AdminNoticeListRes, type AdminNoticeDetailParams, type AdminNoticeDetailRes, type AdminNoticeCreateReq, type AdminNoticeCreateRes, type AdminNoticeUpdateReq, AdminNoticeListDeleteReq } from '@iitp-dabt/common';
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { logApiCall } from '../../utils/apiLogger';
 import { extractUserIdFromRequest, normalizeErrorMessage } from '../../utils/commonUtils';
-import { getNoticeListAdmin, getNoticeDetailAdmin, createNoticeAdmin, updateNoticeAdmin, deleteNoticeAdmin } from '../../services/admin/adminNoticeService';
+import { getNoticeListAdmin, getNoticeDetailAdmin, createNoticeAdmin, updateNoticeAdmin, deleteNoticeAdmin, deleteNoticeListAdmin } from '../../services/admin/adminNoticeService';
 import { toAdminNoticeItem } from '../../mappers/noticeMapper';
 import { getNumberQuery, getStringQuery, getBooleanQuery } from '../../utils/queryParsers';
 import { getActorTag } from '../../utils/auth';
@@ -158,4 +158,28 @@ export const deleteNoticeForAdmin = async (req: Request<{ noticeId: string }>, r
   }
 };
 
+
+// 공지 목록 삭제 (관리자용)
+export const deleteNoticeListForAdmin = async (req: Request<{}, {}, AdminNoticeListDeleteReq>, res: Response) => {
+  try {
+    logApiCall('POST', API_URLS.ADMIN.NOTICE.LIST_DELETE, ADMIN_API_MAPPING as any, '공지사항 목록 삭제 (관리자용)');
+
+    const adminId = extractUserIdFromRequest(req);
+    if (!adminId) return sendError(res, ErrorCode.UNAUTHORIZED);
+
+    const { noticeIds } = req.body;
+    if (!noticeIds || noticeIds.length === 0) { 
+      return sendValidationError(res, 'noticeIds', '삭제할 공지사항 ID 목록을 제공해야 합니다.');
+    }
+    await deleteNoticeListAdmin(noticeIds);
+    sendSuccess(res, undefined, undefined, 'ADMIN_NOTICE_LIST_DELETED', { adminId, count: req.body.noticeIds.length });
+  } catch (error) {
+    if (error instanceof Error) {
+      const msg = normalizeErrorMessage(error);
+      if (msg.includes('validation')) return sendValidationError(res, 'general', msg);
+      if (msg.includes('database')) return sendDatabaseError(res, '삭제', '공지사항');
+    }
+    sendError(res, ErrorCode.NOTICE_DELETE_FAILED);
+  }
+};
 

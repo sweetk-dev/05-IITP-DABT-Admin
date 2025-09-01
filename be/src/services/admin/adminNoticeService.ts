@@ -167,3 +167,31 @@ export const deleteNoticeAdmin = async (noticeId: number) => {
 };
 
 
+// FAQ 목록 삭제 (관리자용)
+export const deleteNoticeListAdmin = async (noticeIds: number[]) => {
+  try {
+    const deletedCount = await SysNoticeRepository.deleteNoticeList(noticeIds);
+    if (deletedCount == 0) {
+      throw new ResourceError(
+        ErrorCode.NOTICE_NOT_FOUND,
+        '삭제할 공지사항을 찾을 수 없습니다.',
+        'notice',
+        noticeIds.toString()
+      );
+    }
+
+    appLogger.info('공지사항 목록 삭제 성공', { noticeIds });
+    return deletedCount;
+  } catch (error) {
+    if (error instanceof ResourceError) {
+      throw error;
+    }
+    appLogger.error('공지사항 목록 삭제 중 오류 발생', { error, noticeIds });
+    throw new BusinessError(
+      ErrorCode.NOTICE_DELETE_FAILED,
+      '공지사항 목록 삭제 중 오류가 발생했습니다.',
+      { noticeIds, originalError: error }
+    );
+  }
+}
+

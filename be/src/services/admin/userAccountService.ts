@@ -1,4 +1,8 @@
-import { UserAccountListQuery, UserAccountCreateReq, UserAccountUpdateReq, UserAccountPasswordChangeReq, UserAccountStatusUpdateReq, UserAccountCheckEmailReq, ErrorCode } from '@iitp-dabt/common';
+import { UserAccountListQuery, 
+  UserAccountCreateReq, UserAccountUpdateReq, 
+  UserAccountPasswordChangeReq, UserAccountStatusUpdateReq, 
+  UserAccountCheckEmailReq,
+   ErrorCode } from '@iitp-dabt/common';
 import bcrypt from 'bcrypt';
 import { appLogger } from '../../utils/logger';
 import { ResourceError, BusinessError } from '../../utils/customErrors';
@@ -7,6 +11,8 @@ import { arrayBuffer } from 'stream/consumers';
 import { UserAccountListRes, UserAccountListItem,
   UserAccountDetailRes
  } from '@iitp-dabt/common';
+
+
 
 export const userAccountService = {
   // 사용자 계정 목록 조회
@@ -168,6 +174,28 @@ export const userAccountService = {
       throw error;
     }
   },
+
+
+  // 사용자 계정 목록 삭제
+  async deleteUserAccountList(userIds: number[], actorTag: string) {  
+    try {
+      const deleteCount = await openApiUserRepository.deleteUserAccountList(userIds, actorTag); 
+      if (deleteCount === 0) {
+        throw new ResourceError(
+          ErrorCode.ACCOUNT_NOT_FOUND,
+          '삭제할 사용자 계정을 찾을 수 없습니다.',
+          'user',
+          userIds.toString()
+        );
+      }
+    } catch (error) {
+      appLogger.error('사용자 계정 목록 삭제 서비스 오류:', { error, userIds });
+      throw error;
+    }
+  },
+
+
+
 
   // 사용자 계정 비밀번호 변경
   async changeUserPassword(userId: number, data: UserAccountPasswordChangeReq, actorTag: string) {

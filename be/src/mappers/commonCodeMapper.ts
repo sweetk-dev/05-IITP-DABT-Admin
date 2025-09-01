@@ -1,11 +1,8 @@
 import type { CommonCode, CommonCodeDetail } from '@iitp-dabt/common';
 import type { SysCommonCode } from '../models/sysCommonCode';
+import { toIsoString } from '../utils/timeUtils';
 
-function toIsoString(value?: Date | string | number): string | undefined {
-	if (!value) return undefined;
-	const d = value instanceof Date ? value : new Date(value);
-	return d.toISOString();
-}
+
 
 export function toUserCommonCode(code: SysCommonCode): CommonCode {
 	return {

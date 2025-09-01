@@ -1,6 +1,7 @@
 import { AdminAccountListQuery, AdminAccountCreateReq, 
   AdminAccountUpdateReq, AdminAccountPasswordChangeReq, 
   AdminAccountRoleUpdateReq, AdminAccountCheckEmailReq,
+  AdminAccountListDeleteReq,
   ErrorCode
 } from '@iitp-dabt/common';
 import bcrypt from 'bcrypt';
@@ -168,6 +169,37 @@ export const adminAccountService = {
       throw error;
     }
   },
+
+
+
+
+  // 운영자 계정 목록 삭제
+  async deleteAdminAccountList(data: AdminAccountListDeleteReq, actorTag: string) {
+    try { 
+      const { adminIds } = data;
+
+      const deleteCount = await sysAdmAccountRepository.deleteAdminList(adminIds, actorTag);
+      if (deleteCount === 0) {
+        throw new ResourceError(
+          ErrorCode.ADMIN_NOT_FOUND,
+          '삭제할 운영자 계정을 찾을 수 없습니다.',
+          'admin',
+          adminIds.toString()
+        );
+      }
+    } catch (error) {
+      appLogger.error('운영자 계정 목록 삭제 서비스 오류:', { error, data });
+      throw new BusinessError(
+        ErrorCode.ADMIN_DELETE_FAILED,
+        '운영자 계정 목록 삭제 중 오류가 발생했습니다.', 
+        { data, originalError: error }
+      );
+    }
+  },
+
+
+
+
 
   // 운영자 계정 비밀번호 변경
   async changeAdminPassword(adminId: number, data: AdminAccountPasswordChangeReq, actorTag: string) {

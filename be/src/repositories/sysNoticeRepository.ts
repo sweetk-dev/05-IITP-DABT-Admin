@@ -122,6 +122,18 @@ export class SysNoticeRepository {
     return true;
   }
 
+
+
+ /**
+  * FAQ 다중 삭제
+  */
+  static async deleteNoticeList(noticeIds: number[]): Promise<number> {
+    const deletedCount = await SysNotice.destroy({  where: { noticeId: { [Op.in]: noticeIds } } });
+    return deletedCount ? deletedCount : 0;  
+  }
+
+
+
   /**
    * 상단 고정 공지사항 조회 (홈 화면용)
    */

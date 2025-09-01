@@ -10,7 +10,7 @@ import {
 sysAdmAccountRepository
 } from '../../repositories/sysAdmAccountRepository';
 import { 
-  findCommonCodeById
+  commonCodeRepository
 } from '../../repositories/sysCommonCodeRepository';
 import { ResourceError, BusinessError, ValidationError } from '../../utils/customErrors';
 
@@ -29,7 +29,7 @@ export const adminService = {
                 );
             }
 
-            const roleCode = await findCommonCodeById(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES, admin.roles);
+            const roleCode = await commonCodeRepository.findCommonCodeById(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES, admin.roles);
 
             return {
                 adminId: admin.admId,

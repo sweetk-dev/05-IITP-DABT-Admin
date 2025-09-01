@@ -28,6 +28,7 @@ interface PageHeaderProps {
   filters?: Array<{ label: string; value: string; options: Array<{ label: string; value: string }>; onChange: (v: string) => void }>;
   sticky?: boolean;
   dense?: boolean;
+  sx?: any;
 }
 
 export default function PageHeader({
@@ -45,6 +46,7 @@ export default function PageHeader({
   filters,
   sticky = true,
   dense = false,
+  sx,
 }: PageHeaderProps) {
   const header = (
     <ListHeader
@@ -62,7 +64,7 @@ export default function PageHeader({
   const hasBottomRow = Boolean(subtitle || actionsRight || (tabs && tabs.length));
 
   return (
-    <Box id={id || 'page-header-root'} sx={{ position: sticky ? 'sticky' : 'relative', top: 0, zIndex: 1, bgcolor: 'background.default', mb: 2 }}>
+    <Box id={id || 'page-header-root'} sx={{ position: sticky ? 'sticky' : 'relative', top: 0, zIndex: 1, bgcolor: 'background.default', mb: 2, ...sx }}>
       {hasTopRow && (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: dense ? 0.5 : 1 }}>
           <Breadcrumbs aria-label="breadcrumb">

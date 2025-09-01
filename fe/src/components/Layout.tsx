@@ -34,19 +34,7 @@ export default function Layout() {
 	const isAdminLoggedIn = isAdminAuthenticated();
 	const [sideNavOpen, setSideNavOpen] = useState(true);
 	const adminRole = getAdminRole(); // 권한 체크용 (예: 'S-ADMIN')
-	
-	//TODO:: Remove console logs in production
-	// This is for debugging purposes to see the current authentication state and path
-	console.log('[Layout]', {
-		pathname: location.pathname,
-		isLoggedIn,
-		isUserLoggedIn,
-		isAdminLoggedIn,
-		isAuthenticated: isAuthenticated(),
-		isUserAuthenticated: isUserAuthenticated(),
-		isAdminAuthenticated: isAdminAuthenticated()
-	});
-	
+		
 	useEffect(() => {
 		// 토큰/유저정보 변경 또는 라우트 이동 시 토큰 정리
 		// 무한 루프 방지를 위해 한 번만 실행
@@ -74,7 +62,6 @@ export default function Layout() {
 		appBarType = 'public';
 	}
 
-	console.log('[Layout] AppBar type determined:', appBarType);
 
 	// Apply compact density; default to 70%, can switch to 60% if needed after preview
 	const appTheme = createAppTheme(

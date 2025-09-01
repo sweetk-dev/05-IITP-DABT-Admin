@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
+import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
@@ -25,7 +25,8 @@ export default function AdminQnaReply() {
     autoFetch: !!qnaId 
   });
   
-  const detail = (data as any)?.qna || (data as any) || {};
+  // API 응답 구조를 유연하게 처리
+  const detail = (data as any)?.data?.qna || (data as any)?.qna || (data as any) || {};
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -41,6 +42,11 @@ export default function AdminQnaReply() {
   const answerBytes = useMemo(()=> new TextEncoder().encode(answer).length, [answer]);
 
   useEffect(() => {
+    console.log('[QnaReply] detail data:', detail);
+    console.log('[QnaReply] raw API response:', data);
+    console.log('[QnaReply] data.data:', (data as any)?.data);
+    console.log('[QnaReply] data.data?.qna:', (data as any)?.data?.qna);
+    
     if (detail) {
       setTitle(detail.title || '');
       setContent(detail.content || '');
@@ -48,7 +54,7 @@ export default function AdminQnaReply() {
       setQnaType(detail.qnaType || '');
       setSecretYn(detail.secretYn || 'N');
     }
-  }, [detail]);
+  }, [detail, data]);
 
   const handleBack = () => navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(qnaId)));
   
@@ -109,6 +115,7 @@ export default function AdminQnaReply() {
       <PageHeader 
         id="admin-qna-reply-header" 
         title="Q&A 답변/수정" 
+        sx={{ mt: 1, mb: 2 }}
       />
       
       {/* 에러 알림 */}
@@ -121,74 +128,94 @@ export default function AdminQnaReply() {
       
       <ThemedCard>
         <CardContent>
-          <TextField 
-            id="qna-title" 
-            fullWidth 
-            label="제목" 
-            value={title} 
-            onChange={(e)=>setTitle(e.target.value)} 
-            sx={{ mb: 0.5 }} 
-            required
-          />
-          <ByteLimitHelper id="qna-title-bytes" currentBytes={titleBytes} maxBytes={MAX_TITLE} />
+                     {/* 사용자 작성 내용 - 읽기 전용 */}
+           <Box sx={{ 
+             bgcolor: 'grey.50', 
+             p: 2, 
+             borderRadius: 1, 
+             border: '1px solid',
+             borderColor: 'grey.200',
+             mb: SPACING.SMALL 
+           }}>
+            
+            <TextField 
+              id="qna-title" 
+              fullWidth 
+              label="제목" 
+              value={title} 
+              InputProps={{ readOnly: true }}
+              sx={{ mb: 0.5, bgcolor: 'white' }} 
+            />
+            <ByteLimitHelper id="qna-title-bytes" currentBytes={titleBytes} maxBytes={MAX_TITLE} />
 
-          <TextField 
-            id="qna-content" 
-            fullWidth 
-            label="질문 내용" 
-            value={content} 
-            onChange={(e)=>setContent(e.target.value)} 
-            multiline 
-            minRows={8} 
-            sx={{ mb: 0.5 }} 
-            required
-          />
-          <ByteLimitHelper id="qna-content-bytes" currentBytes={contentBytes} maxBytes={MAX_CONTENT} />
+            <TextField 
+              id="qna-content" 
+              fullWidth 
+              label="질문 내용" 
+              value={content} 
+              InputProps={{ readOnly: true }}
+              multiline 
+              minRows={8} 
+              sx={{ mb: 0.5, bgcolor: 'white' }} 
+            />
+            <ByteLimitHelper id="qna-content-bytes" currentBytes={contentBytes} maxBytes={MAX_CONTENT} />
 
-          <FormControl fullWidth sx={{ mb: SPACING.MEDIUM }}>
-            <InputLabel id="qna-type-label">Q&A 유형</InputLabel>
-            <Select
-              labelId="qna-type-label"
-              id="qna-type"
-              value={qnaType}
-              label="Q&A 유형"
-              onChange={(e) => setQnaType(e.target.value)}
-            >
-              <MenuItem value="GENERAL">일반</MenuItem>
-              <MenuItem value="TECHNICAL">기술</MenuItem>
-              <MenuItem value="ACCOUNT">계정</MenuItem>
-              <MenuItem value="OTHER">기타</MenuItem>
-            </Select>
-            <FormHelperText>Q&A의 유형을 선택해주세요</FormHelperText>
-          </FormControl>
+            <FormControl fullWidth sx={{ mb: SPACING.MEDIUM }}>
+              <InputLabel id="qna-type-label">Q&A 유형</InputLabel>
+              <Select
+                labelId="qna-type-label"
+                id="qna-type"
+                value={qnaType}
+                label="Q&A 유형"
+                disabled={true}
+                sx={{ bgcolor: 'white' }}
+              >
+                <MenuItem value="GENERAL">일반</MenuItem>
+                <MenuItem value="TECHNICAL">기술</MenuItem>
+                <MenuItem value="ACCOUNT">계정</MenuItem>
+                <MenuItem value="OTHER">기타</MenuItem>
+              </Select>
+            </FormControl>
 
-          <FormControl fullWidth sx={{ mb: SPACING.MEDIUM }}>
-            <InputLabel id="secret-yn-label">비공개 여부</InputLabel>
-            <Select
-              labelId="secret-yn-label"
-              id="secret-yn"
-              value={secretYn}
-              label="비공개 여부"
-              onChange={(e) => setSecretYn(e.target.value as 'Y' | 'N')}
-            >
-              <MenuItem value="N">공개</MenuItem>
-              <MenuItem value="Y">비공개</MenuItem>
-            </Select>
-            <FormHelperText>Q&A를 비공개로 설정할지 여부를 선택해주세요</FormHelperText>
-          </FormControl>
+            <FormControl fullWidth sx={{ mb: 0 }}>
+              <InputLabel id="secret-yn-label">비공개 여부</InputLabel>
+              <Select
+                labelId="secret-yn-label"
+                id="secret-yn"
+                value={secretYn}
+                label="비공개 여부"
+                disabled={true}
+                sx={{ bgcolor: 'white' }}
+              >
+                <MenuItem value="N">공개</MenuItem>
+                <MenuItem value="Y">비공개</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
 
-          <TextField 
-            id="qna-answer" 
-            fullWidth 
-            label="답변 내용" 
-            value={answer} 
-            onChange={(e)=>setAnswer(e.target.value)} 
-            multiline 
-            minRows={10} 
-            sx={{ mb: 0.5 }} 
-            helperText="질문에 대한 답변을 입력해주세요"
-          />
-          <ByteLimitHelper id="qna-answer-bytes" currentBytes={answerBytes} maxBytes={MAX_CONTENT} />
+          {/* 어드민 편집 영역 - 답변만 수정 가능 */}
+          <Box sx={{ 
+            bgcolor: 'primary.50', 
+            p: 2, 
+            borderRadius: 1, 
+            border: '2px solid',
+            borderColor: 'primary.200',
+            mb: SPACING.MEDIUM 
+          }}>
+            
+            <TextField 
+              id="qna-answer" 
+              fullWidth 
+              label="답변 내용" 
+              value={answer} 
+              onChange={(e)=>setAnswer(e.target.value)} 
+              multiline 
+              minRows={10} 
+              sx={{ mb: 0.5 }} 
+              helperText="질문에 대한 답변을 입력해주세요"
+            />
+            <ByteLimitHelper id="qna-answer-bytes" currentBytes={answerBytes} maxBytes={MAX_CONTENT} />
+          </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.MEDIUM }}>
             <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>

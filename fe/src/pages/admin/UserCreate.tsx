@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, CardContent, TextField, Alert } from '@mui/material';
+import { Box, CardContent, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
@@ -7,10 +7,11 @@ import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import { SPACING } from '../../constants/spacing';
 import { ROUTES } from '../../routes';
-import { createUserAccount } from '../../api/account';
+import { createUserAccount, checkUserEmail } from '../../api/account';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import SelectField from '../../components/common/SelectField';
 import ErrorAlert from '../../components/ErrorAlert';
+import { isValidEmail } from '@iitp-dabt/common';
 
 export default function UserCreate() {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ export default function UserCreate() {
   const [status, setStatus] = useState<'A' | 'I' | 'S'>('A');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailChecked, setEmailChecked] = useState(false); // 이메일 중복체크 상태
+  const [checkingEmail, setCheckingEmail] = useState(false); // 이메일 중복체크 중 상태
 
   const statusOptions = [
     { value: 'A', label: '활성' },
@@ -49,10 +52,15 @@ export default function UserCreate() {
       return;
     }
 
-    // 이메일 형식 검사
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(loginId)) {
+    // 이메일 형식 검사 (공통함수 사용)
+    if (!isValidEmail(loginId)) {
       setError('올바른 이메일 형식을 입력해주세요.');
+      return;
+    }
+
+    // ✅ Email 중복체크 검증 추가
+    if (!emailChecked) {
+      setError('이메일 중복체크를 먼저 완료해주세요.');
       return;
     }
 
@@ -79,6 +87,44 @@ export default function UserCreate() {
     }
   };
 
+  const handleLoginIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoginId(e.target.value);
+    setEmailChecked(false); // 입력값이 변경되면 중복체크 상태 초기화
+  };
+
+  const handleCheckEmail = async () => {
+    if (!loginId.trim()) {
+      setError('이메일을 입력해 주세요.');
+      return;
+    }
+
+    // 이메일 형식 검증 (공통함수 사용)
+    if (!isValidEmail(loginId)) {
+      setError('이메일 형식으로 입력해 주세요.');
+      setEmailChecked(false);
+      return;
+    }
+
+    setCheckingEmail(true);
+    setError(null);
+
+    try {
+      const res = await checkUserEmail({ email: loginId });
+      if (res.success && res.data?.available) {
+        setEmailChecked(true);
+        setError(null);
+      } else {
+        setError(res.errorMessage || '이미 사용 중인 이메일입니다.');
+        setEmailChecked(false);
+      }
+    } catch (error) {
+      setError('이메일 중복체크 중 오류가 발생했습니다.');
+      setEmailChecked(false);
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
+
   return (
     <Box id="admin-user-create-page" sx={{ p: SPACING.LARGE }}>
       <AdminPageHeader />
@@ -102,11 +148,47 @@ export default function UserCreate() {
             label="로그인 ID (이메일)"
             type="email"
             value={loginId}
-            onChange={(e) => setLoginId(e.target.value)}
+            onChange={handleLoginIdChange}
             sx={{ mb: SPACING.MEDIUM }}
             required
             helperText="이메일 형식으로 입력해주세요"
           />
+          
+          {/* ✅ Email 중복체크 버튼 및 상태 표시 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: SPACING.MEDIUM }}>
+            <ThemedButton
+              variant="outlined"
+              onClick={handleCheckEmail}
+              disabled={checkingEmail || !loginId.trim()}
+              sx={{ 
+                minWidth: '120px',
+                backgroundColor: '#fff0f5', // 파스텔 핑크
+                borderColor: '#ffb6c1',
+                color: '#c71585',
+                '&:hover': {
+                  backgroundColor: '#ffe6f0',
+                  borderColor: '#ff69b4'
+                },
+                '&:disabled': {
+                  backgroundColor: '#f5f5f5',
+                  borderColor: '#d3d3d3',
+                  color: '#a9a9a9'
+                }
+              }}
+            >
+              {checkingEmail ? '확인 중...' : '이메일 중복체크'}
+            </ThemedButton>
+            {emailChecked && (
+              <Typography variant="body2" color="success.main" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'medium' }}>
+                ✅ 사용 가능한 이메일입니다
+              </Typography>
+            )}
+            {!emailChecked && loginId.trim() && (
+              <Typography variant="body2" color="text.secondary">
+                이메일 중복체크를 완료해주세요
+              </Typography>
+            )}
+          </Box>
           
           <TextField
             id="user-password"
@@ -147,8 +229,6 @@ export default function UserCreate() {
             onChange={(v) => setStatus(v as 'A' | 'I' | 'S')}
             options={statusOptions}
             label="상태"
-            sx={{ mb: SPACING.MEDIUM }}
-            required
           />
           
           <TextField

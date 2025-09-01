@@ -58,62 +58,29 @@ export default function CodeManagement() {
 
   // 그룹 목록 조회
   const { data, isLoading, isEmpty, isError, refetch } = useDataFetching({
-    fetchFunction: () => getCommonCodeGroups(),
-    dependencies: []
+    fetchFunction: () => getCommonCodeGroups({ search, useYn, sort }),  // ✅ 필터 값들을 API 요청에 포함
+    dependencies: [search, useYn, sort]  // ✅ 필터 값이 변경될 때마다 재조회
   });
 
-  // 필터링된 그룹 목록
+  // ✅ 서버에서 이미 필터링된 데이터를 받아오므로 클라이언트 필터링 제거
   const filteredGroups = React.useMemo(() => {
-    if (!data?.data?.groups) return [];
-    
-    let groups = data.data.groups;
-    
-    // 검색 필터
-    if (search) {
-      groups = groups.filter((group: any) => 
-        group.grpId?.toLowerCase().includes(search.toLowerCase()) ||
-        group.grpNm?.toLowerCase().includes(search.toLowerCase()) ||
-        group.description?.toLowerCase().includes(search.toLowerCase())
-      );
+    if (!data?.groups) {
+      return [];
     }
-    
-    // 사용여부 필터
-    if (useYn) {
-      groups = groups.filter((group: any) => group.useYn === useYn);
-    }
-    
-    return groups;
-  }, [data?.data?.groups, search, useYn]);
 
-  // 정렬된 그룹 목록
-  const sortedGroups = React.useMemo(() => {
-    const [key, order] = sort.split('-');
-    
-    return [...filteredGroups].sort((a: any, b: any) => {
-      let aValue: any = a[key as keyof typeof a];
-      let bValue: any = b[key as keyof typeof b];
-      
-      if (key === 'createdAt') {
-        aValue = new Date(aValue || '').getTime();
-        bValue = new Date(bValue || '').getTime();
-      } else if (key === 'sortOrder') {
-        aValue = Number(aValue) || 0;
-        bValue = Number(bValue) || 0;
-      }
-      
-      if (order === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-  }, [filteredGroups, sort]);
+    return data.groups;  // ✅ data.groups로 직접 접근
+  }, [data?.groups]);
+
+  // ✅ 서버에서 이미 정렬된 데이터를 받아오므로 클라이언트 정렬 제거
+  const sortedGroups = filteredGroups;
 
   // 페이징 처리
   const paginatedGroups = React.useMemo(() => {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    return sortedGroups.slice(startIndex, endIndex);
+    const result = sortedGroups.slice(startIndex, endIndex);
+    
+    return result;
   }, [sortedGroups, page, limit]);
 
   const totalPages = Math.ceil(sortedGroups.length / limit);
@@ -132,7 +99,11 @@ export default function CodeManagement() {
       ) 
     },
     { key: 'grpNm', header: '그룹명' },
-    { key: 'description', header: '설명' },
+    { 
+      key: 'codeType', 
+      header: '코드 타입',
+      render: (r) => r.codeType || '-'  // ✅ codeType이 없으면 '-' 표시
+    },
     { key: 'codeCount', header: '코드 수' },
     { 
       key: 'useYn', 
@@ -171,7 +142,7 @@ export default function CodeManagement() {
             setSearch(v); 
             setQuery({ search: v, page: 1, limit, useYn, sort }, { replace: true }); 
           }, 
-          placeholder: '그룹 ID/그룹명/설명 검색' 
+          placeholder: '그룹 ID/그룹명 검색' 
         }} 
         filters={[
           { 
@@ -211,8 +182,8 @@ export default function CodeManagement() {
         title="코드 그룹 관리"
         total={sortedGroups.length}
         loading={isLoading}
-        errorText={isError ? '그룹 목록을 불러오는 중 오류가 발생했습니다.' : ''}
-        emptyText={sortedGroups && sortedGroups.length > 0 ? undefined : '표시할 그룹이 없습니다.'}
+        errorText={isError ? '그룹 목록을 불러오는 중 오류가 발생했습니다.' : undefined}
+        emptyText={isEmpty && !isLoading ? '표시할 그룹이 없습니다.' : undefined}  // ✅ 로딩 중이 아닐 때만 empty 표시
         selectable={{
           enabled: true,
           items: sortedGroups,
@@ -229,7 +200,7 @@ export default function CodeManagement() {
             successMessage: '선택된 그룹들이 삭제되었습니다.',
             errorMessage: '그룹 삭제 중 오류가 발생했습니다.',
             onDeleteSuccess: () => {
-              refetch();
+              refetch(); // refetch 대신 refetch 호출
             }
           }
         }}
@@ -273,7 +244,7 @@ export default function CodeManagement() {
             selectedIds={selected}
             onToggleRow={(id) => toggleRow(id as string)}
             onToggleAll={toggleAll}
-            emptyText={isEmpty ? '표시할 그룹이 없습니다.' : undefined}
+            emptyText={paginatedGroups.length === 0 && !isLoading ? '표시할 그룹이 없습니다.' : undefined}  // ✅ 로딩 중이 아닐 때만 empty 표시
           />
         </CardContent>
       </ListScaffold>

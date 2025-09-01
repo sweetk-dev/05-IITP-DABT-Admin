@@ -12,7 +12,10 @@ import ByteLimitHelper from '../../components/common/ByteLimitHelper';
 import { getAdminNoticeDetail, updateAdminNotice } from '../../api';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
+import { NOTICE_TYPE_OPTIONS } from '../../constants/noticeTypes';
+import type { NoticeType } from '../../constants/noticeTypes';  // ✅ type import 사용
 import type { AdminNoticeUpdateReq } from '@iitp-dabt/common';
+import { NOTICE_TYPES } from '../../constants/noticeTypes';
 
 export default function AdminNoticeEdit() {
   const navigate = useNavigate();
@@ -29,7 +32,7 @@ export default function AdminNoticeEdit() {
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [noticeType, setNoticeType] = useState<'G' | 'S' | 'E'>('G');
+  const [noticeType, setNoticeType] = useState<NoticeType>(NOTICE_TYPES.GENERAL);  // ✅ 공통 상수 사용
   const [pinnedYn, setPinnedYn] = useState<'Y' | 'N'>('N');
   const [publicYn, setPublicYn] = useState<'Y' | 'N'>('Y');
   const [startDt, setStartDt] = useState('');
@@ -47,7 +50,7 @@ export default function AdminNoticeEdit() {
     if (detail) {
       setTitle(detail.title || '');
       setContent(detail.content || '');
-      setNoticeType(detail.noticeType || 'G');
+      setNoticeType(detail.noticeType || NOTICE_TYPES.GENERAL);  // ✅ 공통 상수 사용
       setPinnedYn(detail.pinnedYn || 'N');
       setPublicYn(detail.publicYn || 'Y');
       setStartDt(detail.startDt ? detail.startDt.split('T')[0] : '');
@@ -142,11 +145,13 @@ export default function AdminNoticeEdit() {
               id="notice-type"
               value={noticeType}
               label="공지 유형"
-              onChange={(e) => setNoticeType(e.target.value as 'G' | 'S' | 'E')}
+              onChange={(e) => setNoticeType(e.target.value as NoticeType)}
             >
-              <MenuItem value="G">일반 (G)</MenuItem>
-              <MenuItem value="S">중요 (S)</MenuItem>
-              <MenuItem value="E">긴급 (E)</MenuItem>
+              {NOTICE_TYPE_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
             </Select>
             <FormHelperText>공지의 중요도를 설정합니다</FormHelperText>
           </FormControl>

@@ -16,19 +16,11 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
 import { PAGINATION } from '../../constants/pagination';
 import { formatYmdHm } from '../../utils/date';
+import { getNoticeTypeLabel, getNoticeTypeColor, NOTICE_TYPE_FILTER_OPTIONS, NOTICE_TYPES } from '../../constants/noticeTypes';  // ✅ NOTICE_TYPES 추가
+import type { NoticeType } from '../../constants/noticeTypes';  // ✅ NoticeType 타입 추가
 import type { AdminNoticeListItem, AdminNoticeListQuery } from '@iitp-dabt/common';
 
-// 공지사항 타입별 라벨
-const getNoticeTypeLabel = (type: string) => {
-  switch (type) {
-    case 'G': return '일반';
-    case 'S': return '시스템';
-    case 'E': return '긴급';
-    default: return type;
-  }
-};
-
-// 공지사항 상태별 라벨
+// 공지사항 상태별 라벨 (이 함수는 공지사항 상태용이므로 별도 유지)
 const getStatusLabel = (status: string) => {
   switch (status) {
     case 'Y': return '공개';
@@ -43,7 +35,7 @@ export default function NoticeManage() {
 
   // 검색 및 필터 상태
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'G' | 'S' | 'E'>('all');
+  const [filterType, setFilterType] = useState<'all' | NoticeType>('all');  // ✅ 공통 타입 사용
   const [filterStatus, setFilterStatus] = useState<'all' | 'Y' | 'N'>('all');
   
   // 선택된 공지사항 항목들
@@ -91,16 +83,6 @@ export default function NoticeManage() {
   useEffect(() => {
     refetch();
   }, [filterType, filterStatus, refetch]);
-
-  // 공지사항 타입별 색상
-  const getNoticeTypeColor = (type: string): 'primary' | 'info' | 'error' | 'default' => {
-    switch (type) {
-      case 'G': return 'primary';
-      case 'S': return 'info';
-      case 'E': return 'error';
-      default: return 'default';
-    }
-  };
 
   const handleNoticeClick = (noticeId: number) => {
     navigate(ROUTES.ADMIN.NOTICES.DETAIL.replace(':id', String(noticeId)));
@@ -151,13 +133,8 @@ export default function NoticeManage() {
             {
               label: '타입',
               value: filterType,
-              options: [
-                { value: 'all', label: '전체' },
-                { value: 'G', label: '일반' },
-                { value: 'S', label: '시스템' },
-                { value: 'E', label: '긴급' }
-              ],
-              onChange: (value: string) => setFilterType(value as 'all' | 'G' | 'S' | 'E')
+              options: NOTICE_TYPE_FILTER_OPTIONS,
+              onChange: (value: string) => setFilterType(value as 'all' | NoticeType)
             },
             {
               label: '공개여부',

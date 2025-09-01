@@ -112,6 +112,7 @@ export const ROUTES = {
     // 코드 관리 (S-Admin 전용)
     CODE: {
       LIST: '/admin/code',
+      GROUP_DETAIL: '/admin/code/group/:groupId',
       CREATE: '/admin/code/create',
       DETAIL: '/admin/code/:id',
       EDIT: '/admin/code/:id/edit',

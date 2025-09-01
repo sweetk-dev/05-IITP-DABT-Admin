@@ -47,6 +47,7 @@ const AdminQnaReply = lazy(() => import('./pages/admin/QnaReply'));
 const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
 const OperatorManagement = lazy(() => import('./pages/admin/OperatorManagement'));
 const CodeManagement = lazy(() => import('./pages/admin/CodeManagement'));
+const CodeGroupDetail = lazy(() => import('./pages/admin/CodeGroupDetail'));
 
 // 새로 추가된 Admin Edit 페이지들
 const OperatorEdit = lazy(() => import('./pages/admin/OperatorEdit'));
@@ -121,6 +122,7 @@ function App() {
                     
                     {/* 코드 관리 */}
             <Route path="/admin/code" element={<AdminProtectedRoute><CodeManagement /></AdminProtectedRoute>} />
+            <Route path="/admin/code/group/:groupId" element={<AdminProtectedRoute><CodeGroupDetail /></AdminProtectedRoute>} />
                     
                     {/* 기존 관리자 페이지들 */}
             <Route path={ROUTES.ADMIN.OPENAPI.CLIENTS} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminOpenApiClients /></Suspense></AdminProtectedRoute>} />

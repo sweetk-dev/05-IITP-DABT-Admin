@@ -13,11 +13,11 @@ Write-Host "📦 packages/common 설정 중..." -ForegroundColor Green
 Set-Location "packages/common"
 npm install
 npm run build
-Set-Location "../script"
+Set-Location "../.."
 
 Write-Host "🔧 Backend 설정 중..." -ForegroundColor Green
 # BE 설정
-Set-Location "../be"
+Set-Location "be"
 if (Test-Path "scripts/setup.sh") {
     # Windows에서는 bash 대신 npm 스크립트 사용
     npm install
@@ -36,11 +36,11 @@ if (Test-Path "scripts/setup.sh") {
     Write-Host "❌ be/scripts/setup.sh 파일이 없습니다." -ForegroundColor Red
     exit 1
 }
-Set-Location "../script"
+Set-Location ".."
 
 Write-Host "🎨 Frontend 설정 중..." -ForegroundColor Green
 # FE 설정
-Set-Location "../fe"
+Set-Location "fe"
 if (Test-Path "scripts/setup.sh") {
     # Windows에서는 bash 대신 npm 스크립트 사용
     npm install
@@ -49,7 +49,7 @@ if (Test-Path "scripts/setup.sh") {
     Write-Host "❌ fe/scripts/setup.sh 파일이 없습니다." -ForegroundColor Red
     exit 1
 }
-Set-Location "../script"
+Set-Location ".."
 
 Write-Host "✅ 전체 프로젝트 설정 완료!" -ForegroundColor Green
 Write-Host ""
@@ -63,4 +63,4 @@ Write-Host "   # Backend: cd be && npm run dev" -ForegroundColor Gray
 Write-Host "   # Frontend: cd fe && npm run dev" -ForegroundColor Gray
 Write-Host ""
 Write-Host "3. 전체 빌드:" -ForegroundColor White
-Write-Host "   npm run build" -ForegroundColor Gray 
+Write-Host "   npm run build" -ForegroundColor Gray

@@ -81,7 +81,7 @@ cd fe && npm run dev
 
 **사용법:**
 ```typescript
-import { isValidEmail, isValidPassword } from '@iitp/common';
+import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
 ```
 
 ### be/ (Backend)
@@ -118,24 +118,13 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
 
 ## 🔧 상세 설정
 
-### Backend 설정
+각 워크스페이스의 상세한 설정 방법은 해당 README 파일을 참조하세요:
 
-자세한 설정은 [be/README.md](be/README.md)를 참조하세요.
-
-**주요 설정 항목:**
-- 데이터베이스 연결
-- 환경 변수 설정
-- JWT 설정
-- 로깅 설정
-
-### Frontend 설정
-
-자세한 설정은 [fe/README.md](fe/README.md)를 참조하세요.
-
-**주요 설정 항목:**
-- API 엔드포인트 설정
-- 환경 변수 설정
-- 빌드 설정
+- **[packages/common/README.md](packages/common/README.md)**: 공통 패키지 설정 및 API 문서
+- **[be/README.md](be/README.md)**: Backend 설정, API 문서, 데이터베이스 설정
+- **[fe/README.md](fe/README.md)**: Frontend 설정, 컴포넌트 문서, 페이지 구조
+- **[script/README.md](script/README.md)**: 배포 스크립트 가이드
+- **[script/env-guide.md](script/env-guide.md)**: 환경 변수 설정 가이드
 
 ## 🛠️ 개발 가이드
 
@@ -174,7 +163,7 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
    cd packages/common && npm run build
    
    # Backend
-   cd be && bash scripts/build.sh
+   cd be && npm run build
    
    # Frontend
    cd fe && bash scripts/build.sh

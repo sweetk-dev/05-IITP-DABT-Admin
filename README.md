@@ -21,7 +21,7 @@ IITP DABT (Data API Business Tool) Admin 시스템입니다.
 
 ### 1. 사전 요구사항
 
-- **Node.js**: 18.x 이상
+- **Node.js**: 22.x 이상
 - **npm**: 9.x 이상
 - **PostgreSQL**: 12.x 이상
 - **Git**: 최신 버전
@@ -80,8 +80,7 @@ cd fe && npm run dev
 - 비밀번호 강도 측정
 
 **사용법:**
-```typescript
-import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
+```typescriptimport { isValidEmail, isValidPassword } from '@iitp-dabt/common';
 ```
 
 ### be/ (Backend)

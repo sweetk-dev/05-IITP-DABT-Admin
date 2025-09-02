@@ -22,7 +22,7 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스로, 사용자 
 
 ### 1. 사전 요구사항
 
-- **Node.js**: 18.x 이상
+- **Node.js**: 22.x 이상
 - **npm**: 9.x 이상
 - **Git**: 최신 버전
 

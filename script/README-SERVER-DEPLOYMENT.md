@@ -64,7 +64,7 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "🏗️ 빌드 서버"
-        A[📁 소스 코드<br/>/var/www/iitp-dabt-admin]
+        A[📁 소스 코드<br/>your-build-server-root/iitp-data-admin]
         B[🔨 빌드 과정<br/>Git pull + npm build]
         C[📦 배포 폴더<br/>/var/www/iitp-dabt-deploy]
     end
@@ -105,26 +105,32 @@ graph TB
 sudo apt update
 sudo apt upgrade -y
 
-# Node.js 18.x 설치
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# Node.js 22.x 설치
+# 1. NodeSource 저장소 추가
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+
+# 2. Node.js 설치
 sudo apt-get install -y nodejs
 
 # Git 설치
 sudo apt install git -y
 
 # SSH 키 설정 (Git 저장소 접근용)
+# 1. SSH 키 생성
 ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
-# GitHub/GitLab에 공개키 등록
+
+# 2. GitHub/GitLab에 공개키 등록 (수동)
+# cat ~/.ssh/id_rsa.pub
 ```
 
 #### 1.1.2 프로젝트 설정
 ```bash
 # 1. 기본 디렉토리 생성
-sudo mkdir -p /var/www/iitp-dabt-admin
-sudo chown $USER:$USER /var/www/iitp-dabt-admin
+sudo mkdir -p your-build-server-root/iitp-data-admin
+sudo chown $USER:$USER your-build-server-root/iitp-data-admin
 
 # 2. Git에서 소스 다운로드
-cd /var/www/iitp-dabt-admin
+cd your-build-server-root/iitp-data-admin
 git clone https://github.com/your-repo/iitp-dabt-admin.git .
 
 # 3. 의존성 설치
@@ -143,7 +149,7 @@ GIT_REPO_URL=https://github.com/your-repo/iitp-dabt-admin.git
 GIT_BRANCH=main
 
 # 경로 설정
-SOURCE_PATH=/var/www/iitp-dabt-admin
+SOURCE_PATH=your-build-server-root/iitp-data-admin
 DEPLOY_PATH=/var/www/iitp-dabt-deploy
 
 # 빌드 설정
@@ -156,7 +162,7 @@ NPM_CONFIG_PRODUCTION=true
 #### 1.2.1 전체 빌드 및 배포
 ```bash
 # 빌드 서버에서 실행
-cd /var/www/iitp-dabt-admin
+cd your-build-server-root/iitp-data-admin
 npm run build:server
 ```
 
@@ -195,7 +201,7 @@ flowchart TD
 
 #### 1.3.2 빌드 서버 디렉토리 구조
 ```
-/var/www/iitp-dabt-admin/          # 소스 코드
+your-build-server-root/iitp-data-admin/          # 소스 코드
 ├── packages/common/
 ├── be/
 ├── fe/
@@ -219,8 +225,11 @@ flowchart TD
 sudo apt update
 sudo apt upgrade -y
 
-# Node.js 18.x 설치
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# Node.js 22.x 설치
+# 1. NodeSource 저장소 추가
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+
+# 2. Node.js 설치
 sudo apt-get install -y nodejs
 
 # PM2 설치
@@ -272,8 +281,13 @@ server {
 }
 EOF
 
+# 4. Nginx 설정 활성화
 sudo ln -s /etc/nginx/sites-available/iitp-dabt /etc/nginx/sites-enabled/
+
+# 5. Nginx 설정 검증
 sudo nginx -t
+
+# 6. Nginx 재시작
 sudo systemctl reload nginx
 ```
 
@@ -315,7 +329,7 @@ EOF
 #### 2.2.1 배포 받기 및 실행
 ```bash
 # 실행 서버에서 실행
-cd /var/www/iitp-dabt-admin
+cd your-build-server-root/iitp-data-admin
 npm run deploy:server
 ```
 
@@ -488,7 +502,7 @@ export GIT_REPO_URL=https://github.com/your-repo/iitp-dabt-admin.git
 export GIT_BRANCH=main
 
 # 경로 설정
-export SOURCE_PATH=/var/www/iitp-dabt-admin
+export SOURCE_PATH=your-build-server-root/iitp-data-admin
 export DEPLOY_PATH=/var/www/iitp-dabt-deploy
 
 # 빌드 설정
@@ -690,7 +704,7 @@ sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
 
 ### 빌드 서버 체크리스트
 - [ ] Git 저장소 접근 가능
-- [ ] Node.js 18.x 설치됨
+- [ ] Node.js 22.x 설치됨
 - [ ] 환경 변수 설정됨
 - [ ] SSH 키 설정됨
 - [ ] 디스크 공간 충분함 (최소 10GB)
@@ -711,7 +725,7 @@ sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
 ```bash
 # Cron을 이용한 자동 배포
 # 매일 오전 2시에 자동 배포
-0 2 * * * cd /var/www/iitp-dabt-admin && npm run build:server
+0 2 * * * cd your-build-server-root/iitp-data-admin && npm run build:server
 ```
 
 ### 백업

@@ -8,7 +8,7 @@ Node.js + Express + Sequelize 기반의 REST API 서버로, 사용자 인증, �
 
 ### 🏗️ 기술 스택
 
-- **Runtime**: Node.js 18.x+
+- **Runtime**: Node.js 22.x+
 - **Framework**: Express.js 4.x
 - **Language**: TypeScript 5.x
 - **Database**: PostgreSQL 12.x + Sequelize 6.x
@@ -21,7 +21,7 @@ Node.js + Express + Sequelize 기반의 REST API 서버로, 사용자 인증, �
 
 ### 1. 사전 요구사항
 
-- **Node.js**: 18.x 이상
+- **Node.js**: 22.x 이상
 - **npm**: 9.x 이상
 - **PostgreSQL**: 12.x 이상
 - **Git**: 최신 버전

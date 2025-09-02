@@ -28,8 +28,8 @@ const deployConfig = {
   productionServer: {
     host: process.env.PROD_SERVER_HOST || 'localhost',
     user: process.env.PROD_SERVER_USER || 'root',
-    bePath: process.env.PROD_BE_PATH || '/var/www/iitp-dabt-backend',
-    fePath: process.env.PROD_FE_PATH || '/var/www/iitp-dabt-frontend',
+    bePath: process.env.PROD_BE_PATH || '/var/www/iitp-dabt-adm-be',
+    fePath: process.env.PROD_FE_PATH || '/var/www/iitp-dabt-adm-fe',
     port: process.env.PROD_SERVER_PORT || '22'
   }
 };
@@ -173,8 +173,8 @@ if (!process.env.BUILD_SERVER_HOST || !process.env.PROD_SERVER_HOST) {
   console.log('   export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy');
   console.log('   export PROD_SERVER_HOST=prod-server.com');
   console.log('   export PROD_SERVER_USER=produser');
-  console.log('   export PROD_BE_PATH=/var/www/iitp-dabt-backend');
-  console.log('   export PROD_FE_PATH=/var/www/iitp-dabt-frontend');
+  console.log('   export PROD_BE_PATH=/var/www/iitp-dabt-adm-be');
+  console.log('   export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe');
   console.log('');
   console.log('🔧 또는 .env 파일에 설정하세요.');
   process.exit(1);

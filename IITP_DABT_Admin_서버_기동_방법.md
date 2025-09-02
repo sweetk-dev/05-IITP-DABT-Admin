@@ -198,10 +198,10 @@ tail -f be/logs/app-$(date +%Y-%m-%d).log
 # 환경 변수 설정
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-backend
+export BE_PATH=/var/www/iitp-dabt-adm-be
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-frontend
+export FE_PATH=/var/www/iitp-dabt-adm-fe
 
 # 전체 배포 실행
 npm run deploy
@@ -257,8 +257,8 @@ export BUILD_SERVER_USER=builduser
 export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
-export PROD_BE_PATH=/var/www/iitp-dabt-backend
-export PROD_FE_PATH=/var/www/iitp-dabt-frontend
+export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
 
 # 전체 배포 (빌드 서버 → 기동 서버)
 npm run deploy:server
@@ -301,12 +301,12 @@ npm run restart:server:fe
 # Backend 서버 설정
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-backend
+export BE_PATH=/var/www/iitp-dabt-adm-be
 
 # Frontend 서버 설정
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-frontend
+export FE_PATH=/var/www/iitp-dabt-adm-fe
 ```
 
 #### 서버 빌드용
@@ -328,11 +328,11 @@ export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
 # 기동 서버 설정
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
-export PROD_BE_PATH=/var/www/iitp-dabt-backend
-export PROD_FE_PATH=/var/www/iitp-dabt-frontend
-export PM2_APP_NAME_BE=iitp-dabt-backend
+export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PM2_APP_NAME_BE=iitp-dabt-adm-be
 export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-frontend
+export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 ```
 
 ## 🛠️ 9. 개발 가이드
@@ -538,9 +538,9 @@ export GIT_BRANCH=main
 # 기동 서버 환경 변수
 export BUILD_SERVER_HOST=build-server.com
 export PROD_SERVER_HOST=prod-server.com
-export PROD_BE_PATH=/var/www/iitp-dabt-backend
-export PROD_FE_PATH=/var/www/iitp-dabt-frontend
-export PM2_APP_NAME_BE=iitp-dabt-backend
+export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PM2_APP_NAME_BE=iitp-dabt-adm-be
 export FRONTEND_DOMAIN=your-domain.com
 ```
 

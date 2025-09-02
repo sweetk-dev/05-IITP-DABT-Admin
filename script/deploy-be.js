@@ -16,7 +16,7 @@ const deployConfig = {
   backend: {
     host: process.env.BE_HOST || 'your-backend-server.com',
     user: process.env.BE_USER || 'your-username',
-    path: process.env.BE_PATH || '/var/www/iitp-dabt-backend',
+    path: process.env.BE_PATH || '/var/www/iitp-dabt-adm-be',
     port: process.env.BE_PORT || '22'
   }
 };
@@ -143,7 +143,7 @@ function restartServer() {
     const restartBackend = spawn('ssh', [
       '-p', deployConfig.backend.port,
       `${deployConfig.backend.user}@${deployConfig.backend.host}`,
-      'cd', deployConfig.backend.path, '&&', 'npm', 'install', '&&', 'pm2', 'restart', 'iitp-dabt-backend'
+      'cd', deployConfig.backend.path, '&&', 'npm', 'install', '&&', 'pm2', 'restart', 'iitp-dabt-adm-be'
     ], { stdio: 'inherit' });
     
     return new Promise((resolve, reject) => {
@@ -159,7 +159,7 @@ function restartServer() {
   } else {
     console.log('⚠️  Windows에서는 수동으로 서버를 재시작하세요.');
     console.log('📤 서버 재시작 명령어:');
-    console.log(`ssh -p ${deployConfig.backend.port} ${deployConfig.backend.user}@${deployConfig.backend.host} 'cd ${deployConfig.backend.path} && npm install && pm2 restart iitp-dabt-backend'`);
+    console.log(`ssh -p ${deployConfig.backend.port} ${deployConfig.backend.user}@${deployConfig.backend.host} 'cd ${deployConfig.backend.path} && npm install && pm2 restart iitp-dabt-adm-be'`);
     return Promise.resolve();
   }
 }
@@ -200,7 +200,7 @@ if (!process.env.BE_HOST) {
   console.log('💡 예시:');
   console.log('   export BE_HOST=your-backend-server.com');
   console.log('   export BE_USER=your-username');
-  console.log('   export BE_PATH=/var/www/iitp-dabt-backend');
+  console.log('   export BE_PATH=/var/www/iitp-dabt-adm-be');
   console.log('');
   console.log('🔧 또는 .env 파일에 설정하세요.');
   process.exit(1);

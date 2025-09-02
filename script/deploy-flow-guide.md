@@ -29,10 +29,10 @@
 # 1. 환경 변수 설정
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-backend
+export BE_PATH=/var/www/iitp-dabt-adm-be
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-frontend
+export FE_PATH=/var/www/iitp-dabt-adm-fe
 
 # 2. 전체 배포 실행
 npm run deploy
@@ -94,8 +94,8 @@ export BUILD_SERVER_USER=builduser
 export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
-export PROD_BE_PATH=/var/www/iitp-dabt-backend
-export PROD_FE_PATH=/var/www/iitp-dabt-frontend
+export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
 
 # 2. 전체 배포 실행
 npm run deploy:server
@@ -188,13 +188,13 @@ sudo chmod -R 755 /var/www/iitp-dabt-deploy
 
 #### 디렉토리 구조
 ```
-/var/www/iitp-dabt-backend/        # Backend 서비스
+/var/www/iitp-dabt-adm-be/        # Backend 서비스
 ├── dist/
 ├── node_modules/
 ├── package.json
 └── .env
 
-/var/www/iitp-dabt-frontend/       # Frontend 서비스
+/var/www/iitp-dabt-adm-fe/       # Frontend 서비스
 ├── index.html
 ├── assets/
 └── static/
@@ -209,9 +209,9 @@ npm install -g pm2
 # ecosystem.config.js
 module.exports = {
   apps: [{
-    name: 'iitp-dabt-backend',
+    name: 'iitp-dabt-adm-be',
     script: 'dist/index.js',
-    cwd: '/var/www/iitp-dabt-backend',
+    cwd: '/var/www/iitp-dabt-adm-be',
     env: {
       NODE_ENV: 'production',
       PORT: 30000
@@ -226,11 +226,11 @@ module.exports = {
 sudo apt install nginx
 
 # 설정 파일 생성
-# /etc/nginx/sites-available/iitp-dabt-frontend
+# /etc/nginx/sites-available/iitp-dabt-adm-fe
 server {
     listen 80;
     server_name your-domain.com;
-    root /var/www/iitp-dabt-frontend;
+    root /var/www/iitp-dabt-adm-fe;
     index index.html;
     
     location / {
@@ -279,7 +279,7 @@ telnet server.com 22
 ```bash
 # PM2 상태 확인
 pm2 status
-pm2 logs iitp-dabt-backend
+pm2 logs iitp-dabt-adm-be
 
 # Nginx 상태 확인
 sudo systemctl status nginx
@@ -295,7 +295,7 @@ netstat -tulpn | grep :30000
 env | grep -E "(DB_|JWT_|ENC_)"
 
 # .env 파일 확인
-cat /var/www/iitp-dabt-backend/.env
+cat /var/www/iitp-dabt-adm-be/.env
 
 # 환경 변수 로드 테스트
 node -e "console.log(process.env.JWT_SECRET)"

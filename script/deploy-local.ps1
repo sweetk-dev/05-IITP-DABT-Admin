@@ -30,13 +30,13 @@ if (-not (Test-Path $configPath)) {
   "backend": {
     "host": "your-backend-server.com",
     "user": "your-username",
-    "path": "/var/www/iitp-dabt-backend",
+    "path": "/var/www/iitp-dabt-adm-be",
     "port": "22"
   },
   "frontend": {
     "host": "your-frontend-server.com",
     "user": "your-username",
-    "path": "/var/www/iitp-dabt-frontend",
+    "path": "/var/www/iitp-dabt-adm-fe",
     "port": "22"
   }
 }

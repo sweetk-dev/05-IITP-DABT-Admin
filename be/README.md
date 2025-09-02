@@ -9,13 +9,12 @@ Node.js + Express + Sequelize 기반의 REST API 서버로, 사용자 인증, �
 ### 🏗️ 기술 스택
 
 - **Runtime**: Node.js 18.x+
-- **Framework**: Express.js 5.x
+- **Framework**: Express.js 4.x
 - **Language**: TypeScript 5.x
 - **Database**: PostgreSQL 12.x + Sequelize 6.x
 - **Authentication**: JWT (jsonwebtoken)
-- **Password Hashing**: bcryptjs
+- **Password Hashing**: bcrypt
 - **Logging**: Winston + Winston Daily Rotate File
-- **HTTP Logging**: Morgan
 - **Environment**: dotenv
 
 ## 🚀 빠른 시작
@@ -60,7 +59,7 @@ npm run dev
 npm run build
 
 # 2. 프로덕션 서버 실행
-npm run prod
+npm start
 ```
 
 ## ⚙️ 환경 변수 설정
@@ -120,19 +119,93 @@ LOG_LEVEL=warn
 ```
 be/
 ├── src/
-│   ├── controllers/          # 컨트롤러
-│   │   ├── user/            # 사용자 관련 컨트롤러
+│   ├── controllers/          # 컨트롤러 (MVC 패턴)
 │   │   ├── admin/           # 관리자 관련 컨트롤러
-│   │   └── common/          # 공통 컨트롤러
-│   ├── models/              # Sequelize 모델
+│   │   │   ├── adminAccountController.ts
+│   │   │   ├── adminAuthController.ts
+│   │   │   ├── adminController.ts
+│   │   │   ├── adminFaqController.ts
+│   │   │   ├── adminNoticeController.ts
+│   │   │   ├── adminOpenApiController.ts
+│   │   │   ├── adminQnaController.ts
+│   │   │   └── userAccountController.ts
+│   │   ├── common/          # 공통 컨트롤러
+│   │   │   ├── commController.ts
+│   │   │   └── commonCodeController.ts
+│   │   └── user/            # 사용자 관련 컨트롤러
+│   │       ├── userAuthController.ts
+│   │       ├── userController.ts
+│   │       ├── userFaqController.ts
+│   │       ├── userNoticeController.ts
+│   │       ├── userOpenApiController.ts
+│   │       └── userQnaController.ts
+│   ├── services/            # 비즈니스 로직 계층
+│   │   ├── admin/           # 관리자 서비스
+│   │   ├── common/          # 공통 서비스
+│   │   └── user/            # 사용자 서비스
 │   ├── repositories/        # 데이터 접근 계층
+│   │   ├── openApiAuthKeyRepository.ts
+│   │   ├── openApiUserRepository.ts
+│   │   ├── sysAdmAccountRepository.ts
+│   │   ├── sysCommonCodeRepository.ts
+│   │   ├── sysFaqRepository.ts
+│   │   ├── sysLogChangeHisRepository.ts
+│   │   ├── sysLogUserAccessRepository.ts
+│   │   ├── sysNoticeRepository.ts
+│   │   └── sysQnaRepository.ts
+│   ├── models/              # Sequelize 모델
+│   │   ├── openApiAuthKey.ts
+│   │   ├── openApiUser.ts
+│   │   ├── sysAdmAccount.ts
+│   │   ├── sysCommonCode.ts
+│   │   ├── sysFaq.ts
+│   │   ├── sysLogChangeHis.ts
+│   │   ├── sysLogUserAccess.ts
+│   │   ├── sysNotice.ts
+│   │   ├── sysQna.ts
+│   │   └── index.ts
 │   ├── routes/              # 라우터
-│   ├── services/            # 비즈니스 로직
+│   │   ├── adminRouter.ts
+│   │   ├── authRouter.ts
+│   │   ├── commonCodeRoutes.ts
+│   │   ├── commonRouter.ts
+│   │   └── userRouter.ts
 │   ├── middleware/          # 미들웨어
+│   │   ├── accessLogMiddleware.ts
+│   │   ├── authMiddleware.ts
+│   │   ├── trimMiddleware.ts
+│   │   └── index.ts
+│   ├── mappers/             # 데이터 변환 매퍼
+│   │   ├── commonCodeMapper.ts
+│   │   ├── faqMapper.ts
+│   │   ├── noticeMapper.ts
+│   │   ├── openApiMapper.ts
+│   │   └── qnaMapper.ts
 │   ├── utils/               # 유틸리티
+│   │   ├── apiLogger.ts
+│   │   ├── auth.ts
+│   │   ├── authKeyGenerator.ts
+│   │   ├── commonUtils.ts
+│   │   ├── customErrors.ts
+│   │   ├── decrypt.ts
+│   │   ├── errorHandler.ts
+│   │   ├── jwt.ts
+│   │   ├── logAnalyzer.ts
+│   │   ├── logger.ts
+│   │   ├── queryParsers.ts
+│   │   ├── response.ts
+│   │   ├── timeUtils.ts
+│   │   └── trimUtils.ts
 │   ├── types/               # TypeScript 타입 정의
+│   │   └── express.d.ts
 │   └── index.ts             # 애플리케이션 진입점
 ├── scripts/                 # 빌드 및 유틸리티 스크립트
+│   ├── build-info.js
+│   ├── dev-watch.js
+│   ├── dev-watch.bat
+│   ├── dev-watch.sh
+│   ├── encrypt-env.js
+│   └── test-password-hash.js
 ├── logs/                    # 로그 파일 (자동 생성)
 ├── dist/                    # 빌드 결과물
 └── package.json
@@ -185,26 +258,23 @@ GRANT ALL PRIVILEGES ON DATABASE iitp_dabt_admin TO iitp_user;
 ### 스크립트 명령어
 
 ```bash
-# 개발 서버 실행 (nodemon)
+# 개발 서버 실행
 npm run dev
+
+# 개발 서버 실행 (watch 모드)
+npm run dev:watch
 
 # 프로덕션 빌드
 npm run build
 
 # 프로덕션 서버 실행
-npm run prod
-
-# 스크립트를 사용한 빌드 (packages/common 의존성 자동 처리)
-bash scripts/build.sh
+npm start
 
 # 클린 빌드
 npm run build:clean
 
-# 전체 빌드 (공통 패키지 포함)
-npm run build:all
-
-# 비밀번호 해싱 테스트
-npm run hash-password <password>
+# 빌드 정보 생성 (prebuild)
+npm run prebuild
 ```
 
 ### 개발 서버 실행
@@ -230,11 +300,11 @@ curl http://localhost:30000/api/common/jwt-config
 
 ## 📚 API 문서
 
-### 인증 API
+### 인증 API (`/api/auth`)
 
 #### 사용자 로그인
 ```http
-POST /api/user/login
+POST /api/auth/login
 Content-Type: application/json
 
 {
@@ -245,7 +315,7 @@ Content-Type: application/json
 
 #### 사용자 회원가입
 ```http
-POST /api/user/register
+POST /api/auth/register
 Content-Type: application/json
 
 {
@@ -258,7 +328,7 @@ Content-Type: application/json
 
 #### 토큰 갱신
 ```http
-POST /api/user/refresh
+POST /api/auth/refresh
 Content-Type: application/json
 
 {
@@ -266,13 +336,50 @@ Content-Type: application/json
 }
 ```
 
+#### 관리자 로그인
+```http
+POST /api/auth/admin/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+```
+
+### 사용자 API (`/api/user`)
+
 #### 사용자 프로필 조회
 ```http
 GET /api/user/profile
 Authorization: Bearer your-access-token
 ```
 
-### 관리자 API
+#### 사용자 프로필 수정
+```http
+PUT /api/user/profile
+Authorization: Bearer your-access-token
+Content-Type: application/json
+
+{
+  "name": "수정된 이름",
+  "affiliation": "수정된 소속"
+}
+```
+
+#### 비밀번호 변경
+```http
+PUT /api/user/password
+Authorization: Bearer your-access-token
+Content-Type: application/json
+
+{
+  "currentPassword": "현재비밀번호",
+  "newPassword": "새비밀번호"
+}
+```
+
+### 관리자 API (`/api/admin`)
 
 #### 사용자 목록 조회
 ```http
@@ -294,7 +401,156 @@ Content-Type: application/json
 }
 ```
 
-### 공통 API
+#### 사용자 수정
+```http
+PUT /api/admin/users/:id
+Authorization: Bearer your-admin-token
+Content-Type: application/json
+
+{
+  "name": "수정된 이름",
+  "affiliation": "수정된 소속",
+  "isActive": true
+}
+```
+
+#### 사용자 삭제
+```http
+DELETE /api/admin/users/:id
+Authorization: Bearer your-admin-token
+```
+
+### FAQ API (`/api/faq`)
+
+#### FAQ 목록 조회
+```http
+GET /api/faq?page=1&limit=10&category=general
+```
+
+#### FAQ 상세 조회
+```http
+GET /api/faq/:id
+```
+
+#### FAQ 생성 (관리자)
+```http
+POST /api/admin/faq
+Authorization: Bearer your-admin-token
+Content-Type: application/json
+
+{
+  "question": "자주 묻는 질문",
+  "answer": "답변 내용",
+  "category": "general"
+}
+```
+
+### QNA API (`/api/qna`)
+
+#### QNA 목록 조회
+```http
+GET /api/qna?page=1&limit=10&status=pending
+Authorization: Bearer your-access-token
+```
+
+#### QNA 생성
+```http
+POST /api/qna
+Authorization: Bearer your-access-token
+Content-Type: application/json
+
+{
+  "title": "문의 제목",
+  "content": "문의 내용",
+  "category": "technical"
+}
+```
+
+#### QNA 답변 (관리자)
+```http
+POST /api/admin/qna/:id/reply
+Authorization: Bearer your-admin-token
+Content-Type: application/json
+
+{
+  "reply": "답변 내용"
+}
+```
+
+### 공지사항 API (`/api/notice`)
+
+#### 공지사항 목록 조회
+```http
+GET /api/notice?page=1&limit=10&type=general
+```
+
+#### 공지사항 상세 조회
+```http
+GET /api/notice/:id
+```
+
+#### 공지사항 생성 (관리자)
+```http
+POST /api/admin/notice
+Authorization: Bearer your-admin-token
+Content-Type: application/json
+
+{
+  "title": "공지사항 제목",
+  "content": "공지사항 내용",
+  "type": "general",
+  "isImportant": false
+}
+```
+
+### OpenAPI API (`/api/openapi`)
+
+#### OpenAPI 클라이언트 목록 조회
+```http
+GET /api/openapi/clients
+Authorization: Bearer your-access-token
+```
+
+#### OpenAPI 클라이언트 생성
+```http
+POST /api/openapi/clients
+Authorization: Bearer your-access-token
+Content-Type: application/json
+
+{
+  "clientName": "클라이언트 이름",
+  "description": "클라이언트 설명"
+}
+```
+
+#### OpenAPI 요청 내역 조회
+```http
+GET /api/openapi/requests?page=1&limit=10
+Authorization: Bearer your-access-token
+```
+
+### 공통 코드 API (`/api/common-code`)
+
+#### 공통 코드 목록 조회
+```http
+GET /api/common-code?group=category
+```
+
+#### 공통 코드 생성 (관리자)
+```http
+POST /api/admin/common-code
+Authorization: Bearer your-admin-token
+Content-Type: application/json
+
+{
+  "codeGroup": "category",
+  "codeValue": "tech",
+  "codeName": "기술",
+  "description": "기술 관련 카테고리"
+}
+```
+
+### 공통 API (`/api/common`)
 
 #### 서버 버전 정보
 ```http
@@ -399,7 +655,7 @@ cd ../packages/common && npm run build && cd ../../be
 npm run build
 
 # 4. 프로덕션 서버 실행
-npm run prod
+npm start
 ```
 
 ### Docker 배포 (선택사항)
@@ -417,7 +673,7 @@ COPY scripts ./scripts
 
 EXPOSE 30000
 
-CMD ["npm", "run", "prod"]
+CMD ["npm", "start"]
 ```
 
 ### 환경 변수 설정

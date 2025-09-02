@@ -6,13 +6,19 @@
 
 ## 🖥️ OS 자동 감지
 
-모든 스크립트는 실행 환경의 OS를 자동으로 감지하여 적절한 명령어를 실행합니다:
+### 로컬용 스크립트 (OS 자동 분기)
+모든 로컬용 스크립트는 실행 환경의 OS를 자동으로 감지하여 적절한 명령어를 실행합니다:
 - **Windows**: PowerShell 스크립트 (`.ps1`)
 - **Linux/macOS**: Bash 스크립트 (`.sh`)
 
+### 서버용 스크립트 (Linux 전용)
+서버용 스크립트는 Linux 환경에서만 실행되며, 빌드 서버와 기동 서버 간의 배포를 담당합니다.
+
 ## 🚀 배포 스크립트
 
-### 1. 전체 배포
+### 로컬 → 서버 배포 (기존 방식)
+
+#### 1. 전체 배포
 ```bash
 npm run deploy
 ```
@@ -21,9 +27,9 @@ npm run deploy
 - **대상**: packages/common + be + fe
 - **특징**: 모듈화된 구조로 유지보수성 향상
 
-### 2. 개별 배포
+#### 2. 개별 배포
 
-#### Common 패키지 배포
+##### Common 패키지 배포
 ```bash
 npm run deploy:common
 ```
@@ -31,7 +37,7 @@ npm run deploy:common
 - **기능**: packages/common만 빌드 및 배포
 - **환경 변수**: `COMMON_HOST`, `COMMON_USER`, `COMMON_PATH`
 
-#### Backend 배포
+##### Backend 배포
 ```bash
 npm run deploy:be
 ```
@@ -39,7 +45,7 @@ npm run deploy:be
 - **기능**: packages/common 의존성 확인 → Backend 빌드 → 배포 → 서버 재시작
 - **환경 변수**: `BE_HOST`, `BE_USER`, `BE_PATH`
 
-#### Frontend 배포
+##### Frontend 배포
 ```bash
 npm run deploy:fe
 ```
@@ -47,9 +53,75 @@ npm run deploy:fe
 - **기능**: packages/common 의존성 확인 → Frontend 빌드 → 배포
 - **환경 변수**: `FE_HOST`, `FE_USER`, `FE_PATH`
 
+### 서버 → 서버 배포 (새로운 방식)
+
+#### 빌드 서버에서 실행
+
+##### 1. 전체 빌드
+```bash
+npm run build:server
+```
+- **파일**: `script/build-server.js`
+- **기능**: Git pull + 전체 빌드 + 배포 폴더 복사
+- **환경 변수**: `SOURCE_PATH`, `DEPLOY_PATH`, `GIT_REPO_URL`, `GIT_BRANCH`
+
+##### 2. 개별 빌드
+```bash
+# Backend만 빌드
+npm run build:server:be
+
+# Frontend만 빌드
+npm run build:server:fe
+
+# Common 패키지만 빌드
+npm run build:server:common
+```
+
+#### 기동 서버에서 실행
+
+##### 1. 전체 배포
+```bash
+npm run deploy:server
+```
+- **파일**: `script/deploy-server.js`
+- **기능**: 빌드 서버 → 기동 서버 배포
+- **환경 변수**: `BUILD_SERVER_HOST`, `PROD_SERVER_HOST`, `PROD_BE_PATH`, `PROD_FE_PATH`
+
+##### 2. 개별 배포
+```bash
+# Backend만 배포
+npm run deploy:server:be
+
+# Frontend만 배포
+npm run deploy:server:fe
+
+# Common 패키지만 배포
+npm run deploy:server:common
+```
+
+##### 3. 서버 시작
+```bash
+# Backend 서버 시작 (PM2)
+npm run start:server:be
+
+# Frontend 서버 시작 (Nginx)
+npm run start:server:fe
+```
+
+##### 4. 서버 재시작
+```bash
+# Backend 서버 재시작
+npm run restart:server:be
+
+# Frontend 서버 재시작
+npm run restart:server:fe
+```
+
 ## ⚙️ 환경 변수 설정
 
-### 전체 배포용
+### 로컬 → 서버 배포용
+
+#### 전체 배포용
 ```bash
 # Backend 서버
 export BE_HOST=your-backend-server.com
@@ -62,7 +134,7 @@ export FE_USER=your-username
 export FE_PATH=/var/www/iitp-dabt-frontend
 ```
 
-### 개별 배포용
+#### 개별 배포용
 ```bash
 # Common 패키지
 export COMMON_HOST=your-common-server.com
@@ -78,6 +150,68 @@ export BE_PATH=/var/www/iitp-dabt-backend
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
 export FE_PATH=/var/www/iitp-dabt-frontend
+```
+
+### 서버 → 서버 배포용
+
+#### 빌드 서버용
+```bash
+# Git 설정
+export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
+export GIT_BRANCH=main
+
+# 경로 설정
+export SOURCE_PATH=/var/www/iitp-dabt-admin
+export DEPLOY_PATH=/var/www/iitp-dabt-deploy
+
+# 빌드 설정
+export NODE_ENV=production
+export NPM_CONFIG_PRODUCTION=true
+```
+
+#### 기동 서버용
+```bash
+# 빌드 서버 설정
+export BUILD_SERVER_HOST=build-server.com
+export BUILD_SERVER_USER=builduser
+export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
+export BUILD_SERVER_PORT=22
+
+# 기동 서버 설정
+export PROD_SERVER_HOST=prod-server.com
+export PROD_SERVER_USER=produser
+export PROD_SERVER_PORT=22
+
+# Backend 설정
+export PROD_BE_PATH=/var/www/iitp-dabt-backend
+export PM2_APP_NAME_BE=iitp-dabt-backend
+
+# Frontend 설정
+export PROD_FE_PATH=/var/www/iitp-dabt-frontend
+export FRONTEND_DOMAIN=your-domain.com
+export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-frontend
+
+# 데이터베이스 설정
+export DB_HOST=your-db-server.com
+export DB_PORT=5432
+export DB_NAME=iitp_dabt_admin
+export DB_USER=your_db_user
+export DB_PASSWORD=your_db_password
+
+# JWT 설정
+export JWT_SECRET=your-production-jwt-secret
+export JWT_ISSUER=iitp-dabt-api
+export ACCESS_TOKEN_EXPIRES_IN=15m
+export REFRESH_TOKEN_EXPIRES_IN=7d
+
+# 암호화 설정
+export ENC_SECRET=your-production-encryption-secret
+
+# CORS 설정
+export CORS_ORIGINS=https://your-domain.com,https://www.your-domain.com
+
+# 로깅 설정
+export LOG_LEVEL=warn
 ```
 
 ## 📁 배포 파일 구조

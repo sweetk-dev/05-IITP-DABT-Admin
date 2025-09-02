@@ -196,12 +196,12 @@ npm run deploy:fe
 # Backend 서버 설정
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-backend
+export BE_PATH=/var/www/iitp-dabt-adm-be
 
 # Frontend 서버 설정
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-frontend
+export FE_PATH=/var/www/iitp-dabt-adm-fe
 ```
 
 **개별 배포용:**
@@ -214,12 +214,12 @@ export COMMON_PATH=/var/www/iitp-dabt-common
 # Backend 개별 배포용
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-backend
+export BE_PATH=/var/www/iitp-dabt-adm-be
 
 # Frontend 개별 배포용
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-frontend
+export FE_PATH=/var/www/iitp-dabt-adm-fe
 ```
 
 #### 4. 배포 과정

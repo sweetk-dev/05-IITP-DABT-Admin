@@ -15,7 +15,7 @@ if (!isLinux) {
 
 // 설정
 const config = {
-  pm2AppName: process.env.PM2_APP_NAME_BE || 'iitp-dabt-backend'
+  pm2AppName: process.env.PM2_APP_NAME_BE || 'iitp-dabt-adm-be'
 };
 
 // Backend 서버 재시작
@@ -53,8 +53,8 @@ async function main() {
     console.log('');
     console.log('💡 유용한 명령어:');
     console.log('   pm2 status                    # 서버 상태 확인');
-    console.log('   pm2 logs iitp-dabt-backend    # 로그 확인');
-    console.log('   pm2 stop iitp-dabt-backend    # 서버 중지');
+    console.log('   pm2 logs iitp-dabt-adm-be    # 로그 확인');
+    console.log('   pm2 stop iitp-dabt-adm-be    # 서버 중지');
     
   } catch (error) {
     console.error('❌ Backend 서버 재시작 실패:', error.message);

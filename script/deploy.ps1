@@ -39,7 +39,7 @@ if (-not $deployConfig.Backend.Host -or -not $deployConfig.Frontend.Host) {
     Write-Host "   FE_PATH: Frontend 서버 경로" -ForegroundColor White
     Write-Host ""
     Write-Host "💡 사용법:" -ForegroundColor Cyan
-    Write-Host "   .\script\deploy.ps1 -BeHost your-backend-server.com -BeUser your-username -BePath /var/www/iitp-dabt-backend -FeHost your-frontend-server.com -FeUser your-username -FePath /var/www/iitp-dabt-frontend" -ForegroundColor Gray
+    Write-Host "   .\script\deploy.ps1 -BeHost your-backend-server.com -BeUser your-username -BePath /var/www/iitp-dabt-adm-be -FeHost your-frontend-server.com -FeUser your-username -FePath /var/www/iitp-dabt-adm-fe" -ForegroundColor Gray
     exit 1
 }
 
@@ -110,7 +110,7 @@ function Restart-Servers {
     Write-Host "🔄 서버 재시작 중..." -ForegroundColor Green
     
     Write-Host "📤 Backend 서버 재시작 명령어:" -ForegroundColor Cyan
-    Write-Host "ssh -p $($deployConfig.Backend.Port) $($deployConfig.Backend.User)@$($deployConfig.Backend.Host) 'cd $($deployConfig.Backend.Path) && npm install && pm2 restart iitp-dabt-backend'" -ForegroundColor Gray
+    Write-Host "ssh -p $($deployConfig.Backend.Port) $($deployConfig.Backend.User)@$($deployConfig.Backend.Host) 'cd $($deployConfig.Backend.Path) && npm install && pm2 restart iitp-dabt-adm-be'" -ForegroundColor Gray
     
     Write-Host "⚠️  위 명령어를 Git Bash에서 수동으로 실행하세요." -ForegroundColor Yellow
 }

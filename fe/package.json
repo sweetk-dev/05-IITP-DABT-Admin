@@ -7,7 +7,8 @@
     "build": "rimraf dist && tsc -b && vite build",
     "build:clean": "rimraf dist && tsc --build",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prebuild": "node scripts/build-info.js"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",

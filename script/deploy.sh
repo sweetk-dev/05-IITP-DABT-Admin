@@ -12,12 +12,12 @@ fi
 # 배포 설정
 BE_HOST=${BE_HOST:-"your-backend-server.com"}
 BE_USER=${BE_USER:-"your-username"}
-BE_PATH=${BE_PATH:-"/var/www/iitp-dabt-backend"}
+BE_PATH=${BE_PATH:-"/var/www/iitp-dabt-adm-be"}
 BE_PORT=${BE_PORT:-"22"}
 
 FE_HOST=${FE_HOST:-"your-frontend-server.com"}
 FE_USER=${FE_USER:-"your-username"}
-FE_PATH=${FE_PATH:-"/var/www/iitp-dabt-frontend"}
+FE_PATH=${FE_PATH:-"/var/www/iitp-dabt-adm-fe"}
 FE_PORT=${FE_PORT:-"22"}
 
 echo "🖥️  Linux/Mac 배포 스크립트 시작..."
@@ -36,10 +36,10 @@ if [ "$BE_HOST" = "your-backend-server.com" ] || [ "$FE_HOST" = "your-frontend-s
     echo "💡 사용법:"
     echo "   export BE_HOST=your-backend-server.com"
     echo "   export BE_USER=your-username"
-    echo "   export BE_PATH=/var/www/iitp-dabt-backend"
+    echo "   export BE_PATH=/var/www/iitp-dabt-adm-be"
     echo "   export FE_HOST=your-frontend-server.com"
     echo "   export FE_USER=your-username"
-    echo "   export FE_PATH=/var/www/iitp-dabt-frontend"
+    echo "   export FE_PATH=/var/www/iitp-dabt-adm-fe"
     echo "   bash script/deploy.sh"
     exit 1
 fi
@@ -131,7 +131,7 @@ restart_servers() {
     
     # Backend 서버 재시작
     echo "🔄 Backend 서버 재시작 중..."
-    ssh -p "$BE_PORT" "$BE_USER@$BE_HOST" "cd $BE_PATH && npm install && pm2 restart iitp-dabt-backend"
+    ssh -p "$BE_PORT" "$BE_USER@$BE_HOST" "cd $BE_PATH && npm install && pm2 restart iitp-dabt-adm-be"
     
     if [ $? -eq 0 ]; then
         echo "✅ Backend 서버 재시작 완료"

@@ -70,8 +70,8 @@ graph TB
     end
     
     subgraph "🚀 실행 서버"
-        D[📁 Backend<br/>/var/www/iitp-dabt-backend]
-        E[📁 Frontend<br/>/var/www/iitp-dabt-frontend]
+        D[📁 Backend<br/>/var/www/iitp-dabt-adm-be]
+        E[📁 Frontend<br/>/var/www/iitp-dabt-adm-fe]
         F[🔄 PM2 + Nginx]
     end
     
@@ -116,21 +116,23 @@ sudo apt-get install -y nodejs
 sudo apt install git -y
 
 # SSH 키 설정 (Git 저장소 접근용)
+# Public 저장소인 경우 아래 단계는 생략 가능
 # 1. SSH 키 생성
 ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
 
-# 2. GitHub/GitLab에 공개키 등록 (수동)
+# 2. GitHub/GitLab에 공개키 등록
 # cat ~/.ssh/id_rsa.pub
 ```
 
 #### 1.1.2 프로젝트 설정
 ```bash
 # 1. 기본 디렉토리 생성
-sudo mkdir -p your-build-server-root/iitp-data-admin
-sudo chown $USER:$USER your-build-server-root/iitp-data-admin
+sudo mkdir -p /var/www/iitp-dabt-admin/source
+sudo mkdir -p /var/www/iitp-dabt-admin/deploy
+sudo chown $USER:$USER /var/www/iitp-dabt-admin
 
 # 2. Git에서 소스 다운로드
-cd your-build-server-root/iitp-data-admin
+cd /var/www/iitp-dabt-admin/source
 git clone https://github.com/your-repo/iitp-dabt-admin.git .
 
 # 3. 의존성 설치
@@ -149,8 +151,8 @@ GIT_REPO_URL=https://github.com/your-repo/iitp-dabt-admin.git
 GIT_BRANCH=main
 
 # 경로 설정
-SOURCE_PATH=your-build-server-root/iitp-data-admin
-DEPLOY_PATH=/var/www/iitp-dabt-deploy
+SOURCE_PATH=/var/www/iitp-dabt-admin/source
+DEPLOY_PATH=/var/www/iitp-dabt-admin/deploy
 
 # 빌드 설정
 NODE_ENV=production
@@ -183,36 +185,48 @@ npm run build:server:common
 #### 1.3.1 build-server.js 동작 과정
 ```mermaid
 flowchart TD
-    A[🚀 npm run build:server] --> B[📥 Git pull]
-    B --> C[📦 npm install]
-    C --> D[🔨 npm run build]
-    D --> E[📁 packages/common 빌드]
-    E --> F[🔧 Backend 빌드]
-    F --> G[🎨 Frontend 빌드]
-    G --> H[📋 파일 복사]
-    H --> I[📦 배포 폴더 준비]
-    I --> J[✅ 빌드 완료]
+    A[🚀 npm run build:server] --> B[📋 버전 정보 출력]
+    B --> C[📥 Git pull]
+    C --> D[📦 npm install]
+    D --> E[🔨 npm run build]
+    E --> F[📁 packages/common 빌드]
+    F --> G[🔧 Backend 빌드]
+    G --> H[🎨 Frontend 빌드]
+    H --> I[📋 파일 복사]
+    I --> J[📦 배포 폴더 준비]
+    J --> K[✅ 빌드 완료]
     
     style A fill:#e1f5fe
-    style J fill:#e8f5e8
-    style D fill:#fff3e0
-    style H fill:#f3e5f5
+    style B fill:#f3e5f5
+    style K fill:#e8f5e8
+    style E fill:#fff3e0
+    style I fill:#f3e5f5
+```
+
+#### 1.3.2 빌드 시 버전 정보 출력
+빌드 시작 시 다음 정보가 자동으로 출력됩니다:
+```bash
+📋 빌드할 프로젝트 버전 정보:
+   🏗️  Backend: 1.0.0
+   🎨 Frontend: 1.0.0
+   📦 Common: 1.0.0
+   🏷️  Git 태그: v1.0.0
 ```
 
 #### 1.3.2 빌드 서버 디렉토리 구조
 ```
-your-build-server-root/iitp-data-admin/          # 소스 코드
-├── packages/common/
-├── be/
-├── fe/
-├── script/
-└── package.json
-
-/var/www/iitp-dabt-deploy/         # 배포 폴더
-├── packages/common/dist/
-├── be/dist/
-├── fe/dist/
-└── package.json files
+/var/www/iitp-dabt-admin/
+├── source/                        # 소스 코드
+│   ├── packages/common/
+│   ├── be/
+│   ├── fe/
+│   ├── script/
+│   └── package.json
+└── deploy/                        # 배포 폴더
+    ├── packages/common/dist/
+    ├── be/dist/
+    ├── fe/dist/
+    └── package.json files
 ```
 
 ## 🚀 2. 실행 서버 설정 및 운영
@@ -245,8 +259,8 @@ sudo apt install postgresql postgresql-contrib -y
 #### 2.1.2 실행 환경 설정
 ```bash
 # 1. 기본 디렉토리 생성
-sudo mkdir -p /var/www/iitp-dabt-backend
-sudo mkdir -p /var/www/iitp-dabt-frontend
+sudo mkdir -p /var/www/iitp-dabt-adm-be
+sudo mkdir -p /var/www/iitp-dabt-adm-fe
 sudo chown $USER:$USER /var/www/iitp-dabt-*
 
 # 2. PM2 설정
@@ -261,7 +275,7 @@ server {
     
     # Frontend
     location / {
-        root /var/www/iitp-dabt-frontend;
+        root /var/www/iitp-dabt-adm-fe;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
@@ -294,7 +308,7 @@ sudo systemctl reload nginx
 #### 2.1.3 실행 서버 환경 변수 설정
 ```bash
 # .env 파일 생성
-sudo tee /var/www/iitp-dabt-backend/.env << 'EOF'
+sudo tee /var/www/iitp-dabt-adm-be/.env << 'EOF'
 # 데이터베이스 설정
 DB_HOST=localhost
 DB_PORT=5432
@@ -364,7 +378,7 @@ npm run restart:server:fe
 flowchart TD
     A[🚀 npm run deploy:server] --> B[📥 파일 수신<br/>rsync from 빌드 서버]
     B --> C[📦 Backend 의존성 설치<br/>npm install --production]
-    C --> D[🔄 PM2 서비스 재시작<br/>iitp-dabt-backend]
+    C --> D[🔄 PM2 서비스 재시작<br/>iitp-dabt-adm-be]
     D --> E[🌐 Nginx 설정 업데이트<br/>Frontend 정적 파일]
     E --> F[✅ 배포 완료]
     
@@ -374,16 +388,35 @@ flowchart TD
     style D fill:#f3e5f5
 ```
 
+#### 2.3.2 서버 시작 시 버전 정보 출력
+서버 시작 시 다음 정보가 자동으로 출력됩니다:
+
+**Backend 서버 시작 시:**
+```bash
+📋 버전 정보:
+   🏗️  Backend: 1.0.0
+   📦 Common: 1.0.0
+   🔨 빌드 시간: 2025-01-02 10:30:45.123
+```
+
+**Frontend 서버 시작 시:**
+```bash
+📋 버전 정보:
+   🎨 Frontend: 1.0.0
+   📦 Common: 1.0.0
+   🔨 빌드 시간: 2025-01-02 10:30:45.123
+```
+
 #### 2.3.2 실행 서버 디렉토리 구조
 ```
-/var/www/iitp-dabt-backend/        # Backend 서비스
+/var/www/iitp-dabt-adm-be/        # Backend 서비스
 ├── dist/                          # 빌드된 Backend 파일
 ├── node_modules/                  # Backend 의존성
 ├── package.json
 ├── package-lock.json
 └── .env
 
-/var/www/iitp-dabt-frontend/       # Frontend 서비스
+/var/www/iitp-dabt-adm-fe/       # Frontend 서비스
 ├── index.html
 ├── assets/
 └── static files
@@ -490,7 +523,7 @@ npm run start:server:be
 npm run restart:server:be
 
 # 내부 동작:
-# 1. PM2 restart iitp-dabt-backend
+# 1. PM2 restart iitp-dabt-adm-be
 ```
 
 ### 3.3 환경 변수 설정
@@ -515,7 +548,7 @@ export NPM_CONFIG_PRODUCTION=true
 # 빌드 서버 설정
 export BUILD_SERVER_HOST=build-server.com
 export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
+export BUILD_SERVER_PATH=/var/www/iitp-dabt-admin/deploy
 export BUILD_SERVER_PORT=22
 
 # 기동 서버 설정
@@ -524,16 +557,158 @@ export PROD_SERVER_USER=produser
 export PROD_SERVER_PORT=22
 
 # Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-backend
-export PM2_APP_NAME_BE=iitp-dabt-backend
+export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PM2_APP_NAME_BE=iitp-dabt-adm-be
 
 # Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-frontend
+export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
 export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-frontend
+export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 ```
 
-## 🆘 4. 문제 해결 및 모니터링
+## 📋 4. 배포된 프로젝트 버전 확인
+
+### 4.0 빌드 정보 생성 과정
+
+#### 4.0.1 빌드 정보 파일 생성
+빌드 시 자동으로 생성되는 `build-info.json` 파일에는 다음 정보가 포함됩니다:
+
+```json
+{
+  "version": "1.0.0",
+  "buildDate": "2025-01-02 10:30:45.123"
+}
+```
+
+#### 4.0.2 빌드 정보 생성 과정
+```bash
+# Backend 빌드 시
+npm run build
+# 1. prebuild 실행: node scripts/build-info.js
+# 2. build-info.json 생성 (현재 시간 기록)
+# 3. TypeScript 컴파일
+# 4. dist/build-info.json에 복사
+
+# Frontend 빌드 시  
+npm run build
+# 1. prebuild 실행: node scripts/build-info.js
+# 2. build-info.json 생성 (현재 시간 기록)
+# 3. TypeScript 컴파일 + Vite 빌드
+# 4. dist/build-info.json에 복사
+```
+
+#### 4.0.3 빌드 정보 파일 위치
+- **Backend**: `/var/www/iitp-dabt-adm-be/dist/build-info.json`
+- **Frontend**: `/var/www/iitp-dabt-adm-fe/dist/build-info.json`
+
+### 4.1 빌드 서버에서 버전 확인
+
+#### 4.1.1 전체 프로젝트 버전 확인
+```bash
+# 빌드 서버에서 실행
+cd /var/www/iitp-dabt-admin/source
+
+# Backend 프로젝트 버전
+cd be && cat package.json | grep '"version"' && cd ..
+
+# Frontend 프로젝트 버전
+cd fe && cat package.json | grep '"version"' && cd ..
+
+# Common 패키지 버전
+cd packages/common && cat package.json | grep '"version"' && cd ../..
+```
+
+#### 4.1.2 Git 태그로 버전 확인
+```bash
+# Git 태그 확인
+git tag --sort=-version:refname | head -5
+
+# 현재 커밋의 태그 확인
+git describe --tags
+```
+
+### 4.2 실행 서버에서 버전 확인
+
+#### 4.2.1 Backend 서버 버전 확인
+```bash
+# Backend 서버에서 실행
+cd /var/www/iitp-dabt-adm-be
+
+# Backend 프로젝트 버전
+cat package.json | grep '"version"'
+
+# Common 패키지 버전 (Backend에 포함된)
+npm list @iitp-dabt/common
+
+# 빌드 정보 확인
+if [ -f "dist/build-info.json" ]; then
+    cat dist/build-info.json | grep version
+fi
+```
+
+#### 4.2.2 Frontend 서버 버전 확인
+```bash
+# Frontend 서버에서 실행
+cd /var/www/iitp-dabt-adm-fe
+
+# Frontend 프로젝트 버전
+npm version
+
+# Common 패키지 버전 (Frontend에 포함된)
+npm list @iitp-dabt/common
+
+# 빌드 정보 확인
+if [ -f "dist/build-info.json" ]; then
+    cat dist/build-info.json | grep version
+fi
+```
+
+#### 4.2.3 통합 버전 확인 스크립트
+```bash
+# 버전 확인 스크립트 생성
+cat > /var/www/iitp-dabt-adm-be/check-versions.sh << 'EOF'
+#!/bin/bash
+
+echo "=== 배포된 프로젝트 버전 확인 ==="
+echo "확인 시간: $(date)"
+echo ""
+
+echo "🏗️ Backend 프로젝트 버전:"
+cd /var/www/iitp-dabt-adm-be
+cat package.json | grep '"version"'
+
+echo -e "\n📦 Backend에 포함된 Common 패키지 버전:"
+npm list @iitp-dabt/common
+
+echo -e "\n🎨 Frontend 프로젝트 버전:"
+cd /var/www/iitp-dabt-adm-fe
+cat package.json | grep '"version"'
+
+echo -e "\n📦 Frontend에 포함된 Common 패키지 버전:"
+npm list @iitp-dabt/common
+
+echo -e "\n🏷️ Git 태그 정보:"
+cd /var/www/iitp-dabt-adm-be
+git describe --tags 2>/dev/null || echo "태그가 없습니다."
+
+echo -e "\n📋 빌드 정보:"
+if [ -f "dist/build-info.json" ]; then
+    cat dist/build-info.json | grep version
+else
+    echo "빌드 정보 파일이 없습니다."
+fi
+EOF
+
+chmod +x /var/www/iitp-dabt-adm-be/check-versions.sh
+```
+
+#### 4.2.4 스크립트 실행
+```bash
+# 버전 확인 스크립트 실행
+./check-versions.sh
+```
+
+## 🆘 5. 문제 해결 및 모니터링
 
 ### 4.0 문제 해결 Flow
 ```mermaid
@@ -647,7 +822,7 @@ sudo swapon /swapfile
 ```bash
 # 문제: PM2 서비스 시작 실패
 # 해결: 로그 확인
-pm2 logs iitp-dabt-backend
+pm2 logs iitp-dabt-adm-be
 pm2 status
 
 # 문제: Nginx 설정 오류
@@ -675,8 +850,8 @@ sudo systemctl status postgresql
 #### 4.3.2 로그 모니터링
 ```bash
 # Backend 로그
-pm2 logs iitp-dabt-backend
-tail -f /var/www/iitp-dabt-backend/logs/app.log
+pm2 logs iitp-dabt-adm-be
+tail -f /var/www/iitp-dabt-adm-be/logs/app.log
 
 # Nginx 로그
 sudo tail -f /var/log/nginx/access.log
@@ -734,7 +909,7 @@ sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
 pg_dump iitp_dabt_admin > backup_$(date +%Y%m%d).sql
 
 # 파일 백업
-tar -czf backup_$(date +%Y%m%d).tar.gz /var/www/iitp-dabt-backend
+tar -czf backup_$(date +%Y%m%d).tar.gz /var/www/iitp-dabt-adm-be
 ```
 
 ### 보안

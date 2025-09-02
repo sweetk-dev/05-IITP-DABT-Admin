@@ -22,9 +22,41 @@ if (!isLinux) {
 const gitConfig = {
   repoUrl: process.env.GIT_REPO_URL || 'https://github.com/iitp/dabt-admin.git',
   branch: process.env.GIT_BRANCH || 'main',
-  sourcePath: process.env.SOURCE_PATH || '/var/www/iitp-dabt-admin',
-  deployPath: process.env.DEPLOY_PATH || '/var/www/iitp-dabt-deploy'
+  sourcePath: process.env.SOURCE_PATH || '/var/www/iitp-dabt-admin/source',
+  deployPath: process.env.DEPLOY_PATH || '/var/www/iitp-dabt-admin/deploy'
 };
+
+// 버전 정보 출력
+function showVersionInfo() {
+  console.log('📋 빌드할 프로젝트 버전 정보:');
+  
+  try {
+    // Backend 버전 확인
+    const bePackageJson = require(path.join(gitConfig.sourcePath, 'be/package.json'));
+    console.log(`   🏗️  Backend: ${bePackageJson.version}`);
+    
+    // Frontend 버전 확인
+    const fePackageJson = require(path.join(gitConfig.sourcePath, 'fe/package.json'));
+    console.log(`   🎨 Frontend: ${fePackageJson.version}`);
+    
+    // Common 패키지 버전 확인
+    const commonPackageJson = require(path.join(gitConfig.sourcePath, 'packages/common/package.json'));
+    console.log(`   📦 Common: ${commonPackageJson.version}`);
+    
+    // Git 태그 확인
+    const { execSync } = require('child_process');
+    try {
+      const gitTag = execSync('git describe --tags', { cwd: gitConfig.sourcePath, encoding: 'utf8' }).trim();
+      console.log(`   🏷️  Git 태그: ${gitTag}`);
+    } catch (error) {
+      console.log(`   🏷️  Git 태그: 없음`);
+    }
+  } catch (error) {
+    console.log('   ⚠️  버전 정보를 가져올 수 없습니다.');
+  }
+  
+  console.log('');
+}
 
 // Git pull
 async function gitPull() {
@@ -170,6 +202,9 @@ async function main() {
   try {
     console.log('🚀 서버용 전체 빌드 시작...');
     
+    // 0. 버전 정보 출력
+    showVersionInfo();
+    
     // 1. Git pull
     await gitPull();
     
@@ -200,14 +235,14 @@ async function main() {
 if (!process.env.SOURCE_PATH) {
   console.log('⚠️  환경 변수가 설정되지 않았습니다.');
   console.log('📋 필요한 환경 변수:');
-  console.log('   SOURCE_PATH: 소스 코드 경로 (기본값: /var/www/iitp-dabt-admin)');
-  console.log('   DEPLOY_PATH: 배포 폴더 경로 (기본값: /var/www/iitp-dabt-deploy)');
+  console.log('   SOURCE_PATH: 소스 코드 경로 (기본값: /var/www/iitp-dabt-admin/source)');
+  console.log('   DEPLOY_PATH: 배포 폴더 경로 (기본값: /var/www/iitp-dabt-admin/deploy)');
   console.log('   GIT_REPO_URL: Git 저장소 URL');
   console.log('   GIT_BRANCH: Git 브랜치 (기본값: main)');
   console.log('');
   console.log('💡 예시:');
-  console.log('   export SOURCE_PATH=/var/www/iitp-dabt-admin');
-  console.log('   export DEPLOY_PATH=/var/www/iitp-dabt-deploy');
+  console.log('   export SOURCE_PATH=/var/www/iitp-dabt-admin/source');
+  console.log('   export DEPLOY_PATH=/var/www/iitp-dabt-admin/deploy');
   console.log('   export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git');
   console.log('   export GIT_BRANCH=main');
   console.log('');

@@ -17,14 +17,14 @@ const deployConfig = {
   backend: {
     host: process.env.BE_HOST || 'your-backend-server.com',
     user: process.env.BE_USER || 'your-username',
-    path: process.env.BE_PATH || '/var/www/iitp-dabt-backend',
+    path: process.env.BE_PATH || '/var/www/iitp-dabt-adm-be',
     port: process.env.BE_PORT || '22'
   },
   // Frontend 서버 설정
   frontend: {
     host: process.env.FE_HOST || 'your-frontend-server.com',
     user: process.env.FE_USER || 'your-username',
-    path: process.env.FE_PATH || '/var/www/iitp-dabt-frontend',
+    path: process.env.FE_PATH || '/var/www/iitp-dabt-adm-fe',
     port: process.env.FE_PORT || '22'
   }
 };
@@ -131,10 +131,10 @@ if (!process.env.BE_HOST || !process.env.FE_HOST) {
   console.log('💡 예시:');
   console.log('   export BE_HOST=your-backend-server.com');
   console.log('   export BE_USER=your-username');
-  console.log('   export BE_PATH=/var/www/iitp-dabt-backend');
+  console.log('   export BE_PATH=/var/www/iitp-dabt-adm-be');
   console.log('   export FE_HOST=your-frontend-server.com');
   console.log('   export FE_USER=your-username');
-  console.log('   export FE_PATH=/var/www/iitp-dabt-frontend');
+  console.log('   export FE_PATH=/var/www/iitp-dabt-adm-fe');
   console.log('');
   console.log('🔧 또는 .env 파일에 설정하세요.');
   process.exit(1);

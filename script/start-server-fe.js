@@ -17,13 +17,42 @@ if (!isLinux) {
 
 // 설정
 const config = {
-  fePath: process.env.PROD_FE_PATH || '/var/www/iitp-dabt-frontend',
-  nginxConfigPath: process.env.NGINX_CONFIG_PATH || '/etc/nginx/sites-available/iitp-dabt-frontend'
+  fePath: process.env.PROD_FE_PATH || '/var/www/iitp-dabt-adm-fe',
+  nginxConfigPath: process.env.NGINX_CONFIG_PATH || '/etc/nginx/sites-available/iitp-dabt-adm-fe'
 };
+
+// 버전 정보 출력
+function showVersionInfo() {
+  console.log('📋 버전 정보:');
+  
+  try {
+    // Frontend 버전 확인
+    const fePackageJson = require(path.join(config.fePath, 'package.json'));
+    console.log(`   🎨 Frontend: ${fePackageJson.version}`);
+    
+    // Common 패키지 버전 확인
+    const commonPackageJson = require(path.join(config.fePath, 'node_modules/@iitp-dabt/common/package.json'));
+    console.log(`   📦 Common: ${commonPackageJson.version}`);
+    
+    // 빌드 정보 확인
+    const buildInfoPath = path.join(config.fePath, 'dist/build-info.json');
+    if (fs.existsSync(buildInfoPath)) {
+      const buildInfo = require(buildInfoPath);
+      console.log(`   🔨 빌드 시간: ${buildInfo.buildTime}`);
+    }
+  } catch (error) {
+    console.log('   ⚠️  버전 정보를 가져올 수 없습니다.');
+  }
+  
+  console.log('');
+}
 
 // Frontend 서버 시작 (Nginx 설정)
 async function startFrontend() {
   console.log('🎨 Frontend 서버 시작 중...');
+  
+  // 버전 정보 출력
+  showVersionInfo();
   
   // Nginx 설정 파일 생성
   console.log('📝 Nginx 설정 파일 생성 중...');
@@ -141,13 +170,13 @@ async function main() {
 if (!process.env.PROD_FE_PATH) {
   console.log('⚠️  환경 변수가 설정되지 않았습니다.');
   console.log('📋 필요한 환경 변수:');
-  console.log('   PROD_FE_PATH: Frontend 서버 경로 (기본값: /var/www/iitp-dabt-frontend)');
-  console.log('   NGINX_CONFIG_PATH: Nginx 설정 파일 경로 (기본값: /etc/nginx/sites-available/iitp-dabt-frontend)');
+  console.log('   PROD_FE_PATH: Frontend 서버 경로 (기본값: /var/www/iitp-dabt-adm-fe)');
+  console.log('   NGINX_CONFIG_PATH: Nginx 설정 파일 경로 (기본값: /etc/nginx/sites-available/iitp-dabt-adm-fe)');
   console.log('   FRONTEND_DOMAIN: Frontend 도메인 (기본값: localhost)');
   console.log('');
   console.log('💡 예시:');
-  console.log('   export PROD_FE_PATH=/var/www/iitp-dabt-frontend');
-  console.log('   export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-frontend');
+  console.log('   export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe');
+  console.log('   export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe');
   console.log('   export FRONTEND_DOMAIN=your-domain.com');
   console.log('');
   console.log('🔧 또는 .env 파일에 설정하세요.');

@@ -100,13 +100,13 @@ export PROD_SERVER_USER=produser
 export PROD_SERVER_PORT=22
 
 # Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-backend
-export PM2_APP_NAME_BE=iitp-dabt-backend
+export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PM2_APP_NAME_BE=iitp-dabt-adm-be
 
 # Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-frontend
+export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
 export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-frontend
+export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 
 # 데이터베이스 설정
 export DB_HOST=your-db-server.com
@@ -145,13 +145,13 @@ PROD_SERVER_USER=produser
 PROD_SERVER_PORT=22
 
 # Backend 설정
-PROD_BE_PATH=/var/www/iitp-dabt-backend
-PM2_APP_NAME_BE=iitp-dabt-backend
+PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+PM2_APP_NAME_BE=iitp-dabt-adm-be
 
 # Frontend 설정
-PROD_FE_PATH=/var/www/iitp-dabt-frontend
+PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
 FRONTEND_DOMAIN=your-domain.com
-NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-frontend
+NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 
 # 데이터베이스 설정
 DB_HOST=your-db-server.com
@@ -223,7 +223,7 @@ services:
 # ecosystem.config.js
 module.exports = {
   apps: [{
-    name: 'iitp-dabt-backend',
+    name: 'iitp-dabt-adm-be',
     script: 'dist/index.js',
     env: {
       NODE_ENV: 'production',

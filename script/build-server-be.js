@@ -4,6 +4,41 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+// .env 파일 로드 함수
+function loadEnvFile(envPath) {
+  if (!fs.existsSync(envPath)) {
+    console.log(`⚠️  .env 파일이 없습니다: ${envPath}`);
+    return {};
+  }
+  
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  const envVars = {};
+  
+  envContent.split('\n').forEach(line => {
+    line = line.trim();
+    if (line && !line.startsWith('#')) {
+      const [key, ...valueParts] = line.split('=');
+      if (key && valueParts.length > 0) {
+        envVars[key.trim()] = valueParts.join('=').trim();
+      }
+    }
+  });
+  
+  console.log(`✅ .env 파일 로드됨: ${envPath}`);
+  return envVars;
+}
+
+// .env 파일 로드
+const envPath = path.join(__dirname, '.env');
+const envVars = loadEnvFile(envPath);
+
+// 환경 변수 적용
+Object.keys(envVars).forEach(key => {
+  if (!process.env[key]) {
+    process.env[key] = envVars[key];
+  }
+});
+
 // OS 감지
 const isLinux = process.platform === 'linux';
 

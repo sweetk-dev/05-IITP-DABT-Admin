@@ -112,6 +112,13 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 # 2. Node.js 설치
 sudo apt-get install -y nodejs
 
+ ** 설치시 에러가 나면, 서버 OS에서 기본 설치된 npm과 충돌날수 있음으로 아래 명령어 수행 후 설치 하세요. 
+    sudo apt remove -y nodejs npm
+    sudo apt purge -y nodejs npm
+    sudo apt autoremove -y
+
+
+
 # Git 설치
 sudo apt install git -y
 
@@ -129,23 +136,27 @@ ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
 # 1. 기본 디렉토리 생성
 sudo mkdir -p /home/iitp-adm/iitp-dabt-admin/source
 sudo mkdir -p /home/iitp-adm/iitp-dabt-admin/deploy
-sudo chown $USER:$USER /var/www/iitp-dabt-admin
+sudo chown $USER:$USER /home/iitp-adm/iitp-dabt-admin
 
 # 2. Git에서 소스 다운로드
 cd /home/iitp-adm/iitp-dabt-admin/source
 git clone https://github.com/your-repo/iitp-dabt-admin.git .
 
-# 3. 의존성 설치
-npm install
-
-# 4. 환경 변수 설정
-cp .env.example .env
+# 3. 환경 변수 설정 (npm install 전에 설정 필요)
+cp env.sample.build-server .env
 # .env 파일 편집 (빌드 서버용 설정)
+
+# 4. 의존성 설치 (NPM_CONFIG_PRODUCTION=true가 적용됨)
+npm install
 ```
 
 #### 1.1.3 빌드 서버 환경 변수 설정
 ```bash
-# .env 파일에 추가
+# .env 파일 생성 (빌드 서버용)
+cp env.sample.build-server .env
+
+# 또는 직접 생성
+cat > .env << 'EOF'
 # Git 설정
 GIT_REPO_URL=https://github.com/your-repo/iitp-dabt-admin.git
 GIT_BRANCH=main
@@ -157,6 +168,7 @@ DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 # 빌드 설정
 NODE_ENV=production
 NPM_CONFIG_PRODUCTION=true
+EOF
 ```
 
 ### 1.2 일상 운영 (Daily Operations)
@@ -215,7 +227,7 @@ flowchart TD
 
 #### 1.3.2 빌드 서버 디렉토리 구조
 ```
-/var/www/iitp-dabt-admin/
+/home/iitp-adm/iitp-dabt-admin/
 ├── source/                        # 소스 코드
 │   ├── packages/common/
 │   ├── be/
@@ -307,7 +319,10 @@ sudo systemctl reload nginx
 
 #### 2.1.3 실행 서버 환경 변수 설정
 ```bash
-# .env 파일 생성
+# .env 파일 생성 (실행 서버용)
+sudo cp env.sample /var/www/iitp-dabt-adm-be/.env
+
+# 또는 직접 생성
 sudo tee /var/www/iitp-dabt-adm-be/.env << 'EOF'
 # 데이터베이스 설정
 DB_HOST=localhost
@@ -527,6 +542,21 @@ npm run restart:server:be
 ```
 
 ### 3.3 환경 변수 설정
+
+#### 3.3.0 환경 변수 샘플 파일
+
+프로젝트에는 환경 변수 샘플 파일이 제공됩니다:
+
+
+**빌드 서버용 (build-server*.js 실행용):**
+```bash
+cp env.sample.build-server .env
+```
+
+**배포 서버용 (deploy-server*.js 실행용):**
+```bash
+cp env.sample.deploy-server .env
+```
 
 #### 3.3.1 빌드 서버 환경 변수
 ```bash

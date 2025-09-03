@@ -18,8 +18,8 @@ if (!isLinux) {
 
 // 설정
 const config = {
-  sourcePath: process.env.SOURCE_PATH || '/var/www/iitp-dabt-admin',
-  deployPath: process.env.DEPLOY_PATH || '/var/www/iitp-dabt-deploy'
+  sourcePath: process.env.SOURCE_PATH || '/home/iitp-adm/iitp-dabt-admin/source',
+  deployPath: process.env.DEPLOY_PATH || '/home/iitp-adm/iitp-dabt-admin/deploy'
 };
 
 // Common 패키지 빌드

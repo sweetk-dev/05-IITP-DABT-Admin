@@ -63,8 +63,8 @@ npm run deploy:common
 #### 전체 빌드
 ```bash
 # 1. 환경 변수 설정
-export SOURCE_PATH=your-build-server-dir/iitp-dabt-admin
-export DEPLOY_PATH=/var/www/iitp-dabt-deploy
+export SOURCE_PATH=your-build-server-root/iitp-dabt-admin
+export DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
 export GIT_BRANCH=main
 
@@ -91,7 +91,7 @@ npm run build:server:common
 # 1. 환경 변수 설정
 export BUILD_SERVER_HOST=build-server.com
 export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
+export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
 export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
@@ -161,13 +161,13 @@ npm run restart:server:fe
 
 #### 디렉토리 구조
 ```
-/var/www/iitp-dabt-admin/          # 소스 코드
+/home/iitp-adm/iitp-dabt-admin/source/          # 소스 코드
 ├── packages/common/
 ├── be/
 ├── fe/
 └── script/
 
-/var/www/iitp-dabt-deploy/         # 배포 폴더
+/home/iitp-adm/iitp-dabt-admin/deploy/         # 배포 폴더
 ├── common/
 ├── backend/
 └── frontend/
@@ -175,14 +175,10 @@ npm run restart:server:fe
 
 #### 권한 설정
 ```bash
-# 소스 디렉토리 권한
+# 소스/배포 디렉토리 권한
 sudo chown -R $USER:$USER /var/www/iitp-dabt-admin
 sudo chmod -R 755 /var/www/iitp-dabt-admin
 
-# 배포 디렉토리 권한
-sudo chown -R $USER:$USER /var/www/iitp-dabt-deploy
-sudo chmod -R 755 /var/www/iitp-dabt-deploy
-```
 
 ### 2. 기동 서버 설정
 
@@ -259,7 +255,7 @@ rm -rf node_modules package-lock.json
 npm install
 
 # 권한 문제 해결
-sudo chown -R $USER:$USER /var/www/iitp-dabt-admin
+sudo chown -R $USER:$USER /home/iitp-adm/iitp-dabt-admin
 ```
 
 ### 2. 배포 실패

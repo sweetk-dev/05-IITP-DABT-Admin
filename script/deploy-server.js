@@ -21,7 +21,7 @@ const deployConfig = {
   buildServer: {
     host: process.env.BUILD_SERVER_HOST || 'localhost',
     user: process.env.BUILD_SERVER_USER || 'root',
-    path: process.env.BUILD_SERVER_PATH || '/var/www/iitp-dabt-deploy',
+    path: process.env.BUILD_SERVER_PATH || '/home/iitp-adm/iitp-dabt-admin/deploy',
     port: process.env.BUILD_SERVER_PORT || '22'
   },
   // 기동 서버 설정
@@ -170,7 +170,7 @@ if (!process.env.BUILD_SERVER_HOST || !process.env.PROD_SERVER_HOST) {
   console.log('💡 예시:');
   console.log('   export BUILD_SERVER_HOST=build-server.com');
   console.log('   export BUILD_SERVER_USER=builduser');
-  console.log('   export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy');
+  console.log('   export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy');
   console.log('   export PROD_SERVER_HOST=prod-server.com');
   console.log('   export PROD_SERVER_USER=produser');
   console.log('   export PROD_BE_PATH=/var/www/iitp-dabt-adm-be');

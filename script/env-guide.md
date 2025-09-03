@@ -61,8 +61,8 @@ export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
 export GIT_BRANCH=main
 
 # 경로 설정
-export SOURCE_PATH=/var/www/iitp-dabt-admin
-export DEPLOY_PATH=/var/www/iitp-dabt-deploy
+export SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
+export DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 
 # 빌드 설정
 export NODE_ENV=production
@@ -76,8 +76,8 @@ GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
 GIT_BRANCH=main
 
 # 경로 설정
-SOURCE_PATH=/var/www/iitp-dabt-admin
-DEPLOY_PATH=/var/www/iitp-dabt-deploy
+SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
+DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 
 # 빌드 설정
 NODE_ENV=production
@@ -91,7 +91,7 @@ NPM_CONFIG_PRODUCTION=true
 # 빌드 서버 설정
 export BUILD_SERVER_HOST=build-server.com
 export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
+export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export BUILD_SERVER_PORT=22
 
 # 기동 서버 설정
@@ -136,7 +136,7 @@ export LOG_LEVEL=warn
 # 빌드 서버 설정
 BUILD_SERVER_HOST=build-server.com
 BUILD_SERVER_USER=builduser
-BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
+BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 BUILD_SERVER_PORT=22
 
 # 기동 서버 설정

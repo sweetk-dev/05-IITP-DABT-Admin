@@ -226,8 +226,8 @@ npm run deploy:common
 ##### 전체 빌드
 ```bash
 # 환경 변수 설정
-export SOURCE_PATH=/var/www/iitp-dabt-admin
-export DEPLOY_PATH=/var/www/iitp-dabt-deploy
+export SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
+export DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
 export GIT_BRANCH=main
 
@@ -254,7 +254,7 @@ npm run build:server:common
 # 환경 변수 설정
 export BUILD_SERVER_HOST=build-server.com
 export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
+export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
 export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
@@ -312,8 +312,8 @@ export FE_PATH=/var/www/iitp-dabt-adm-fe
 #### 서버 빌드용
 ```bash
 # 빌드 서버 설정
-export SOURCE_PATH=/var/www/iitp-dabt-admin
-export DEPLOY_PATH=/var/www/iitp-dabt-deploy
+export SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
+export DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
 export GIT_BRANCH=main
 ```
@@ -323,7 +323,7 @@ export GIT_BRANCH=main
 # 빌드 서버 설정
 export BUILD_SERVER_HOST=build-server.com
 export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=/var/www/iitp-dabt-deploy
+export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 
 # 기동 서버 설정
 export PROD_SERVER_HOST=prod-server.com
@@ -527,8 +527,8 @@ DB_HOST=localhost
 #### 서버 빌드용
 ```bash
 # 빌드 서버 환경 변수
-export SOURCE_PATH=/var/www/iitp-dabt-admin
-export DEPLOY_PATH=/var/www/iitp-dabt-deploy
+export SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
+export DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
 export GIT_BRANCH=main
 ```

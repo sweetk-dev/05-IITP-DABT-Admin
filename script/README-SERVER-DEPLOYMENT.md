@@ -64,9 +64,9 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "🏗️ 빌드 서버"
-        A[📁 소스 코드<br/>your-build-server-root/iitp-data-admin]
+        A[📁 소스 코드<br/>your-build-server-root/iitp-data-admin/source]
         B[🔨 빌드 과정<br/>Git pull + npm build]
-        C[📦 배포 폴더<br/>/var/www/iitp-dabt-deploy]
+        C[📦 배포 폴더<br/>your-build-server-root/iitp-data-admin/deploy]
     end
     
     subgraph "🚀 실행 서버"
@@ -127,12 +127,12 @@ ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
 #### 1.1.2 프로젝트 설정
 ```bash
 # 1. 기본 디렉토리 생성
-sudo mkdir -p /var/www/iitp-dabt-admin/source
-sudo mkdir -p /var/www/iitp-dabt-admin/deploy
+sudo mkdir -p /home/iitp-adm/iitp-dabt-admin/source
+sudo mkdir -p /home/iitp-adm/iitp-dabt-admin/deploy
 sudo chown $USER:$USER /var/www/iitp-dabt-admin
 
 # 2. Git에서 소스 다운로드
-cd /var/www/iitp-dabt-admin/source
+cd /home/iitp-adm/iitp-dabt-admin/source
 git clone https://github.com/your-repo/iitp-dabt-admin.git .
 
 # 3. 의존성 설치
@@ -151,8 +151,8 @@ GIT_REPO_URL=https://github.com/your-repo/iitp-dabt-admin.git
 GIT_BRANCH=main
 
 # 경로 설정
-SOURCE_PATH=/var/www/iitp-dabt-admin/source
-DEPLOY_PATH=/var/www/iitp-dabt-admin/deploy
+SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
+DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 
 # 빌드 설정
 NODE_ENV=production
@@ -536,7 +536,7 @@ export GIT_BRANCH=main
 
 # 경로 설정
 export SOURCE_PATH=your-build-server-root/iitp-data-admin
-export DEPLOY_PATH=/var/www/iitp-dabt-deploy
+export DEPLOY_PATH=your-build-server-root/iitp-data-admin/deploy
 
 # 빌드 설정
 export NODE_ENV=production
@@ -548,7 +548,7 @@ export NPM_CONFIG_PRODUCTION=true
 # 빌드 서버 설정
 export BUILD_SERVER_HOST=build-server.com
 export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=/var/www/iitp-dabt-admin/deploy
+export BUILD_SERVER_PATH=your-build-server-root/iitp-dabt-admin/deploy
 export BUILD_SERVER_PORT=22
 
 # 기동 서버 설정
@@ -606,7 +606,7 @@ npm run build
 #### 4.1.1 전체 프로젝트 버전 확인
 ```bash
 # 빌드 서버에서 실행
-cd /var/www/iitp-dabt-admin/source
+cd /home/iitp-adm/iitp-dabt-admin/source
 
 # Backend 프로젝트 버전
 cd be && cat package.json | grep '"version"' && cd ..
@@ -786,7 +786,7 @@ ssh-copy-id user@target-server
 # 문제: 디스크 공간 부족
 # 해결: 디스크 공간 확인
 df -h
-du -sh /var/www/iitp-dabt-deploy
+du -sh your-build-server-root/iitp-data-admin/deploy
 ```
 
 ### 4.2 실행 서버 문제 해결

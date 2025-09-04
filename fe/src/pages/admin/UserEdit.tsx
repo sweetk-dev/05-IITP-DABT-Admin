@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -7,7 +7,7 @@ import ThemedCard from '../../components/common/ThemedCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import ErrorAlert from '../../components/ErrorAlert';
 import { SPACING } from '../../constants/spacing';
-import { ROUTES } from '../../routes';
+//import { ROUTES } from '../../routes';
 import { getUserAccountDetail, updateUserAccount } from '../../api/account';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 import { useDataFetching } from '../../hooks/useDataFetching';
@@ -18,11 +18,13 @@ export default function UserEdit() {
   const { id } = useParams<{ id: string }>();
   const userId = Number(id);
 
-  const { data, error: fetchError } = useDataFetching({
+  const { data, isError, status: fetchStatus } = useDataFetching({
     fetchFunction: () => getUserAccountDetail(userId),
     dependencies: [userId],
     autoFetch: !!userId
   });
+
+  const fetchError = isError && fetchStatus === 'error' ? (data as any)?.error : undefined;
 
   const user = (data as any)?.user;
 
@@ -42,7 +44,7 @@ export default function UserEdit() {
     }
   }, [user]);
 
-  const handleBack = () => navigate(`/admin/users/${userId}`);
+  //const handleBack = () => navigate(`/admin/users/${userId}`);
   
   const handleSubmit = async () => {
     // 유효성 검사

@@ -1,4 +1,4 @@
-import { Box, CardContent, Typography, Chip, Stack, Grid } from '@mui/material';
+import { Box, CardContent, Typography, Chip, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
@@ -7,7 +7,7 @@ import ThemedButton from '../../components/common/ThemedButton';
 import StatusChip from '../../components/common/StatusChip';
 import ErrorAlert from '../../components/ErrorAlert';
 import { SPACING } from '../../constants/spacing';
-import { ROUTES } from '../../routes';
+//import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { formatYmdHm } from '../../utils/date';
 import { getAdminRole } from '../../store/user';
@@ -23,11 +23,13 @@ export default function UserDetail() {
   const canEdit = hasUserAccountEditPermission(adminRole);
 
   // 실제 API 호출
-  const { data, isLoading, isEmpty, isError, error } = useDataFetching({
+  const { data, isLoading, isEmpty, isError, status } = useDataFetching({
     fetchFunction: () => getUserAccountDetail(userId),
     dependencies: [userId],
     autoFetch: !!userId
   });
+
+  const error = isError && status === 'error' ? (data as any)?.error : undefined;
 
   const user = (data as UserAccountDetailRes)?.user;
 

@@ -3,12 +3,12 @@ import { useLocation, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import AppBar from './AppBar';
 import SideNav from './admin/SideNav';
-import AdminPageHeader from './admin/AdminPageHeader';
+//import AdminPageHeader from './admin/AdminPageHeader';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { ToastProvider } from './ToastProvider';
 import { createAppTheme } from '../theme/mui';
-import { isAuthenticated, validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
+import { validateAndCleanTokens, isUserAuthenticated, isAdminAuthenticated } from '../store/auth';
 import { getAdminRole } from '../store/user';
 import { ROUTES } from '../routes';
 import Footer from './Footer';
@@ -29,7 +29,7 @@ const PUBLIC_PAGES = [
 
 export default function Layout() {
 	const location = useLocation();
-	const isLoggedIn = isAuthenticated();
+	//const isLoggedIn = isAuthenticated();
 	const isUserLoggedIn = isUserAuthenticated();
 	const isAdminLoggedIn = isAdminAuthenticated();
 	const [sideNavOpen, setSideNavOpen] = useState(true);

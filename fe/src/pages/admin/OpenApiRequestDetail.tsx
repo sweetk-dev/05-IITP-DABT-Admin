@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Box, 
@@ -16,7 +16,7 @@ import {
   Grid,
   Chip
 } from '@mui/material';
-import { Check as CheckIcon, Close as CloseIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { Check as CheckIcon } from '@mui/icons-material';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ThemedCard from '../../components/common/ThemedCard';
 import ErrorAlert from '../../components/ErrorAlert';
@@ -43,7 +43,7 @@ export default function AdminOpenApiRequestDetail() {
     data: openApiDetail, 
     isLoading, 
     isError, 
-    refetch 
+    // refetch 
   } = useDataFetching({
     fetchFunction: () => getAdminOpenApiDetail(Number(keyId)),
     dependencies: [keyId],
@@ -89,10 +89,10 @@ export default function AdminOpenApiRequestDetail() {
     }
   };
 
-  // 뒤로 가기
-  const handleBack = () => {
-    navigate(ROUTES.ADMIN.OPENAPI.REQUESTS);
-  };
+  // 뒤로 가기 제거 (브레드크럼 사용)
+  // const handleBack = () => {
+  //   navigate(ROUTES.ADMIN.OPENAPI.REQUESTS);
+  // };
 
   if (!keyId) {
     return <ErrorAlert error="잘못된 요청입니다." />;
@@ -109,13 +109,7 @@ export default function AdminOpenApiRequestDetail() {
       
       <Box sx={{ p: SPACING.LARGE }}>
         {/* 뒤로 가기 버튼 */}
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mb: 2 }}
-        >
-          목록으로 돌아가기
-        </Button>
+        {/* <Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mb: 2 }}>뒤로가기</Button> */}
 
         <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
           API 요청 처리
@@ -251,14 +245,7 @@ export default function AdminOpenApiRequestDetail() {
                         {isSubmitting ? '처리 중...' : '처리 완료'}
                       </Button>
                       
-                      <Button
-                        variant="outlined"
-                        onClick={handleBack}
-                        disabled={isSubmitting}
-                        fullWidth
-                      >
-                        취소
-                      </Button>
+                      {/* <Button variant="outlined" onClick={handleBack} disabled={isSubmitting} fullWidth>취소</Button> */}
                     </Stack>
                   </Stack>
                 </CardContent>

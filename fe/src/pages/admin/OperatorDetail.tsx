@@ -1,4 +1,4 @@
-import { Box, CardContent, Typography, Chip, Stack, Grid } from '@mui/material';
+import { Box, CardContent, Typography, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
@@ -7,7 +7,7 @@ import ThemedButton from '../../components/common/ThemedButton';
 import StatusChip from '../../components/common/StatusChip';
 import ErrorAlert from '../../components/ErrorAlert';
 import { SPACING } from '../../constants/spacing';
-import { ROUTES } from '../../routes';
+//import { ROUTES } from '../../routes';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { formatYmdHm } from '../../utils/date';
 import { getAdminRole } from '../../store/user';
@@ -25,17 +25,19 @@ export default function OperatorDetail() {
   const canManage = hasAccountManagementPermission(adminRole);
 
   // 공통 코드 조회 (운영자 역할)
-  const { data: roleCodes, isLoading: roleLoading } = useDataFetching({ 
+  const { data: roleCodes } = useDataFetching({ 
     fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES), 
     autoFetch: true 
   });
 
   // 실제 API 호출
-  const { data, isLoading, isEmpty, isError, error } = useDataFetching({
+  const { data, isLoading, isEmpty, isError, status } = useDataFetching({
     fetchFunction: () => getAdminAccountDetail(operatorId),
     dependencies: [operatorId],
     autoFetch: !!operatorId
   });
+
+  const error = isError && status === 'error' ? (data as any)?.error : undefined;
 
   const operator = (data as AdminAccountDetailRes)?.admin;
 
@@ -132,7 +134,7 @@ export default function OperatorDetail() {
                    <Typography variant="subtitle2" color="text.secondary">역할</Typography>
                    <StatusChip 
                      kind={getRoleColor(operator.role) as any} 
-                     label={operator.roleName || operator.role}
+                     label={getRoleLabel(operator.role)}
                      sx={{ mb: 1 }}
                    />
                  </Grid>

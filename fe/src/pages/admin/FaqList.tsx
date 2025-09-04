@@ -8,7 +8,7 @@ import ListItemCard from '../../components/common/ListItemCard';
 import ThemedButton from '../../components/common/ThemedButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
-import { getAdminFaqList, deleteAdminFaq, deleteAdminFaqList } from '../../api/faq';
+import { getAdminFaqList, deleteAdminFaqList } from '../../api/faq';
 import { getCommonCodesByGroupId } from '../../api';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { usePagination } from '../../hooks/usePagination';
@@ -85,12 +85,6 @@ export default function FaqList() {
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
     pagination.handlePageChange(page);
-  };
-
-  // 검색 핸들러
-  const handleSearch = () => {
-    pagination.handlePageChange(1);
-    refetch();
   };
 
   // 필터 변경 시 자동 refetch

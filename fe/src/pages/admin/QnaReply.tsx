@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText, Typography } from '@mui/material';
+import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
@@ -19,11 +19,13 @@ export default function AdminQnaReply() {
   const { id } = useParams<{ id: string }>();
   const qnaId = Number(id);
 
-  const { data, error: fetchError } = useDataFetching({ 
+  const { data, isError, status } = useDataFetching({ 
     fetchFunction: ()=> getAdminQnaDetail(qnaId), 
     dependencies: [qnaId], 
     autoFetch: !!qnaId 
   });
+
+  const fetchError = isError && status === 'error' ? (data as any)?.error : undefined;
   
   // API 응답 구조를 유연하게 처리
   const detail = (data as any)?.data?.qna || (data as any)?.qna || (data as any) || {};
@@ -56,7 +58,7 @@ export default function AdminQnaReply() {
     }
   }, [detail, data]);
 
-  const handleBack = () => navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(qnaId)));
+  // const handleBack = () => navigate(ROUTES.ADMIN.QNA.DETAIL.replace(':id', String(qnaId)));
   
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
@@ -76,8 +78,7 @@ export default function AdminQnaReply() {
       title, 
       content, 
       answerContent: answer,
-      qnaType,
-      secretYn
+      updatedBy: 'admin' // TODO: 실제 관리자 정보로 교체
     };
     
     const res = await updateAdminQna(qnaId, updateData);
@@ -100,7 +101,8 @@ export default function AdminQnaReply() {
     setError(null);
     
     const answerData: AdminQnaAnswerReq = { 
-      answerContent: answer 
+      answer: answer,
+      answeredBy: 'admin' // TODO: 실제 관리자 정보로 교체
     };
     
     const res = await answerAdminQna(qnaId, answerData);
@@ -218,7 +220,7 @@ export default function AdminQnaReply() {
           </Box>
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.MEDIUM }}>
-            <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>
+            {/* <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton> */}
             <ThemedButton variant="outlined" onClick={handleSave} disabled={loading} buttonSize="cta">저장</ThemedButton>
             <ThemedButton variant="primary" onClick={handleAnswer} disabled={loading} buttonSize="cta">답변완료</ThemedButton>
           </Box>

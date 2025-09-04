@@ -331,6 +331,25 @@ VITE_API_TIMEOUT=10000
 OPPEN_API_DOC_URL=https://your-openapi-doc-domain.com
 ```
 
+## 🔄 배포 요약 (서버 간)
+
+- 명령어
+  - 전체 빌드(빌드 서버): `npm run build:server`
+  - 운영 스크립트 배포(최초 1회 또는 변경 시): `npm run deploy:server:ops`
+  - 전체 배포(빌드→실행): `npm run deploy:server`
+  - 기동: `npm run start:server:be`, `npm run start:server:fe`
+
+- 권장 실행 순서
+```bash
+npm run build:server
+npm run deploy:server:ops   # 최초 1회 또는 스크립트 변경 시
+npm run deploy:server
+npm run start:server:be
+npm run start:server:fe
+```
+
+자세한 내용은 `script/README-SERVER-DEPLOYMENT.md`를 참조하세요.
+
 ## 🤝 기여 가이드
 
 1. Fork the repository

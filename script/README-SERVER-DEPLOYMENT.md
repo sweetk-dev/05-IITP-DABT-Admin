@@ -474,6 +474,22 @@ npm run deploy:server
 # 3. Frontend: Nginx 설정 업데이트
 ```
 
+#### 3.2.1.1 deploy-server-ops.js (운영 스크립트 배포)
+```bash
+# 실행 서버에 기동/재시작 스크립트 배포
+npm run deploy:server:ops
+
+# 동작:
+# - script/start-server-*.js, restart-server-*.js 를 실행 서버 OPS_SCRIPT_PATH(기본: /var/www/iitp-dabt-admin/script)로 복사
+# - 실행 권한 부여 (chmod +x)
+```
+
+- 권장 실행 순서:
+  1) 빌드 서버: `npm run build:server`
+  2) (초기 1회) 실행 서버 운영 스크립트 배포: `npm run deploy:server:ops`
+  3) 실행 서버로 배포: `npm run deploy:server`
+  4) 서버 기동: `npm run start:server:be`, `npm run start:server:fe`
+
 #### 3.2.2 start-server-be.js
 ```bash
 # Backend 서버 시작

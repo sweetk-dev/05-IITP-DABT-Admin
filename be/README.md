@@ -577,7 +577,7 @@ GET /api/common/jwt-config
 
 ### 비밀번호 보안
 
-- **해싱**: bcryptjs (salt rounds: 10)
+- **해싱**: bcrypt (salt rounds: 10)
 - **검증**: 공통 패키지의 `isValidPassword` 함수 사용
 
 ### 환경 변수 암호화
@@ -661,7 +661,7 @@ npm start
 ### Docker 배포 (선택사항)
 
 ```dockerfile
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 

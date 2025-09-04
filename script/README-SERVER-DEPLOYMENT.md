@@ -70,8 +70,8 @@ graph TB
     end
     
     subgraph "🚀 실행 서버"
-        D[📁 Backend<br/>/var/www/iitp-dabt-adm-be]
-        E[📁 Frontend<br/>/var/www/iitp-dabt-adm-fe]
+        D[📁 Backend<br/>/var/www/iitp-dabt-admin/be]
+        E[📁 Frontend<br/>/var/www/iitp-dabt-admin/fe]
         F[🔄 PM2 + Nginx]
     end
     
@@ -260,9 +260,10 @@ sudo apt install postgresql postgresql-contrib -y
 #### 2.1.2 실행 환경 설정
 ```bash
 # 1. 기본 디렉토리 생성
-sudo mkdir -p /var/www/iitp-dabt-adm-be
-sudo mkdir -p /var/www/iitp-dabt-adm-fe
-sudo chown $USER:$USER /var/www/iitp-dabt-*
+sudo mkdir -p /var/www/iitp-dabt-admin/be
+sudo mkdir -p /var/www/iitp-dabt-admin/fe
+sudo mkdir -p /var/www/iitp-dabt-admin/script
+sudo chown $USER:$USER /var/www/iitp-dabt-admin -R
 
 # 2. PM2 설정
 pm2 startup
@@ -276,7 +277,7 @@ server {
     
     # Frontend
     location / {
-        root /var/www/iitp-dabt-adm-fe;
+        root /var/www/iitp-dabt-admin/fe;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
@@ -309,10 +310,10 @@ sudo systemctl reload nginx
 #### 2.1.3 실행 서버 환경 변수 설정
 ```bash
 # .env 파일 생성 (실행 서버용)
-sudo cp env.sample /var/www/iitp-dabt-adm-be/.env
+sudo cp env.sample /var/www/iitp-dabt-admin/be/.env
 
 # 또는 직접 생성
-sudo tee /var/www/iitp-dabt-adm-be/.env << 'EOF'
+sudo tee /var/www/iitp-dabt-admin/be/.env << 'EOF'
 # 데이터베이스 설정
 DB_HOST=localhost
 DB_PORT=5432
@@ -538,11 +539,11 @@ export PROD_SERVER_USER=produser
 export PROD_SERVER_PORT=22
 
 # Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
 export PM2_APP_NAME_BE=iitp-dabt-adm-be
 
 # Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 export FRONTEND_DOMAIN=your-domain.com
 export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 ```
@@ -579,8 +580,8 @@ npm run build
 ```
 
 #### 4.0.3 빌드 정보 파일 위치
-- **Backend**: `/var/www/iitp-dabt-adm-be/dist/build-info.json`
-- **Frontend**: `/var/www/iitp-dabt-adm-fe/dist/build-info.json`
+- **Backend**: `/var/www/iitp-dabt-admin/be/dist/build-info.json`
+- **Frontend**: `/var/www/iitp-dabt-admin/fe/dist/build-info.json`
 
 ### 4.1 빌드 서버에서 버전 확인
 
@@ -613,7 +614,7 @@ git describe --tags
 #### 4.2.1 Backend 서버 버전 확인
 ```bash
 # Backend 서버에서 실행
-cd /var/www/iitp-dabt-adm-be
+cd /var/www/iitp-dabt-admin/be
 
 # Backend 프로젝트 버전
 cat package.json | grep '"version"'
@@ -623,31 +624,31 @@ npm list @iitp-dabt/common
 
 # 빌드 정보 확인
 if [ -f "dist/build-info.json" ]; then
-    cat dist/build-info.json | grep version
+    cat dist/build-info.json | grep buildDate
 fi
 ```
 
 #### 4.2.2 Frontend 서버 버전 확인
 ```bash
 # Frontend 서버에서 실행
-cd /var/www/iitp-dabt-adm-fe
+cd /var/www/iitp-dabt-admin/fe
 
 # Frontend 프로젝트 버전
-npm version
+cat package.json | grep '"version"'
 
 # Common 패키지 버전 (Frontend에 포함된)
 npm list @iitp-dabt/common
 
 # 빌드 정보 확인
 if [ -f "dist/build-info.json" ]; then
-    cat dist/build-info.json | grep version
+    cat dist/build-info.json | grep buildDate
 fi
 ```
 
 #### 4.2.3 통합 버전 확인 스크립트
 ```bash
 # 버전 확인 스크립트 생성
-cat > /var/www/iitp-dabt-adm-be/check-versions.sh << 'EOF'
+cat > /var/www/iitp-dabt-admin/be/check-versions.sh << 'EOF'
 #!/bin/bash
 
 echo "=== 배포된 프로젝트 버전 확인 ==="
@@ -655,32 +656,35 @@ echo "확인 시간: $(date)"
 echo ""
 
 echo "🏗️ Backend 프로젝트 버전:"
-cd /var/www/iitp-dabt-adm-be
+cd /var/www/iitp-dabt-admin/be
 cat package.json | grep '"version"'
 
 echo -e "\n📦 Backend에 포함된 Common 패키지 버전:"
 npm list @iitp-dabt/common
 
 echo -e "\n🎨 Frontend 프로젝트 버전:"
-cd /var/www/iitp-dabt-adm-fe
+cd /var/www/iitp-dabt-admin/fe
 cat package.json | grep '"version"'
 
 echo -e "\n📦 Frontend에 포함된 Common 패키지 버전:"
 npm list @iitp-dabt/common
 
-echo -e "\n🏷️ Git 태그 정보:"
-cd /var/www/iitp-dabt-adm-be
-git describe --tags 2>/dev/null || echo "태그가 없습니다."
-
 echo -e "\n📋 빌드 정보:"
+cd /var/www/iitp-dabt-admin/be
 if [ -f "dist/build-info.json" ]; then
-    cat dist/build-info.json | grep version
+    cat dist/build-info.json | grep buildDate
 else
-    echo "빌드 정보 파일이 없습니다."
+    echo "BE 빌드 정보 파일이 없습니다."
+fi
+cd /var/www/iitp-dabt-admin/fe
+if [ -f "dist/build-info.json" ]; then
+    cat dist/build-info.json | grep buildDate
+else
+    echo "FE 빌드 정보 파일이 없습니다."
 fi
 EOF
 
-chmod +x /var/www/iitp-dabt-adm-be/check-versions.sh
+chmod +x /var/www/iitp-dabt-admin/be/check-versions.sh
 ```
 
 #### 4.2.4 스크립트 실행
@@ -832,7 +836,7 @@ sudo systemctl status postgresql
 ```bash
 # Backend 로그
 pm2 logs iitp-dabt-adm-be
-tail -f /var/www/iitp-dabt-adm-be/logs/app.log
+tail -f /var/www/iitp-dabt-admin/be/logs/app.log
 
 # Nginx 로그
 sudo tail -f /var/log/nginx/access.log
@@ -890,7 +894,7 @@ sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
 pg_dump iitp_dabt_admin > backup_$(date +%Y%m%d).sql
 
 # 파일 백업
-tar -czf backup_$(date +%Y%m%d).tar.gz /var/www/iitp-dabt-adm-be
+tar -czf backup_$(date +%Y%m%d).tar.gz /var/www/iitp-dabt-admin/be
 ```
 
 ### 보안

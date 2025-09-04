@@ -4,8 +4,8 @@
   "description": "IITP DABT Admin Backend",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rimraf dist && tsc",
-    "build:clean": "rimraf dist && tsc --build",
+    "build": "rimraf dist && npm run prebuild && tsc",
+    "build:clean": "rimraf dist && npm run prebuild && tsc --build",
     "dev": "tsc && node dist/index.js",
     "dev:watch": "node scripts/dev-watch.js",
     "dev:watch:win": "scripts\\dev-watch.bat",

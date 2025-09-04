@@ -29,10 +29,10 @@
 # 1. 환경 변수 설정
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-adm-be
+export BE_PATH=/var/www/iitp-dabt-admin/be
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-adm-fe
+export FE_PATH=/var/www/iitp-dabt-admin/fe
 
 # 2. 전체 배포 실행
 npm run deploy
@@ -94,8 +94,8 @@ export BUILD_SERVER_USER=builduser
 export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
-export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
-export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
+export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 
 # 2. 전체 배포 실행
 npm run deploy:server
@@ -184,13 +184,13 @@ sudo chmod -R 755 /var/www/iitp-dabt-admin
 
 #### 디렉토리 구조
 ```
-/var/www/iitp-dabt-adm-be/        # Backend 서비스
+/var/www/iitp-dabt-admin/be/        # Backend 서비스
 ├── dist/
 ├── node_modules/
 ├── package.json
 └── .env
 
-/var/www/iitp-dabt-adm-fe/       # Frontend 서비스
+/var/www/iitp-dabt-admin/fe/       # Frontend 서비스
 ├── index.html
 ├── assets/
 └── static/
@@ -207,7 +207,7 @@ module.exports = {
   apps: [{
     name: 'iitp-dabt-adm-be',
     script: 'dist/index.js',
-    cwd: '/var/www/iitp-dabt-adm-be',
+    cwd: '/var/www/iitp-dabt-admin/be',
     env: {
       NODE_ENV: 'production',
       PORT: 30000
@@ -226,7 +226,7 @@ sudo apt install nginx
 server {
     listen 80;
     server_name your-domain.com;
-    root /var/www/iitp-dabt-adm-fe;
+    root /var/www/iitp-dabt-admin/fe;
     index index.html;
     
     location / {
@@ -291,7 +291,7 @@ netstat -tulpn | grep :30000
 env | grep -E "(DB_|JWT_|ENC_)"
 
 # .env 파일 확인
-cat /var/www/iitp-dabt-adm-be/.env
+cat /var/www/iitp-dabt-admin/be/.env
 
 # 환경 변수 로드 테스트
 node -e "console.log(process.env.JWT_SECRET)"

@@ -16,7 +16,7 @@ const deployConfig = {
   backend: {
     host: process.env.BE_HOST || 'your-backend-server.com',
     user: process.env.BE_USER || 'your-username',
-    path: process.env.BE_PATH || '/var/www/iitp-dabt-adm-be',
+    path: process.env.BE_PATH || '/var/www/iitp-dabt-admin/be',
     port: process.env.BE_PORT || '22'
   }
 };
@@ -200,7 +200,7 @@ if (!process.env.BE_HOST) {
   console.log('💡 예시:');
   console.log('   export BE_HOST=your-backend-server.com');
   console.log('   export BE_USER=your-username');
-  console.log('   export BE_PATH=/var/www/iitp-dabt-adm-be');
+  console.log('   export BE_PATH=/var/www/iitp-dabt-admin/be');
   console.log('');
   console.log('🔧 또는 .env 파일에 설정하세요.');
   process.exit(1);

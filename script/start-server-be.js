@@ -17,7 +17,7 @@ if (!isLinux) {
 
 // 설정
 const config = {
-  bePath: process.env.PROD_BE_PATH || '/var/www/iitp-dabt-adm-be',
+  bePath: process.env.PROD_BE_PATH || '/var/www/iitp-dabt-admin/be',
   pm2AppName: process.env.PM2_APP_NAME_BE || 'iitp-dabt-adm-be'
 };
 
@@ -37,8 +37,8 @@ function showVersionInfo() {
     // 빌드 정보 확인
     const buildInfoPath = path.join(config.bePath, 'dist/build-info.json');
     if (fs.existsSync(buildInfoPath)) {
-      const buildInfo = require(buildInfoPath);
-      console.log(`   🔨 빌드 시간: ${buildInfo.buildTime}`);
+      const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, 'utf8'));
+      if (buildInfo.buildDate) console.log(`   🔨 빌드 시간: ${buildInfo.buildDate}`);
     }
   } catch (error) {
     console.log('   ⚠️  버전 정보를 가져올 수 없습니다.');
@@ -107,9 +107,9 @@ async function main() {
     console.log('');
     console.log('💡 유용한 명령어:');
     console.log('   pm2 status                    # 서버 상태 확인');
-    console.log('   pm2 logs iitp-dabt-adm-be    # 로그 확인');
-    console.log('   pm2 restart iitp-dabt-adm-be # 서버 재시작');
-    console.log('   pm2 stop iitp-dabt-adm-be    # 서버 중지');
+    console.log(`   pm2 logs ${config.pm2AppName}    # 로그 확인`);
+    console.log(`   pm2 restart ${config.pm2AppName} # 서버 재시작`);
+    console.log(`   pm2 stop ${config.pm2AppName}    # 서버 중지`);
     
   } catch (error) {
     console.error('❌ Backend 서버 시작 실패:', error.message);
@@ -121,11 +121,11 @@ async function main() {
 if (!process.env.PROD_BE_PATH) {
   console.log('⚠️  환경 변수가 설정되지 않았습니다.');
   console.log('📋 필요한 환경 변수:');
-  console.log('   PROD_BE_PATH: Backend 서버 경로 (기본값: /var/www/iitp-dabt-adm-be)');
+  console.log('   PROD_BE_PATH: Backend 서버 경로 (기본값: /var/www/iitp-dabt-admin/be)');
   console.log('   PM2_APP_NAME_BE: PM2 앱 이름 (기본값: iitp-dabt-adm-be)');
   console.log('');
   console.log('💡 예시:');
-  console.log('   export PROD_BE_PATH=/var/www/iitp-dabt-adm-be');
+  console.log('   export PROD_BE_PATH=/var/www/iitp-dabt-admin/be');
   console.log('   export PM2_APP_NAME_BE=iitp-dabt-adm-be');
   console.log('');
   console.log('🔧 또는 .env 파일에 설정하세요.');

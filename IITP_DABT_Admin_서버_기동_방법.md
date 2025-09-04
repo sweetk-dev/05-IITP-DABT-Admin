@@ -4,7 +4,7 @@
 
 ## 📋 사전 요구사항
 
-- **Node.js**: 18.x 이상
+- **Node.js**: 22.x 이상
 - **npm**: 9.x 이상  
 - **PostgreSQL**: 12.x 이상
 - **Git**: 최신 버전
@@ -161,7 +161,7 @@ npm run preview
 ## 🌐 5. 서비스 접속
 
 - **Backend API**: `http://localhost:30000`
-- **Frontend**: `http://localhost:5173` (개발) 또는 `http://localhost:4173` (프로덕션)
+- **Frontend**: `http://localhost:5173` (개발) 또는 `http://localhost:4173` (프로덕션 프리뷰)
 
 ## 🔍 6. 서버 상태 확인
 
@@ -234,6 +234,8 @@ export GIT_BRANCH=main
 # 전체 빌드 (Git pull + 빌드 + 배포 폴더 복사)
 npm run build:server
 ```
+
+- 최신 스크립트 동작: dist 검증/보강(ensureBuilt) → 안전 복사(`cp -a dist/. <deploy>`)로 글롭(*) 문제와 빈 디렉터리 문제 방지
 
 ##### 개별 빌드
 ```bash
@@ -366,18 +368,16 @@ npm run build:server:fe     # FE만 빌드 + 배포 폴더 복사
 npm run build:server:common # Common만 빌드 + 배포 폴더 복사
 
 # 기동 서버에서 실행
-npm run deploy:server       # 전체 배포 (빌드 서버 → 기동 서버)
-npm run deploy:server:be    # BE만 배포
-npm run deploy:server:fe    # FE만 배포
+npm run deploy:server        # 전체 배포 (빌드 서버 → 기동 서버)
+npm run deploy:server:be     # BE만 배포
+npm run deploy:server:fe     # FE만 배포
 npm run deploy:server:common # Common만 배포
 
-# 서버 시작
-npm run start:server:be     # BE 서버 시작 (PM2)
-npm run start:server:fe     # FE 서버 시작 (Nginx)
-
-# 서버 재시작
-npm run restart:server:be   # BE 서버 재시작
-npm run restart:server:fe   # FE 서버 재시작
+# 서버 시작/재시작
+npm run start:server:be
+npm run start:server:fe
+npm run restart:server:be
+npm run restart:server:fe
 ```
 
 ### 빌드
@@ -407,7 +407,7 @@ cd fe && npm run build
 - **자동 갱신**: Access Token 만료 5분 전 자동 갱신
 
 ### 비밀번호 보안
-- **해싱**: bcryptjs (salt rounds: 10)
+- **해싱**: bcrypt (salt rounds: 10)
 - **검증**: 공통 패키지의 `isValidPassword` 함수 사용
 
 ### 환경 변수 암호화
@@ -447,11 +447,14 @@ ls -la be/logs/
 chmod 755 be/logs/
 ```
 
-#### 4. 의존성 문제
+#### 4. 의존성/빌드 문제
 ```bash
 # node_modules 삭제 후 재설치
 rm -rf node_modules package-lock.json
 npm install
+
+# 서버 빌드 시 dist 오류 방지 (ensureBuilt + 안전 복사)
+# 최신 build-server.js는 dist가 없거나 비어 있으면 자동 빌드 보강 후 cp -a로 복사합니다.
 ```
 
 ### 로그 확인
@@ -506,55 +509,35 @@ npm run deploy         # 로컬 → 서버 배포
 #### 새로운 방식 (서버 → 서버)
 ```bash
 # 빌드 서버에서 실행
-npm run build:server   # Git pull + 빌드 + 배포 폴더 복사
+npm run build:server   # Git pull + 빌드 + 배포 폴더 복사 (ensureBuilt + cp -a)
 
 # 기동 서버에서 실행  
 npm run deploy:server  # 빌드 서버 → 기동 서버 배포
 npm run start:server:be # 서버 시작
 ```
 
-### 환경 변수 설정 가이드
+### 환경 변수 설정 가이드 (요약)
+- 빌드 서버: `SOURCE_PATH`, `DEPLOY_PATH`, `GIT_*`, `NPM_CONFIG_PRODUCTION`
+- 기동 서버: `PROD_*_PATH`, `PM2_APP_NAME_BE`, `NGINX_CONFIG_PATH`
 
-#### 로컬 개발용
+## 🔎 14. 버전/빌드 정보 출력
+
+- 빌드 시: `script/build-server.js`가 시작 시 버전 정보(Backend/Frontend/Common, Git 태그)를 STDOUT에 출력
+- 실행 시: `script/start-server-*.js`가 각 앱 `package.json` 버전과 `dist/build-info.json`의 빌드 시간을 STDOUT에 출력
+- 수동 확인:
 ```bash
-# .env 파일에 설정
-NODE_ENV=development
-PORT=30000
-DB_HOST=localhost
-# ... 기타 설정
+# BE/FE 버전
+cat be/package.json | grep "\"version\""
+cat fe/package.json | grep "\"version\""
+
+# Common 버전 (설치본)
+cd /var/www/iitp-dabt-adm-be && npm list @iitp-dabt/common
+cd /var/www/iitp-dabt-adm-fe && npm list @iitp-dabt/common
+
+# 빌드 시간 (실행 서버)
+cat /var/www/iitp-dabt-adm-be/dist/build-info.json | grep buildDate || true
+cat /var/www/iitp-dabt-adm-fe/dist/build-info.json | grep buildDate || true
 ```
-
-#### 서버 빌드용
-```bash
-# 빌드 서버 환경 변수
-export SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
-export DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
-export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
-export GIT_BRANCH=main
-```
-
-#### 서버 배포용
-```bash
-# 기동 서버 환경 변수
-export BUILD_SERVER_HOST=build-server.com
-export PROD_SERVER_HOST=prod-server.com
-export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
-export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
-export PM2_APP_NAME_BE=iitp-dabt-adm-be
-export FRONTEND_DOMAIN=your-domain.com
-```
-
-## 🔍 14. 모니터링
-
-### 헬스 체크
-```bash
-curl http://your-server:30000/api/common/health
-```
-
-### 성능 모니터링
-- **API 응답 시간**: Morgan 액세스 로그
-- **메모리 사용량**: Node.js 내장 모니터링
-- **데이터베이스 성능**: Sequelize 로깅
 
 ## 📞 15. 지원
 

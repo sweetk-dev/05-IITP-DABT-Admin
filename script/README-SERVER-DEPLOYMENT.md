@@ -112,23 +112,17 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 # 2. Node.js 설치
 sudo apt-get install -y nodejs
 
- ** 설치시 에러가 나면, 서버 OS에서 기본 설치된 npm과 충돌날수 있음으로 아래 명령어 수행 후 설치 하세요. 
-    sudo apt remove -y nodejs npm
-    sudo apt purge -y nodejs npm
-    sudo apt autoremove -y
-
-
+# 설치시 충돌 발생 시 (기본 npm과 충돌) 제거 후 재설치
+# sudo apt remove -y nodejs npm
+# sudo apt purge -y nodejs npm
+# sudo apt autoremove -y
 
 # Git 설치
 sudo apt install git -y
 
 # SSH 키 설정 (Git 저장소 접근용)
 # Public 저장소인 경우 아래 단계는 생략 가능
-# 1. SSH 키 생성
-ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
-
-# 2. GitHub/GitLab에 공개키 등록
-# cat ~/.ssh/id_rsa.pub
+# ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
 ```
 
 #### 1.1.2 프로젝트 설정
@@ -176,7 +170,7 @@ EOF
 #### 1.2.1 전체 빌드 및 배포
 ```bash
 # 빌드 서버에서 실행
-cd your-build-server-root/iitp-data-admin
+cd /home/iitp-adm/iitp-dabt-admin/source
 npm run build:server
 ```
 
@@ -194,26 +188,22 @@ npm run build:server:common
 
 ### 1.3 빌드 스크립트 상세
 
-#### 1.3.1 build-server.js 동작 과정
+#### 1.3.1 build-server.js 동작 과정 (업데이트됨)
 ```mermaid
 flowchart TD
     A[🚀 npm run build:server] --> B[📋 버전 정보 출력]
     B --> C[📥 Git pull]
-    C --> D[📦 npm install]
-    D --> E[🔨 npm run build]
-    E --> F[📁 packages/common 빌드]
-    F --> G[🔧 Backend 빌드]
-    G --> H[🎨 Frontend 빌드]
-    H --> I[📋 파일 복사]
-    I --> J[📦 배포 폴더 준비]
-    J --> K[✅ 빌드 완료]
+    C --> D[🔨 packages/common → be → fe: npm run build:clean]
+    D --> E[🧪 dist 검증 및 보강 ensureBuilt]
+    E --> F[📋 안전 복사 cp -a dist/. deploy]
+    F --> G[✅ 빌드 완료]
     
     style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style K fill:#e8f5e8
-    style E fill:#fff3e0
-    style I fill:#f3e5f5
+    style G fill:#e8f5e8
 ```
+
+- ensureBuilt: dist 디렉터리가 없거나 비어 있으면 해당 패키지에서 `npm ci` 후 `npm run build:clean`을 수행해 보강합니다.
+- 안전 복사: 글롭(*)을 사용하지 않고 `cp -a dist/. <deploy>`로 디렉터리 단위 복사합니다.
 
 #### 1.3.2 빌드 시 버전 정보 출력
 빌드 시작 시 다음 정보가 자동으로 출력됩니다:
@@ -225,7 +215,7 @@ flowchart TD
    🏷️  Git 태그: v1.0.0
 ```
 
-#### 1.3.2 빌드 서버 디렉토리 구조
+#### 1.3.3 빌드 서버 디렉토리 구조
 ```
 /home/iitp-adm/iitp-dabt-admin/
 ├── source/                        # 소스 코드
@@ -235,10 +225,9 @@ flowchart TD
 │   ├── script/
 │   └── package.json
 └── deploy/                        # 배포 폴더
-    ├── packages/common/dist/
-    ├── be/dist/
-    ├── fe/dist/
-    └── package.json files
+    ├── common/
+    ├── backend/
+    └── frontend/
 ```
 
 ## 🚀 2. 실행 서버 설정 및 운영
@@ -386,56 +375,18 @@ npm run restart:server:be
 npm run restart:server:fe
 ```
 
-### 2.3 실행 스크립트 상세
+### 2.3 실행 스크립트 상세 (요약)
+- deploy-server.js: rsync → Backend npm install --production → PM2 restart → Nginx reload
+- start-server-be.js: npm install --production → PM2 start + 버전/빌드 시간 표시
+- restart-server-be.js: PM2 restart
 
-#### 2.3.1 deploy-server.js 동작 과정
-```mermaid
-flowchart TD
-    A[🚀 npm run deploy:server] --> B[📥 파일 수신<br/>rsync from 빌드 서버]
-    B --> C[📦 Backend 의존성 설치<br/>npm install --production]
-    C --> D[🔄 PM2 서비스 재시작<br/>iitp-dabt-adm-be]
-    D --> E[🌐 Nginx 설정 업데이트<br/>Frontend 정적 파일]
-    E --> F[✅ 배포 완료]
-    
-    style A fill:#e1f5fe
-    style F fill:#e8f5e8
-    style B fill:#fff3e0
-    style D fill:#f3e5f5
-```
+## 📋 4. 배포된 프로젝트 버전 확인 (요약)
+- 빌드 시 `build-info.json` 생성 및 실행 시 STDOUT로 버전/빌드 시간 출력
+- 실행 서버에서 `cat package.json | grep "version"`, `npm list @iitp-dabt/common`, `cat dist/build-info.json`로 확인 가능
 
-#### 2.3.2 서버 시작 시 버전 정보 출력
-서버 시작 시 다음 정보가 자동으로 출력됩니다:
-
-**Backend 서버 시작 시:**
-```bash
-📋 버전 정보:
-   🏗️  Backend: 1.0.0
-   📦 Common: 1.0.0
-   🔨 빌드 시간: 2025-01-02 10:30:45.123
-```
-
-**Frontend 서버 시작 시:**
-```bash
-📋 버전 정보:
-   🎨 Frontend: 1.0.0
-   📦 Common: 1.0.0
-   🔨 빌드 시간: 2025-01-02 10:30:45.123
-```
-
-#### 2.3.2 실행 서버 디렉토리 구조
-```
-/var/www/iitp-dabt-adm-be/        # Backend 서비스
-├── dist/                          # 빌드된 Backend 파일
-├── node_modules/                  # Backend 의존성
-├── package.json
-├── package-lock.json
-└── .env
-
-/var/www/iitp-dabt-adm-fe/       # Frontend 서비스
-├── index.html
-├── assets/
-└── static files
-```
+## 🆘 문제 해결 (추가)
+- cp: cannot stat: 글롭(*) 사용으로 발생 가능 → `cp -a dist/. <deploy>` 사용으로 방지
+- dist 비어있음: ensureBuilt가 자동 보강 (없으면 빌드 실행)
 
 ## 🔧 3. 배포 스크립트 상세 가이드
 

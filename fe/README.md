@@ -651,17 +651,19 @@ import { useCommonCode } from './hooks/useCommonCode';
 const { codes, loading, error } = useCommonCode('category');
 ```
 
-### useDataFetching
-데이터 페칭을 관리하는 훅입니다.
-
+### useDataFetching (표준 에러 처리 패턴)
 ```typescript
 import { useDataFetching } from './hooks/useDataFetching';
 
-const { data, loading, error, refetch } = useDataFetching(
+const { data, isLoading, isEmpty, isError, status, refetch } = useDataFetching(
   () => fetchUsers({ page, limit }),
   [page, limit]
 );
+
+const error = isError && status === 'error' ? (data as any)?.error : undefined;
 ```
+
+- 에러는 `isError + status === 'error'`로 판별하고, 메시지는 `data?.error`에서 꺼냅니다.
 
 ### usePagination
 페이지네이션을 관리하는 훅입니다.

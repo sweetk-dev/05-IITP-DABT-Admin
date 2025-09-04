@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
@@ -10,10 +10,8 @@ function loadEnvFile(envPath) {
     console.log(`⚠️  .env 파일이 없습니다: ${envPath}`);
     return {};
   }
-  
   const envContent = fs.readFileSync(envPath, 'utf8');
   const envVars = {};
-  
   envContent.split('\n').forEach(line => {
     line = line.trim();
     if (line && !line.startsWith('#')) {
@@ -23,7 +21,6 @@ function loadEnvFile(envPath) {
       }
     }
   });
-  
   console.log(`✅ .env 파일 로드됨: ${envPath}`);
   return envVars;
 }
@@ -31,7 +28,6 @@ function loadEnvFile(envPath) {
 // .env 파일 로드
 const envPath = path.join(__dirname, '.env');
 const envVars = loadEnvFile(envPath);
-
 // 환경 변수 적용
 Object.keys(envVars).forEach(key => {
   if (!process.env[key]) {
@@ -43,7 +39,6 @@ Object.keys(envVars).forEach(key => {
 const isWindows = process.platform === 'win32';
 const isLinux = process.platform === 'linux';
 const isMac = process.platform === 'darwin';
-
 console.log(`🖥️  OS 감지: ${process.platform} (${isWindows ? 'Windows' : isLinux ? 'Linux' : isMac ? 'macOS' : 'Unknown'})`);
 
 // Linux에서만 실행 가능
@@ -64,193 +59,135 @@ const gitConfig = {
 // 버전 정보 출력
 function showVersionInfo() {
   console.log('📋 빌드할 프로젝트 버전 정보:');
-  
   try {
-    // Backend 버전 확인
     const bePackageJson = require(path.join(gitConfig.sourcePath, 'be/package.json'));
     console.log(`   🏗️  Backend: ${bePackageJson.version}`);
-    
-    // Frontend 버전 확인
     const fePackageJson = require(path.join(gitConfig.sourcePath, 'fe/package.json'));
     console.log(`   🎨 Frontend: ${fePackageJson.version}`);
-    
-    // Common 패키지 버전 확인
     const commonPackageJson = require(path.join(gitConfig.sourcePath, 'packages/common/package.json'));
     console.log(`   📦 Common: ${commonPackageJson.version}`);
-    
-    // Git 태그 확인
-    const { execSync } = require('child_process');
     try {
       const gitTag = execSync('git describe --tags', { cwd: gitConfig.sourcePath, encoding: 'utf8' }).trim();
       console.log(`   🏷️  Git 태그: ${gitTag}`);
     } catch (error) {
-      console.log(`   🏷️  Git 태그: 없음`);
+      console.log('   🏷️  Git 태그: 없음');
     }
   } catch (error) {
     console.log('   ⚠️  버전 정보를 가져올 수 없습니다.');
   }
-  
   console.log('');
+}
+
+// 유틸: 프로세스 실행 (Promise)
+function run(cmd, args, cwd, inherit = true) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(cmd, args, { stdio: inherit ? 'inherit' : 'pipe', cwd });
+    p.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${cmd} ${args.join(' ')} 실패 (종료 코드: ${code})`));
+    });
+  });
+}
+
+function pathExists(p) {
+  try { return fs.existsSync(p); } catch { return false; }
+}
+
+function isDirEmpty(dir) {
+  try { return fs.readdirSync(dir).length === 0; } catch { return true; }
+}
+
+async function ensureBuilt(name, pkgRelPath, distRelPath) {
+  const pkgPath = path.join(gitConfig.sourcePath, pkgRelPath);
+  const distPath = path.join(gitConfig.sourcePath, distRelPath);
+  if (!pathExists(distPath) || isDirEmpty(distPath)) {
+    console.log(`⚙️  ${name} dist가 없어 빌드 수행: ${pkgPath}`);
+    await run('npm', ['ci'], pkgPath);
+    await run('npm', ['run', 'build:clean'], pkgPath);
+  }
+  if (!pathExists(distPath)) {
+    throw new Error(`${name} dist 경로가 존재하지 않습니다: ${distPath}`);
+  }
+  // 비어있어도 디렉터리 복사 방식이면 복사 가능하므로 에러로 간주하지 않음
+  console.log(`✅ ${name} dist 확인: ${distPath}`);
 }
 
 // Git pull
 async function gitPull() {
   console.log('📥 Git 소스 업데이트 중...');
-  
-  return new Promise((resolve, reject) => {
-    const gitProcess = spawn('git', ['pull', 'origin', gitConfig.branch], {
-      stdio: 'inherit',
-      cwd: gitConfig.sourcePath
-    });
-    
-    gitProcess.on('close', (code) => {
-      if (code === 0) {
-        console.log('✅ Git 소스 업데이트 완료');
-        resolve();
-      } else {
-        reject(new Error(`Git pull 실패 (종료 코드: ${code})`));
-      }
-    });
-  });
+  return run('git', ['pull', 'origin', gitConfig.branch], gitConfig.sourcePath);
 }
 
 // Common 패키지 빌드
 async function buildCommon() {
   console.log('📦 packages/common 빌드 중...');
-  
-  return new Promise((resolve, reject) => {
-    const buildProcess = spawn('npm', ['run', 'build:clean'], {
-      stdio: 'inherit',
-      cwd: path.join(gitConfig.sourcePath, 'packages/common')
-    });
-    
-    buildProcess.on('close', (code) => {
-      if (code === 0) {
-        console.log('✅ packages/common 빌드 완료');
-        resolve();
-      } else {
-        reject(new Error(`packages/common 빌드 실패 (종료 코드: ${code})`));
-      }
-    });
-  });
+  await run('npm', ['run', 'build:clean'], path.join(gitConfig.sourcePath, 'packages/common'));
+  console.log('✅ packages/common 빌드 완료');
 }
 
 // Backend 빌드
 async function buildBe() {
   console.log('🔧 Backend 빌드 중...');
-  
-  return new Promise((resolve, reject) => {
-    const buildProcess = spawn('npm', ['run', 'build:clean'], {
-      stdio: 'inherit',
-      cwd: path.join(gitConfig.sourcePath, 'be')
-    });
-    
-    buildProcess.on('close', (code) => {
-      if (code === 0) {
-        console.log('✅ Backend 빌드 완료');
-        resolve();
-      } else {
-        reject(new Error(`Backend 빌드 실패 (종료 코드: ${code})`));
-      }
-    });
-  });
+  await run('npm', ['run', 'build:clean'], path.join(gitConfig.sourcePath, 'be'));
+  console.log('✅ Backend 빌드 완료');
 }
 
 // Frontend 빌드
 async function buildFe() {
   console.log('🎨 Frontend 빌드 중...');
-  
-  return new Promise((resolve, reject) => {
-    const buildProcess = spawn('npm', ['run', 'build:clean'], {
-      stdio: 'inherit',
-      cwd: path.join(gitConfig.sourcePath, 'fe')
-    });
-    
-    buildProcess.on('close', (code) => {
-      if (code === 0) {
-        console.log('✅ Frontend 빌드 완료');
-        resolve();
-      } else {
-        reject(new Error(`Frontend 빌드 실패 (종료 코드: ${code})`));
-      }
-    });
-  });
+  await run('npm', ['run', 'build:clean'], path.join(gitConfig.sourcePath, 'fe'));
+  console.log('✅ Frontend 빌드 완료');
+}
+
+// 배포 폴더로 복사 (디렉터리 안전 복사)
+async function copyDirSafe(name, fromDir, toDir) {
+  console.log(`📋 ${name} 복사 중...`);
+  if (!pathExists(fromDir)) {
+    throw new Error(`${name} dist 경로가 없습니다: ${fromDir}`);
+  }
+  if (!pathExists(toDir)) {
+    fs.mkdirSync(toDir, { recursive: true });
+  }
+  // cp -a from/. toDir
+  await run('cp', ['-a', path.join(fromDir, '.'), toDir], undefined);
+  console.log(`✅ ${name} 복사 완료`);
 }
 
 // 배포 폴더로 복사
 async function copyToDeployFolders() {
   console.log('📁 배포 폴더로 복사 중...');
-  
-  // 배포 폴더 생성
   const deployCommonPath = path.join(gitConfig.deployPath, 'common');
   const deployBePath = path.join(gitConfig.deployPath, 'backend');
   const deployFePath = path.join(gitConfig.deployPath, 'frontend');
-  
-  // 디렉토리 생성
   [deployCommonPath, deployBePath, deployFePath].forEach(dir => {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   });
-  
-  // 복사 명령어 실행
-  const copyCommands = [
-    {
-      name: 'Common',
-      from: path.join(gitConfig.sourcePath, 'packages/common/dist'),
-      to: deployCommonPath
-    },
-    {
-      name: 'Backend',
-      from: path.join(gitConfig.sourcePath, 'be/dist'),
-      to: deployBePath
-    },
-    {
-      name: 'Frontend',
-      from: path.join(gitConfig.sourcePath, 'fe/dist'),
-      to: deployFePath
-    }
-  ];
-  
-  for (const cmd of copyCommands) {
-    console.log(`📋 ${cmd.name} 복사 중...`);
-    
-    const cpProcess = spawn('cp', ['-r', `${cmd.from}/*`, cmd.to], {
-      stdio: 'inherit'
-    });
-    
-    await new Promise((resolve, reject) => {
-      cpProcess.on('close', (code) => {
-        if (code === 0) {
-          console.log(`✅ ${cmd.name} 복사 완료`);
-          resolve();
-        } else {
-          reject(new Error(`${cmd.name} 복사 실패 (종료 코드: ${code})`));
-        }
-      });
-    });
-  }
+
+  const commonDist = path.join(gitConfig.sourcePath, 'packages/common/dist');
+  const beDist = path.join(gitConfig.sourcePath, 'be/dist');
+  const feDist = path.join(gitConfig.sourcePath, 'fe/dist');
+
+  // dist 검증 및 필요 시 빌드 보강
+  await ensureBuilt('Common', 'packages/common', 'packages/common/dist');
+  await ensureBuilt('Backend', 'be', 'be/dist');
+  await ensureBuilt('Frontend', 'fe', 'fe/dist');
+
+  // 안전 복사
+  await copyDirSafe('Common', commonDist, deployCommonPath);
+  await copyDirSafe('Backend', beDist, deployBePath);
+  await copyDirSafe('Frontend', feDist, deployFePath);
 }
 
 // 메인 실행 함수
 async function main() {
   try {
     console.log('🚀 서버용 전체 빌드 시작...');
-    
-    // 0. 버전 정보 출력
     showVersionInfo();
-    
-    // 1. Git pull
     await gitPull();
-    
-    // 2. 빌드 (의존성 순서대로)
     await buildCommon();
     await buildBe();
     await buildFe();
-    
-    // 3. 배포 폴더로 복사
     await copyToDeployFolders();
-    
     console.log('🎉 서버용 전체 빌드 완료!');
     console.log('');
     console.log('📁 빌드 결과물:');
@@ -259,7 +196,6 @@ async function main() {
     console.log(`   - ${gitConfig.deployPath}/frontend/`);
     console.log('');
     console.log('💡 다음 단계: npm run deploy:server');
-    
   } catch (error) {
     console.error('❌ 서버용 빌드 실패:', error.message);
     process.exit(1);

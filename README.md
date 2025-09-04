@@ -333,11 +333,17 @@ OPPEN_API_DOC_URL=https://your-openapi-doc-domain.com
 
 ## 🔄 배포 요약 (서버 간)
 
+- 실행 위치
+  - 아래 npm 스크립트들은 “프로젝트 루트”에서 실행해야 합니다. (루트 package.json에 정의)
+  - 대안: 개별 스크립트를 직접 실행 `node script/<file>.js`
+
 - 명령어
   - 전체 빌드(빌드 서버): `npm run build:server`
   - 운영 스크립트 배포(최초 1회 또는 변경 시): `npm run deploy:server:ops`
   - 전체 배포(빌드→실행): `npm run deploy:server`
   - 기동: `npm run start:server:be`, `npm run start:server:fe`
+  - 재시작: `npm run restart:server:be`, `npm run restart:server:fe`
+  - 중지: `npm run stop:server:be`, `npm run stop:server:fe`
 
 - 권장 실행 순서
 ```bash

@@ -31,7 +31,9 @@
     "start:server:be": "node script/start-server-be.js",
     "start:server:fe": "node script/start-server-fe.js",
     "restart:server:be": "node script/restart-server-be.js",
-    "restart:server:fe": "node script/restart-server-fe.js"
+    "restart:server:fe": "node script/restart-server-fe.js",
+    "stop:server:be": "node script/stop-server-be.js",
+    "stop:server:fe": "node script/stop-server-fe.js"
   },
   "keywords": ["iitp", "dabt", "admin", "monorepo", "typescript", "react", "nodejs"],
   "author": "IITP DABT Team",

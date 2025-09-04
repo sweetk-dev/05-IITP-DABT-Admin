@@ -1,6 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const pkg = require('../package.json');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
 
 function getLocalDateTimeString() {
   const now = new Date();
@@ -14,5 +19,11 @@ const buildInfo = {
   buildDate: getLocalDateTimeString()
 };
 
-fs.writeFileSync(path.join(__dirname, '../build-info.json'), JSON.stringify(buildInfo, null, 2));
+// dist 폴더가 없으면 생성
+const distPath = path.join(__dirname, '../dist');
+if (!fs.existsSync(distPath)) {
+  fs.mkdirSync(distPath, { recursive: true });
+}
+
+fs.writeFileSync(path.join(distPath, 'build-info.json'), JSON.stringify(buildInfo, null, 2));
 console.log('build-info.json generated:', buildInfo);

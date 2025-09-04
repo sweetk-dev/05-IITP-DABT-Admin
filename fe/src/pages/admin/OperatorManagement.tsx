@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 import ThemedButton from '../../components/common/ThemedButton';
 import ListItemCard from '../../components/common/ListItemCard';
 import ListScaffold from '../../components/common/ListScaffold';
@@ -36,7 +36,7 @@ export default function OperatorManagement() {
   const { currentPage, pageSize, handlePageChange, handlePageSizeChange } = usePagination();
 
   // 공통 코드 조회 (운영자 역할)
-  const { data: roleCodes, isLoading: roleLoading } = useDataFetching({ 
+  const { data: roleCodes } = useDataFetching({ 
     fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES), 
     autoFetch: true 
   });
@@ -60,7 +60,7 @@ export default function OperatorManagement() {
   }, [roleCodes]);
 
   // API 호출 - 실제 API 함수를 래핑하여 useDataFetching에 전달
-  const { data: operatorData, isLoading, isError, refetch } = useDataFetching({
+  const { data: operatorData, isLoading, isError, status, refetch } = useDataFetching({
     fetchFunction: () => getAdminAccountList({
       search: searchTerm,
       status: selectedStatus,
@@ -70,6 +70,10 @@ export default function OperatorManagement() {
     }),
     dependencies: [searchTerm, selectedStatus, selectedRole, currentPage, pageSize]
   });
+
+  // apiError 포함한 최종 에러
+  const apiError = isError && status === 'error' ? (operatorData as any)?.error : undefined;
+  const finalError = error || apiError;
 
   // 운영자 선택 처리
   const handleOperatorSelect = (adminId: number, checked: boolean) => {
@@ -83,29 +87,27 @@ export default function OperatorManagement() {
   // 검색 처리
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    handlePageChange(1); // Reset to first page on search
+    handlePageChange(1);
   };
 
   // 상태 필터 처리
   const handleStatusFilter = (status: string) => {
     setSelectedStatus(status);
-    handlePageChange(1); // Reset to first page on status filter
+    handlePageChange(1);
   };
 
   // 역할 필터 처리
   const handleRoleFilter = (role: string) => {
     setSelectedRole(role);
-    handlePageChange(1); // Reset to first page on role filter
+    handlePageChange(1);
   };
 
-  // 정렬 처리
-  const handleSort = (field: 'name' | 'createdAt' | 'role') => {
-    if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
+  // 정렬 필터 처리 (UI에서 선택)
+  const handleSortSelect = (value: string) => {
+    // value 예: 'createdAt-desc', 'createdAt-asc', 'name-asc', 'role-asc'
+    const [field, dir] = value.split('-') as ['name' | 'createdAt' | 'role', 'asc' | 'desc'];
+    setSortField(field);
+    setSortDirection(dir);
   };
 
   // 운영자 클릭 처리
@@ -118,7 +120,6 @@ export default function OperatorManagement() {
     navigate(ROUTES.ADMIN.OPERATORS.CREATE);
   };
 
-  // 상태 라벨 및 색상
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'A': return '활성';
@@ -137,7 +138,6 @@ export default function OperatorManagement() {
     }
   };
 
-  // 역할 라벨
   const getRoleLabel = (role: string) => {
     if (roleCodes?.codes) {
       const roleCode = roleCodes.codes.find((code: any) => code.codeId === role);
@@ -146,7 +146,6 @@ export default function OperatorManagement() {
     return role;
   };
 
-  // 정렬된 운영자 목록
   const sortedOperators = operatorData?.items ? [...operatorData.items].sort((a: AdminAccountListItem, b: AdminAccountListItem) => {
     let aValue: any = a[sortField];
     let bValue: any = b[sortField];
@@ -168,7 +167,7 @@ export default function OperatorManagement() {
       <AdminPageHeader />
       
       {/* 에러 알림 */}
-      {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
+      {finalError && <ErrorAlert error={finalError} onClose={() => setError(null)} />}
       
       <ListScaffold
         title="운영자 관리"
@@ -194,6 +193,19 @@ export default function OperatorManagement() {
             value: selectedRole,
             options: roleOptions,
             onChange: handleRoleFilter
+          },
+          {
+            label: '정렬',
+            value: `${sortField}-${sortDirection}`,
+            options: [
+              { value: 'createdAt-desc', label: '최신 등록순' },
+              { value: 'createdAt-asc', label: '오래된 등록순' },
+              { value: 'name-asc', label: '이름 오름차순' },
+              { value: 'name-desc', label: '이름 내림차순' },
+              { value: 'role-asc', label: '역할 오름차순' },
+              { value: 'role-desc', label: '역할 내림차순' },
+            ],
+            onChange: handleSortSelect
           }
         ]}
         actionsRight={
@@ -223,7 +235,6 @@ export default function OperatorManagement() {
           renderCheckbox: true,
           deleteConfig: {
             apiFunction: async (ids: (number | string)[]) => {
-              // LIST_DELETE API 호출 - 일괄 삭제
               await deleteAdminAccountList(ids);
             },
             confirmTitle: '운영자 삭제 확인',

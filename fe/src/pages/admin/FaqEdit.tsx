@@ -21,11 +21,13 @@ export default function AdminFaqEdit() {
   const { id } = useParams<{ id: string }>();
   const faqId = Number(id);
 
-  const { data, error: fetchError } = useDataFetching({ 
+  const { data, isError, status } = useDataFetching({ 
     fetchFunction: () => getAdminFaqDetail(faqId), 
     dependencies: [faqId], 
     autoFetch: !!faqId 
   });
+
+  const fetchError = isError && status === 'error' ? (data as any)?.error : undefined;
   
   const detail = (data as any)?.faq || (data as any) || {};
 
@@ -64,8 +66,6 @@ export default function AdminFaqEdit() {
     ...((faqTypeCodes as any)?.codes || []).map((c: any) => ({ value: c.codeId, label: c.codeNm }))
   ];
 
-  const handleBack = () => navigate(ROUTES.ADMIN.FAQ.DETAIL.replace(':id', String(faqId)));
-  
   const handleSave = async () => {
     if (!faqType || !question || !answer) { 
       setError('유형, 질문, 답변을 모두 입력해 주세요.'); 
@@ -123,8 +123,6 @@ export default function AdminFaqEdit() {
             onChange={(v)=>setFaqType(v)} 
             options={faqTypeOptions} 
             label="FAQ 유형" 
-            sx={{ mb: SPACING.MEDIUM }}
-            required
           />
           
           <TextField 
@@ -180,7 +178,6 @@ export default function AdminFaqEdit() {
           </FormControl>
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.MEDIUM }}>
-            <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>
             <ThemedButton variant="primary" onClick={handleSave} disabled={loading} buttonSize="cta">저장</ThemedButton>
           </Box>
         </CardContent>

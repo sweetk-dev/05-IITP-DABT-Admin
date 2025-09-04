@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Box, CardContent, Stack } from '@mui/material';
 import { 
-  Code as CodeIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon
+  Add as AddIcon
 } from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getAdminRole } from '../../store/user';
 import { hasAccountManagementPermission } from '../../utils/auth';
 import { ROUTES, ROUTE_META } from '../../routes';
@@ -20,11 +18,9 @@ import { useQuerySync } from '../../hooks/useQuerySync';
 import { useDataFetching } from '../../hooks/useDataFetching';
 import { formatYmdHm } from '../../utils/date';
 import { getCommonCodeGroups, deleteCommonCodeGroupList } from '../../api/commonCode';
-import type { CommonCodeByTypeDetailRes } from '@iitp-dabt/common';
 
 export default function CodeManagement() {
   const navigate = useNavigate();
-  const location = useLocation();
   const adminRole = getAdminRole();
   const canManage = hasAccountManagementPermission(adminRole);
   

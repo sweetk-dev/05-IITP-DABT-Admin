@@ -114,7 +114,7 @@ export default function ProfileForm({
 
     setSaving(true);
     try {
-      const result = await onSaveProfile({ 
+      await onSaveProfile({ 
         name: trimmedName, 
         affiliation: affiliationValue.trim() // 소속은 선택적 (빈 값 허용)
       });

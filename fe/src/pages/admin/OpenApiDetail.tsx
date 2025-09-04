@@ -1,4 +1,4 @@
-import { Box, CardContent, Typography, Stack, Grid } from '@mui/material';
+import { Box, CardContent, Typography, Grid } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -24,15 +24,16 @@ export default function AdminOpenApiDetail() {
   const { id } = useParams<{ id: string }>();
   const keyId = Number(id);
 
-  const { data, isLoading, isEmpty, isError, error, refetch } = useDataFetching({ 
+  const { data, isLoading, isEmpty, isError, status, refetch } = useDataFetching({ 
     fetchFunction: ()=> getAdminOpenApiDetail(keyId), 
     dependencies: [keyId], 
     autoFetch: !!keyId 
   });
+
+  const error = isError && status === 'error' ? (data as any)?.error : undefined;
   
   const item = (data as AdminOpenApiDetailRes)?.authKey;
 
-  const handleBack = () => navigate(ROUTES.ADMIN.OPENAPI.CLIENTS);
   const [extendOpen, setExtendOpen] = useState(false);
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
   const handleEdit = () => navigate(ROUTES.ADMIN.OPENAPI.CLIENTS + '/' + keyId + '/edit');

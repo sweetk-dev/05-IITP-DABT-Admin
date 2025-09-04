@@ -1,4 +1,4 @@
-import { Box, CardContent, Typography, Chip, Stack, Grid } from '@mui/material';
+import { Box, CardContent, Typography, Chip, Grid } from '@mui/material';
 import QnaTypeChip from '../../components/common/QnaTypeChip';
 import StatusChip from '../../components/common/StatusChip';
 import ErrorAlert from '../../components/ErrorAlert';
@@ -20,15 +20,16 @@ export default function AdminQnaDetail() {
   const { id } = useParams<{ id: string }>();
   const qnaId = Number(id);
 
-  const { data, isLoading, isEmpty, isError, error } = useDataFetching({ 
+  const { data, isLoading, isEmpty, isError, status } = useDataFetching({ 
     fetchFunction: ()=> getAdminQnaDetail(qnaId), 
     dependencies: [qnaId], 
     autoFetch: !!qnaId 
   });
+
+  const error = isError && status === 'error' ? (data as any)?.error : undefined;
   
   const qna = (data as AdminQnaDetailRes)?.qna;
 
-  const handleBack = () => navigate(ROUTES.ADMIN.QNA.LIST);
   const handleEdit = () => navigate(ROUTES.ADMIN.QNA.REPLY.replace(':id', String(qnaId)));
   const handleDelete = async () => { const res = await deleteAdminQna(qnaId); handleApiResponse(res, ()=>navigate(ROUTES.ADMIN.QNA.LIST)); };
 
@@ -136,12 +137,12 @@ export default function AdminQnaDetail() {
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">등록일</Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>
-                    {qna.postedAt ? formatYmdHm(qna.postedAt) : '-'}
+                    {qna.createdAt ? formatYmdHm(qna.createdAt) : '-'}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">등록자</Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>{qna.postedBy || '-'}</Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>{qna.createdBy || '-'}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2" color="text.secondary">수정일</Typography>
@@ -166,10 +167,10 @@ export default function AdminQnaDetail() {
                   </Grid>
                 )}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">삭제 여부</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">답변 상태</Typography>
                   <StatusChip 
-                    kind={qna.delYn === 'N' ? 'success' : 'error'} 
-                    label={qna.delYn === 'N' ? '활성' : '삭제됨'}
+                    kind={qna.answeredYn === 'Y' ? 'success' : 'warning'} 
+                    label={qna.answeredYn === 'Y' ? '답변완료' : '답변대기'}
                     sx={{ mb: 1 }}
                   />
                 </Grid>

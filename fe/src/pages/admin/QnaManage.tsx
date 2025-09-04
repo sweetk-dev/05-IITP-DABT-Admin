@@ -17,15 +17,15 @@ import { usePagination } from '../../hooks/usePagination';
 import { PAGINATION } from '../../constants/pagination';
 import { SPACING } from '../../constants/spacing';
 import { formatYmdHm } from '../../utils/date';
-import { hasContentEditPermission } from '../../utils/auth';
-import { getAdminRole } from '../../store/user';
+//import { hasContentEditPermission } from '../../utils/auth';
+//import { getAdminRole } from '../../store/user';
 import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import type { AdminQnaListItem, AdminQnaListQuery } from '@iitp-dabt/common';
 
 export default function QnaManage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const adminRole = getAdminRole();
+  //const adminRole = getAdminRole();
 
   // ROUTE_META에서 페이지 정보 동적 가져오기
   const pageMeta = (ROUTE_META as any)[ROUTES.ADMIN.QNA.LIST];
@@ -96,11 +96,6 @@ export default function QnaManage() {
     pagination.handlePageChange(page);
   };
 
-  // 검색 핸들러
-  const handleSearch = () => {
-    pagination.handlePageChange(1);
-    refetch();
-  };
 
   // 필터 변경 시 자동 refetch
   useEffect(() => {
@@ -184,7 +179,7 @@ export default function QnaManage() {
           emptyText={isEmpty ? '등록된 Q&A가 없습니다.' : ''}
           search={{
             value: searchTerm,
-            onChange: setSearchTerm,
+            onChange: (v) => { setSearchTerm(v); pagination.handlePageChange(1); },
             placeholder: 'Q&A 제목 또는 작성자로 검색'
           }}
 
@@ -305,7 +300,7 @@ export default function QnaManage() {
                   variant="body2" 
                   sx={{ color: 'text.secondary', mb: SPACING.SMALL }}
                 >
-                  {qna.content}
+                  {qna.title}
                 </Typography>
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: SPACING.SMALL }}>

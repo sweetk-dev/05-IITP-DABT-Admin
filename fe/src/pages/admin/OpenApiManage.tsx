@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Box, CardContent, Typography, Stack } from '@mui/material';
+import { Box } from '@mui/material';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ListScaffold from '../../components/common/ListScaffold';
 import ErrorAlert from '../../components/ErrorAlert';
 import { SPACING } from '../../constants/spacing';
 import { useDataFetching } from '../../hooks/useDataFetching';
-import { getAdminOpenApiList, deleteAdminOpenApi } from '../../api';
+import { getAdminOpenApiList } from '../../api';
 import { deleteAdminOpenApiList } from '../../api/openApi';
 import DataTable, { type DataTableColumn } from '../../components/common/DataTable';
 import StatusChip from '../../components/common/StatusChip';

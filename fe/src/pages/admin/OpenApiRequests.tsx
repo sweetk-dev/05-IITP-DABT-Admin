@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, CardContent, Typography, Stack } from '@mui/material';
+import { Box } from '@mui/material';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import ListScaffold from '../../components/common/ListScaffold';
 import ErrorAlert from '../../components/ErrorAlert';
@@ -31,7 +31,7 @@ export default function AdminOpenApiRequests() {
   }, [query.page, query.limit, query.search]);
 
   // pending 상태만 조회 (activeYn = 'N' AND active_at IS NULL)
-  const { data, isLoading, isEmpty, isError, refetch } = useDataFetching({
+  const { data, isLoading, isEmpty, isError } = useDataFetching({
     fetchFunction: () => getAdminOpenApiList({ 
       page, 
       limit, 
@@ -83,10 +83,6 @@ export default function AdminOpenApiRequests() {
       render: (r) => formatYmdHm(r.createdAt) 
     },
   ];
-
-  const handleRequestClick = (keyId: number) => {
-    navigate(`/admin/openapi/requests/${keyId}`);
-  };
 
   return (
     <Box id="admin-openapi-requests-page">

@@ -126,12 +126,12 @@ npm run restart:server:fe
 # Backend 서버
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-adm-be
+export BE_PATH=/var/www/iitp-dabt-admin/be
 
 # Frontend 서버
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-adm-fe
+export FE_PATH=/var/www/iitp-dabt-admin/fe
 ```
 
 #### 개별 배포용
@@ -144,12 +144,12 @@ export COMMON_PATH=/var/www/iitp-dabt-common
 # Backend
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-adm-be
+export BE_PATH=/var/www/iitp-dabt-admin/be
 
 # Frontend
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-adm-fe
+export FE_PATH=/var/www/iitp-dabt-admin/fe
 ```
 
 ### 서버 → 서버 배포용
@@ -183,11 +183,11 @@ export PROD_SERVER_USER=produser
 export PROD_SERVER_PORT=22
 
 # Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
 export PM2_APP_NAME_BE=iitp-dabt-adm-be
 
 # Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 export FRONTEND_DOMAIN=your-domain.com
 export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 
@@ -246,7 +246,7 @@ fe/dist/           # Vite로 빌드된 정적 파일들
 ### Backend 서버 (Node.js)
 ```bash
 # 서버에서 실행
-cd /var/www/iitp-dabt-adm-be
+cd /var/www/iitp-dabt-admin/be
 npm install
 pm2 start dist/index.js --name iitp-dabt-adm-be
 ```
@@ -256,7 +256,7 @@ pm2 start dist/index.js --name iitp-dabt-adm-be
 server {
     listen 80;
     server_name your-frontend-domain.com;
-    root /var/www/iitp-dabt-adm-fe;
+    root /var/www/iitp-dabt-admin/fe;
     index index.html;
     
     location / {
@@ -278,22 +278,22 @@ scp -P 22 packages/common/package-lock.json user@server:/var/www/iitp-dabt-commo
 
 ### Backend
 ```bash
-scp -P 22 -r be/dist/* user@server:/var/www/iitp-dabt-adm-be/
-scp -P 22 be/package.json user@server:/var/www/iitp-dabt-adm-be/
-scp -P 22 be/package-lock.json user@server:/var/www/iitp-dabt-adm-be/
-scp -P 22 be/build-info.json user@server:/var/www/iitp-dabt-adm-be/
+scp -P 22 -r be/dist/* user@server:/var/www/iitp-dabt-admin/be/
+scp -P 22 be/package.json user@server:/var/www/iitp-dabt-admin/be/
+scp -P 22 be/package-lock.json user@server:/var/www/iitp-dabt-admin/be/
+scp -P 22 be/build-info.json user@server:/var/www/iitp-dabt-admin/be/
 ```
 
 ### Frontend
 ```bash
-scp -P 22 -r fe/dist/* user@server:/var/www/iitp-dabt-adm-fe/
+scp -P 22 -r fe/dist/* user@server:/var/www/iitp-dabt-admin/fe/
 ```
 
 ## 🔄 서버 재시작
 
 ### Backend 서버 재시작
 ```bash
-ssh -p 22 user@server 'cd /var/www/iitp-dabt-adm-be && npm install && pm2 restart iitp-dabt-adm-be'
+ssh -p 22 user@server 'cd /var/www/iitp-dabt-admin/be && npm install && pm2 restart iitp-dabt-adm-be'
 ```
 
 ## 🔧 유지보수성

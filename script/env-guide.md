@@ -100,11 +100,11 @@ export PROD_SERVER_USER=produser
 export PROD_SERVER_PORT=22
 
 # Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
 export PM2_APP_NAME_BE=iitp-dabt-adm-be
 
 # Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 export FRONTEND_DOMAIN=your-domain.com
 export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 
@@ -145,11 +145,11 @@ PROD_SERVER_USER=produser
 PROD_SERVER_PORT=22
 
 # Backend 설정
-PROD_BE_PATH=/var/www/iitp-dabt-adm-be
+PROD_BE_PATH=/var/www/iitp-dabt-admin/be
 PM2_APP_NAME_BE=iitp-dabt-adm-be
 
 # Frontend 설정
-PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 FRONTEND_DOMAIN=your-domain.com
 NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 

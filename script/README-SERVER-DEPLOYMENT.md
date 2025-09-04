@@ -503,6 +503,18 @@ npm run restart:server:be
 # 1. PM2 restart iitp-dabt-adm-be
 ```
 
+#### 3.2.4 stop-server-be.js
+```bash
+# Backend 서버 중지 (PM2)
+npm run stop:server:be
+```
+
+#### 3.2.5 stop-server-fe.js
+```bash
+# Frontend Nginx 비활성화 (중지)
+npm run stop:server:fe
+```
+
 ### 3.3 환경 변수 설정
 
 #### 3.3.0 환경 변수 샘플 파일

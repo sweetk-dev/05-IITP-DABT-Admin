@@ -214,6 +214,14 @@ npm run deploy:server
 # 4) 서버 기동
 npm run start:server:be
 npm run start:server:fe
+
+# (필요 시) 서버 재시작
+npm run restart:server:be
+npm run restart:server:fe
+
+# (필요 시) 서버 중지
+npm run stop:server:be
+npm run stop:server:fe
 ```
 
 ### 로컬에서 원격 서버로 배포 (기존 방식)

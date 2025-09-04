@@ -63,8 +63,10 @@ const sameHost = hostsEqual(config.buildHost, config.prodHost) && config.buildUs
 const scriptFiles = [
   'script/start-server-be.js',
   'script/restart-server-be.js',
+  'script/stop-server-be.js',
   'script/start-server-fe.js',
-  'script/restart-server-fe.js'
+  'script/restart-server-fe.js',
+  'script/stop-server-fe.js'
 ];
 
 async function rsyncLocal(src, dest) {
@@ -124,6 +126,7 @@ async function main() {
     console.log('💡 사용 예:');
     console.log(`   node ${path.posix.join(config.opsPath, 'start-server-be.js')}`);
     console.log(`   node ${path.posix.join(config.opsPath, 'restart-server-be.js')}`);
+    console.log(`   node ${path.posix.join(config.opsPath, 'stop-server-be.js')}`);
   } catch (e) {
     console.error('❌ 배포 실패:', e.message);
     process.exit(1);

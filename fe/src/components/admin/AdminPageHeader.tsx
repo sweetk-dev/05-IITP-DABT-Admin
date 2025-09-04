@@ -1,7 +1,6 @@
-import React from 'react';
 import { Box, Breadcrumbs, Typography, Link } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES, ROUTE_META, ROUTE_GROUPS } from '../../routes';
+import { ROUTES, ROUTE_GROUPS } from '../../routes';
 
 interface AdminPageHeaderProps {
   id?: string;
@@ -91,7 +90,7 @@ export default function AdminPageHeader({
   };
 
   const crumbs = makeCrumbs();
-  const title = crumbs[crumbs.length - 1]?.label || '관리자';
+  //const title = crumbs[crumbs.length - 1]?.label || '관리자';
 
   return (
     <>

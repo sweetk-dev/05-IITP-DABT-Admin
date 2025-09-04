@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, CardContent, TextField, Alert, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, CardContent, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
@@ -32,7 +32,7 @@ export default function OperatorCreate() {
   const [checkingEmail, setCheckingEmail] = useState(false);  // ✅ Email 중복체크 중 상태
 
   // 공통 코드 조회 (운영자 역할)
-  const { data: roleCodes, isLoading: roleLoading } = useDataFetching({ 
+  const { data: roleCodes } = useDataFetching({ 
     fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.SYS_ADMIN_ROLES), 
     autoFetch: true 
   });

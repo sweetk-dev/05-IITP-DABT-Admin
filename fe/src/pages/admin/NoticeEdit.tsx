@@ -22,11 +22,13 @@ export default function AdminNoticeEdit() {
   const { id } = useParams<{ id: string }>();
   const noticeId = Number(id);
 
-  const { data, error: fetchError } = useDataFetching({ 
+  const { data, isError, status } = useDataFetching({ 
     fetchFunction: () => getAdminNoticeDetail(noticeId), 
     dependencies: [noticeId], 
     autoFetch: !!noticeId 
   });
+
+  const fetchError = isError && status === 'error' ? (data as any)?.error : undefined;
   
   const detail = (data as any)?.notice || (data as any) || {};
 
@@ -58,8 +60,6 @@ export default function AdminNoticeEdit() {
     }
   }, [detail]);
 
-  const handleBack = () => navigate(ROUTES.ADMIN.NOTICES.DETAIL.replace(':id', String(noticeId)));
-  
   const handleSave = async () => {
     if (!title || !content) { 
       setError('제목과 내용을 입력해 주세요.'); 
@@ -211,7 +211,6 @@ export default function AdminNoticeEdit() {
           />
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.MEDIUM }}>
-            <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>
             <ThemedButton variant="primary" onClick={handleSave} disabled={loading} buttonSize="cta">저장</ThemedButton>
           </Box>
         </CardContent>

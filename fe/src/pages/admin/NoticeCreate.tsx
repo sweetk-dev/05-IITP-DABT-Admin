@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, CardContent, TextField, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
+import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import PageHeader from '../../components/common/PageHeader';
@@ -31,7 +31,6 @@ export default function AdminNoticeCreate() {
   const TITLE_MAX = 600;
   const CONTENT_MAX = 6000;
 
-  const handleBack = () => navigate(ROUTES.ADMIN.NOTICES.LIST);
   const handleSubmit = async () => {
     if (!title || !content) {
       setError('제목과 내용을 입력해 주세요.');
@@ -181,7 +180,7 @@ export default function AdminNoticeCreate() {
           />
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.MEDIUM }}>
-            <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>
+            <ThemedButton variant="outlined" onClick={() => navigate(ROUTES.ADMIN.NOTICES.LIST)} buttonSize="cta">취소</ThemedButton>
             <ThemedButton variant="primary" onClick={handleSubmit} disabled={loading} buttonSize="cta">등록</ThemedButton>
           </Box>
         </CardContent>

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { getAdminInfo } from '../../store/user';
 import { getAdminProfile, updateAdminProfile, changeAdminPassword } from '../../api/admin';
 import ProfileForm from '../../components/ProfileForm';
-import type { AdminProfileRes } from '@iitp-dabt/common';
 
 // ProfileForm과 호환되는 타입 정의
 interface ProfileData {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -29,8 +29,6 @@ export default function CodeCreate() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleBack = () => navigate(ROUTES.ADMIN.CODE.LIST);
-  
   const handleSubmit = async () => {
     // 유효성 검사
     if (!grpId || !grpNm || !codeId || !codeNm) {
@@ -252,7 +250,7 @@ export default function CodeCreate() {
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.LARGE }}>
             <ThemedButton 
               variant="outlined" 
-              onClick={handleBack} 
+              onClick={() => navigate(ROUTES.ADMIN.CODE.LIST)} 
               buttonSize="cta"
             >
               취소

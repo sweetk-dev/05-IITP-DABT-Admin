@@ -80,7 +80,8 @@ cd fe && npm run dev
 - 비밀번호 강도 측정
 
 **사용법:**
-```typescriptimport { isValidEmail, isValidPassword } from '@iitp-dabt/common';
+```typescript
+import { isValidEmail, isValidPassword } from '@iitp-dabt/common';
 ```
 
 ### be/ (Backend)
@@ -109,11 +110,11 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
 - API 키 관리
 
 **기술 스택:**
-- React 19
+- React 18.x
 - TypeScript
-- Vite
-- Material-UI
-- React Router
+- Vite 5.x
+- Material-UI (MUI) 5.x
+- React Router 6.x
 
 ## 🔧 상세 설정
 
@@ -124,6 +125,7 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
 - **[fe/README.md](fe/README.md)**: Frontend 설정, 컴포넌트 문서, 페이지 구조
 - **[script/README.md](script/README.md)**: 배포 스크립트 가이드
 - **[script/env-guide.md](script/env-guide.md)**: 환경 변수 설정 가이드
+- **[script/README-SERVER-DEPLOYMENT.md](script/README-SERVER-DEPLOYMENT.md)**: 서버 간 배포 전체 가이드(빌드 서버/실행 서버 설정, 버전/빌드 정보 출력, 플로우 다이어그램 포함)
 
 ## 🛠️ 개발 가이드
 
@@ -165,7 +167,7 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
    cd be && npm run build
    
    # Frontend
-   cd fe && bash scripts/build.sh
+   cd fe && npm run build
    ```
 
 ### 배포
@@ -304,8 +306,6 @@ cd fe && npm test
 ```bash
 # 전체 프로덕션 빌드 (권장)
 npm run build
-# 또는
-bash script/build-all.sh
 ```
 
 ### 환경 변수

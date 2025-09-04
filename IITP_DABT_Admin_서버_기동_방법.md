@@ -191,6 +191,39 @@ tail -f be/logs/app-$(date +%Y-%m-%d).log
 
 ## 🚀 8. 배포 (서버 환경)
 
+### 운영 스크립트 배포 (최초 1회 또는 변경 시)
+
+```bash
+# 실행 서버에 기동/재기동 스크립트 배포 (최초 1회 또는 변경 시)
+npm run deploy:server:ops
+# 직접 실행 대안: node script/deploy-server-ops.js
+# 기본 경로: /var/www/iitp-dabt-admin/script
+```
+
+### 권장 실행 순서
+```bash
+# 1) 빌드 서버: 전체 빌드
+npm run build:server
+
+# 2) (최초 1회 또는 스크립트 변경 시) 운영 스크립트 배포
+npm run deploy:server:ops
+
+# 3) 실행 서버로 전체 배포
+npm run deploy:server
+
+# 4) 서버 기동
+npm run start:server:be
+npm run start:server:fe
+
+# (필요 시) 서버 재시작
+npm run restart:server:be
+npm run restart:server:fe
+
+# (필요 시) 서버 중지
+npm run stop:server:be
+npm run stop:server:fe
+```
+
 ### 로컬에서 원격 서버로 배포 (기존 방식)
 
 #### 전체 배포
@@ -198,10 +231,10 @@ tail -f be/logs/app-$(date +%Y-%m-%d).log
 # 환경 변수 설정
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-adm-be
+export BE_PATH=/var/www/iitp-dabt-admin/be
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-adm-fe
+export FE_PATH=/var/www/iitp-dabt-admin/fe
 
 # 전체 배포 실행
 npm run deploy
@@ -259,8 +292,8 @@ export BUILD_SERVER_USER=builduser
 export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
-export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
-export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
+export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 
 # 전체 배포 (빌드 서버 → 기동 서버)
 npm run deploy:server
@@ -303,12 +336,12 @@ npm run restart:server:fe
 # Backend 서버 설정
 export BE_HOST=your-backend-server.com
 export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-adm-be
+export BE_PATH=/var/www/iitp-dabt-admin/be
 
 # Frontend 서버 설정
 export FE_HOST=your-frontend-server.com
 export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-adm-fe
+export FE_PATH=/var/www/iitp-dabt-admin/fe
 ```
 
 #### 서버 빌드용
@@ -330,8 +363,8 @@ export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
 # 기동 서버 설정
 export PROD_SERVER_HOST=prod-server.com
 export PROD_SERVER_USER=produser
-export PROD_BE_PATH=/var/www/iitp-dabt-adm-be
-export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe
+export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
+export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 export PM2_APP_NAME_BE=iitp-dabt-adm-be
 export FRONTEND_DOMAIN=your-domain.com
 export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
@@ -531,12 +564,12 @@ cat be/package.json | grep "\"version\""
 cat fe/package.json | grep "\"version\""
 
 # Common 버전 (설치본)
-cd /var/www/iitp-dabt-adm-be && npm list @iitp-dabt/common
-cd /var/www/iitp-dabt-adm-fe && npm list @iitp-dabt/common
+cd /var/www/iitp-dabt-admin/be && npm list @iitp-dabt/common
+cd /var/www/iitp-dabt-admin/fe && npm list @iitp-dabt/common
 
 # 빌드 시간 (실행 서버)
-cat /var/www/iitp-dabt-adm-be/dist/build-info.json | grep buildDate || true
-cat /var/www/iitp-dabt-adm-fe/dist/build-info.json | grep buildDate || true
+cat /var/www/iitp-dabt-admin/be/dist/build-info.json | grep buildDate || true
+cat /var/www/iitp-dabt-admin/fe/dist/build-info.json | grep buildDate || true
 ```
 
 ## 📞 15. 지원

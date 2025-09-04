@@ -56,7 +56,7 @@ const gitConfig = {
   deployPath: process.env.DEPLOY_PATH || '/home/iitp-adm/iitp-dabt-admin/deploy'
 };
 
-// 버전 정보 출력
+// 버전 정보 출력 (소스 package.json 기준)
 function showVersionInfo() {
   console.log('📋 빌드할 프로젝트 버전 정보:');
   try {
@@ -76,6 +76,36 @@ function showVersionInfo() {
     console.log('   ⚠️  버전 정보를 가져올 수 없습니다.');
   }
   console.log('');
+}
+
+function readBuildDateSafe(baseDir, preferDist = true) {
+  try {
+    const distPath = path.join(baseDir, 'dist', 'build-info.json');
+    const rootPath = path.join(baseDir, 'build-info.json');
+    const infoPath = preferDist && fs.existsSync(distPath) ? distPath : (fs.existsSync(rootPath) ? rootPath : distPath);
+    if (fs.existsSync(infoPath)) {
+      const info = JSON.parse(fs.readFileSync(infoPath, 'utf8'));
+      return info.buildDate || undefined;
+    }
+  } catch (_) {}
+  return undefined;
+}
+
+function showBuildSummary() {
+  try {
+    const beVer = require(path.join(gitConfig.sourcePath, 'be/package.json')).version;
+    const feVer = require(path.join(gitConfig.sourcePath, 'fe/package.json')).version;
+    const commonVer = require(path.join(gitConfig.sourcePath, 'packages/common/package.json')).version;
+    const beBuild = readBuildDateSafe(path.join(gitConfig.sourcePath, 'be'));
+    const feBuild = readBuildDateSafe(path.join(gitConfig.sourcePath, 'fe'));
+    console.log('📦 빌드 산출물 버전/시간:');
+    console.log(`   🏗️  Backend v${beVer}${beBuild ? ` | 🔨 ${beBuild}` : ''}`);
+    console.log(`   🎨 Frontend v${feVer}${feBuild ? ` | 🔨 ${feBuild}` : ''}`);
+    console.log(`   📦 Common v${commonVer}`);
+    console.log('');
+  } catch (e) {
+    console.log('⚠️  빌드 산출물 버전/시간 정보를 읽을 수 없습니다.');
+  }
 }
 
 // 유틸: 프로세스 실행 (Promise)
@@ -102,13 +132,15 @@ async function ensureBuilt(name, pkgRelPath, distRelPath) {
   const distPath = path.join(gitConfig.sourcePath, distRelPath);
   if (!pathExists(distPath) || isDirEmpty(distPath)) {
     console.log(`⚙️  ${name} dist가 없어 빌드 수행: ${pkgPath}`);
-    await run('npm', ['ci'], pkgPath);
+    // prebuild (빌드 정보 생성) 실행 후 빌드
+    if (name === 'Backend' || name === 'Frontend') {
+      await run('npm', ['run', 'prebuild'], pkgPath);
+    }
     await run('npm', ['run', 'build:clean'], pkgPath);
   }
   if (!pathExists(distPath)) {
     throw new Error(`${name} dist 경로가 존재하지 않습니다: ${distPath}`);
   }
-  // 비어있어도 디렉터리 복사 방식이면 복사 가능하므로 에러로 간주하지 않음
   console.log(`✅ ${name} dist 확인: ${distPath}`);
 }
 
@@ -116,6 +148,13 @@ async function ensureBuilt(name, pkgRelPath, distRelPath) {
 async function gitPull() {
   console.log('📥 Git 소스 업데이트 중...');
   return run('git', ['pull', 'origin', gitConfig.branch], gitConfig.sourcePath);
+}
+
+// 루트에서 도구체인 설치 (rimraf/tsc/vite 등)
+async function installToolchainAtRoot() {
+  console.log('🧰 루트 도구체인 설치 (dev 포함) 중...');
+  await run('npm', ['ci', '--include=dev'], gitConfig.sourcePath);
+  console.log('✅ 루트 도구체인 설치 완료');
 }
 
 // Common 패키지 빌드
@@ -128,6 +167,8 @@ async function buildCommon() {
 // Backend 빌드
 async function buildBe() {
   console.log('🔧 Backend 빌드 중...');
+  // prebuild 실행(빌드 정보 생성)
+  await run('npm', ['run', 'prebuild'], path.join(gitConfig.sourcePath, 'be'));
   await run('npm', ['run', 'build:clean'], path.join(gitConfig.sourcePath, 'be'));
   console.log('✅ Backend 빌드 완료');
 }
@@ -135,6 +176,8 @@ async function buildBe() {
 // Frontend 빌드
 async function buildFe() {
   console.log('🎨 Frontend 빌드 중...');
+  // prebuild 실행(빌드 정보 생성)
+  await run('npm', ['run', 'prebuild'], path.join(gitConfig.sourcePath, 'fe'));
   await run('npm', ['run', 'build:clean'], path.join(gitConfig.sourcePath, 'fe'));
   console.log('✅ Frontend 빌드 완료');
 }
@@ -184,10 +227,13 @@ async function main() {
     console.log('🚀 서버용 전체 빌드 시작...');
     showVersionInfo();
     await gitPull();
+    await installToolchainAtRoot();
     await buildCommon();
     await buildBe();
     await buildFe();
     await copyToDeployFolders();
+    // 빌드 요약 출력
+    showBuildSummary();
     console.log('🎉 서버용 전체 빌드 완료!');
     console.log('');
     console.log('📁 빌드 결과물:');

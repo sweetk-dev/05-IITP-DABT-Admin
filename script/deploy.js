@@ -12,22 +12,23 @@ const isMac = process.platform === 'darwin';
 console.log(`🖥️  OS 감지: ${process.platform} (${isWindows ? 'Windows' : isLinux ? 'Linux' : isMac ? 'macOS' : 'Unknown'})`);
 
 // 배포 설정
-const deployConfig = {
-  // Backend 서버 설정
+const config = {
   backend: {
-    host: process.env.BE_HOST || 'your-backend-server.com',
-    user: process.env.BE_USER || 'your-username',
-    path: process.env.BE_PATH || '/var/www/iitp-dabt-adm-be',
-    port: process.env.BE_PORT || '22'
+    host: process.env.BE_HOST || 'localhost',
+    user: process.env.BE_USER || 'root',
+    path: process.env.BE_PATH || '/var/www/iitp-dabt-admin/be'
   },
-  // Frontend 서버 설정
   frontend: {
-    host: process.env.FE_HOST || 'your-frontend-server.com',
-    user: process.env.FE_USER || 'your-username',
-    path: process.env.FE_PATH || '/var/www/iitp-dabt-adm-fe',
-    port: process.env.FE_PORT || '22'
+    host: process.env.FE_HOST || 'localhost',
+    user: process.env.FE_USER || 'root',
+    path: process.env.FE_PATH || '/var/www/iitp-dabt-admin/fe'
   }
 };
+
+console.log('이 스크립트는 예시이며, 실제 배포 로직은 프로젝트 요구에 맞게 구현하세요.');
+console.log('환경 변수 예시 설정:');
+console.log('   export BE_PATH=/var/www/iitp-dabt-admin/be');
+console.log('   export FE_PATH=/var/www/iitp-dabt-admin/fe');
 
 // 개별 배포 스크립트 실행 함수
 function runDeployScript(scriptName, description, envVars = {}) {
@@ -73,33 +74,33 @@ async function main() {
     
     // 1. Common 패키지 배포 (Backend 서버와 동일한 서버 사용)
     await runDeployScript('deploy-common.js', 'Common 패키지 배포', {
-      COMMON_HOST: deployConfig.backend.host,
-      COMMON_USER: deployConfig.backend.user,
-      COMMON_PATH: deployConfig.backend.path,
-      COMMON_PORT: deployConfig.backend.port
+      COMMON_HOST: config.backend.host,
+      COMMON_USER: config.backend.user,
+      COMMON_PATH: config.backend.path,
+      COMMON_PORT: config.backend.port
     });
     
     // 2. Backend 배포
     await runDeployScript('deploy-be.js', 'Backend 배포', {
-      BE_HOST: deployConfig.backend.host,
-      BE_USER: deployConfig.backend.user,
-      BE_PATH: deployConfig.backend.path,
-      BE_PORT: deployConfig.backend.port
+      BE_HOST: config.backend.host,
+      BE_USER: config.backend.user,
+      BE_PATH: config.backend.path,
+      BE_PORT: config.backend.port
     });
     
     // 3. Frontend 배포
     await runDeployScript('deploy-fe.js', 'Frontend 배포', {
-      FE_HOST: deployConfig.frontend.host,
-      FE_USER: deployConfig.frontend.user,
-      FE_PATH: deployConfig.frontend.path,
-      FE_PORT: deployConfig.frontend.port
+      FE_HOST: config.frontend.host,
+      FE_USER: config.frontend.user,
+      FE_PATH: config.frontend.path,
+      FE_PORT: config.frontend.port
     });
     
     console.log('🎉 통합 배포 완료!');
     console.log('');
     console.log('📋 배포된 서비스:');
-    console.log(`   Backend: http://${deployConfig.backend.host}:30000`);
-    console.log(`   Frontend: http://${deployConfig.frontend.host}`);
+    console.log(`   Backend: http://${config.backend.host}:30000`);
+    console.log(`   Frontend: http://${config.frontend.host}`);
     console.log('');
     console.log('💡 모든 서비스가 성공적으로 배포되었습니다.');
     
@@ -131,10 +132,10 @@ if (!process.env.BE_HOST || !process.env.FE_HOST) {
   console.log('💡 예시:');
   console.log('   export BE_HOST=your-backend-server.com');
   console.log('   export BE_USER=your-username');
-  console.log('   export BE_PATH=/var/www/iitp-dabt-adm-be');
+  console.log('   export BE_PATH=/var/www/iitp-dabt-admin/be');
   console.log('   export FE_HOST=your-frontend-server.com');
   console.log('   export FE_USER=your-username');
-  console.log('   export FE_PATH=/var/www/iitp-dabt-adm-fe');
+  console.log('   export FE_PATH=/var/www/iitp-dabt-admin/fe');
   console.log('');
   console.log('🔧 또는 .env 파일에 설정하세요.');
   process.exit(1);

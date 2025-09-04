@@ -192,9 +192,13 @@ tail -f be/logs/app-$(date +%Y-%m-%d).log
 ## 🚀 8. 배포 (서버 환경)
 
 ### 운영 스크립트 배포 (최초 1회 또는 변경 시)
+
+> 실행 위치 안내: 모든 npm 스크립트는 루트(`.../iitp-dabt-admin/source`)의 package.json에 정의되어 있어 루트에서 실행해야 합니다. 필요 시 `node script/<file>.js`로 직접 실행 가능합니다.
+
 ```bash
-# 실행 서버에 기동/재기동 스크립트 배포
+# 실행 서버에 기동/재기동 스크립트 배포 (최초 1회 또는 변경 시)
 npm run deploy:server:ops
+# 직접 실행 대안: node script/deploy-server-ops.js
 # 기본 경로: /var/www/iitp-dabt-admin/script
 ```
 

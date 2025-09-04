@@ -1,13 +1,17 @@
 # Windows용 배포 스크립트 (PowerShell)
 
 param(
-    [string]$BeHost = $env:BE_HOST,
-    [string]$BeUser = $env:BE_USER,
-    [string]$BePath = $env:BE_PATH,
-    [string]$FeHost = $env:FE_HOST,
-    [string]$FeUser = $env:FE_USER,
-    [string]$FePath = $env:FE_PATH
+    [string]$BeHost,
+    [string]$BeUser,
+    [string]$BePath = "/var/www/iitp-dabt-admin/be",
+    [string]$FeHost,
+    [string]$FeUser,
+    [string]$FePath = "/var/www/iitp-dabt-admin/fe"
 )
+
+Write-Host "이 스크립트는 예시이며 실제 배포 로직은 프로젝트 요구에 맞게 구현하세요." -ForegroundColor Yellow
+Write-Host "예시 실행:" -ForegroundColor Yellow
+Write-Host "   .\script\deploy.ps1 -BeHost your-backend-server.com -BeUser your-username -BePath /var/www/iitp-dabt-admin/be -FeHost your-frontend-server.com -FeUser your-username -FePath /var/www/iitp-dabt-admin/fe" -ForegroundColor Gray
 
 # 배포 설정
 $deployConfig = @{
@@ -39,7 +43,7 @@ if (-not $deployConfig.Backend.Host -or -not $deployConfig.Frontend.Host) {
     Write-Host "   FE_PATH: Frontend 서버 경로" -ForegroundColor White
     Write-Host ""
     Write-Host "💡 사용법:" -ForegroundColor Cyan
-    Write-Host "   .\script\deploy.ps1 -BeHost your-backend-server.com -BeUser your-username -BePath /var/www/iitp-dabt-adm-be -FeHost your-frontend-server.com -FeUser your-username -FePath /var/www/iitp-dabt-adm-fe" -ForegroundColor Gray
+    Write-Host "   .\script\deploy.ps1 -BeHost your-backend-server.com -BeUser your-username -BePath /var/www/iitp-dabt-admin/be -FeHost your-frontend-server.com -FeUser your-username -FePath /var/www/iitp-dabt-admin/fe" -ForegroundColor Gray
     exit 1
 }
 

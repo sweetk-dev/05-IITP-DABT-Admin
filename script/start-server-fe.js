@@ -17,7 +17,7 @@ if (!isLinux) {
 
 // 설정
 const config = {
-  fePath: process.env.PROD_FE_PATH || '/var/www/iitp-dabt-adm-fe',
+  fePath: process.env.PROD_FE_PATH || '/var/www/iitp-dabt-admin/fe',
   nginxConfigPath: process.env.NGINX_CONFIG_PATH || '/etc/nginx/sites-available/iitp-dabt-adm-fe'
 };
 
@@ -37,8 +37,8 @@ function showVersionInfo() {
     // 빌드 정보 확인
     const buildInfoPath = path.join(config.fePath, 'dist/build-info.json');
     if (fs.existsSync(buildInfoPath)) {
-      const buildInfo = require(buildInfoPath);
-      console.log(`   🔨 빌드 시간: ${buildInfo.buildTime}`);
+      const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, 'utf8'));
+      if (buildInfo.buildDate) console.log(`   🔨 빌드 시간: ${buildInfo.buildDate}`);
     }
   } catch (error) {
     console.log('   ⚠️  버전 정보를 가져올 수 없습니다.');
@@ -170,12 +170,12 @@ async function main() {
 if (!process.env.PROD_FE_PATH) {
   console.log('⚠️  환경 변수가 설정되지 않았습니다.');
   console.log('📋 필요한 환경 변수:');
-  console.log('   PROD_FE_PATH: Frontend 서버 경로 (기본값: /var/www/iitp-dabt-adm-fe)');
+  console.log('   PROD_FE_PATH: Frontend 서버 경로 (기본값: /var/www/iitp-dabt-admin/fe)');
   console.log('   NGINX_CONFIG_PATH: Nginx 설정 파일 경로 (기본값: /etc/nginx/sites-available/iitp-dabt-adm-fe)');
   console.log('   FRONTEND_DOMAIN: Frontend 도메인 (기본값: localhost)');
   console.log('');
   console.log('💡 예시:');
-  console.log('   export PROD_FE_PATH=/var/www/iitp-dabt-adm-fe');
+  console.log('   export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe');
   console.log('   export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe');
   console.log('   export FRONTEND_DOMAIN=your-domain.com');
   console.log('');

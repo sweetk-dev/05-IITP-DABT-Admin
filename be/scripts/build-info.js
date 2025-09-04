@@ -14,5 +14,12 @@ const buildInfo = {
   buildDate: getLocalDateTimeString()
 };
 
-fs.writeFileSync(path.join(__dirname, '../build-info.json'), JSON.stringify(buildInfo, null, 2));
+// dist 폴더가 없으면 생성
+const distPath = path.join(__dirname, '../dist');
+if (!fs.existsSync(distPath)) {
+  fs.mkdirSync(distPath, { recursive: true });
+}
+
+// dist/build-info.json에 기록
+fs.writeFileSync(path.join(distPath, 'build-info.json'), JSON.stringify(buildInfo, null, 2));
 console.log('build-info.json generated:', buildInfo); 

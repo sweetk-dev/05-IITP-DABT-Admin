@@ -462,9 +462,6 @@ npm run build:server:fe
 ```
 
 ### 3.2 실행 서버 스크립트
-
-> 실행 위치 안내: 본 문서의 npm 스크립트들은 모두 “프로젝트 루트”의 package.json에 정의되어 있어 루트에서 실행해야 합니다. (예: `/home/iitp-adm/iitp-dabt-admin/source`) 필요 시 `node script/<file>.js`로 직접 실행 가능합니다.
-
 #### 3.2.1 deploy-server.js
 ```bash
 # 전체 배포 (빌드 서버 → 실행 서버)

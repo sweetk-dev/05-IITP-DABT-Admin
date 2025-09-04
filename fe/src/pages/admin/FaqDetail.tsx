@@ -20,11 +20,13 @@ export default function AdminFaqDetail() {
   const { id } = useParams<{ id: string }>();
   const faqId = Number(id);
 
-  const { data, isLoading, isEmpty, isError, error } = useDataFetching({
+  const { data, isLoading, isEmpty, isError, status } = useDataFetching({
     fetchFunction: () => getAdminFaqDetail(faqId),
     dependencies: [faqId],
     autoFetch: !!faqId
   });
+
+  const error = isError && status === 'error' ? (data as any)?.error : undefined;
 
   const faq = (data as AdminFaqDetailRes)?.faq;
 
@@ -33,7 +35,6 @@ export default function AdminFaqDetail() {
   const faqTypeOptions = [{ value: '', label: '전체' }, ...((faqTypeCodes as any)?.codes || []).map((c: any) => ({ value: c.codeId, label: c.codeNm }))];
   const faqTypeLabel = faq ? (faqTypeOptions.find(o=>o.value===faq.faqType)?.label || faq.faqType) : '';
 
-  const handleBack = () => navigate(ROUTES.ADMIN.FAQ.LIST);
   const handleEdit = () => navigate(ROUTES.ADMIN.FAQ.EDIT.replace(':id', String(faqId)));
   const handleDelete = async () => {
     const res = await deleteAdminFaq(faqId);

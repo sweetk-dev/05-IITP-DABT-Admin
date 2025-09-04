@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, CardContent, TextField, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
+import { Box, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { COMMON_CODE_GROUPS } from '@iitp-dabt/common';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -34,7 +34,6 @@ export default function AdminFaqCreate() {
   const { data: faqTypeCodes } = useDataFetching({ fetchFunction: () => getCommonCodesByGroupId(COMMON_CODE_GROUPS.FAQ_TYPE), autoFetch: true });
   const faqTypeOptions = [{ value: '', label: '선택하세요' }, ...((faqTypeCodes as any)?.codes || []).map((c: any) => ({ value: c.codeId, label: c.codeNm }))];
 
-  const handleBack = () => navigate(ROUTES.ADMIN.FAQ.LIST);
   const handleSubmit = async () => {
     if (!faqType || !question || !answer) {
       setError('유형, 질문, 답변을 모두 입력해 주세요.');
@@ -87,8 +86,6 @@ export default function AdminFaqCreate() {
             onChange={(v)=>setFaqType(v)} 
             options={faqTypeOptions} 
             label="FAQ 유형" 
-            sx={{ mb: SPACING.MEDIUM }}
-            required
           />
           
           <TextField 
@@ -144,7 +141,7 @@ export default function AdminFaqCreate() {
           </FormControl>
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: SPACING.MEDIUM }}>
-            <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>
+            <ThemedButton variant="outlined" onClick={() => navigate(ROUTES.ADMIN.FAQ.LIST)} buttonSize="cta">취소</ThemedButton>
             <ThemedButton variant="primary" buttonSize="cta" onClick={handleSubmit} disabled={loading}>등록</ThemedButton>
           </Box>
         </CardContent>

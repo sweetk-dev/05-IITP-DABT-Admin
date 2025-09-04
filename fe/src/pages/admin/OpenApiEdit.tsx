@@ -22,11 +22,13 @@ export default function AdminOpenApiEdit() {
   const { id } = useParams<{ id: string }>();
   const keyId = Number(id);
 
-  const { data, error: fetchError } = useDataFetching({ 
+  const { data, isError, status } = useDataFetching({ 
     fetchFunction: ()=> getAdminOpenApiDetail(keyId), 
     dependencies: [keyId], 
     autoFetch: !!keyId 
   });
+
+  const fetchError = isError && status === 'error' ? (data as any)?.error : undefined;
   
   const detail = (data as any)?.authKey || (data as any) || {};
 
@@ -50,8 +52,6 @@ export default function AdminOpenApiEdit() {
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'warning' | 'info' } | null>(null);
 
-  const handleBack = () => navigate(ROUTES.ADMIN.OPENAPI.CLIENTS + '/' + keyId);
-  
   const handleSave = async () => {
     if (!keyName.trim()) {
       setError('키 이름을 입력해주세요.');
@@ -64,7 +64,8 @@ export default function AdminOpenApiEdit() {
     const updateData: AdminOpenApiUpdateReq = { 
       keyName, 
       keyDesc,
-      activeYn
+      activeYn,
+      updatedBy: 'admin' // TODO: 실제 관리자 정보로 교체
     };
     
     const res = await updateAdminOpenApi(keyId, updateData);
@@ -195,7 +196,7 @@ export default function AdminOpenApiEdit() {
           </Stack>
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <ThemedButton variant="outlined" onClick={handleBack} buttonSize="cta">취소</ThemedButton>
+            <ThemedButton variant="outlined" onClick={() => navigate(ROUTES.ADMIN.OPENAPI.CLIENTS + '/' + keyId)} buttonSize="cta">취소</ThemedButton>
             <ThemedButton variant="outlined" onClick={handleExtend} disabled={loading} buttonSize="cta">기간연장</ThemedButton>
             <ThemedButton variant="primary" onClick={handleSave} disabled={loading} buttonSize="cta">저장</ThemedButton>
           </Box>

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Box, CardContent, Stack } from '@mui/material';
 import { 
-  Code as CodeIcon,
   Add as AddIcon,
-  Delete as DeleteIcon,
   Edit as EditIcon
 } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { getAdminRole } from '../../store/user';
 import { hasAccountManagementPermission } from '../../utils/auth';
 import { ROUTES, ROUTE_META } from '../../routes';
@@ -22,14 +20,10 @@ import { useDataFetching } from '../../hooks/useDataFetching';
 import { formatYmdHm } from '../../utils/date';
 import { 
   getCommonCodesByGroupIdDetail, 
-  deleteCommonCodeList,
-  updateCommonCode,
-  createCommonCode
+  deleteCommonCodeList
 } from '../../api/commonCode';
-import type { CommonCodeByGroupDetailRes } from '@iitp-dabt/common';
 
 export default function CodeGroupDetail() {
-  const navigate = useNavigate();
   const { groupId } = useParams<{ groupId: string }>();
   const adminRole = getAdminRole();
   const canManage = hasAccountManagementPermission(adminRole);
@@ -79,7 +73,7 @@ export default function CodeGroupDetail() {
       codes = codes.filter((code: any) => 
         code.codeId?.toLowerCase().includes(search.toLowerCase()) ||
         code.codeNm?.toLowerCase().includes(search.toLowerCase()) ||
-        code.codeDes?.toLowerCase().includes(search.toLowerCase())  // ✅ description → codeDes로 수정
+        code.codeDes?.toLowerCase().includes(search.toLowerCase())
       );
     }
     
@@ -127,7 +121,7 @@ export default function CodeGroupDetail() {
   const columns: Array<DataTableColumn<any>> = [
     { key: 'codeId', header: '코드 ID' },
     { key: 'codeNm', header: '코드명' },
-    { key: 'codeDes', header: '설명' },  // ✅ description → codeDes로 수정
+    { key: 'codeDes', header: '설명' },
     { key: 'sortOrder', header: '정렬순서' },
     { 
       key: 'useYn', 
@@ -160,19 +154,11 @@ export default function CodeGroupDetail() {
     console.log('그룹 정보 수정');
   };
 
-  const handleBackToList = () => {
-    navigate('/admin/code');
-  };
-
   return (
     <Box id="admin-code-group-detail-page" sx={{ p: SPACING.LARGE }}>
       <PageHeader 
         id="admin-code-group-detail-header" 
         title={pageTitle}
-        backButton={{
-          onClick: handleBackToList,
-          label: '그룹 목록으로'
-        }}
         search={{ 
           value: search, 
           onChange: (v) => { 

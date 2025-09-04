@@ -20,15 +20,16 @@ export default function AdminNoticeDetail() {
   const { id } = useParams<{ id: string }>();
   const noticeId = Number(id);
 
-  const { data, isLoading, isEmpty, isError, error } = useDataFetching({
+  const { data, isLoading, isEmpty, isError, status } = useDataFetching({
     fetchFunction: () => getAdminNoticeDetail(noticeId),
     dependencies: [noticeId],
     autoFetch: !!noticeId
   });
 
+  const error = isError && status === 'error' ? (data as any)?.error : undefined;
+
   const notice = (data as AdminNoticeDetailRes)?.notice;
 
-  const handleBack = () => navigate(ROUTES.ADMIN.NOTICES.LIST);
   const handleEdit = () => navigate(ROUTES.ADMIN.NOTICES.EDIT.replace(':id', String(noticeId)));
   const handleDelete = async () => {
     const res = await deleteAdminNotice(noticeId);
@@ -154,23 +155,11 @@ export default function AdminNoticeDetail() {
                   <Typography variant="subtitle2" color="text.secondary">수정자</Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>{notice.updatedBy || '-'}</Typography>
                 </Grid>
-                {notice.deletedAt && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">삭제일</Typography>
-                    <Typography variant="body1" sx={{ mb: 1 }}>{formatYmdHm(notice.deletedAt)}</Typography>
-                  </Grid>
-                )}
-                {notice.deletedBy && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">삭제자</Typography>
-                    <Typography variant="body1" sx={{ mb: 1 }}>{notice.deletedBy}</Typography>
-                  </Grid>
-                )}
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">삭제 여부</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">공개 여부</Typography>
                   <StatusChip 
-                    kind={notice.delYn === 'N' ? 'success' : 'error'} 
-                    label={notice.delYn === 'N' ? '활성' : '삭제됨'}
+                    kind={notice.publicYn === 'Y' ? 'success' : 'error'} 
+                    label={notice.publicYn === 'Y' ? '공개' : '비공개'}
                     sx={{ mb: 1 }}
                   />
                 </Grid>

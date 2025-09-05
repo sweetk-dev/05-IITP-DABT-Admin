@@ -207,6 +207,7 @@ async function copyToDeployFolders() {
   });
 
   const commonDist = path.join(gitConfig.sourcePath, 'packages/common/dist');
+  const commonPkgJson = path.join(gitConfig.sourcePath, 'packages/common/package.json');
   const beDist = path.join(gitConfig.sourcePath, 'be/dist');
   const feDist = path.join(gitConfig.sourcePath, 'fe/dist');
   const bePkgJson = path.join(gitConfig.sourcePath, 'be/package.json');
@@ -220,6 +221,11 @@ async function copyToDeployFolders() {
 
   // 안전 복사
   await copyDirSafe('Common', commonDist, deployCommonPath);
+  // Common 패키지 식별/엔트리 해석을 위해 package.json 포함
+  if (!fs.existsSync(commonPkgJson)) {
+    throw new Error(`Common package.json이 없습니다: ${commonPkgJson}`);
+  }
+  fs.copyFileSync(commonPkgJson, path.join(deployCommonPath, 'package.json'));
   await copyDirSafe('Backend', beDist, deployBePath);
   // Backend 실행에 필요한 메타 파일 포함 (의존성 설치를 위해 필요)
   if (!fs.existsSync(bePkgJson)) {

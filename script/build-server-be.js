@@ -123,9 +123,39 @@ async function copyBeToDeploy() {
   const deployBePath = path.join(config.deployPath, 'backend');
   if (!fs.existsSync(deployBePath)) fs.mkdirSync(deployBePath, { recursive: true });
   const beDist = path.join(config.sourcePath, 'be/dist');
+  const bePkgJson = path.join(config.sourcePath, 'be/package.json');
+  const bePkgLock = path.join(config.sourcePath, 'be/package-lock.json');
+  const beBuildInfo = path.join(config.sourcePath, 'be/build-info.json');
   await ensureBuilt('Backend', 'be', 'be/dist');
   await run('cp', ['-a', path.join(beDist, '.'), deployBePath], undefined);
+  // package.json / lock / build-info 포함
+  if (!fs.existsSync(bePkgJson)) {
+    throw new Error(`Backend package.json이 없습니다: ${bePkgJson}`);
+  }
+  fs.copyFileSync(bePkgJson, path.join(deployBePath, 'package.json'));
+  if (fs.existsSync(bePkgLock)) {
+    fs.copyFileSync(bePkgLock, path.join(deployBePath, 'package-lock.json'));
+  }
+  if (fs.existsSync(beBuildInfo)) {
+    fs.copyFileSync(beBuildInfo, path.join(deployBePath, 'build-info.json'));
+  }
   console.log('✅ Backend 복사 완료');
+}
+
+// Common 배포 폴더로 복사 (@iitp-dabt/common 배포용)
+async function copyCommonToDeploy() {
+  console.log('📁 Common 배포 폴더로 복사 중...');
+  const deployCommonPath = path.join(config.deployPath, 'common');
+  if (!fs.existsSync(deployCommonPath)) fs.mkdirSync(deployCommonPath, { recursive: true });
+  const commonDist = path.join(config.sourcePath, 'packages/common/dist');
+  const commonPkgJson = path.join(config.sourcePath, 'packages/common/package.json');
+  await ensureBuilt('Common', 'packages/common', 'packages/common/dist');
+  await run('cp', ['-a', path.join(commonDist, '.'), deployCommonPath], undefined);
+  if (!fs.existsSync(commonPkgJson)) {
+    throw new Error(`Common package.json이 없습니다: ${commonPkgJson}`);
+  }
+  fs.copyFileSync(commonPkgJson, path.join(deployCommonPath, 'package.json'));
+  console.log('✅ Common 복사 완료');
 }
 
 // 메인 실행 함수
@@ -135,11 +165,13 @@ async function main() {
     await installToolchainAtRoot();
     await buildCommon();
     await buildBe();
+    await copyCommonToDeploy();
     await copyBeToDeploy();
     showBuildSummary();
     console.log('🎉 서버용 Backend 빌드 완료!');
     console.log('');
     console.log('📁 빌드 결과물:');
+    console.log(`   - ${config.deployPath}/common/`);
     console.log(`   - ${config.deployPath}/backend/`);
     console.log('');
     console.log('💡 다음 단계: npm run deploy:server:be');

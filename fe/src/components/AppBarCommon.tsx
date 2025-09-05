@@ -52,7 +52,7 @@ export function Logo({ serviceName }: { serviceName: string; theme?: 'user' | 'a
     >
       <img 
         id="appbar-logo-image"
-        src="/iitp_cms_logo_img_1.png" 
+        src={`${import.meta.env.BASE_URL}iitp_cms_logo_img_1.png`}
         alt="IITP Logo" 
         style={{ height: 56, marginRight: 12 }} 
       />

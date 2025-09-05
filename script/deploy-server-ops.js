@@ -120,13 +120,63 @@ async function copyOpsScripts() {
   console.log(`📁 대상 경로: ${config.opsPath}`);
 }
 
+// 운영 편의성: 런타임 루트(/var/www/iitp-dabt-admin)에 최소 package.json 배포
+async function deployRuntimePackageJson() {
+  const runtimeRoot = path.posix.dirname(config.opsPath);
+  const pkgContent = JSON.stringify({
+    name: 'iitp-dabt-admin-runtime',
+    private: true,
+    scripts: {
+      'start:server:be': 'node script/start-server-be.js',
+      'restart:server:be': 'node script/restart-server-be.js',
+      'stop:server:be': 'node script/stop-server-be.js',
+      'start:server:fe': 'node script/start-server-fe.js',
+      'restart:server:fe': 'node script/restart-server-fe.js',
+      'stop:server:fe': 'node script/stop-server-fe.js'
+    }
+  }, null, 2) + '\n';
+
+  console.log('🧩 운영 루트 package.json 배포 준비...');
+  if (sameHost) {
+    try {
+      if (!fs.existsSync(runtimeRoot)) fs.mkdirSync(runtimeRoot, { recursive: true });
+      fs.writeFileSync(path.posix.join(runtimeRoot, 'package.json'), pkgContent, 'utf8');
+      console.log(`✅ 로컬에 package.json 배포 완료: ${path.posix.join(runtimeRoot, 'package.json')}`);
+    } catch (e) {
+      console.error('❌ package.json 생성 실패:', e.message);
+      throw e;
+    }
+  } else {
+    // 빌드 서버의 임시 경로에 파일 생성 후 rsync로 원격에 복사
+    const tmpLocal = path.posix.join('/tmp', `iitp-runtime-package-${Date.now()}.json`);
+    try {
+      fs.writeFileSync(tmpLocal, pkgContent, 'utf8');
+      const destUserHost = `${config.prodUser}@${config.prodHost}`;
+      const destPath = path.posix.join(runtimeRoot, 'package.json');
+      await rsyncRemote(`${config.buildUser}@${config.buildHost}`, tmpLocal, destUserHost, destPath, config.buildPort);
+      console.log(`✅ 원격에 package.json 배포 완료: ${destPath}`);
+    } catch (e) {
+      console.error('❌ 원격 package.json 배포 실패:', e.message);
+      throw e;
+    } finally {
+      try { fs.unlinkSync(tmpLocal); } catch (_) {}
+    }
+  }
+}
+
 async function main() {
   try {
     await copyOpsScripts();
+    await deployRuntimePackageJson();
     console.log('💡 사용 예:');
     console.log(`   node ${path.posix.join(config.opsPath, 'start-server-be.js')}`);
     console.log(`   node ${path.posix.join(config.opsPath, 'restart-server-be.js')}`);
     console.log(`   node ${path.posix.join(config.opsPath, 'stop-server-be.js')}`);
+    const runtimeRoot = path.posix.dirname(config.opsPath);
+    console.log('💡 npm 별칭 사용 예:');
+    console.log(`   (on ${runtimeRoot}) npm run start:server:be`);
+    console.log(`   (on ${runtimeRoot}) npm run restart:server:be`);
+    console.log(`   (on ${runtimeRoot}) npm run stop:server:be`);
   } catch (e) {
     console.error('❌ 배포 실패:', e.message);
     process.exit(1);

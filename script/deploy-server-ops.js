@@ -127,9 +127,15 @@ async function deployRuntimePackageJson() {
     name: 'iitp-dabt-admin-runtime',
     private: true,
     scripts: {
+      'start:be': 'node script/start-server-be.js',
+      'restart:be': 'node script/restart-server-be.js',
+      'stop:be': 'node script/stop-server-be.js',
       'start:server:be': 'node script/start-server-be.js',
       'restart:server:be': 'node script/restart-server-be.js',
       'stop:server:be': 'node script/stop-server-be.js',
+      'start:fe': 'node script/start-server-fe.js',
+      'restart:fe': 'node script/restart-server-fe.js',
+      'stop:fe': 'node script/stop-server-fe.js',
       'start:server:fe': 'node script/start-server-fe.js',
       'restart:server:fe': 'node script/restart-server-fe.js',
       'stop:server:fe': 'node script/stop-server-fe.js'

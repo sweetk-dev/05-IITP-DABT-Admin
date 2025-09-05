@@ -80,7 +80,7 @@ export default function Footer() {
 						<Box
 							component="img"
 							id="footer-brand-image"
-							src="/iitp_cms_logo_img_2.png"
+							src={`${import.meta.env.BASE_URL}iitp_cms_logo_img_2.png`}
 							alt="IITP Logo"
 							sx={{ height: { xs: 80, md: 160 }, width: 'auto', opacity: 0.95, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))' }}
 						/>

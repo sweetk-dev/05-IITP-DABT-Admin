@@ -78,7 +78,7 @@ function App() {
           }
         }
       `}</style>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Layout />}>
             {/* 공개 페이지 (로그인 불필요) */}

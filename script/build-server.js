@@ -209,6 +209,9 @@ async function copyToDeployFolders() {
   const commonDist = path.join(gitConfig.sourcePath, 'packages/common/dist');
   const beDist = path.join(gitConfig.sourcePath, 'be/dist');
   const feDist = path.join(gitConfig.sourcePath, 'fe/dist');
+  const bePkgJson = path.join(gitConfig.sourcePath, 'be/package.json');
+  const bePkgLock = path.join(gitConfig.sourcePath, 'be/package-lock.json');
+  const beBuildInfo = path.join(gitConfig.sourcePath, 'be/build-info.json');
 
   // dist 검증 및 필요 시 빌드 보강
   await ensureBuilt('Common', 'packages/common', 'packages/common/dist');
@@ -218,6 +221,17 @@ async function copyToDeployFolders() {
   // 안전 복사
   await copyDirSafe('Common', commonDist, deployCommonPath);
   await copyDirSafe('Backend', beDist, deployBePath);
+  // Backend 실행에 필요한 메타 파일 포함 (의존성 설치를 위해 필요)
+  if (!fs.existsSync(bePkgJson)) {
+    throw new Error(`Backend package.json이 없습니다: ${bePkgJson}`);
+  }
+  fs.copyFileSync(bePkgJson, path.join(deployBePath, 'package.json'));
+  if (fs.existsSync(bePkgLock)) {
+    fs.copyFileSync(bePkgLock, path.join(deployBePath, 'package-lock.json'));
+  }
+  if (fs.existsSync(beBuildInfo)) {
+    fs.copyFileSync(beBuildInfo, path.join(deployBePath, 'build-info.json'));
+  }
   await copyDirSafe('Frontend', feDist, deployFePath);
 }
 

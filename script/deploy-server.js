@@ -176,9 +176,14 @@ async function deployCommon() {
   const src = path.posix.join(deployConfig.buildServer.path, 'common/')
   const dest = path.posix.join(deployConfig.productionServer.bePath, 'node_modules/@iitp-dabt/common/');
   if (sameHost) {
+    // 대상 경로 보장 (mkdir -p)
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
     await rsyncLocal(src, dest);
   } else {
+    // 원격 경로 보장 후 rsync
+    const sshBase = ['-p', `${deployConfig.productionServer.port}`, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`];
+    const mkdirCmd = `mkdir -p ${dest}`;
+    await run('ssh', [...sshBase, mkdirCmd]);
     await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, dest, deployConfig.buildServer.port);
   }
   console.log('✅ Common 배포 완료');

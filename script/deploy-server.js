@@ -175,14 +175,28 @@ async function deployCommon() {
   console.log('📦 Common 배포 중...');
   const src = path.posix.join(deployConfig.buildServer.path, 'common/')
   const dest = path.posix.join(deployConfig.productionServer.bePath, 'node_modules/@iitp-dabt/common/');
+  console.log(`   ▶︎ 배포 모드: ${sameHost ? 'local' : 'ssh'} | dest: ${dest}`);
   if (sameHost) {
-    // 대상 경로 보장 (mkdir -p)
-    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    // 대상 경로 보장 (bePath, node_modules, scope 포함)
+    const bePath = deployConfig.productionServer.bePath;
+    const baseDirs = [
+      bePath,
+      path.posix.join(bePath, 'node_modules'),
+      path.posix.join(bePath, 'node_modules/@iitp-dabt'),
+      dest
+    ];
+    for (const d of baseDirs) {
+      try { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); } catch (e) {
+        console.error(`   ❌ 디렉터리 생성 실패: ${d} (${e.code || e.message})`);
+        throw e;
+      }
+    }
     await rsyncLocal(src, dest);
   } else {
     // 원격 경로 보장 후 rsync
     const sshBase = ['-p', `${deployConfig.productionServer.port}`, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`];
-    const mkdirCmd = `mkdir -p ${dest}`;
+    const bePath = deployConfig.productionServer.bePath;
+    const mkdirCmd = `mkdir -p ${bePath} ${bePath}/node_modules ${bePath}/node_modules/@iitp-dabt ${dest}`;
     await run('ssh', [...sshBase, mkdirCmd]);
     await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, dest, deployConfig.buildServer.port);
   }

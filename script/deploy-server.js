@@ -127,14 +127,30 @@ async function showRemoteVersionSummary() {
 }
 
 async function rsyncLocal(src, dest) {
-  const args = ['-avz', '--delete', '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r', `${src}`, `${dest}`];
+  const args = [
+    '-avz',
+    '--delete',
+    '--exclude', 'node_modules/',
+    '--exclude', '.env',
+    '--exclude', '.env*',
+    '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+    `${src}`,
+    `${dest}`
+  ];
   console.log(`📤 rsync (local): rsync ${args.join(' ')}`);
   await run('rsync', args);
 }
 
 async function rsyncRemote(srcUserHost, srcPath, destUserHost, destPath, port) {
   // 퍼미션 기본값: 디렉터리 755, 파일 644
-  const baseArgs = ['-avz', '--delete', '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r'];
+  const baseArgs = [
+    '-avz',
+    '--delete',
+    '--exclude', 'node_modules/',
+    '--exclude', '.env',
+    '--exclude', '.env*',
+    '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r'
+  ];
   // 필요 시 소유자 지정(옵션)
   if (process.env.RSYNC_CHOWN) baseArgs.push(`--chown=${process.env.RSYNC_CHOWN}`);
   const args = [...baseArgs, '-e', `ssh -p ${port}`, `${srcUserHost}:${srcPath}`, `${destUserHost}:${destPath}`];

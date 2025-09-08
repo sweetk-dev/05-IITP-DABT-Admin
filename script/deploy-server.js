@@ -127,13 +127,33 @@ async function showRemoteVersionSummary() {
 }
 
 async function rsyncLocal(src, dest) {
-  const args = ['-avz', '--delete', `${src}`, `${dest}`];
+  const args = [
+    '-avz',
+    '--delete',
+    '--exclude', 'node_modules/',
+    '--exclude', '.env',
+    '--exclude', '.env*',
+    '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+    `${src}`,
+    `${dest}`
+  ];
   console.log(`📤 rsync (local): rsync ${args.join(' ')}`);
   await run('rsync', args);
 }
 
 async function rsyncRemote(srcUserHost, srcPath, destUserHost, destPath, port) {
-  const args = ['-avz', '--delete', '-e', `ssh -p ${port}`, `${srcUserHost}:${srcPath}`, `${destUserHost}:${destPath}`];
+  // 퍼미션 기본값: 디렉터리 755, 파일 644
+  const baseArgs = [
+    '-avz',
+    '--delete',
+    '--exclude', 'node_modules/',
+    '--exclude', '.env',
+    '--exclude', '.env*',
+    '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r'
+  ];
+  // 필요 시 소유자 지정(옵션)
+  if (process.env.RSYNC_CHOWN) baseArgs.push(`--chown=${process.env.RSYNC_CHOWN}`);
+  const args = [...baseArgs, '-e', `ssh -p ${port}`, `${srcUserHost}:${srcPath}`, `${destUserHost}:${destPath}`];
   console.log(`📤 rsync (ssh): rsync ${args.join(' ')}`);
   await run('rsync', args);
 }
@@ -149,6 +169,7 @@ async function deployBackend() {
     await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, dest, deployConfig.buildServer.port);
   }
   console.log('✅ Backend 배포 완료');
+  await fixPermissionsBackend();
 }
 
 // Frontend 배포
@@ -162,18 +183,43 @@ async function deployFrontend() {
     await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, dest, deployConfig.buildServer.port);
   }
   console.log('✅ Frontend 배포 완료');
+  await fixPermissionsFrontend();
 }
 
 // Common 배포 (BE의 node_modules 내 common으로 동기화)
 async function deployCommon() {
   console.log('📦 Common 배포 중...');
   const src = path.posix.join(deployConfig.buildServer.path, 'common/')
-  const dest = path.posix.join(deployConfig.productionServer.bePath, 'node_modules/@iitp-dabt/common/');
+  const destNodeModules = path.posix.join(deployConfig.productionServer.bePath, 'node_modules/@iitp-dabt/common/');
+  const destWorkspaceCommon = path.posix.join(deployConfig.productionServer.bePath, '..', 'packages/common/');
+  console.log(`   ▶︎ 배포 모드: ${sameHost ? 'local' : 'ssh'}`);
+  console.log(`   ▶︎ dest(node_modules): ${destNodeModules}`);
+  console.log(`   ▶︎ dest(workspace common): ${destWorkspaceCommon}`);
   if (sameHost) {
-    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-    await rsyncLocal(src, dest);
+    // 대상 경로 보장 (bePath, node_modules, scope 포함)
+    const bePath = deployConfig.productionServer.bePath;
+    const baseDirs = [
+      bePath,
+      path.posix.join(bePath, 'node_modules'),
+      path.posix.join(bePath, 'node_modules/@iitp-dabt'),
+      destWorkspaceCommon
+    ];
+    for (const d of baseDirs) {
+      try { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); } catch (e) {
+        console.error(`   ❌ 디렉터리 생성 실패: ${d} (${e.code || e.message})`);
+        throw e;
+      }
+    }
+    // node_modules/@iitp-dabt/common 은 npm이 만든 symlink일 수 있으므로 mkdir/rsync 생략
+    await rsyncLocal(src, destWorkspaceCommon);
   } else {
-    await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, dest, deployConfig.buildServer.port);
+    // 원격 경로 보장 후 rsync
+    const sshBase = ['-p', `${deployConfig.productionServer.port}`, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`];
+    const bePath = deployConfig.productionServer.bePath;
+    const mkdirCmd = `mkdir -p ${bePath} ${bePath}/node_modules ${bePath}/node_modules/@iitp-dabt ${destWorkspaceCommon}`;
+    await run('ssh', [...sshBase, mkdirCmd]);
+    // node_modules/@iitp-dabt/common 은 npm이 만든 symlink일 수 있으므로 rsync는 워크스페이스 경로에만 수행
+    await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, destWorkspaceCommon, deployConfig.buildServer.port);
   }
   console.log('✅ Common 배포 완료');
 }
@@ -207,6 +253,35 @@ async function main() {
     console.error('❌ 서버용 배포 실패:', error.message);
     process.exit(1);
   }
+}
+
+// 권한 정리: Frontend (실행 서버에서 수행)
+async function fixPermissionsFrontend() {
+  const sshBase = ['-p', `${deployConfig.productionServer.port}`, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`];
+  const fePath = deployConfig.productionServer.fePath;
+  const cmd = `find ${fePath} -type d -exec chmod 755 {} \\; && find ${fePath} -type f -exec chmod 644 {} \\;`;
+  if (sameHost) {
+    await run('bash', ['-lc', cmd]);
+  } else {
+    await run('ssh', [...sshBase, cmd]);
+  }
+  console.log('🔐 Frontend 퍼미션 정리 완료 (755/644)');
+}
+
+// 권한 정리: Backend (logs 등 쓰기 경로 포함)
+async function fixPermissionsBackend() {
+  const sshBase = ['-p', `${deployConfig.productionServer.port}`, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`];
+  const bePath = deployConfig.productionServer.bePath;
+  const ensureLogs = `mkdir -p ${bePath}/logs`;
+  const chmodAll = `find ${bePath} -type d -exec chmod 755 {} \\; && find ${bePath} -type f -exec chmod 644 {} \\;`;
+  const relaxLogs = `chmod 755 ${bePath}/logs || true`;
+  const cmd = `${ensureLogs} && ${chmodAll} && ${relaxLogs}`;
+  if (sameHost) {
+    await run('bash', ['-lc', cmd]);
+  } else {
+    await run('ssh', [...sshBase, cmd]);
+  }
+  console.log('🔐 Backend 퍼미션 정리 완료 (755/644, logs 디렉터리 보장)');
 }
 
 // 환경 변수 확인

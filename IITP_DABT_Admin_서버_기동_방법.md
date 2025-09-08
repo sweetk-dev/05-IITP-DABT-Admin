@@ -282,6 +282,15 @@ npm run build:server:fe
 npm run build:server:common
 ```
 
+> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다. 서브패스(`/adm/`) 배포 시에는 빌드 전에 아래를 설정하고 빌드하세요.
+>
+> ```bash
+> # FE가 /adm/에서 서빙되고 API가 /adm/api로 프록시되는 경우
+> export VITE_BASE=/adm/
+> export VITE_API_BASE_URL=/adm/api
+> npm run build:server:fe
+> ```
+
 #### 기동 서버에서 실행
 
 ##### 전체 배포
@@ -298,6 +307,17 @@ export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 # 전체 배포 (빌드 서버 → 기동 서버)
 npm run deploy:server
 ```
+
+> 중요: 실행 서버 의존성 설치 안내
+>
+> - Backend: 최초 배포이거나 `be/package.json`이 변경되었을 때, 실행 서버에서 다음을 실행하세요.
+>   ```bash
+>   cd /var/www/iitp-dabt-admin/be
+>   npm ci --omit=dev || npm install --omit=dev
+>   pm2 restart iitp-dabt-adm-be
+>   ```
+>
+> - Frontend: 정적 산출물만 배포하므로 실행 서버에서 `npm install`이 필요하지 않습니다.
 
 ##### 개별 배포
 ```bash

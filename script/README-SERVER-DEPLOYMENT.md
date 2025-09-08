@@ -54,7 +54,7 @@ sequenceDiagram
     Build->>Build: 3. npm install (의존성 업데이트)
     Build->>Build: 4. npm run build (빌드)
     Build->>Deploy: 5. rsync (파일 전송)
-    Deploy->>Deploy: 6. npm install --production
+    Deploy->>Deploy: 6. npm install --omit=dev (최초 또는 package.json 변경 시)
     Deploy->>Deploy: 7. PM2 restart
     Deploy->>Deploy: 8. Nginx reload
     User->>Deploy: 9. 웹 서비스 접속
@@ -186,6 +186,15 @@ npm run build:server:fe
 npm run build:server:common
 ```
 
+> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다. 서브패스(`/adm/`) 배포 시에는 빌드 전에 아래를 설정하고 빌드하세요.
+>
+> ```bash
+> # FE가 /adm/에서 서빙되고 API가 /adm/api로 프록시되는 경우
+> export VITE_BASE=/adm/
+> export VITE_API_BASE_URL=/adm/api
+> npm run build:server:fe
+> ```
+
 ### 1.3 빌드 스크립트 상세
 
 #### 1.3.1 build-server.js 동작 과정 (업데이트됨)
@@ -265,8 +274,18 @@ sudo mkdir -p /var/www/iitp-dabt-admin/fe
 sudo mkdir -p /var/www/iitp-dabt-admin/script
 sudo chown $USER:$USER /var/www/iitp-dabt-admin -R
 
-# 2. PM2 설정
-pm2 startup
+# 2. PM2 설정 (설치/검증/자동기동)
+# 2-1) 설치 검증
+pm2 -v
+command -v pm2
+
+# 2-2) (선택) nvm 사용 시 PATH 포함 예시
+# export PATH="$PATH:/home/<user>/.nvm/versions/node/v22.x.x/bin"
+# pm2 -v
+
+# 2-3) 부팅 자동 실행(systemd)
+# 로그인 사용자와 홈 디렉터리를 지정하세요.
+sudo env PATH=$PATH pm2 startup systemd -u <user> --hp /home/<user>
 pm2 save
 
 # 3. Nginx 설정
@@ -351,6 +370,13 @@ EOF
 cd your-build-server-root/iitp-data-admin
 npm run deploy:server
 ```
+> 중요: Backend는 최초 배포 또는 `be/package.json` 변경 시 실행 서버에서 의존성 설치가 필요합니다.
+> ```bash
+> cd /var/www/iitp-dabt-admin/be
+> npm ci --omit=dev || npm install --omit=dev
+> pm2 restart iitp-dabt-adm-be
+> ```
+> Frontend는 정적 산출물만 배포되므로 실행 서버에서 `npm install`이 필요하지 않습니다.
 
 #### 2.2.2 개별 배포 및 실행
 ```bash
@@ -377,7 +403,7 @@ npm run restart:server:fe
 ```
 
 ### 2.3 실행 스크립트 상세 (요약)
-- deploy-server.js: rsync → Backend npm install --production → PM2 restart → Nginx reload
+- deploy-server.js: rsync → (필요 시) Backend npm install --omit=dev → PM2 restart → Nginx reload
 - start-server-be.js: npm install --production → PM2 start + 버전/빌드 시간 표시
 - restart-server-be.js: PM2 restart
 
@@ -832,6 +858,14 @@ sudo swapon /swapfile
 pm2 logs iitp-dabt-adm-be
 pm2 status
 
+# 문제: pm2: command not found
+# 원인: PATH에 글로벌 npm bin 또는 nvm Node 경로 미포함
+# 해결:
+# 1) 글로벌 npm bin 확인: npm bin -g  (예: /usr/local/bin)
+# 2) 일시 추가: export PATH="$PATH:/usr/local/bin"
+# 3) nvm 사용 시: export PATH="$PATH:/home/<user>/.nvm/versions/node/v22.x.x/bin"
+# 4) 영구 적용: ~/.bashrc 또는 ~/.profile에 export 추가 후 source
+
 # 문제: Nginx 설정 오류
 # 해결: 설정 파일 검증
 sudo nginx -t
@@ -902,6 +936,14 @@ sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
 - [ ] 모니터링 시스템 설정됨
 
 ## 💡 팁
+
+### Windows 참고 (개발/테스트 용)
+```powershell
+npm install -g pm2
+pm2 -v
+pm2 startup windows
+```
+
 
 ### 자동화
 ```bash

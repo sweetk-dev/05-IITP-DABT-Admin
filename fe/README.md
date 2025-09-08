@@ -77,6 +77,16 @@ VITE_API_TIMEOUT=10000
 VITE_PORT=5173
 ```
 
+> 중요: Vite의 `VITE_*` 환경변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다. 서브패스 배포 시에는 빌드 전에 아래와 같이 설정하세요.
+
+```bash
+# 예: /adm/에서 FE를 서빙하고, API를 Nginx로 /adm/api 프록시할 때
+VITE_BASE=/adm/
+VITE_API_BASE_URL=/adm/api
+```
+
+빌드 후 `dist/index.html`에서 `/adm/` 경로가 반영되었는지 확인하세요.
+
 ### 환경별 설정
 
 #### Development

@@ -191,6 +191,17 @@ npm run deploy:be
 npm run deploy:fe
 ```
 
+> 중요: 실행 서버 의존성 설치 안내
+>
+> - Backend: 최초 배포이거나 `be/package.json`이 변경되었을 때, 실행 서버에서 다음을 실행하세요.
+>   ```bash
+>   cd /var/www/iitp-dabt-admin/be
+>   npm ci --omit=dev || npm install --omit=dev
+>   ```
+>   이후 PM2 재시작.
+>
+> - Frontend: 정적 산출물만 배포하므로 실행 서버에서 `npm install`이 필요하지 않습니다.
+
 #### 3. 배포 전 환경 변수 설정
 
 **전체 배포용:**

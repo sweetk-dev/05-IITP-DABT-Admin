@@ -174,8 +174,11 @@ async function deployFrontend() {
 async function deployCommon() {
   console.log('📦 Common 배포 중...');
   const src = path.posix.join(deployConfig.buildServer.path, 'common/')
-  const dest = path.posix.join(deployConfig.productionServer.bePath, 'node_modules/@iitp-dabt/common/');
-  console.log(`   ▶︎ 배포 모드: ${sameHost ? 'local' : 'ssh'} | dest: ${dest}`);
+  const destNodeModules = path.posix.join(deployConfig.productionServer.bePath, 'node_modules/@iitp-dabt/common/');
+  const destWorkspaceCommon = path.posix.join(deployConfig.productionServer.bePath, '..', 'packages/common/');
+  console.log(`   ▶︎ 배포 모드: ${sameHost ? 'local' : 'ssh'}`);
+  console.log(`   ▶︎ dest(node_modules): ${destNodeModules}`);
+  console.log(`   ▶︎ dest(workspace common): ${destWorkspaceCommon}`);
   if (sameHost) {
     // 대상 경로 보장 (bePath, node_modules, scope 포함)
     const bePath = deployConfig.productionServer.bePath;
@@ -183,7 +186,7 @@ async function deployCommon() {
       bePath,
       path.posix.join(bePath, 'node_modules'),
       path.posix.join(bePath, 'node_modules/@iitp-dabt'),
-      dest
+      destWorkspaceCommon
     ];
     for (const d of baseDirs) {
       try { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); } catch (e) {
@@ -191,14 +194,16 @@ async function deployCommon() {
         throw e;
       }
     }
-    await rsyncLocal(src, dest);
+    // node_modules/@iitp-dabt/common 은 npm이 만든 symlink일 수 있으므로 mkdir/rsync 생략
+    await rsyncLocal(src, destWorkspaceCommon);
   } else {
     // 원격 경로 보장 후 rsync
     const sshBase = ['-p', `${deployConfig.productionServer.port}`, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`];
     const bePath = deployConfig.productionServer.bePath;
-    const mkdirCmd = `mkdir -p ${bePath} ${bePath}/node_modules ${bePath}/node_modules/@iitp-dabt ${dest}`;
+    const mkdirCmd = `mkdir -p ${bePath} ${bePath}/node_modules ${bePath}/node_modules/@iitp-dabt ${destWorkspaceCommon}`;
     await run('ssh', [...sshBase, mkdirCmd]);
-    await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, dest, deployConfig.buildServer.port);
+    // node_modules/@iitp-dabt/common 은 npm이 만든 symlink일 수 있으므로 rsync는 워크스페이스 경로에만 수행
+    await rsyncRemote(`${deployConfig.buildServer.user}@${deployConfig.buildServer.host}`, src, `${deployConfig.productionServer.user}@${deployConfig.productionServer.host}`, destWorkspaceCommon, deployConfig.buildServer.port);
   }
   console.log('✅ Common 배포 완료');
 }

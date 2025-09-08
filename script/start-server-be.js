@@ -113,7 +113,7 @@ async function startBackend() {
   
   // 의존성 설치
   console.log('📦 의존성 설치 중...');
-  const installProcess = spawn('npm', ['install', '--production'], {
+  const installProcess = spawn('npm', ['install', '--omit=dev'], {
     stdio: 'inherit',
     cwd: config.bePath
   });

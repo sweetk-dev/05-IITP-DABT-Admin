@@ -349,6 +349,49 @@ npm run restart:server:be
 npm run restart:server:fe
 ```
 
+### 2.4 재부팅 자동 기동 설정 (PM2)
+
+서버 재부팅 후 BE가 자동 기동되도록 PM2를 systemd에 등록합니다.
+
+```bash
+# root로 실행: iitp-adm 사용자용 PM2 systemd 유닛 생성
+sudo env PATH=$PATH pm2 startup systemd -u iitp-adm --hp /home/iitp-adm
+
+# iitp-adm 사용자로 프로세스 등록 및 저장
+sudo -iu iitp-adm
+pm2 start /var/www/iitp-dabt-admin/be/dist/index.js --name iitp-dabt-adm-be || true
+pm2 save
+
+# 재부팅 후 검증
+pm2 status
+pm2 logs iitp-dabt-adm-be --lines 50
+```
+
+주의:
+- `npm run start:be`는 .env 로드와 `npm install --omit=dev`까지 수행합니다. `pm2 start dist/index.js`는 앱만 실행하므로, 최초 한 번은 `npm run start:be`로 기동 후 `pm2 save`를 권장합니다.
+- 이후 `be/package.json` 변경 배포 시에는 실행 서버에서:
+  ```bash
+  cd /var/www/iitp-dabt-admin/be
+  npm ci --omit=dev || npm install --omit=dev
+  pm2 restart iitp-dabt-adm-be
+  pm2 save
+  ```
+
+검증 체크리스트:
+```bash
+# 유닛 상태/활성화
+sudo systemctl status pm2-iitp-adm | cat
+sudo systemctl is-enabled pm2-iitp-adm
+
+# 부팅 직후 복구 로그 확인(이번 부팅 범위)
+journalctl -u pm2-iitp-adm -b --no-pager | tail -n 100
+
+# 반드시 iitp-adm 컨텍스트에서 상태 확인
+sudo -iu iitp-adm pm2 status
+```
+권장 실행 위치/사용자:
+- BE 기동/저장은 반드시 `iitp-adm` 사용자로, 프로젝트 루트(`/var/www/iitp-dabt-admin`)에서 수행하세요.
+
 ### 배포 전 환경 변수 설정
 
 #### 로컬 배포용

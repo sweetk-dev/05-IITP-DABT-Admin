@@ -295,32 +295,75 @@ sudo env PATH=$PATH pm2 startup systemd -u <user> --hp /home/<user>
 pm2 save
 
 # 3. Nginx 설정
+
+**시나리오 A: 독립 도메인/루트 경로 배포**
+```bash
 sudo tee /etc/nginx/sites-available/iitp-dabt << 'EOF'
+upstream backend {
+    server 127.0.0.1:30000;
+}
+
 server {
     listen 80;
-    server_name your-domain.com;
-    
-    # Frontend
+    server_name admin.example.com;
+    root /var/www/iitp-dabt-admin/fe/dist;
+    index index.html;
+
+    # SPA fallback
     location / {
-        root /var/www/iitp-dabt-admin/fe;
-        index index.html;
         try_files $uri $uri/ /index.html;
     }
     
     # Backend API
-    location /api {
-        proxy_pass http://localhost:30000;
+    location /api/ {
+        proxy_pass http://backend/api/;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
     }
 }
 EOF
+```
+
+**시나리오 B: 서브패스 배포 (여러 서비스 공존)**
+```bash
+sudo tee /etc/nginx/sites-available/iitp-dabt << 'EOF'
+upstream backend {
+    server 127.0.0.1:30000;
+}
+
+server {
+    listen 80;
+    server_name example.com;
+
+    # API 프록시
+    location /adm/api/ {
+        proxy_pass http://backend/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /adm { return 301 /adm/; }
+
+    location ^~ /adm/assets/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/assets/;
+        try_files $uri =404;
+    }
+
+    # SPA fallback (alias 사용 시)
+    location /adm/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/;
+        index index.html;
+        try_files $uri $uri/ /adm/index.html;
+    }
+}
+EOF
+```
 
 # 4. Nginx 설정 활성화
 sudo ln -s /etc/nginx/sites-available/iitp-dabt /etc/nginx/sites-enabled/

@@ -158,10 +158,58 @@ npm start
 ```
 
 #### Frontend 프로덕션 실행
+
+**로컬 프리뷰 (빌드 검증용):**
 ```bash
 cd fe
 npm run build
-npm run preview
+npm run preview  # http://localhost:4173에서 확인
+```
+
+**프로덕션 서버 배포 (Nginx):**
+
+Frontend는 정적 파일로 빌드되어 Nginx로 서빙됩니다.
+
+**Nginx 설정 예시 (서브패스 배포):**
+```nginx
+upstream backend {
+    server 127.0.0.1:30000;
+}
+
+server {
+    listen 80;
+    server_name 192.168.60.142;
+
+    # API 프록시
+    location /adm/api/ {
+        proxy_pass http://backend/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # /adm → /adm/ 리다이렉트
+    location = /adm { return 301 /adm/; }
+
+    # 정적 자산
+    location ^~ /adm/assets/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/assets/;
+        try_files $uri =404;
+    }
+
+    # SPA fallback
+    location /adm/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/;
+        index index.html;
+        try_files $uri $uri/ /adm/index.html;
+    }
+}
+```
+
+적용:
+```bash
+
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ## 🌐 5. 서비스 접속

@@ -267,18 +267,20 @@ server {
         add_header Cache-Control "public, max-age=604800";
     }
 
-    location ~* ^/adm/(.+\.(?:png|jpg|jpeg|gif|svg|ico|woff2?|js|css))$ {
+    # 루트 레벨 정적 파일 (이미지 등)
+    location ~* ^/adm/([^/]+\.(?:png|jpg|jpeg|gif|svg|ico|woff2?|js|css|map))$ {
         alias /var/www/iitp-dabt-admin/fe/dist/$1;
         try_files $uri =404;
         expires 7d;
         add_header Cache-Control "public, max-age=604800";
     }
 
-    # SPA 진입점
-    location ^~ /adm/ {
+    # SPA fallback (React Router 지원)
+    location /adm/ {
         alias /var/www/iitp-dabt-admin/fe/dist/;
         index index.html;
-        try_files $uri $uri/ /index.html;
+        # 중요: alias 사용 시 fallback은 location prefix 포함 경로로 지정
+        try_files $uri $uri/ /adm/index.html;
     }
 
     # API 프록시 (/adm/api/* → /api/*)

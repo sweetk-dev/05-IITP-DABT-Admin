@@ -60,6 +60,10 @@ ls dist/
 
 ## ⚙️ 환경 변수 설정
 
+> **중요**: Frontend의 `VITE_*` 환경변수는 "빌드 시점"에만 주입됩니다. 
+> - **빌드 시**: 서브패스 배포 시 `VITE_BASE`, `VITE_API_BASE_URL` 설정 필요
+> - **실행 시**: `.env` 불필요 (정적 파일만 서빙, 런타임 env 미사용)
+
 ### .env 파일 생성
 
 ```bash
@@ -862,12 +866,30 @@ npm install
 # 2. 공통 패키지 빌드
 cd ../packages/common && npm run build && cd ../../fe
 
-# 3. 프로덕션 빌드
+# 3. 환경변수 설정 (빌드 전)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 시나리오 A: 독립 도메인/루트 경로 배포 (기본)
+# 예: https://admin.example.com 또는 http://192.168.1.100
+# → 환경변수 설정 불필요 (기본값 '/' 사용)
+
+# 시나리오 B: 서브패스 배포 (한 서버에 여러 서비스 공존 시)
+# 예: https://example.com/adm (관리자), https://example.com/docs (문서)
+export VITE_BASE=/adm/
+export VITE_API_BASE_URL=/adm/api
+
+# 4. 프로덕션 빌드
 npm run build
 
-# 4. 빌드 결과물 확인
+# 5. 빌드 결과물 확인
 ls dist/
+# 서브패스 설정 확인: dist/index.html에 /adm/ 경로가 반영되었는지 확인
+grep -Eo 'src="/adm/|href="/adm/' dist/index.html | head
 ```
+
+> **중요**: Vite의 `VITE_*` 환경변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다.
+> 
+> - **시나리오 A (독립 도메인/루트)**: 추가 설정 불필요
+> - **시나리오 B (서브패스)**: 빌드 전에 `VITE_BASE`와 `VITE_API_BASE_URL` 설정 필수
 
 ### 정적 파일 서빙
 

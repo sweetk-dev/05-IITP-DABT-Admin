@@ -186,10 +186,16 @@ npm run build:server:fe
 npm run build:server:common
 ```
 
-> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다. 서브패스(`/adm/`) 배포 시에는 빌드 전에 아래를 설정하고 빌드하세요.
+> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다.
 >
+> **시나리오 A: 독립 도메인/루트 경로 배포 (기본)**
+> - 예: `https://admin.example.com` 또는 `http://192.168.1.100`
+> - 환경변수 설정 불필요 (기본값 `/` 사용)
+>
+> **시나리오 B: 서브패스 배포 (한 서버에 여러 서비스 공존 시)**
+> - 예: `https://example.com/adm` (관리자), `https://example.com/docs` (문서)
+> - 빌드 전 환경변수 설정 필수:
 > ```bash
-> # FE가 /adm/에서 서빙되고 API가 /adm/api로 프록시되는 경우
 > export VITE_BASE=/adm/
 > export VITE_API_BASE_URL=/adm/api
 > npm run build:server:fe
@@ -543,58 +549,33 @@ npm run stop:server:fe
 
 ### 3.3 환경 변수 설정
 
-#### 3.3.0 환경 변수 샘플 파일
+> 배포 스크립트에 필요한 환경 변수 전체 목록과 상세 설명은 **[env-guide.md](env-guide.md)**를 참조하세요.
+
+#### 3.3.1 환경 변수 샘플 파일
 
 프로젝트에는 환경 변수 샘플 파일이 제공됩니다:
 
-
-**빌드 서버용 (build-server*.js 실행용):**
 ```bash
+# 빌드 서버용 (build-server*.js 실행용)
 cp env.sample.build-server .env
-```
 
-**배포 서버용 (deploy-server*.js 실행용):**
-```bash
+# 배포 서버용 (deploy-server*.js 실행용)
 cp env.sample.deploy-server .env
 ```
 
-#### 3.3.1 빌드 서버 환경 변수
-```bash
-# Git 설정
-export GIT_REPO_URL=https://github.com/your-repo/iitp-dabt-admin.git
-export GIT_BRANCH=main
+#### 3.3.2 주요 환경 변수 요약
 
-# 경로 설정
-export SOURCE_PATH=your-build-server-root/iitp-data-admin
-export DEPLOY_PATH=your-build-server-root/iitp-data-admin/deploy
+**빌드 서버:**
+- `SOURCE_PATH`, `DEPLOY_PATH` - 빌드/배포 경로
+- `GIT_REPO_URL`, `GIT_BRANCH` - Git 저장소 정보
 
-# 빌드 설정
-export NODE_ENV=production
-export NPM_CONFIG_PRODUCTION=true
-```
+**실행 서버:**
+- `PROD_BE_PATH`, `PROD_FE_PATH` - 배포 대상 경로
+- `PM2_APP_NAME_BE` - PM2 앱 이름
+- `BUILD_SERVER_HOST`, `PROD_SERVER_HOST` - 서버 접속 정보
 
-#### 3.3.2 실행 서버 환경 변수
-```bash
-# 빌드 서버 설정
-export BUILD_SERVER_HOST=build-server.com
-export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=your-build-server-root/iitp-dabt-admin/deploy
-export BUILD_SERVER_PORT=22
-
-# 기동 서버 설정
-export PROD_SERVER_HOST=prod-server.com
-export PROD_SERVER_USER=produser
-export PROD_SERVER_PORT=22
-
-# Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
-export PM2_APP_NAME_BE=iitp-dabt-adm-be
-
-# Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
-export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
-```
+**Frontend 빌드 (서브패스 배포 시):**
+- `VITE_BASE=/adm/`, `VITE_API_BASE_URL=/adm/api`
 
 ## 📋 4. 배포된 프로젝트 버전 확인
 
@@ -922,9 +903,11 @@ sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
 
 ```bash
 # root로 실행: iitp-adm 사용자용 PM2 systemd 유닛 생성
+# 주의: 홈 디렉토리 경로(/home/iitp-adm)가 실제 환경과 일치하는지 확인하세요
 sudo env PATH=$PATH pm2 startup systemd -u iitp-adm --hp /home/iitp-adm
 
 # iitp-adm 사용자로 프로세스 등록 및 저장
+# 주의: BE 경로(/var/www/iitp-dabt-admin/be)가 실제 배포 경로와 일치하는지 확인하세요
 sudo -iu iitp-adm
 pm2 start /var/www/iitp-dabt-admin/be/dist/index.js --name iitp-dabt-adm-be || true
 pm2 save

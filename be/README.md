@@ -64,6 +64,11 @@ npm start
 
 ## ⚙️ 환경 변수 설정
 
+> **중요**: Backend는 **실행 시 `.env` 파일이 필수**입니다.
+> - **빌드 시**: `.env` 불필요 (TypeScript 컴파일만 수행)
+> - **실행 시**: `.env` 필수 (DB 연결, JWT, 포트 등 런타임 설정)
+> - **배포 환경**: 실행 서버의 `/var/www/iitp-dabt-admin/be/.env`에 반드시 존재해야 함
+
 ### .env 파일 생성
 
 ```bash

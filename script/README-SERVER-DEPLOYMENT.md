@@ -25,7 +25,7 @@ graph TD
     style E fill:#f3e5f5
 ```
 
-### 일상 배포 Flow (설정 완료 후)
+### 업데이트 배포 Flow (설정 완료 후)
 ```mermaid
 graph LR
     A[👨‍💻 개발자<br/>코드 수정] --> B[📤 Git Push]
@@ -100,29 +100,73 @@ graph TB
 ### 1.1 초기 설정 (First Time Setup)
 
 #### 1.1.1 서버 준비
+
+**기본 패키지 설치:**
 ```bash
 # Ubuntu 20.04+ 기준
-sudo apt update
-sudo apt upgrade -y
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git curl unzip jq build-essential
+```
 
-# Node.js 22.x 설치
-# 1. NodeSource 저장소 추가
+**Node.js 22.x 설치 (아래 중 하나 선택):**
+
+**방법 1: nvm 사용 (권장 - 버전 관리 용이)**
+```bash
+# nvm 설치
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc  # 또는 source ~/.zshrc
+
+# Node.js 22 설치 및 기본 버전 설정
+nvm install 22
+nvm use 22
+nvm alias default 22
+```
+- **장점**: 여러 Node.js 버전 관리 가능, 사용자별 설치 (sudo 불필요)
+- **단점**: 쉘 재시작 필요, PM2 PATH 설정 주의 필요
+
+**방법 2: snap 사용 (가장 간단)**
+```bash
+sudo snap install node --classic --channel=22
+```
+- **장점**: 한 줄로 설치 완료, 자동 업데이트
+- **단점**: Ubuntu/일부 배포판만 지원
+
+**방법 3: NodeSource 사용 (전통적 방식, 안정적)**
+```bash
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-
-# 2. Node.js 설치
 sudo apt-get install -y nodejs
+```
+- **장점**: 시스템 전역 설치, 가장 안정적, 모든 사용자가 사용
+- **단점**: 버전 변경 시 재설치 필요
 
-# 설치시 충돌 발생 시 (기본 npm과 충돌) 제거 후 재설치
-# sudo apt remove -y nodejs npm
-# sudo apt purge -y nodejs npm
-# sudo apt autoremove -y
+**설치 확인:**
+```bash
+node -v   # v22.x.x 출력 확인
+npm -v    # 10.x 이상 확인
+which node
+```
 
-# Git 설치
-sudo apt install git -y
+**문제 해결:**
+```bash
+# nvm 명령을 찾을 수 없을 때
+source ~/.nvm/nvm.sh
 
-# SSH 키 설정 (Git 저장소 접근용)
-# Public 저장소인 경우 아래 단계는 생략 가능
-# ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
+# snap 설치 실패 시
+sudo apt install snapd
+sudo systemctl start snapd
+
+# NodeSource 설치 충돌 시
+sudo apt remove -y nodejs npm
+sudo apt purge -y nodejs npm
+sudo apt autoremove -y
+# 그 다음 재설치
+```
+
+**SSH 키 설정 (Git 저장소 접근용):**
+```bash
+# Private 저장소인 경우에만 필요
+ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
+# Public 저장소인 경우 생략 가능
 ```
 
 #### 1.1.2 프로젝트 설정
@@ -250,27 +294,58 @@ flowchart TD
 ### 2.1 초기 설정 (First Time Setup)
 
 #### 2.1.1 서버 준비
+
+**기본 패키지 설치:**
 ```bash
 # Ubuntu 20.04+ 기준
-sudo apt update
-sudo apt upgrade -y
-
-# Node.js 22.x 설치
-# 1. NodeSource 저장소 추가
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-
-# 2. Node.js 설치
-sudo apt-get install -y nodejs
-
-# PM2 설치
-sudo npm install -g pm2
-
-# Nginx 설치
-sudo apt install nginx -y
-
-# PostgreSQL 설치
-sudo apt install postgresql postgresql-contrib -y
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git curl unzip jq build-essential nginx postgresql postgresql-contrib
 ```
+
+**Node.js 22.x 설치 (아래 중 하나 선택):**
+
+**방법 1: nvm 사용 (권장 - 버전 관리 용이)**
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+
+nvm install 22
+nvm use 22
+nvm alias default 22
+```
+- **장점**: 여러 버전 관리, 사용자별 설치
+- **단점**: PM2 PATH 설정 필요
+
+**방법 2: snap 사용 (가장 간단)**
+```bash
+sudo snap install node --classic --channel=22
+```
+- **장점**: 한 줄 설치, 자동 업데이트
+- **단점**: Ubuntu/일부 배포판만 지원
+
+**방법 3: NodeSource 사용 (전통적, 안정적)**
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+- **장점**: 시스템 전역 설치, 안정적
+- **단점**: 버전 변경 시 재설치
+
+**설치 확인:**
+```bash
+node -v && npm -v && which node
+```
+
+**PM2 설치:**
+```bash
+sudo npm install -g pm2
+pm2 -v
+```
+
+> **nvm 사용 시 주의**: PM2 startup 설정 시 PATH 명시 필요
+> ```bash
+> sudo env PATH=$PATH pm2 startup systemd -u <user> --hp /home/<user>
+> ```
 
 #### 2.1.2 실행 환경 설정
 ```bash
@@ -536,6 +611,16 @@ npm run build:server:fe
 # 3. fe/dist를 deploy 폴더로 복사
 ```
 
+#### 3.1.4 build-server-common.js
+```bash
+# Common 패키지만 빌드
+npm run build:server:common
+
+# 내부 동작:
+# 1. packages/common 빌드
+# 2. common/dist를 deploy 폴더로 복사
+```
+
 ### 3.2 실행 서버 스크립트
 #### 3.2.1 deploy-server.js
 ```bash
@@ -557,7 +642,57 @@ node script/deploy-server-ops.js
   1) 빌드 서버: `npm run build:server`
   2) (최초 1회) 실행 서버 운영 스크립트 배포: `npm run deploy:server:ops`
   3) 실행 서버로 배포: `npm run deploy:server`
-  4) 서버 기동: `npm run start:server:be`, `npm run start:server:fe`
+  4) 서버 기동: `npm run start:server:be`, `npm run restart:server:fe`
+
+#### 3.2.1.2 deploy-server-common.js (Common 단독 배포)
+```bash
+# Common 패키지만 배포
+npm run deploy:server:common
+
+# 내부 동작:
+# 1. deploy/common/ → /var/www/iitp-dabt-admin/packages/common/ rsync
+# 2. 권한 설정 (755/644)
+# 3. 버전 정보 출력
+```
+
+**사용 시나리오:**
+- 공통 검증 로직 버그 수정 (예: `isValidEmail` 핫픽스)
+- 타입 정의 추가/수정 (예: 새 API 응답 타입)
+- 에러 코드 추가
+- **장점**: BE/FE 재빌드 없이 5~10분 내 배포 가능
+- **주의**: 배포 후 **반드시 BE 재시작 필수**
+
+**배포 흐름:**
+```bash
+# 빌드 서버
+npm run build:server:common
+
+# 실행 서버
+npm run deploy:server:common
+npm run restart:server:be  # BE 재시작 필수
+# FE는 재시작 불필요 (정적 파일, 빌드 시 이미 포함됨)
+```
+
+#### 3.2.1.3 deploy-server-be.js (Backend 단독 배포)
+```bash
+# Backend만 배포
+npm run deploy:server:be
+
+# 내부 동작:
+# 1. deploy/backend/ → /var/www/iitp-dabt-admin/be/ rsync
+# 2. npm ci --omit=dev (실행 서버에서 프로덕션 의존성 설치)
+# 3. 권한 설정
+```
+
+#### 3.2.1.4 deploy-server-fe.js (Frontend 단독 배포)
+```bash
+# Frontend만 배포
+npm run deploy:server:fe
+
+# 내부 동작:
+# 1. deploy/frontend/dist/ → /var/www/iitp-dabt-admin/fe/dist/ rsync
+# 2. 권한 설정
+```
 
 #### 3.2.2 start-server-be.js
 ```bash
@@ -578,13 +713,32 @@ npm run restart:server:be
 # 1. PM2 restart iitp-dabt-adm-be
 ```
 
-#### 3.2.4 stop-server-be.js
+#### 3.2.4 start-server-fe.js
+```bash
+# Frontend 서버 시작 (Nginx reload)
+npm run start:server:fe
+
+# 내부 동작:
+# 1. 버전 정보 출력
+# 2. nginx -t (설정 검증)
+# 3. systemctl reload nginx
+```
+
+> **중요**: 이 스크립트는 Nginx 설정을 생성하지 않습니다. Nginx 설정은 사전에 수동으로 구성되어 있어야 합니다. 설정 예시는 섹션 2.1.2 참조.
+
+#### 3.2.5 restart-server-fe.js
+```bash
+# Frontend 서버 재시작 (Nginx reload)
+npm run restart:server:fe
+```
+
+#### 3.2.6 stop-server-be.js
 ```bash
 # Backend 서버 중지 (PM2)
 npm run stop:server:be
 ```
 
-#### 3.2.5 stop-server-fe.js
+#### 3.2.7 stop-server-fe.js
 ```bash
 # Frontend Nginx 비활성화 (중지)
 npm run stop:server:fe

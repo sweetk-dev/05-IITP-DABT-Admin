@@ -15,29 +15,87 @@
 
 아래는 Ubuntu 20.04+ 기준 예시입니다. 다른 배포판은 패키지 명칭만 차이 있을 수 있습니다.
 
+### 0.0 기본 패키지 설치
 ```bash
 sudo apt update && sudo apt upgrade -y
 
 # 필수 패키지
 sudo apt install -y git curl unzip jq build-essential nginx
 
-# Node.js 22.x 설치 (NodeSource)
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# PM2 글로벌 설치
-sudo npm install -g pm2
-
 # PostgreSQL (필요 시)
 sudo apt install -y postgresql postgresql-contrib
 ```
 
-확인:
+### Node.js 22.x 설치 (아래 중 하나 선택)
+
+**방법 1: nvm 사용 (권장 - 버전 관리 용이)**
 ```bash
-node -v
-npm -v
+# nvm 설치
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc  # 또는 source ~/.zshrc
+
+# Node.js 22 설치 및 기본 버전 설정
+nvm install 22
+nvm use 22
+nvm alias default 22
+```
+- **장점**: 여러 Node.js 버전 관리 가능, 사용자별 설치 (sudo 불필요)
+- **단점**: 쉘 재시작 필요, PM2 PATH 설정 주의 필요
+
+**방법 2: snap 사용 (가장 간단)**
+```bash
+sudo snap install node --classic --channel=22
+```
+- **장점**: 한 줄로 설치 완료, 자동 업데이트
+- **단점**: Ubuntu/일부 배포판만 지원, snap 환경 필요
+
+**방법 3: NodeSource 사용 (전통적 방식, 안정적)**
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+- **장점**: 시스템 전역 설치, 가장 안정적, 모든 사용자가 사용
+- **단점**: 버전 변경 시 재설치 필요
+
+**설치 확인:**
+```bash
+node -v   # v22.x.x 출력 확인
+npm -v    # 10.x 이상 확인
+which node
+```
+
+**PM2 글로벌 설치:**
+```bash
+# nvm 또는 NodeSource 사용 시
+sudo npm install -g pm2
+
+# snap 사용 시
+sudo npm install -g pm2
+
+# 확인
 pm2 -v
-nginx -t && systemctl status nginx --no-pager | cat
+```
+
+> **PM2 사용 시 주의**: nvm으로 설치한 경우 PM2 startup 설정 시 PATH를 명시해야 합니다.
+> ```bash
+> # nvm 사용 시
+> sudo env PATH=$PATH pm2 startup systemd -u <user> --hp /home/<user>
+> ```
+
+**문제 해결:**
+```bash
+# nvm 명령을 찾을 수 없을 때
+source ~/.nvm/nvm.sh
+
+# snap 설치 실패 시
+sudo apt install snapd
+sudo systemctl start snapd
+
+# NodeSource 설치 충돌 시
+sudo apt remove -y nodejs npm
+sudo apt purge -y nodejs npm
+sudo apt autoremove -y
+# 그 다음 재설치
 ```
 
 ### 0.1 운영 계정 및 디렉터리 구조
@@ -134,6 +192,11 @@ cd /home/iitp-adm/iitp-dabt-admin/source
 # 전체 빌드 (common → be → fe 순, dist 검증 및 보강 포함)
 npm run build:server
 
+# 또는 개별 빌드
+npm run build:server:common    # Common만
+npm run build:server:be        # Backend만
+npm run build:server:fe        # Frontend만
+
 # 빌드 산출물 확인
 ls -l /home/iitp-adm/iitp-dabt-admin/deploy
 ls -l /home/iitp-adm/iitp-dabt-admin/deploy/backend
@@ -179,9 +242,18 @@ PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 
 배포 실행:
 ```bash
-# 동일 서버지만 필요 작업에 sudo가 요구될 수 있음
+# 전체 배포 (동일 서버지만 필요 작업에 sudo가 요구될 수 있음)
 sudo npm run deploy:server
+
+# 또는 개별 배포
+sudo npm run deploy:server:common  # Common만
+sudo npm run deploy:server:be      # Backend만
+sudo npm run deploy:server:fe      # Frontend만
 ```
+
+> **Common 단독 배포 후 주의:**
+> - 배포 후 **반드시 BE 재시작 필수**: `sudo npm run restart:server:be`
+> - FE는 재시작 불필요 (정적 파일, 빌드 시 이미 포함됨)
 
 배포 후 확인:
 ```bash

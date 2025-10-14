@@ -25,7 +25,7 @@ graph TD
     style E fill:#f3e5f5
 ```
 
-### 일상 배포 Flow (설정 완료 후)
+### 업데이트 배포 Flow (설정 완료 후)
 ```mermaid
 graph LR
     A[👨‍💻 개발자<br/>코드 수정] --> B[📤 Git Push]
@@ -100,29 +100,73 @@ graph TB
 ### 1.1 초기 설정 (First Time Setup)
 
 #### 1.1.1 서버 준비
+
+**기본 패키지 설치:**
 ```bash
 # Ubuntu 20.04+ 기준
-sudo apt update
-sudo apt upgrade -y
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git curl unzip jq build-essential
+```
 
-# Node.js 22.x 설치
-# 1. NodeSource 저장소 추가
+**Node.js 22.x 설치 (아래 중 하나 선택):**
+
+**방법 1: nvm 사용 (권장 - 버전 관리 용이)**
+```bash
+# nvm 설치
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc  # 또는 source ~/.zshrc
+
+# Node.js 22 설치 및 기본 버전 설정
+nvm install 22
+nvm use 22
+nvm alias default 22
+```
+- **장점**: 여러 Node.js 버전 관리 가능, 사용자별 설치 (sudo 불필요)
+- **단점**: 쉘 재시작 필요, PM2 PATH 설정 주의 필요
+
+**방법 2: snap 사용 (가장 간단)**
+```bash
+sudo snap install node --classic --channel=22
+```
+- **장점**: 한 줄로 설치 완료, 자동 업데이트
+- **단점**: Ubuntu/일부 배포판만 지원
+
+**방법 3: NodeSource 사용 (전통적 방식, 안정적)**
+```bash
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-
-# 2. Node.js 설치
 sudo apt-get install -y nodejs
+```
+- **장점**: 시스템 전역 설치, 가장 안정적, 모든 사용자가 사용
+- **단점**: 버전 변경 시 재설치 필요
 
-# 설치시 충돌 발생 시 (기본 npm과 충돌) 제거 후 재설치
-# sudo apt remove -y nodejs npm
-# sudo apt purge -y nodejs npm
-# sudo apt autoremove -y
+**설치 확인:**
+```bash
+node -v   # v22.x.x 출력 확인
+npm -v    # 10.x 이상 확인
+which node
+```
 
-# Git 설치
-sudo apt install git -y
+**문제 해결:**
+```bash
+# nvm 명령을 찾을 수 없을 때
+source ~/.nvm/nvm.sh
 
-# SSH 키 설정 (Git 저장소 접근용)
-# Public 저장소인 경우 아래 단계는 생략 가능
-# ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
+# snap 설치 실패 시
+sudo apt install snapd
+sudo systemctl start snapd
+
+# NodeSource 설치 충돌 시
+sudo apt remove -y nodejs npm
+sudo apt purge -y nodejs npm
+sudo apt autoremove -y
+# 그 다음 재설치
+```
+
+**SSH 키 설정 (Git 저장소 접근용):**
+```bash
+# Private 저장소인 경우에만 필요
+ssh-keygen -t rsa -b 4096 -C "build-server@your-domain.com"
+# Public 저장소인 경우 생략 가능
 ```
 
 #### 1.1.2 프로젝트 설정
@@ -186,10 +230,16 @@ npm run build:server:fe
 npm run build:server:common
 ```
 
-> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다. 서브패스(`/adm/`) 배포 시에는 빌드 전에 아래를 설정하고 빌드하세요.
+> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다.
 >
+> **시나리오 A: 독립 도메인/루트 경로 배포 (기본)**
+> - 예: `https://admin.example.com` 또는 `http://192.168.1.100`
+> - 환경변수 설정 불필요 (기본값 `/` 사용)
+>
+> **시나리오 B: 서브패스 배포 (한 서버에 여러 서비스 공존 시)**
+> - 예: `https://example.com/adm` (관리자), `https://example.com/docs` (문서)
+> - 빌드 전 환경변수 설정 필수:
 > ```bash
-> # FE가 /adm/에서 서빙되고 API가 /adm/api로 프록시되는 경우
 > export VITE_BASE=/adm/
 > export VITE_API_BASE_URL=/adm/api
 > npm run build:server:fe
@@ -244,27 +294,58 @@ flowchart TD
 ### 2.1 초기 설정 (First Time Setup)
 
 #### 2.1.1 서버 준비
+
+**기본 패키지 설치:**
 ```bash
 # Ubuntu 20.04+ 기준
-sudo apt update
-sudo apt upgrade -y
-
-# Node.js 22.x 설치
-# 1. NodeSource 저장소 추가
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-
-# 2. Node.js 설치
-sudo apt-get install -y nodejs
-
-# PM2 설치
-sudo npm install -g pm2
-
-# Nginx 설치
-sudo apt install nginx -y
-
-# PostgreSQL 설치
-sudo apt install postgresql postgresql-contrib -y
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git curl unzip jq build-essential nginx postgresql postgresql-contrib
 ```
+
+**Node.js 22.x 설치 (아래 중 하나 선택):**
+
+**방법 1: nvm 사용 (권장 - 버전 관리 용이)**
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+
+nvm install 22
+nvm use 22
+nvm alias default 22
+```
+- **장점**: 여러 버전 관리, 사용자별 설치
+- **단점**: PM2 PATH 설정 필요
+
+**방법 2: snap 사용 (가장 간단)**
+```bash
+sudo snap install node --classic --channel=22
+```
+- **장점**: 한 줄 설치, 자동 업데이트
+- **단점**: Ubuntu/일부 배포판만 지원
+
+**방법 3: NodeSource 사용 (전통적, 안정적)**
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+- **장점**: 시스템 전역 설치, 안정적
+- **단점**: 버전 변경 시 재설치
+
+**설치 확인:**
+```bash
+node -v && npm -v && which node
+```
+
+**PM2 설치:**
+```bash
+sudo npm install -g pm2
+pm2 -v
+```
+
+> **nvm 사용 시 주의**: PM2 startup 설정 시 PATH 명시 필요
+> ```bash
+> sudo env PATH=$PATH pm2 startup systemd -u <user> --hp /home/<user>
+> ```
 
 #### 2.1.2 실행 환경 설정
 ```bash
@@ -289,32 +370,75 @@ sudo env PATH=$PATH pm2 startup systemd -u <user> --hp /home/<user>
 pm2 save
 
 # 3. Nginx 설정
+
+**시나리오 A: 독립 도메인/루트 경로 배포**
+```bash
 sudo tee /etc/nginx/sites-available/iitp-dabt << 'EOF'
+upstream backend {
+    server 127.0.0.1:30000;
+}
+
 server {
     listen 80;
-    server_name your-domain.com;
-    
-    # Frontend
+    server_name admin.example.com;
+    root /var/www/iitp-dabt-admin/fe/dist;
+    index index.html;
+
+    # SPA fallback
     location / {
-        root /var/www/iitp-dabt-admin/fe;
-        index index.html;
         try_files $uri $uri/ /index.html;
     }
     
     # Backend API
-    location /api {
-        proxy_pass http://localhost:30000;
+    location /api/ {
+        proxy_pass http://backend/api/;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
     }
 }
 EOF
+```
+
+**시나리오 B: 서브패스 배포 (여러 서비스 공존)**
+```bash
+sudo tee /etc/nginx/sites-available/iitp-dabt << 'EOF'
+upstream backend {
+    server 127.0.0.1:30000;
+}
+
+server {
+    listen 80;
+    server_name example.com;
+
+    # API 프록시
+    location /adm/api/ {
+        proxy_pass http://backend/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /adm { return 301 /adm/; }
+
+    location ^~ /adm/assets/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/assets/;
+        try_files $uri =404;
+    }
+
+    # SPA fallback (alias 사용 시)
+    location /adm/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/;
+        index index.html;
+        try_files $uri $uri/ /adm/index.html;
+    }
+}
+EOF
+```
 
 # 4. Nginx 설정 활성화
 sudo ln -s /etc/nginx/sites-available/iitp-dabt /etc/nginx/sites-enabled/
@@ -487,6 +611,16 @@ npm run build:server:fe
 # 3. fe/dist를 deploy 폴더로 복사
 ```
 
+#### 3.1.4 build-server-common.js
+```bash
+# Common 패키지만 빌드
+npm run build:server:common
+
+# 내부 동작:
+# 1. packages/common 빌드
+# 2. common/dist를 deploy 폴더로 복사
+```
+
 ### 3.2 실행 서버 스크립트
 #### 3.2.1 deploy-server.js
 ```bash
@@ -508,7 +642,57 @@ node script/deploy-server-ops.js
   1) 빌드 서버: `npm run build:server`
   2) (최초 1회) 실행 서버 운영 스크립트 배포: `npm run deploy:server:ops`
   3) 실행 서버로 배포: `npm run deploy:server`
-  4) 서버 기동: `npm run start:server:be`, `npm run start:server:fe`
+  4) 서버 기동: `npm run start:server:be`, `npm run restart:server:fe`
+
+#### 3.2.1.2 deploy-server-common.js (Common 단독 배포)
+```bash
+# Common 패키지만 배포
+npm run deploy:server:common
+
+# 내부 동작:
+# 1. deploy/common/ → /var/www/iitp-dabt-admin/packages/common/ rsync
+# 2. 권한 설정 (755/644)
+# 3. 버전 정보 출력
+```
+
+**사용 시나리오:**
+- 공통 검증 로직 버그 수정 (예: `isValidEmail` 핫픽스)
+- 타입 정의 추가/수정 (예: 새 API 응답 타입)
+- 에러 코드 추가
+- **장점**: BE/FE 재빌드 없이 5~10분 내 배포 가능
+- **주의**: 배포 후 **반드시 BE 재시작 필수**
+
+**배포 흐름:**
+```bash
+# 빌드 서버
+npm run build:server:common
+
+# 실행 서버
+npm run deploy:server:common
+npm run restart:server:be  # BE 재시작 필수
+# FE는 재시작 불필요 (정적 파일, 빌드 시 이미 포함됨)
+```
+
+#### 3.2.1.3 deploy-server-be.js (Backend 단독 배포)
+```bash
+# Backend만 배포
+npm run deploy:server:be
+
+# 내부 동작:
+# 1. deploy/backend/ → /var/www/iitp-dabt-admin/be/ rsync
+# 2. npm ci --omit=dev (실행 서버에서 프로덕션 의존성 설치)
+# 3. 권한 설정
+```
+
+#### 3.2.1.4 deploy-server-fe.js (Frontend 단독 배포)
+```bash
+# Frontend만 배포
+npm run deploy:server:fe
+
+# 내부 동작:
+# 1. deploy/frontend/dist/ → /var/www/iitp-dabt-admin/fe/dist/ rsync
+# 2. 권한 설정
+```
 
 #### 3.2.2 start-server-be.js
 ```bash
@@ -529,13 +713,32 @@ npm run restart:server:be
 # 1. PM2 restart iitp-dabt-adm-be
 ```
 
-#### 3.2.4 stop-server-be.js
+#### 3.2.4 start-server-fe.js
+```bash
+# Frontend 서버 시작 (Nginx reload)
+npm run start:server:fe
+
+# 내부 동작:
+# 1. 버전 정보 출력
+# 2. nginx -t (설정 검증)
+# 3. systemctl reload nginx
+```
+
+> **중요**: 이 스크립트는 Nginx 설정을 생성하지 않습니다. Nginx 설정은 사전에 수동으로 구성되어 있어야 합니다. 설정 예시는 섹션 2.1.2 참조.
+
+#### 3.2.5 restart-server-fe.js
+```bash
+# Frontend 서버 재시작 (Nginx reload)
+npm run restart:server:fe
+```
+
+#### 3.2.6 stop-server-be.js
 ```bash
 # Backend 서버 중지 (PM2)
 npm run stop:server:be
 ```
 
-#### 3.2.5 stop-server-fe.js
+#### 3.2.7 stop-server-fe.js
 ```bash
 # Frontend Nginx 비활성화 (중지)
 npm run stop:server:fe
@@ -543,58 +746,33 @@ npm run stop:server:fe
 
 ### 3.3 환경 변수 설정
 
-#### 3.3.0 환경 변수 샘플 파일
+> 배포 스크립트에 필요한 환경 변수 전체 목록과 상세 설명은 **[env-guide.md](env-guide.md)**를 참조하세요.
+
+#### 3.3.1 환경 변수 샘플 파일
 
 프로젝트에는 환경 변수 샘플 파일이 제공됩니다:
 
-
-**빌드 서버용 (build-server*.js 실행용):**
 ```bash
+# 빌드 서버용 (build-server*.js 실행용)
 cp env.sample.build-server .env
-```
 
-**배포 서버용 (deploy-server*.js 실행용):**
-```bash
+# 배포 서버용 (deploy-server*.js 실행용)
 cp env.sample.deploy-server .env
 ```
 
-#### 3.3.1 빌드 서버 환경 변수
-```bash
-# Git 설정
-export GIT_REPO_URL=https://github.com/your-repo/iitp-dabt-admin.git
-export GIT_BRANCH=main
+#### 3.3.2 주요 환경 변수 요약
 
-# 경로 설정
-export SOURCE_PATH=your-build-server-root/iitp-data-admin
-export DEPLOY_PATH=your-build-server-root/iitp-data-admin/deploy
+**빌드 서버:**
+- `SOURCE_PATH`, `DEPLOY_PATH` - 빌드/배포 경로
+- `GIT_REPO_URL`, `GIT_BRANCH` - Git 저장소 정보
 
-# 빌드 설정
-export NODE_ENV=production
-export NPM_CONFIG_PRODUCTION=true
-```
+**실행 서버:**
+- `PROD_BE_PATH`, `PROD_FE_PATH` - 배포 대상 경로
+- `PM2_APP_NAME_BE` - PM2 앱 이름
+- `BUILD_SERVER_HOST`, `PROD_SERVER_HOST` - 서버 접속 정보
 
-#### 3.3.2 실행 서버 환경 변수
-```bash
-# 빌드 서버 설정
-export BUILD_SERVER_HOST=build-server.com
-export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=your-build-server-root/iitp-dabt-admin/deploy
-export BUILD_SERVER_PORT=22
-
-# 기동 서버 설정
-export PROD_SERVER_HOST=prod-server.com
-export PROD_SERVER_USER=produser
-export PROD_SERVER_PORT=22
-
-# Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
-export PM2_APP_NAME_BE=iitp-dabt-adm-be
-
-# Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
-export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
-```
+**Frontend 빌드 (서브패스 배포 시):**
+- `VITE_BASE=/adm/`, `VITE_API_BASE_URL=/adm/api`
 
 ## 📋 4. 배포된 프로젝트 버전 확인
 
@@ -915,6 +1093,51 @@ netstat -tulpn | grep :80
 # 데이터베이스 연결 확인
 sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
 ```
+
+## 🔁 재부팅 자동 기동 설정 (PM2)
+
+서버 재부팅 후 Backend가 자동 기동되도록 PM2를 systemd에 등록합니다.
+
+```bash
+# root로 실행: iitp-adm 사용자용 PM2 systemd 유닛 생성
+# 주의: 홈 디렉토리 경로(/home/iitp-adm)가 실제 환경과 일치하는지 확인하세요
+sudo env PATH=$PATH pm2 startup systemd -u iitp-adm --hp /home/iitp-adm
+
+# iitp-adm 사용자로 프로세스 등록 및 저장
+# 주의: BE 경로(/var/www/iitp-dabt-admin/be)가 실제 배포 경로와 일치하는지 확인하세요
+sudo -iu iitp-adm
+pm2 start /var/www/iitp-dabt-admin/be/dist/index.js --name iitp-dabt-adm-be || true
+pm2 save
+
+# 재부팅 후 검증
+pm2 status
+pm2 logs iitp-dabt-adm-be --lines 50
+```
+
+주의:
+- `npm run start:be`는 .env 로드와 `npm install --omit=dev`까지 수행합니다. `pm2 start dist/index.js`는 앱만 실행하므로, 최초 한 번은 `npm run start:be`로 기동 후 `pm2 save`를 권장합니다.
+- 이후 `be/package.json` 변경 배포 시에는 실행 서버에서:
+  ```bash
+  cd /var/www/iitp-dabt-admin/be
+  npm ci --omit=dev || npm install --omit=dev
+  pm2 restart iitp-dabt-adm-be
+  pm2 save
+  ```
+
+검증 체크리스트:
+```bash
+# 유닛 상태/활성화
+sudo systemctl status pm2-iitp-adm | cat
+sudo systemctl is-enabled pm2-iitp-adm
+
+# 부팅 직후 복구 로그 확인(이번 부팅 범위)
+journalctl -u pm2-iitp-adm -b --no-pager | tail -n 100
+
+# 반드시 iitp-adm 컨텍스트에서 상태 확인
+sudo -iu iitp-adm pm2 status
+```
+권장 실행 위치/사용자:
+- BE 기동/저장은 반드시 `iitp-adm` 사용자로, 프로젝트 루트(`/var/www/iitp-dabt-admin`)에서 수행하세요.
 
 ## ✅ 배포 체크리스트
 

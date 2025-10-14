@@ -89,24 +89,32 @@ npm run deploy:server
 
 ##### 2. 개별 배포
 ```bash
+# Common 패키지만 배포
+npm run deploy:server:common
+
 # Backend만 배포
 npm run deploy:server:be
 
 # Frontend만 배포
 npm run deploy:server:fe
-
-# Common 패키지만 배포
-npm run deploy:server:common
 ```
+
+> **Common 단독 배포 시 주의:**
+> - 배포 후 **Backend 재시작 필수**: `npm run restart:server:be`
+> - Frontend는 재시작 불필요 (정적 파일, 빌드에 이미 포함됨)
+> - **사용 시나리오**: 공통 검증 로직/타입 핫픽스, BE/FE 재빌드 없이 Common만 업데이트
 
 ##### 3. 서버 시작
 ```bash
 # Backend 서버 시작 (PM2)
 npm run start:server:be
 
-# Frontend 서버 시작 (Nginx)
+# Frontend 서버 시작 (Nginx reload)
+# 주의: Nginx 설정은 사전에 수동으로 구성되어 있어야 함
 npm run start:server:fe
 ```
+
+> **Frontend 배포 시**: Nginx 설정을 사전에 구성하세요. 설정 예시는 [README-SERVER-DEPLOYMENT.md](README-SERVER-DEPLOYMENT.md) 또는 [README-ONE-SERVER-BUILD-DEPLOY.md](README-ONE-SERVER-BUILD-DEPLOY.md) 참조
 
 ##### 4. 서버 재시작
 ```bash
@@ -119,100 +127,25 @@ npm run restart:server:fe
 
 ## ⚙️ 환경 변수 설정
 
-### 로컬 → 서버 배포용
+> **환경 변수 파일(.env) 역할 정리:**
+> - **Backend**: 빌드 시 `.env` 불필요, **실행 시 `.env` 필수** (DB, JWT, 포트 등 런타임 설정)
+> - **Frontend**: 빌드 시 `.env` 조건부 필요(서브패스 시), **실행 시 `.env` 불필요** (정적 파일만 서빙)
 
-#### 전체 배포용
-```bash
-# Backend 서버
-export BE_HOST=your-backend-server.com
-export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-admin/be
+### 주요 환경 변수 요약
 
-# Frontend 서버
-export FE_HOST=your-frontend-server.com
-export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-admin/fe
-```
+**로컬 → 서버 배포용:**
+- `BE_HOST`, `BE_USER`, `BE_PATH`
+- `FE_HOST`, `FE_USER`, `FE_PATH`
 
-#### 개별 배포용
-```bash
-# Common 패키지
-export COMMON_HOST=your-common-server.com
-export COMMON_USER=your-username
-export COMMON_PATH=/var/www/iitp-dabt-common
+**서버 간 배포용:**
+- 빌드 서버: `SOURCE_PATH`, `DEPLOY_PATH`, `GIT_REPO_URL`, `GIT_BRANCH`
+- 실행 서버: `BUILD_SERVER_HOST`, `PROD_SERVER_HOST`, `PROD_BE_PATH`, `PROD_FE_PATH`, `PM2_APP_NAME_BE`
 
-# Backend
-export BE_HOST=your-backend-server.com
-export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-admin/be
+**Frontend 빌드용 (서브패스 배포 시):**
+- `VITE_BASE=/adm/`
+- `VITE_API_BASE_URL=/adm/api`
 
-# Frontend
-export FE_HOST=your-frontend-server.com
-export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-admin/fe
-```
-
-### 서버 → 서버 배포용
-
-#### 빌드 서버용
-```bash
-# Git 설정
-export GIT_REPO_URL=https://github.com/iitp/dabt-admin.git
-export GIT_BRANCH=main
-
-# 경로 설정
-export SOURCE_PATH=/home/iitp-adm/iitp-dabt-admin/source
-export DEPLOY_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
-
-# 빌드 설정
-export NODE_ENV=production
-export NPM_CONFIG_PRODUCTION=true
-```
-
-#### 기동 서버용
-```bash
-# 빌드 서버 설정
-export BUILD_SERVER_HOST=build-server.com
-export BUILD_SERVER_USER=builduser
-export BUILD_SERVER_PATH=/home/iitp-adm/iitp-dabt-admin/deploy
-export BUILD_SERVER_PORT=22
-
-# 기동 서버 설정
-export PROD_SERVER_HOST=prod-server.com
-export PROD_SERVER_USER=produser
-export PROD_SERVER_PORT=22
-
-# Backend 설정
-export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
-export PM2_APP_NAME_BE=iitp-dabt-adm-be
-
-# Frontend 설정
-export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
-export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
-
-# 데이터베이스 설정
-export DB_HOST=your-db-server.com
-export DB_PORT=5432
-export DB_NAME=iitp_dabt_admin
-export DB_USER=your_db_user
-export DB_PASSWORD=your_db_password
-
-# JWT 설정
-export JWT_SECRET=your-production-jwt-secret
-export JWT_ISSUER=iitp-dabt-api
-export ACCESS_TOKEN_EXPIRES_IN=15m
-export REFRESH_TOKEN_EXPIRES_IN=7d
-
-# 암호화 설정
-export ENC_SECRET=your-production-encryption-secret
-
-# CORS 설정
-export CORS_ORIGINS=https://your-domain.com,https://www.your-domain.com
-
-# 로깅 설정
-export LOG_LEVEL=warn
-```
+> **상세 환경변수 목록 및 설명**: **[env-guide.md](env-guide.md)** 참조
 
 ## 📁 배포 파일 구조
 

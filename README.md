@@ -149,113 +149,67 @@ React + TypeScript + Vite 기반의 관리자 웹 인터페이스입니다.
    npm run dev  # Vite 개발 서버
    ```
 
-### 빌드
+### 로컬 개발 빌드
 
-1. **전체 빌드 (권장)**
-   ```bash
-   npm run build
-   ```
-   
-   > **🖥️ OS 자동 감지**: Windows, Linux, macOS 환경에서 자동으로 적절한 스크립트를 실행합니다.
+```bash
+# 전체 빌드 (권장)
+npm run build
 
-2. **개별 빌드**
-   ```bash
-   # 공통 패키지
-   cd packages/common && npm run build
-   
-   # Backend
-   cd be && npm run build
-   
-   # Frontend
-   cd fe && npm run build
-   ```
+# 개별 빌드
+npm run build:be
+npm run build:fe
+npm run build:common
+```
+
+> **🖥️ OS 자동 감지**: Windows, Linux, macOS 환경에서 자동으로 적절한 스크립트를 실행합니다.
 
 ### 배포
 
-#### 1. 전체 배포 (권장)
+#### 로컬 → 서버 배포 (개발/테스트용)
 ```bash
-npm run deploy
+npm run deploy        # 전체 배포
+npm run deploy:be     # Backend만
+npm run deploy:fe     # Frontend만
 ```
 
-> **🖥️ OS 자동 감지**: Windows, Linux, macOS 환경에서 자동으로 적절한 배포 스크립트를 실행합니다.
+환경 변수 상세는 **[script/README.md](script/README.md)** 참조
 
-#### 2. 개별 배포
+#### 서버 간 배포 (프로덕션 권장)
+**빌드 서버:**
 ```bash
-# Common 패키지만 배포
-npm run deploy:common
-
-# Backend만 배포
-npm run deploy:be
-
-# Frontend만 배포
-npm run deploy:fe
+npm run build:server           # 전체 빌드
+# 또는 개별 빌드
+npm run build:server:common    # Common만
+npm run build:server:be        # Backend만
+npm run build:server:fe        # Frontend만
 ```
 
-> 중요: 실행 서버 의존성 설치 안내
->
-> - Backend: 최초 배포이거나 `be/package.json`이 변경되었을 때, 실행 서버에서 다음을 실행하세요.
->   ```bash
->   cd /var/www/iitp-dabt-admin/be
->   npm ci --omit=dev || npm install --omit=dev
->   ```
->   이후 PM2 재시작.
->
-> - Frontend: 정적 산출물만 배포하므로 실행 서버에서 `npm install`이 필요하지 않습니다.
-
-#### 3. 배포 전 환경 변수 설정
-
-**전체 배포용:**
+**실행 서버:**
 ```bash
-# Backend 서버 설정
-export BE_HOST=your-backend-server.com
-export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-admin/be
+# 최초 1회
+npm run deploy:server:ops
 
-# Frontend 서버 설정
-export FE_HOST=your-frontend-server.com
-export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-admin/fe
+# 전체 배포
+npm run deploy:server
+npm run start:server:be
+npm run restart:server:fe
+
+# 개별 배포
+npm run deploy:server:common && npm run restart:server:be  # Common만
+npm run deploy:server:be && npm run restart:server:be      # BE만
+npm run deploy:server:fe && npm run restart:server:fe      # FE만
 ```
 
-**개별 배포용:**
-```bash
-# Common 패키지 배포용
-export COMMON_HOST=your-common-server.com
-export COMMON_USER=your-username
-export COMMON_PATH=/var/www/iitp-dabt-common
+> **환경 변수 파일(.env) 역할:**
+> - **Backend**: 실행 시 필수 (`/var/www/iitp-dabt-admin/be/.env`)
+> - **Frontend**: 빌드 시 조건부 필요 (서브패스 배포 시)
+>   - 시나리오 A (독립 도메인): 설정 불필요
+>   - 시나리오 B (서브패스 `/adm/`): `VITE_BASE=/adm/`, `VITE_API_BASE_URL=/adm/api` 필요
 
-# Backend 개별 배포용
-export BE_HOST=your-backend-server.com
-export BE_USER=your-username
-export BE_PATH=/var/www/iitp-dabt-admin/be
-
-# Frontend 개별 배포용
-export FE_HOST=your-frontend-server.com
-export FE_USER=your-username
-export FE_PATH=/var/www/iitp-dabt-admin/fe
-```
-
-#### 4. 배포 과정
-
-**전체 배포:**
-- Common 패키지 배포 (개별 스크립트 호출)
-- Backend 배포 (개별 스크립트 호출)
-- Frontend 배포 (개별 스크립트 호출)
-
-**개별 배포:**
-- **Common**: packages/common 빌드 및 배포
-- **Backend**: packages/common 의존성 확인 → Backend 빌드 → 배포 → 서버 재시작
-- **Frontend**: packages/common 의존성 확인 → Frontend 빌드 → 배포
-
-#### 5. 유지보수성
-
-> **🔧 모듈화된 배포 시스템**: 통합 배포는 개별 배포 스크립트들을 호출하여 구성됩니다.
-> 
-> **장점:**
-> - 배포 로직 변경 시 한 곳만 수정하면 모든 곳에 적용
-> - 개별 배포와 통합 배포가 동일한 로직 사용
-> - 코드 중복 최소화
-> - 유지보수성 향상
+상세 가이드:
+- **서버 배포 상세**: [script/README-SERVER-DEPLOYMENT.md](script/README-SERVER-DEPLOYMENT.md)
+- **단계별 기동 튜토리얼**: [IITP_DABT_Admin_서버_기동_방법.md](IITP_DABT_Admin_서버_기동_방법.md)
+- **환경 변수 전체**: [script/env-guide.md](script/env-guide.md)
 
 ### 테스트
 
@@ -269,22 +223,12 @@ cd fe && npm test
 
 ## 📚 API 문서
 
-### 인증 API
-- `POST /api/user/login` - 사용자 로그인
-- `POST /api/user/register` - 사용자 회원가입
-- `POST /api/user/refresh` - 토큰 갱신
-- `GET /api/user/profile` - 사용자 프로필 조회
+주요 API 엔드포인트:
+- 인증: 로그인, 회원가입, 토큰 갱신, 프로필 조회
+- 관리자: 사용자 CRUD, 운영자 관리, FAQ/QNA/공지사항 관리
+- 공통: 버전 정보, 헬스 체크, JWT 설정
 
-### 관리자 API
-- `GET /api/admin/users` - 사용자 목록 조회
-- `POST /api/admin/users` - 사용자 생성
-- `PUT /api/admin/users/:id` - 사용자 정보 수정
-- `DELETE /api/admin/users/:id` - 사용자 삭제
-
-### 공통 API
-- `GET /api/common/version` - 서버 버전 정보
-- `GET /api/common/health` - 서버 상태 확인
-- `GET /api/common/jwt-config` - JWT 설정 정보
+상세 API 문서는 **[be/README.md](be/README.md)**를 참조하세요.
 
 ## 🔒 보안
 
@@ -366,6 +310,8 @@ npm run start:server:fe
 ```
 
 자세한 내용은 `script/README-SERVER-DEPLOYMENT.md`를 참조하세요.
+
+> **PM2 자동 기동 설정**: 서버 재부팅 후 자동 복구가 필요하다면 **[IITP_DABT_Admin_서버_기동_방법.md](IITP_DABT_Admin_서버_기동_방법.md#24-재부팅-자동-기동-설정-pm2)** 또는 **[script/README-SERVER-DEPLOYMENT.md](script/README-SERVER-DEPLOYMENT.md#-재부팅-자동-기동-설정-pm2)**를 참조하세요.
 
 ## 🤝 기여 가이드
 

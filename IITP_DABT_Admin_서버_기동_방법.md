@@ -68,6 +68,12 @@ GRANT ALL PRIVILEGES ON DATABASE iitp_dabt_admin TO iitp_user;
 
 ## ⚙️ 3. 환경 변수 설정
 
+> **환경 변수 파일(.env) 역할 정리:**
+> - **Backend**: 빌드 시 `.env` 불필요, **실행 시 `.env` 필수** (DB, JWT, 포트 등 런타임 설정)
+>   - 실행 서버: `/var/www/iitp-dabt-admin/be/.env` 반드시 필요
+> - **Frontend**: 빌드 시 `.env` 조건부 필요(서브패스 시), **실행 시 `.env` 불필요** (정적 파일만 서빙)
+>   - 실행 서버: `fe/.env` 불필요, 빌드 서버에서만 사용
+
 ### Backend 환경 변수 (.env 파일 생성)
 ```bash
 cd be
@@ -152,10 +158,58 @@ npm start
 ```
 
 #### Frontend 프로덕션 실행
+
+**로컬 프리뷰 (빌드 검증용):**
 ```bash
 cd fe
 npm run build
-npm run preview
+npm run preview  # http://localhost:4173에서 확인
+```
+
+**프로덕션 서버 배포 (Nginx):**
+
+Frontend는 정적 파일로 빌드되어 Nginx로 서빙됩니다.
+
+**Nginx 설정 예시 (서브패스 배포):**
+```nginx
+upstream backend {
+    server 127.0.0.1:30000;
+}
+
+server {
+    listen 80;
+    server_name 192.168.60.142;
+
+    # API 프록시
+    location /adm/api/ {
+        proxy_pass http://backend/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # /adm → /adm/ 리다이렉트
+    location = /adm { return 301 /adm/; }
+
+    # 정적 자산
+    location ^~ /adm/assets/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/assets/;
+        try_files $uri =404;
+    }
+
+    # SPA fallback
+    location /adm/ {
+        alias /var/www/iitp-dabt-admin/fe/dist/;
+        index index.html;
+        try_files $uri $uri/ /adm/index.html;
+    }
+}
+```
+
+적용:
+```bash
+
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ## 🌐 5. 서비스 접속
@@ -282,10 +336,16 @@ npm run build:server:fe
 npm run build:server:common
 ```
 
-> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다. 서브패스(`/adm/`) 배포 시에는 빌드 전에 아래를 설정하고 빌드하세요.
+> 중요(Frontend 빌드 환경변수): Vite의 `VITE_*` 변수는 "빌드 시점"에만 주입됩니다. 실행 서버의 `fe/.env`는 프로덕션(dist) 런타임에 영향을 주지 않습니다.
 >
+> **시나리오 A: 독립 도메인/루트 경로 배포 (기본)**
+> - 예: `https://admin.example.com` 또는 `http://192.168.1.100`
+> - 환경변수 설정 불필요 (기본값 `/` 사용)
+>
+> **시나리오 B: 서브패스 배포 (한 서버에 여러 서비스 공존 시)**
+> - 예: `https://example.com/adm` (관리자), `https://example.com/docs` (문서)
+> - 빌드 전 환경변수 설정 필수:
 > ```bash
-> # FE가 /adm/에서 서빙되고 API가 /adm/api로 프록시되는 경우
 > export VITE_BASE=/adm/
 > export VITE_API_BASE_URL=/adm/api
 > npm run build:server:fe
@@ -321,15 +381,26 @@ npm run deploy:server
 
 ##### 개별 배포
 ```bash
+# Common 패키지만 배포
+npm run deploy:server:common
+# 배포 후 BE 재시작 필수
+npm run restart:server:be
+
 # Backend만 배포
 npm run deploy:server:be
+npm run restart:server:be
 
 # Frontend만 배포
 npm run deploy:server:fe
-
-# Common 패키지만 배포
-npm run deploy:server:common
+npm run restart:server:fe
 ```
+
+> **Common 단독 배포 시나리오:**
+> - 공통 검증 로직 버그 수정 (예: `isValidEmail` 핫픽스)
+> - 타입 정의 추가/수정
+> - 에러 코드 추가
+> - **장점**: BE/FE 재빌드 없이 5분 내 배포 가능
+> - **주의**: 배포 후 반드시 BE 재시작 필요, FE는 불필요
 
 ##### 서버 시작
 ```bash
@@ -349,9 +420,65 @@ npm run restart:server:be
 npm run restart:server:fe
 ```
 
-### 배포 전 환경 변수 설정
+##### 서버 중지
+```bash
+# Backend 서버 중지
+npm run stop:server:be
 
-#### 로컬 배포용
+# Frontend 서버 중지
+npm run stop:server:fe
+```
+
+### 8.4 재부팅 자동 기동 설정 (PM2)
+
+서버 재부팅 후 BE가 자동 기동되도록 PM2를 systemd에 등록합니다.
+
+```bash
+# root로 실행: iitp-adm 사용자용 PM2 systemd 유닛 생성
+# 주의: 홈 디렉토리 경로(/home/iitp-adm)가 실제 환경과 일치하는지 확인하세요
+sudo env PATH=$PATH pm2 startup systemd -u iitp-adm --hp /home/iitp-adm
+
+# iitp-adm 사용자로 프로세스 등록 및 저장
+# 주의: BE 경로(/var/www/iitp-dabt-admin/be)가 실제 배포 경로와 일치하는지 확인하세요
+sudo -iu iitp-adm
+pm2 start /var/www/iitp-dabt-admin/be/dist/index.js --name iitp-dabt-adm-be || true
+pm2 save
+
+# 재부팅 후 검증
+pm2 status
+pm2 logs iitp-dabt-adm-be --lines 50
+```
+
+주의:
+- `npm run start:be`는 .env 로드와 `npm install --omit=dev`까지 수행합니다. `pm2 start dist/index.js`는 앱만 실행하므로, 최초 한 번은 `npm run start:be`로 기동 후 `pm2 save`를 권장합니다.
+- 이후 `be/package.json` 변경 배포 시에는 실행 서버에서:
+  ```bash
+  cd /var/www/iitp-dabt-admin/be
+  npm ci --omit=dev || npm install --omit=dev
+  pm2 restart iitp-dabt-adm-be
+  pm2 save
+  ```
+
+검증 체크리스트:
+```bash
+# 유닛 상태/활성화
+sudo systemctl status pm2-iitp-adm | cat
+sudo systemctl is-enabled pm2-iitp-adm
+
+# 부팅 직후 복구 로그 확인(이번 부팅 범위)
+journalctl -u pm2-iitp-adm -b --no-pager | tail -n 100
+
+# 반드시 iitp-adm 컨텍스트에서 상태 확인
+sudo -iu iitp-adm pm2 status
+```
+권장 실행 위치/사용자:
+- BE 기동/저장은 반드시 `iitp-adm` 사용자로, 프로젝트 루트(`/var/www/iitp-dabt-admin`)에서 수행하세요.
+
+## 9. 환경 변수 설정 (배포용)
+
+> 배포 시 필요한 환경 변수 전체 목록은 **[script/env-guide.md](script/env-guide.md)**를 참조하세요.
+
+### 로컬 배포용
 ```bash
 # Backend 서버 설정
 export BE_HOST=your-backend-server.com
@@ -390,7 +517,7 @@ export FRONTEND_DOMAIN=your-domain.com
 export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
 ```
 
-## 🛠️ 9. 개발 가이드
+## 🛠️ 10. 개발 가이드
 
 ### 스크립트 명령어
 
@@ -452,7 +579,7 @@ cd be && npm run build
 cd fe && npm run build
 ```
 
-## 🔒 10. 보안 설정
+## 🔒 11. 보안 설정
 
 ### JWT 인증
 - **Access Token**: 15분 만료
@@ -469,7 +596,7 @@ cd fe && npm run build
 node scripts/encrypt-env.js <encryption-key>
 ```
 
-## 🐛 11. 문제 해결
+## 🐛 12. 문제 해결
 
 ### 일반적인 문제들
 
@@ -519,7 +646,7 @@ tail -n 50 be/logs/app-$(date +%Y-%m-%d).log
 grep -i error be/logs/app-$(date +%Y-%m-%d).log
 ```
 
-## 📚 12. API 문서
+## 📚 13. API 문서
 
 ### 인증 API
 - `POST /api/user/login` - 사용자 로그인
@@ -538,7 +665,7 @@ grep -i error be/logs/app-$(date +%Y-%m-%d).log
 - `GET /api/common/health` - 서버 상태 확인
 - `GET /api/common/jwt-config` - JWT 설정 정보
 
-## 📋 13. 전체 명령어 구조 정리
+## 📋 14. 전체 명령어 구조 정리
 
 ### 로컬용 vs 서버용 명령어 구분
 
@@ -573,7 +700,7 @@ npm run start:server:be # 서버 시작
 - 빌드 서버: `SOURCE_PATH`, `DEPLOY_PATH`, `GIT_*`, `NPM_CONFIG_PRODUCTION`
 - 기동 서버: `PROD_*_PATH`, `PM2_APP_NAME_BE`, `NGINX_CONFIG_PATH`
 
-## 🔎 14. 버전/빌드 정보 출력
+## 🔎 15. 버전/빌드 정보 출력
 
 - 빌드 시: `script/build-server.js`가 시작 시 버전 정보(Backend/Frontend/Common, Git 태그)를 STDOUT에 출력
 - 실행 시: `script/start-server-*.js`가 각 앱 `package.json` 버전과 `dist/build-info.json`의 빌드 시간을 STDOUT에 출력
@@ -592,7 +719,7 @@ cat /var/www/iitp-dabt-admin/be/dist/build-info.json | grep buildDate || true
 cat /var/www/iitp-dabt-admin/fe/dist/build-info.json | grep buildDate || true
 ```
 
-## 📞 15. 지원
+## 📞 16. 지원
 
 문제가 발생하거나 질문이 있으시면:
 

@@ -64,6 +64,11 @@ npm start
 
 ## ⚙️ 환경 변수 설정
 
+> **중요**: Backend는 **실행 시 `.env` 파일이 필수**입니다.
+> - **빌드 시**: `.env` 불필요 (TypeScript 컴파일만 수행)
+> - **실행 시**: `.env` 필수 (DB 연결, JWT, 포트 등 런타임 설정)
+> - **배포 환경**: 실행 서버의 `/var/www/iitp-dabt-admin/be/.env`에 반드시 존재해야 함
+
 ### .env 파일 생성
 
 ```bash
@@ -646,7 +651,7 @@ VALUES ('admin@example.com', '관리자', '$2a$10$...', true, NOW(), NOW());
 
 ```bash
 # 1. 의존성 설치
-npm install --production
+npm ci --omit=dev || npm install --omit=dev
 
 # 2. 공통 패키지 빌드
 cd ../packages/common && npm run build && cd ../../be
@@ -657,6 +662,47 @@ npm run build
 # 4. 프로덕션 서버 실행
 npm start
 ```
+
+### Nginx 프록시 설정
+
+Backend API를 Nginx를 통해 서빙하는 경우:
+
+**독립 도메인:**
+```nginx
+upstream backend {
+    server 127.0.0.1:30000;
+}
+
+server {
+    listen 80;
+    server_name api.example.com;
+
+    location /api/ {
+        proxy_pass http://backend/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 20m;
+    }
+}
+```
+
+**서브패스 (FE와 함께):**
+```nginx
+location /adm/api/ {
+    proxy_pass http://backend/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    client_max_body_size 20m;
+}
+```
+
+> **주의**: `proxy_pass` 끝에 슬래시(`/api/`)를 포함하면 `/adm/api/*` → `/api/*`로 경로가 재작성됩니다.
 
 ### Docker 배포 (선택사항)
 

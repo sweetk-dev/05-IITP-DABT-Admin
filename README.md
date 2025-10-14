@@ -177,15 +177,27 @@ npm run deploy:fe     # Frontend만
 #### 서버 간 배포 (프로덕션 권장)
 **빌드 서버:**
 ```bash
-npm run build:server
+npm run build:server           # 전체 빌드
+# 또는 개별 빌드
+npm run build:server:common    # Common만
+npm run build:server:be        # Backend만
+npm run build:server:fe        # Frontend만
 ```
 
 **실행 서버:**
 ```bash
-npm run deploy:server:ops   # 최초 1회
+# 최초 1회
+npm run deploy:server:ops
+
+# 전체 배포
 npm run deploy:server
 npm run start:server:be
-npm run start:server:fe
+npm run restart:server:fe
+
+# 개별 배포
+npm run deploy:server:common && npm run restart:server:be  # Common만
+npm run deploy:server:be && npm run restart:server:be      # BE만
+npm run deploy:server:fe && npm run restart:server:fe      # FE만
 ```
 
 > **환경 변수 파일(.env) 역할:**

@@ -64,9 +64,7 @@ const scriptFiles = [
   'script/start-server-be.js',
   'script/restart-server-be.js',
   'script/stop-server-be.js',
-  'script/start-server-fe.js',
-  'script/restart-server-fe.js',
-  'script/stop-server-fe.js'
+  'script/restart-server-fe.js'
 ];
 
 async function rsyncLocal(src, dest) {
@@ -133,12 +131,8 @@ async function deployRuntimePackageJson() {
       'start:server:be': 'node script/start-server-be.js',
       'restart:server:be': 'node script/restart-server-be.js',
       'stop:server:be': 'node script/stop-server-be.js',
-      'start:fe': 'node script/start-server-fe.js',
       'restart:fe': 'node script/restart-server-fe.js',
-      'stop:fe': 'node script/stop-server-fe.js',
-      'start:server:fe': 'node script/start-server-fe.js',
-      'restart:server:fe': 'node script/restart-server-fe.js',
-      'stop:server:fe': 'node script/stop-server-fe.js'
+      'restart:server:fe': 'node script/restart-server-fe.js'
     }
   }, null, 2) + '\n';
 

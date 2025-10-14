@@ -89,24 +89,32 @@ npm run deploy:server
 
 ##### 2. 개별 배포
 ```bash
+# Common 패키지만 배포
+npm run deploy:server:common
+
 # Backend만 배포
 npm run deploy:server:be
 
 # Frontend만 배포
 npm run deploy:server:fe
-
-# Common 패키지만 배포
-npm run deploy:server:common
 ```
+
+> **Common 단독 배포 시 주의:**
+> - 배포 후 **Backend 재시작 필수**: `npm run restart:server:be`
+> - Frontend는 재시작 불필요 (정적 파일, 빌드에 이미 포함됨)
+> - **사용 시나리오**: 공통 검증 로직/타입 핫픽스, BE/FE 재빌드 없이 Common만 업데이트
 
 ##### 3. 서버 시작
 ```bash
 # Backend 서버 시작 (PM2)
 npm run start:server:be
 
-# Frontend 서버 시작 (Nginx)
+# Frontend 서버 시작 (Nginx reload)
+# 주의: Nginx 설정은 사전에 수동으로 구성되어 있어야 함
 npm run start:server:fe
 ```
+
+> **Frontend 배포 시**: Nginx 설정을 사전에 구성하세요. 설정 예시는 [README-SERVER-DEPLOYMENT.md](README-SERVER-DEPLOYMENT.md) 또는 [README-ONE-SERVER-BUILD-DEPLOY.md](README-ONE-SERVER-BUILD-DEPLOY.md) 참조
 
 ##### 4. 서버 재시작
 ```bash

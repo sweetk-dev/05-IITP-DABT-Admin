@@ -381,15 +381,26 @@ npm run deploy:server
 
 ##### 개별 배포
 ```bash
+# Common 패키지만 배포
+npm run deploy:server:common
+# 배포 후 BE 재시작 필수
+npm run restart:server:be
+
 # Backend만 배포
 npm run deploy:server:be
+npm run restart:server:be
 
 # Frontend만 배포
 npm run deploy:server:fe
-
-# Common 패키지만 배포
-npm run deploy:server:common
+npm run restart:server:fe
 ```
+
+> **Common 단독 배포 시나리오:**
+> - 공통 검증 로직 버그 수정 (예: `isValidEmail` 핫픽스)
+> - 타입 정의 추가/수정
+> - 에러 코드 추가
+> - **장점**: BE/FE 재빌드 없이 5분 내 배포 가능
+> - **주의**: 배포 후 반드시 BE 재시작 필요, FE는 불필요
 
 ##### 서버 시작
 ```bash

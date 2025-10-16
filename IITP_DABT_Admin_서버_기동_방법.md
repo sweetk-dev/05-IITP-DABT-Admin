@@ -514,7 +514,7 @@ export PROD_BE_PATH=/var/www/iitp-dabt-admin/be
 export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 export PM2_APP_NAME_BE=iitp-dabt-adm-be
 export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
+export NGINX_CONFIG_PATH=/etc/nginx/conf.d/iitp-dabt-admin.conf
 ```
 
 ## 🛠️ 10. 개발 가이드

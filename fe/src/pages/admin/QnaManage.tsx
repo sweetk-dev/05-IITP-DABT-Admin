@@ -217,6 +217,7 @@ export default function QnaManage() {
             enabled: true,
             items: qnaData?.items || [],
             getId: (qna) => qna.qnaId,
+            selectedIds: selectedQnas,
             onSelectionChange: (selected) => setSelectedQnas(selected as number[]),
             renderCheckbox: true,
             deleteConfig: {
@@ -230,6 +231,7 @@ export default function QnaManage() {
               errorMessage: 'Q&A 삭제 중 오류가 발생했습니다.',
               onDeleteSuccess: () => {
                 refetch();
+                setSelectedQnas([]);
               }
             }
           }}

@@ -144,7 +144,7 @@ export async function getAdminQnaStats(): Promise<ApiResponse<AdminQnaStatusRes>
  */
 export async function deleteAdminQnaList(qnaIds: (number | string)[]): Promise<ApiResponse<void>> {
   return apiFetch<void>(FULL_API_URLS.ADMIN.QNA.LIST_DELETE, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify({ qnaIds }),
   });
 } 

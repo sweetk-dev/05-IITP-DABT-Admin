@@ -430,6 +430,14 @@ server {
         try_files $uri =404;
     }
 
+    # 루트 레벨 정적 파일 (이미지 등)
+    # 주의: 정규식 location에서 alias 사용 시 try_files와 충돌 가능하므로 제거
+    location ~* ^/adm/([^/]+\.(?:png|jpg|jpeg|gif|svg|ico|woff2?|js|css|map))$ {
+        alias /var/www/iitp-dabt-admin/fe/dist/$1;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+    }
+
     # SPA fallback (alias 사용 시)
     location /adm/ {
         alias /var/www/iitp-dabt-admin/fe/dist/;

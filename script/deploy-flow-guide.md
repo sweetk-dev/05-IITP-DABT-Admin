@@ -222,7 +222,7 @@ module.exports = {
 sudo apt install nginx
 
 # 설정 파일 생성
-# /etc/nginx/sites-available/iitp-dabt-adm-fe
+# /etc/nginx/conf.d/iitp-dabt-admin.conf
 server {
     listen 80;
     server_name your-domain.com;

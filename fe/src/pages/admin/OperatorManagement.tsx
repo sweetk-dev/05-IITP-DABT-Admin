@@ -231,6 +231,7 @@ export default function OperatorManagement() {
           enabled: true,
           items: operatorData?.items || [],
           getId: (operator) => operator.adminId,
+          selectedIds: selectedOperators,
           onSelectionChange: (selected) => setSelectedOperators(selected as number[]),
           renderCheckbox: true,
           deleteConfig: {
@@ -243,6 +244,7 @@ export default function OperatorManagement() {
             errorMessage: '운영자 삭제 중 오류가 발생했습니다.',
             onDeleteSuccess: () => {
               refetch();
+              setSelectedOperators([]);
             }
           }
         }}

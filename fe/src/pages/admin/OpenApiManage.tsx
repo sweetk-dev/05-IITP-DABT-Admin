@@ -155,7 +155,8 @@ export default function AdminOpenApiClients() {
           enabled: true,
           items: items,
           getId: (item) => item.keyId,
-          onSelectionChange: (selected) => setSelected(selected as number[]),
+          selectedIds: selected,
+          onSelectionChange: (selectedIds) => setSelected(selectedIds as number[]),
           renderCheckbox: true,
           deleteConfig: {
             apiFunction: async (ids: (number | string)[]) => {
@@ -168,6 +169,7 @@ export default function AdminOpenApiClients() {
             errorMessage: 'OpenAPI 키 삭제 중 오류가 발생했습니다.',
             onDeleteSuccess: () => {
               refetch();
+              setSelected([]);
             }
           }
         }}

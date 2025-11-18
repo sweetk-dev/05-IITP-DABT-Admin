@@ -162,7 +162,7 @@ export async function getAdminOpenApiStats(userId?: number): Promise<ApiResponse
  */
 export async function deleteAdminOpenApiList(keyIds: (number | string)[]): Promise<ApiResponse<void>> {
   return apiFetch<void>(FULL_API_URLS.ADMIN.OPEN_API.LIST_DELETE, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify({ keyIds }),
   });
 } 

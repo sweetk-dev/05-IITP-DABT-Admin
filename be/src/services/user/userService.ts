@@ -11,6 +11,7 @@ import bcrypt from 'bcrypt';
 import { appLogger } from '../../utils/logger';
 import { ResourceError, ValidationError } from '../../utils/customErrors';
 import { openApiUserRepository } from '../../repositories/openApiUserRepository';
+import { BCRYPT_SALT_ROUNDS } from '../../constants/security';
 
 export class UserService {
 
@@ -41,7 +42,7 @@ export class UserService {
     }
 
     // 비밀번호 해시화
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
     // 사용자 생성
     const newUser = await openApiUserRepository.createUser({
@@ -136,7 +137,7 @@ export class UserService {
     }
 
     // 새 비밀번호 해시화
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
 
     // 비밀번호 업데이트
     await openApiUserRepository.updatePassword(userId, hashedNewPassword, CODE_SYS_WORK_TYPES.USER);

@@ -6,7 +6,8 @@ import { UserAccountListQuery,
 import bcrypt from 'bcrypt';
 import { appLogger } from '../../utils/logger';
 import { ResourceError, BusinessError } from '../../utils/customErrors';
-import { openApiUserRepository } from '../../repositories/openApiUserRepository';  
+import { openApiUserRepository } from '../../repositories/openApiUserRepository';
+import { BCRYPT_SALT_ROUNDS } from '../../constants/security';  
 import { arrayBuffer } from 'stream/consumers';
 import { UserAccountListRes, UserAccountListItem,
   UserAccountDetailRes
@@ -124,7 +125,7 @@ export const userAccountService = {
   async createUserAccount(data: UserAccountCreateReq, actorTag: string): Promise<{ userId: number }> {
     try {
       // 비밀번호 해시화
-      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
 
       const result = await openApiUserRepository.createUserAccount({
         loginId: data.loginId,
@@ -201,7 +202,7 @@ export const userAccountService = {
   async changeUserPassword(userId: number, data: UserAccountPasswordChangeReq, actorTag: string) {
     try {
       // 비밀번호 해시화
-      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      const hashedPassword = await bcrypt.hash(data.newPassword, BCRYPT_SALT_ROUNDS);
 
       await openApiUserRepository.updatePassword(userId, hashedPassword, actorTag); 
     } catch (error) {

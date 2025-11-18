@@ -6,6 +6,7 @@ import {
     ErrorCode,
     CODE_SYS_WORK_TYPES
 } from '@iitp-dabt/common';
+import { BCRYPT_SALT_ROUNDS } from '../../constants/security';
 import { 
 sysAdmAccountRepository
 } from '../../repositories/sysAdmAccountRepository';
@@ -120,7 +121,7 @@ export const adminService = {
             }
 
             // 새 비밀번호 해시화
-            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+            const hashedNewPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
 
             // 비밀번호 업데이트
             const updated = await sysAdmAccountRepository.updateAdminPassword(adminId, hashedNewPassword, CODE_SYS_WORK_TYPES.USER);

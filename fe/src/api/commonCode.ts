@@ -163,7 +163,7 @@ export async function deleteCommonCode(grpId: string, codeId: string): Promise<A
  */
 export async function deleteCommonCodeList(ids: (number | string)[]): Promise<ApiResponse<void>> {
   const response = await apiFetch<void>(FULL_API_URLS.COMMON_CODE.CODE.LIST_DELETE, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify({ codeIds: ids }),
   });
   return enhanceApiResponse(response);
@@ -174,7 +174,7 @@ export async function deleteCommonCodeList(ids: (number | string)[]): Promise<Ap
  */
 export async function deleteCommonCodeGroupList(ids: (number | string)[]): Promise<ApiResponse<void>> {
   const response = await apiFetch<void>(FULL_API_URLS.COMMON_CODE.GROUP.LIST_DELETE, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify({ groupIds: ids }),
   });
   return enhanceApiResponse(response);

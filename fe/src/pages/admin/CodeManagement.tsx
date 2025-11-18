@@ -184,7 +184,8 @@ export default function CodeManagement() {
           enabled: true,
           items: sortedGroups,
           getId: (group) => group.grpId,
-          onSelectionChange: (selected) => setSelected(selected as string[]),
+          selectedIds: selected,
+          onSelectionChange: (selectedIds) => setSelected(selectedIds as string[]),
           renderCheckbox: true,
           deleteConfig: {
             apiFunction: async (ids: (number | string)[]) => {
@@ -196,7 +197,8 @@ export default function CodeManagement() {
             successMessage: '선택된 그룹들이 삭제되었습니다.',
             errorMessage: '그룹 삭제 중 오류가 발생했습니다.',
             onDeleteSuccess: () => {
-              refetch(); // refetch 대신 refetch 호출
+              refetch();
+              setSelected([]);
             }
           }
         }}

@@ -8,6 +8,7 @@ import bcrypt from 'bcrypt';
 import { appLogger } from '../../utils/logger';
 import { ResourceError, BusinessError } from '../../utils/customErrors';
 import { sysAdmAccountRepository } from '../../repositories/sysAdmAccountRepository';
+import { BCRYPT_SALT_ROUNDS } from '../../constants/security';
 import { AdminAccountListRes, AdminAccountListItem, AdminAccountDetailRes} from '@iitp-dabt/common';
 
 export const adminAccountService = {
@@ -114,7 +115,7 @@ export const adminAccountService = {
   async createAdminAccount(data: AdminAccountCreateReq, actorTag: string) {
     try {
       // 비밀번호 해시화
-      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
 
       const result = await sysAdmAccountRepository.createAdmin({
         loginId: data.loginId,
@@ -205,7 +206,7 @@ export const adminAccountService = {
   async changeAdminPassword(adminId: number, data: AdminAccountPasswordChangeReq, actorTag: string) {
     try {
       // 비밀번호 해시화
-      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      const hashedPassword = await bcrypt.hash(data.newPassword, BCRYPT_SALT_ROUNDS);
 
       await sysAdmAccountRepository.updateAdminPassword(adminId, hashedPassword, actorTag); 
     } catch (error) {

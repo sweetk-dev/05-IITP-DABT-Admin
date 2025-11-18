@@ -151,6 +151,7 @@ export default function UserManagement() {
           enabled: true,
           items: userData?.items || [],
           getId: (user) => user.userId,
+          selectedIds: selectedUsers,
           onSelectionChange: (selected) => setSelectedUsers(selected as number[]),
           renderCheckbox: true,
           deleteConfig: {
@@ -165,6 +166,7 @@ export default function UserManagement() {
             onDeleteSuccess: () => {
               // 삭제 성공 후 목록 새로고침
               refetch();
+              setSelectedUsers([]);
             }
           }
         }}

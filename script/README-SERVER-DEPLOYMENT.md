@@ -373,7 +373,7 @@ pm2 save
 
 **시나리오 A: 독립 도메인/루트 경로 배포**
 ```bash
-sudo tee /etc/nginx/sites-available/iitp-dabt << 'EOF'
+sudo tee /etc/nginx/conf.d/iitp-dabt-admin.conf << 'EOF'
 upstream backend {
     server 127.0.0.1:30000;
 }
@@ -404,7 +404,7 @@ EOF
 
 **시나리오 B: 서브패스 배포 (여러 서비스 공존)**
 ```bash
-sudo tee /etc/nginx/sites-available/iitp-dabt << 'EOF'
+sudo tee /etc/nginx/conf.d/iitp-dabt-admin.conf << 'EOF'
 upstream backend {
     server 127.0.0.1:30000;
 }
@@ -440,10 +440,7 @@ server {
 EOF
 ```
 
-# 4. Nginx 설정 활성화
-sudo ln -s /etc/nginx/sites-available/iitp-dabt /etc/nginx/sites-enabled/
-
-# 5. Nginx 설정 검증
+# 4. Nginx 설정 검증
 sudo nginx -t
 
 # 6. Nginx 재시작

@@ -217,10 +217,11 @@ export default function FaqList() {
           }
         }}
         wrapInCard={false}
-                  selectable={{
+          selectable={{
             enabled: true,
             items: faqData?.items || [],
             getId: (faq) => faq.faqId,
+            selectedIds: selectedFaqs,
             onSelectionChange: (selected) => setSelectedFaqs(selected as number[]),
             renderCheckbox: true,
             deleteConfig: {
@@ -235,6 +236,7 @@ export default function FaqList() {
               onDeleteSuccess: () => {
                 // 삭제 성공 후 목록 새로고침
                 refetch();
+                setSelectedFaqs([]);
               }
             }
           }}

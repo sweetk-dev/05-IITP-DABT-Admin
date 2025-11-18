@@ -45,6 +45,7 @@ export interface ListScaffoldProps {
     getId: (item: any) => number | string; // ID 추출 함수
     onSelectionChange: (selected: (number | string)[]) => void; // 선택 변경 콜백
     renderCheckbox?: boolean;            // 개별 체크박스 렌더링 여부 (기본값: true)
+    selectedIds?: (number | string)[];  // 외부에서 선택된 ID 목록 전달
     // 삭제 기능 관련
     deleteConfig?: {
       apiFunction: (ids: (number | string)[]) => Promise<void>; // 삭제 API 함수
@@ -79,22 +80,28 @@ export default function ListScaffold({
   const showPagination = !!pagination && (pagination.totalPages || 0) > 0;
   
   // selectable이 활성화된 경우 선택 상태 관리
-  const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
+  const [internalSelectedIds, setInternalSelectedIds] = useState<(number | string)[]>([]);
   
   // 삭제 관련 상태
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // selectable.items가 변경될 때마다 선택 상태 초기화
+  // 외부에서 selectedIds가 전달되면 그것을 사용, 없으면 내부 상태 사용
+  const selectedIds = selectable?.selectedIds !== undefined ? selectable.selectedIds : internalSelectedIds;
+  
+  // selectable.items가 변경될 때마다 선택 상태 초기화 (외부 상태를 사용하지 않는 경우만)
   useEffect(() => {
-    if (selectable?.enabled) {
-      setSelectedIds([]);
+    if (selectable?.enabled && selectable?.selectedIds === undefined) {
+      setInternalSelectedIds([]);
     }
-  }, [selectable?.items, selectable?.enabled]);
+  }, [selectable?.items, selectable?.enabled, selectable?.selectedIds]);
   
   // 선택 변경 핸들러
   const handleSelectionChange = (newSelectedIds: (number | string)[]) => {
-    setSelectedIds(newSelectedIds);
+    // 외부 상태를 사용하지 않는 경우에만 내부 상태 업데이트
+    if (selectable?.selectedIds === undefined) {
+      setInternalSelectedIds(newSelectedIds);
+    }
     selectable?.onSelectionChange(newSelectedIds);
   };
   
@@ -121,8 +128,10 @@ export default function ListScaffold({
         console.log(selectable.deleteConfig.successMessage);
       }
       
-      // 선택 상태 초기화
-      setSelectedIds([]);
+      // 선택 상태 초기화 (외부 상태를 사용하지 않는 경우만)
+      if (selectable.selectedIds === undefined) {
+        setInternalSelectedIds([]);
+      }
       selectable.onSelectionChange([]);
       
       // 성공 콜백 실행

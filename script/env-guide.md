@@ -106,7 +106,7 @@ export PM2_APP_NAME_BE=iitp-dabt-adm-be
 # Frontend 설정
 export PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 export FRONTEND_DOMAIN=your-domain.com
-export NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
+export NGINX_CONFIG_PATH=/etc/nginx/conf.d/iitp-dabt-admin.conf
 
 # 데이터베이스 설정
 export DB_HOST=your-db-server.com
@@ -151,7 +151,7 @@ PM2_APP_NAME_BE=iitp-dabt-adm-be
 # Frontend 설정
 PROD_FE_PATH=/var/www/iitp-dabt-admin/fe
 FRONTEND_DOMAIN=your-domain.com
-NGINX_CONFIG_PATH=/etc/nginx/sites-available/iitp-dabt-adm-fe
+NGINX_CONFIG_PATH=/etc/nginx/conf.d/iitp-dabt-admin.conf
 
 # 데이터베이스 설정
 DB_HOST=your-db-server.com

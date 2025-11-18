@@ -107,7 +107,7 @@ export async function deleteAdminFaq(faqId: number): Promise<ApiResponse<void>> 
  */
 export async function deleteAdminFaqList(faqIds: (number | string)[]): Promise<ApiResponse<void>> {
   return apiFetch<void>(FULL_API_URLS.ADMIN.FAQ.LIST_DELETE, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify({ faqIds }),
   });
 }

@@ -75,7 +75,7 @@ export async function deleteAdminNotice(noticeId: number): Promise<ApiResponse<v
  */
 export async function deleteAdminNoticeList(noticeIds: (number | string)[]): Promise<ApiResponse<void>> {
   return apiFetch<void>(FULL_API_URLS.ADMIN.NOTICE.LIST_DELETE, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify({ noticeIds }),
   });
 }

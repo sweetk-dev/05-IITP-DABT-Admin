@@ -1,3 +1,33 @@
+<style>
+/* PDF 변환 시 페이지 번호 표시 */
+@page {
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-size: 10pt;
+    color: #666;
+    font-family: Arial, sans-serif;
+  }
+}
+</style>
+
+<div style="text-align: center; margin-top: 100px;">
+  <h1 style="font-size: 48px; margin-bottom: 30px;">IITP DABT Admin</h1>
+  <h2 style="font-size: 36px; margin-bottom: 80px;">배포 및 설치 가이드</h2>
+
+  <p style="font-size: 18px; margin-top: 60px;">
+    <strong>문서 버전:</strong> 1.0.0<br/>
+    <strong>작성일:</strong> 2025-11-12<br/>
+    <p style="color: #999;">(주)스위트케이</p>
+  </p>
+</div>
+
+
+
+
+
+
+
+
 # 🚀 IITP DABT Admin 프로젝트 서버 기동 방법
 
 이 프로젝트는 **Backend (Node.js + Express)**와 **Frontend (React + Vite)**로 구성된 풀스택 애플리케이션입니다.
@@ -195,6 +225,14 @@ server {
     location ^~ /adm/assets/ {
         alias /var/www/iitp-dabt-admin/fe/dist/assets/;
         try_files $uri =404;
+    }
+
+    # 루트 레벨 정적 파일 (이미지 등)
+    # 주의: 정규식 location에서 alias 사용 시 try_files와 충돌 가능하므로 제거
+    location ~* ^/adm/([^/]+\.(?:png|jpg|jpeg|gif|svg|ico|woff2?|js|css|map))$ {
+        alias /var/www/iitp-dabt-admin/fe/dist/$1;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
     }
 
     # SPA fallback
@@ -719,14 +757,3 @@ cat /var/www/iitp-dabt-admin/be/dist/build-info.json | grep buildDate || true
 cat /var/www/iitp-dabt-admin/fe/dist/build-info.json | grep buildDate || true
 ```
 
-## 📞 16. 지원
-
-문제가 발생하거나 질문이 있으시면:
-
-1. **로그 확인**: `be/logs/` 디렉토리의 로그 파일 확인
-2. **문서 참조**: 각 디렉토리의 README.md 파일 참조
-3. **이슈 등록**: GitHub Issues에 등록
-
----
-
-**IITP DABT Admin Team** © 2024

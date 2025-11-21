@@ -461,7 +461,3 @@ ls -l /var/www/iitp-dabt-admin/fe/dist
   - `proxy_pass http://iitp_dabt_backend/api/;` 끝 슬래시 포함 여부 확인
 
 ---
-
-이 문서 순서대로 수행하면 단일 서버 환경에서 빌드 → 배포 → 기동까지 원활히 진행되며, `/adm`(FE)와 `/adm/api`(BE)가 정상 동작합니다.
-
-

@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { Link as RouterLink } from 'react-router-dom';
 import { ROUTES } from '../routes';
 
-const SERVICE_NAME = 'IITP DABT';
+const SERVICE_NAME = 'DABT';
 
 export default function Footer() {
 	const theme = useTheme();

@@ -340,9 +340,9 @@ server {
     }
 
     # 루트 레벨 정적 파일 (이미지 등)
+    # 주의: 정규식 location에서 alias 사용 시 try_files와 충돌 가능하므로 제거
     location ~* ^/adm/([^/]+\.(?:png|jpg|jpeg|gif|svg|ico|woff2?|js|css|map))$ {
         alias /var/www/iitp-dabt-admin/fe/dist/$1;
-        try_files $uri =404;
         expires 7d;
         add_header Cache-Control "public, max-age=604800";
     }
@@ -461,7 +461,3 @@ ls -l /var/www/iitp-dabt-admin/fe/dist
   - `proxy_pass http://iitp_dabt_backend/api/;` 끝 슬래시 포함 여부 확인
 
 ---
-
-이 문서 순서대로 수행하면 단일 서버 환경에서 빌드 → 배포 → 기동까지 원활히 진행되며, `/adm`(FE)와 `/adm/api`(BE)가 정상 동작합니다.
-
-

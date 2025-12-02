@@ -11,7 +11,7 @@ import { AccountCircle, Menu as MenuIcon } from '@mui/icons-material';
 import ThemedButton from './common/ThemedButton';
 // AdminMenuBar removed in favor of SideNav + AdminPageHeader
 
-const SERVICE_NAME = 'IITP DABT';
+const SERVICE_NAME = 'DABT';
 
 interface AppBarRowProps {
   left?: React.ReactNode;

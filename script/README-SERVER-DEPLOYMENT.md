@@ -430,6 +430,14 @@ server {
         try_files $uri =404;
     }
 
+    # 루트 레벨 정적 파일 (이미지 등)
+    # 주의: 정규식 location에서 alias 사용 시 try_files와 충돌 가능하므로 제거
+    location ~* ^/adm/([^/]+\.(?:png|jpg|jpeg|gif|svg|ico|woff2?|js|css|map))$ {
+        alias /var/www/iitp-dabt-admin/fe/dist/$1;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+    }
+
     # SPA fallback (alias 사용 시)
     location /adm/ {
         alias /var/www/iitp-dabt-admin/fe/dist/;
@@ -438,7 +446,6 @@ server {
     }
 }
 EOF
-```
 
 # 4. Nginx 설정 검증
 sudo nginx -t
@@ -918,7 +925,7 @@ chmod +x /var/www/iitp-dabt-admin/be/check-versions.sh
 
 ## 🆘 5. 문제 해결 및 모니터링
 
-### 4.0 문제 해결 Flow
+### 5.0 문제 해결 Flow
 ```mermaid
 flowchart TD
     A[🚨 문제 발생] --> B{문제 유형}
@@ -958,9 +965,9 @@ flowchart TD
     style E fill:#e1f5fe
 ```
 
-### 4.1 빌드 서버 문제 해결
+### 5.1 빌드 서버 문제 해결
 
-#### 4.1.1 Git pull 실패
+#### 5.1.1 Git pull 실패
 ```bash
 # 문제: Git 저장소 접근 권한 없음
 # 해결: SSH 키 설정 확인
@@ -972,7 +979,7 @@ git fetch origin
 git reset --hard origin/main
 ```
 
-#### 4.1.2 빌드 실패
+#### 5.1.2 빌드 실패
 ```bash
 # 문제: 의존성 설치 실패
 # 해결: 캐시 정리 후 재설치
@@ -985,7 +992,7 @@ npm install
 npm run build:be
 ```
 
-#### 4.1.3 파일 전송 실패
+#### 5.1.3 파일 전송 실패
 ```bash
 # 문제: SSH 연결 실패
 # 해결: SSH 키 설정 확인
@@ -997,9 +1004,9 @@ df -h
 du -sh your-build-server-root/iitp-data-admin/deploy
 ```
 
-### 4.2 실행 서버 문제 해결
+### 5.2 실행 서버 문제 해결
 
-#### 4.2.1 파일 수신 실패
+#### 5.2.1 파일 수신 실패
 ```bash
 # 문제: rsync 권한 오류
 # 해결: 디렉토리 권한 확인
@@ -1011,7 +1018,7 @@ sudo ufw status
 sudo ufw allow 22
 ```
 
-#### 4.2.2 의존성 설치 실패
+#### 5.2.2 의존성 설치 실패
 ```bash
 # 문제: npm install 실패
 # 해결: Node.js 버전 확인
@@ -1026,7 +1033,7 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
-#### 4.2.3 서비스 시작 실패
+#### 5.2.3 서비스 시작 실패
 ```bash
 # 문제: PM2 서비스 시작 실패
 # 해결: 로그 확인
@@ -1047,9 +1054,9 @@ sudo nginx -t
 sudo systemctl status nginx
 ```
 
-### 4.3 모니터링
+### 5.3 모니터링
 
-#### 4.3.1 서버 상태 모니터링
+#### 5.3.1 서버 상태 모니터링
 ```bash
 # 시스템 리소스 확인
 htop
@@ -1063,7 +1070,7 @@ sudo systemctl status nginx
 sudo systemctl status postgresql
 ```
 
-#### 4.3.2 로그 모니터링
+#### 5.3.2 로그 모니터링
 ```bash
 # Backend 로그
 pm2 logs iitp-dabt-adm-be
@@ -1078,18 +1085,6 @@ sudo journalctl -u nginx -f
 sudo journalctl -u postgresql -f
 ```
 
-#### 4.3.3 성능 모니터링
-```bash
-# PM2 모니터링
-pm2 monit
-
-# 네트워크 연결 확인
-netstat -tulpn | grep :30000
-netstat -tulpn | grep :80
-
-# 데이터베이스 연결 확인
-sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
-```
 
 ## 🔁 재부팅 자동 기동 설정 (PM2)
 
@@ -1155,31 +1150,6 @@ sudo -iu iitp-adm pm2 status
 - [ ] 백업 시스템 설정됨
 - [ ] 모니터링 시스템 설정됨
 
-## 💡 팁
-
-### Windows 참고 (개발/테스트 용)
-```powershell
-npm install -g pm2
-pm2 -v
-pm2 startup windows
-```
-
-
-### 자동화
-```bash
-# Cron을 이용한 자동 배포
-# 매일 오전 2시에 자동 배포
-0 2 * * * cd your-build-server-root/iitp-data-admin && npm run build:server
-```
-
-### 백업
-```bash
-# 데이터베이스 백업
-pg_dump iitp_dabt_admin > backup_$(date +%Y%m%d).sql
-
-# 파일 백업
-tar -czf backup_$(date +%Y%m%d).tar.gz /var/www/iitp-dabt-admin/be
-```
 
 ### 보안
 ```bash
@@ -1203,5 +1173,3 @@ sudo certbot --nginx -d your-domain.com
 2. 시스템 리소스 상태 확인
 3. 네트워크 연결 상태 확인
 4. 환경 변수 설정 확인
-
-**이 가이드를 따라하면 안정적인 서버 간 배포 환경을 구축할 수 있습니다!** 🚀

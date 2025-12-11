@@ -14,17 +14,21 @@ type LoginFormProps = {
   showRegisterButton?: boolean;
   loading?: boolean;
   isAdmin?: boolean;
+  defaultEmail?: string;
+  defaultPassword?: string;
 };
 
 export default function LoginForm({ 
   onSubmit, 
   showRegisterButton = true, 
   loading = false,
-  isAdmin = false 
+  isAdmin = false,
+  defaultEmail = '',
+  defaultPassword = ''
 }: LoginFormProps) {
   // trim 처리가 적용된 입력 필드들
-  const emailOrLoginIdInput = useInputWithTrim('');
-  const [pw, setPw] = useState('');
+  const emailOrLoginIdInput = useInputWithTrim(defaultEmail);
+  const [pw, setPw] = useState(defaultPassword);
   const [showPw, setShowPw] = useState(false);
   const [emailOrLoginIdError, setEmailOrLoginIdError] = useState('');
   const [pwError, setPwError] = useState('');

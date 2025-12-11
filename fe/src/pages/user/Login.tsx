@@ -11,6 +11,10 @@ import { clearLoginInfoByType } from '../../store/user';
 // import { getThemeColors } from '../../theme';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
+// 기본 로그인 정보 (개발/테스트용)
+const DEFAULT_LOGIN_EMAIL = 'public@sweetk.co.kr';
+const DEFAULT_LOGIN_PASSWORD = 'aaaaa';
+
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,6 +127,8 @@ export default function Login() {
           showRegisterButton={true} 
           onSubmit={handleLogin}
           loading={loading}
+          defaultEmail={DEFAULT_LOGIN_EMAIL}
+          defaultPassword={DEFAULT_LOGIN_PASSWORD}
         />
         
         <LoadingSpinner loading={loading} />

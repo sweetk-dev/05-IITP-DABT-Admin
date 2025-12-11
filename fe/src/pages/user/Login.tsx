@@ -12,8 +12,8 @@ import { clearLoginInfoByType } from '../../store/user';
 import { handleApiResponse } from '../../utils/apiResponseHandler';
 
 // 기본 로그인 정보 (개발/테스트용)
-const DEFAULT_LOGIN_EMAIL = 'public@sweetk.co.kr';
-const DEFAULT_LOGIN_PASSWORD = 'aaaaa';
+//const DEFAULT_LOGIN_EMAIL = '';
+//const DEFAULT_LOGIN_PASSWORD = '';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);

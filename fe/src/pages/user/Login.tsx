@@ -127,8 +127,8 @@ export default function Login() {
           showRegisterButton={true} 
           onSubmit={handleLogin}
           loading={loading}
-          defaultEmail={DEFAULT_LOGIN_EMAIL}
-          defaultPassword={DEFAULT_LOGIN_PASSWORD}
+          // defaultEmail={DEFAULT_LOGIN_EMAIL}
+          // defaultPassword={DEFAULT_LOGIN_PASSWORD}
         />
         
         <LoadingSpinner loading={loading} />

@@ -37,8 +37,7 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 	const navigate = useNavigate();
 	const [expandedQna, setExpandedQna] = useState<number | null>(null);
 	const [qnaDetails, setQnaDetails] = useState<Record<number, any>>({});
-	const { query } = useQuerySync({ qnaId: '' });
-	const [pendingExpandId, setPendingExpandId] = useState<number | null>(null);
+	const { query, setQuery } = useQuerySync({ qnaId: '' });
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const [targetDeleteId, setTargetDeleteId] = useState<number | null>(null);
 	// QnA 유형 공통코드 로드 (라벨 표시용)
@@ -78,26 +77,32 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 		pagination.handlePageChange(page);
 	};
 
-	const handleQnaExpand = async (qnaId: number) => {
-		if (expandedQna === qnaId) {
+	const handleQnaExpand = async (qnaId: number | string) => {
+		const numQnaId = Number(qnaId);
+		
+		if (expandedQna === numQnaId) {
 			setExpandedQna(null);
+			// URL에서 qnaId 쿼리 파라미터 제거
+			setQuery({ qnaId: '' }, { replace: true });
 			return;
 		}
 
-		setExpandedQna(qnaId);
+		setExpandedQna(numQnaId);
+		// URL에 qnaId 쿼리 파라미터 추가
+		setQuery({ qnaId: String(numQnaId) }, { replace: true });
 
 		// 이미 로드된 상세 정보가 있으면 재사용
-		if (qnaDetails[qnaId]) {
+		if (qnaDetails[numQnaId]) {
 			return;
 		}
 
 		try {
-			const response = await getUserQnaDetail(qnaId);
+			const response = await getUserQnaDetail(numQnaId);
 			handleApiResponse(response, (data) => {
-				setQnaDetails(prev => ({ ...prev, [qnaId]: data }));
+				setQnaDetails(prev => ({ ...prev, [numQnaId]: data }));
 			});
 		} catch (err) {
-			console.error('QnA 상세 정보 로드 실패:', err);
+			console.error('[QnaHistory] QnA 상세 정보 로드 실패:', err);
 		}
 	};
 
@@ -127,47 +132,68 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 		}
 	};
 
-	// 쿼리파라미터로 전달된 qnaId가 있으면 해당 항목이 포함된 페이지로 이동 후 자동 펼침
+	// 쿼리파라미터로 전달된 qnaId가 있으면 해당 항목을 자동 펼침
+	// qnaList가 로드된 후에만 처리하도록 단일 useEffect로 통합
 	useEffect(() => {
 		const paramId = Number(query.qnaId);
-		if (!paramId) return;
-		let cancelled = false;
-		(async () => {
-			try {
-				// 현재 페이지에 있는지 먼저 확인
-				if (qnaList?.items?.some((i: any) => i.qnaId === paramId)) {
-					setPendingExpandId(paramId);
-					return;
-				}
-				// 전체 페이지 탐색해서 포함된 페이지로 이동
-				const first = await getUserQnaList({ page: 1, limit: pagination.pageSize, mineOnly: true } as any);
-				const totalPages = (first as any)?.totalPages || 1;
-				for (let p = 1; p <= totalPages; p++) {
-					const res = p === 1 ? first : await getUserQnaList({ page: p, limit: pagination.pageSize, mineOnly: true } as any);
-					const items = (res as any)?.items || [];
-					if (items.some((i: any) => i.qnaId === paramId)) {
-						if (!cancelled) {
-							pagination.handlePageChange(p);
-							setPendingExpandId(paramId);
+		
+		// qnaId가 없거나 qnaList가 아직 로드되지 않았으면 무시
+		if (!paramId || !qnaList?.items) {
+			return;
+		}
+		
+		// 이미 펼쳐진 항목이면 무시 (무한 루프 방지)
+		// 단, expandedQna가 null이 아니고 paramId와 다를 때만 체크
+		// (사용자가 수동으로 접기 버튼을 눌렀을 때는 query.qnaId를 제거해야 함)
+		if (expandedQna === paramId) {
+			return;
+		}
+		
+		// 현재 페이지에 해당 항목이 있는지 확인 (타입 변환 고려)
+		const itemInCurrentPage = qnaList.items.some((i: any) => Number(i.qnaId) === paramId);
+		
+		if (itemInCurrentPage) {
+			// 현재 페이지에 있으면 즉시 펼침
+			handleQnaExpand(paramId);
+		} else {
+			// 다른 페이지에 있으면 해당 페이지로 이동 후 펼침
+			// 전체 페이지를 탐색하여 해당 항목이 있는 페이지 찾기
+			let cancelled = false;
+			(async () => {
+				try {
+					const firstResponse = await getUserQnaList({ page: 1, limit: pagination.pageSize, mineOnly: true } as any);
+					// ApiResponse 구조에서 data 추출
+					const firstData = (firstResponse as any)?.data || firstResponse;
+					const totalPages = firstData?.totalPages || 1;
+					
+					for (let p = 1; p <= totalPages; p++) {
+						if (cancelled) break;
+						
+						const res = p === 1 ? firstResponse : await getUserQnaList({ page: p, limit: pagination.pageSize, mineOnly: true } as any);
+						// ApiResponse 구조에서 data 추출
+						const responseData = (res as any)?.data || res;
+						const items = responseData?.items || [];
+						
+						// 타입 변환 고려하여 비교 (qnaId는 number이지만 문자열로 올 수 있음)
+						if (items.some((i: any) => Number(i.qnaId) === paramId)) {
+							if (!cancelled) {
+								// 페이지 변경 후, 다음 렌더링에서 qnaList가 업데이트되면 자동으로 펼쳐짐
+								pagination.handlePageChange(p);
+							}
+							break;
 						}
-						break;
 					}
+				} catch (err) {
+					console.error('[QnaHistory] Error searching for qnaId:', err);
 				}
-			} catch {}
-		})();
-		return () => { cancelled = true; };
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [query.qnaId]);
-
-	// 리스트가 로드되면 대기 중인 항목을 자동 펼침
-	useEffect(() => {
-		if (!pendingExpandId || !qnaList?.items) return;
-		if (qnaList.items.some((i: any) => i.qnaId === pendingExpandId)) {
-			handleQnaExpand(pendingExpandId);
-			setPendingExpandId(null);
+			})();
+			
+			return () => {
+				cancelled = true;
+			};
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [qnaList]);
+	}, [query.qnaId, qnaList]);
 
 	const handleBack = () => {
 		navigate(ROUTES.USER.DASHBOARD);
@@ -189,7 +215,9 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 			>
 				{qnaList?.items && qnaList.items.length > 0 && (
 				<List>
-					{qnaList.items.map((qna: any, index: number) => (
+					{qnaList.items.map((qna: any, index: number) => {
+						const isExpanded = expandedQna === Number(qna.qnaId);
+						return (
 						<React.Fragment key={qna.qnaId}>
 							<ListItem>
 								<ListItemText
@@ -210,8 +238,17 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 										</Typography>
 									}
 								/>
-								{expandedQna === qna.qnaId && (
-									<ThemedButton variant="dangerSoft" size="small" startIcon={<DeleteIcon />} onClick={() => onRequestDelete(qna.qnaId)} sx={{ mr: 1 }}>
+								{isExpanded && (
+									<ThemedButton 
+										variant="dangerSoft" 
+										size="small" 
+										startIcon={<DeleteIcon />} 
+									onClick={(e) => {
+										e.stopPropagation();
+										onRequestDelete(qna.qnaId);
+									}}
+										sx={{ mr: 1 }}
+									>
 										삭제
 									</ThemedButton>
 								)}
@@ -219,14 +256,25 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 									id={`expand-qna-${qna.qnaId}`}
 									variant="outlined"
 									size="small"
-									onClick={() => handleQnaExpand(qna.qnaId)}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleQnaExpand(qna.qnaId);
+									}}
 								>
-									{expandedQna === qna.qnaId ? '접기' : '상세보기'}
+									{isExpanded ? '접기' : '상세보기'}
 								</ThemedButton>
 							</ListItem>
 							
-							{expandedQna === qna.qnaId && (
-								<Accordion expanded={true} sx={{ boxShadow: 'none' }}>
+							{isExpanded && (
+								<Accordion 
+									expanded={true} 
+									sx={{ 
+										boxShadow: 'none',
+										'& .MuiAccordionDetails-root': {
+											pointerEvents: 'auto'
+										}
+									}}
+								>
 									<AccordionDetails>
 										<Box sx={{ pl: 2, pr: 2, pb: 2 }}>
 											<Typography variant="h6" gutterBottom>
@@ -236,18 +284,18 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 												{qna.content}
 											</Typography>
 											
-											{qnaDetails[qna.qnaId]?.qna.answerContent && (
+											{qnaDetails[Number(qna.qnaId)]?.qna.answerContent && (
 												<>
 													<Divider sx={{ my: 2 }} />
 													<Typography variant="h6" gutterBottom>
 														답변
 													</Typography>
 													<Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-														{qnaDetails[qna.qnaId].qna.answerContent}
+														{qnaDetails[Number(qna.qnaId)].qna.answerContent}
 													</Typography>
-													{qnaDetails[qna.qnaId].qna.answeredAt && (
+													{qnaDetails[Number(qna.qnaId)].qna.answeredAt && (
 														<Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-															답변일: {qnaDetails[qna.qnaId].qna.answeredAt ? formatDate(qnaDetails[qna.qnaId].qna.answeredAt || '') : '-'}
+															답변일: {qnaDetails[Number(qna.qnaId)].qna.answeredAt ? formatDate(qnaDetails[Number(qna.qnaId)].qna.answeredAt || '') : '-'}
 														</Typography>
 													)}
 												</>
@@ -260,7 +308,8 @@ export const QnaHistory: React.FC<QnaHistoryProps> = ({ id = 'qna-history' }) =>
 							
 							{index < qnaList.items.length - 1 && <Divider />}
 						</React.Fragment>
-					))}
+						);
+					})}
 				</List>
 				)}
 			</ListScaffold>

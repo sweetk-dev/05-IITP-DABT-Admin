@@ -160,7 +160,9 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
                 <List>
                   {qnaList.items.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
                     <React.Fragment key={qna.qnaId}>
-                      <ListItem id={`dash-qna-item-${qna.qnaId}`} divider button onClick={() => navigate(`${ROUTES.USER.QNA_HISTORY}?qnaId=${qna.qnaId}`)}>
+                      <ListItem id={`dash-qna-item-${qna.qnaId}`} divider button onClick={() => {
+                        navigate(`${ROUTES.USER.QNA_HISTORY}?qnaId=${qna.qnaId}`);
+                      }}>
                         <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

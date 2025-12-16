@@ -51,7 +51,7 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
   const theme: 'user' | 'admin' = 'user';
   const colors = getThemeColors(theme);
 
-  // QnA 데이터 페칭 (대시보드용 제한된 수량)
+  // QnA 데이터 페칭 (대시보드용 제한된 수량) - 로그인한 사용자가 작성한 질문만 조회
   const {
     data: qnaList,
     isLoading: qnaLoading,
@@ -60,7 +60,8 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
   } = useDataFetching({
     fetchFunction: () => getUserQnaList({
       page: 1,
-      limit: PAGINATION.HOME_PAGE_SIZE // 5개로 제한
+      limit: PAGINATION.HOME_PAGE_SIZE, // 5개로 제한
+      mineOnly: true // 로그인한 사용자가 작성한 질문만 조회
     } as any),
     autoFetch: true
   });
@@ -159,7 +160,9 @@ function UserDashboard({ id = 'user-dashboard' }: DashboardProps) {
                 <List>
                   {qnaList.items.slice(0, PAGINATION.HOME_PAGE_SIZE).map((qna: any) => (
                     <React.Fragment key={qna.qnaId}>
-                      <ListItem id={`dash-qna-item-${qna.qnaId}`} divider button onClick={() => navigate(`${ROUTES.USER.QNA_HISTORY}?qnaId=${qna.qnaId}`)}>
+                      <ListItem id={`dash-qna-item-${qna.qnaId}`} divider button onClick={() => {
+                        navigate(`${ROUTES.USER.QNA_HISTORY}?qnaId=${qna.qnaId}`);
+                      }}>
                         <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

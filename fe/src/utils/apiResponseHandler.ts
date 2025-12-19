@@ -2,6 +2,7 @@ import { ErrorCode } from '@iitp-dabt/common';
 import type { ApiResponse } from '../types/api';
 import { getUserType } from '../store/user';
 import { removeTokensByType } from '../store/auth';
+import { RouteUtils } from '../routes';
 
 // 에러 코드별 FE 전용 응답 설정
 export function enhanceApiResponse<T>(response: any): ApiResponse<T> {
@@ -56,7 +57,6 @@ function getRedirectUrl(errorCode?: number): string | undefined {
   if (!errorCode) return undefined;
   
   const userType = getUserType();
-  console.log('[getRedirectUrl]', { errorCode, userType });
   
   switch (errorCode) {
     case ErrorCode.TOKEN_EXPIRED:
@@ -90,7 +90,6 @@ export function handleApiResponse<T>(
     
     // 자동 로그아웃 처리
     if (response.autoLogout) {
-      console.log('자동 로그아웃 처리 - 토큰 정보 제거');
       // 토큰 에러 발생 시 해당 사용자 타입의 토큰 정보 자동 제거
       const userType = getUserType();
       removeTokensByType(userType === 'A' ? 'A' : 'U');
@@ -109,7 +108,9 @@ export function handleApiResponse<T>(
         try {
           const returnTo = window.location.pathname + window.location.search + window.location.hash;
           try { sessionStorage.setItem('returnTo', returnTo); } catch {}
-          window.location.href = response.redirectTo as string;
+          // basename을 고려한 전체 URL 생성
+          const fullUrl = RouteUtils.getFullUrl(response.redirectTo as string);
+          window.location.href = fullUrl;
         } catch {
           // fallback 무시
         }

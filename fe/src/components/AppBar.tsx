@@ -6,7 +6,7 @@ import { Logo, HomeIconButton, DashboardIconButton } from './AppBarCommon';
 import { logoutUser, logoutAdmin } from '../api';
 import { clearLoginInfoByType } from '../store/user';
 import { getUserName, getUserType, getAdminRoleName } from '../store/user';
-import { ROUTES } from '../routes';
+import { ROUTES, RouteUtils } from '../routes';
 import { AccountCircle, Menu as MenuIcon } from '@mui/icons-material';
 import ThemedButton from './common/ThemedButton';
 // AdminMenuBar removed in favor of SideNav + AdminPageHeader
@@ -114,7 +114,9 @@ export default function AppBar({
     } finally {
       clearLoginInfoByType('A'); // 어드민 정보만 명시적으로 제거
       // window.location을 사용하여 강제 페이지 이동 (React Router 우회)
-      window.location.href = ROUTES.ADMIN.LOGIN;
+      // basename을 고려한 전체 URL 생성
+      const fullUrl = RouteUtils.getFullUrl(ROUTES.ADMIN.LOGIN);
+      window.location.href = fullUrl;
     }
   };
 

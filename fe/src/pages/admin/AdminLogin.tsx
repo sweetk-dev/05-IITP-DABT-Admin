@@ -5,7 +5,7 @@ import LoginForm from '../../components/LoginForm';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorAlert from '../../components/ErrorAlert';
 import { loginAdmin } from '../../api';
-import { ROUTES } from '../../routes';
+import { ROUTES, RouteUtils } from '../../routes';
 import { isAdminAuthenticated } from '../../store/auth';
 import { clearLoginInfoByType } from '../../store/user';
 import { useTheme } from '@mui/material/styles';
@@ -30,7 +30,8 @@ export default function AdminLogin() {
       try {
         const saved = sessionStorage.getItem('returnTo');
         if (saved) {
-          targetPath = saved;
+          // basename을 제거한 상대 경로로 변환
+          targetPath = RouteUtils.getRelativePath(saved);
           sessionStorage.removeItem('returnTo');
         }
       } catch {}
@@ -57,11 +58,13 @@ export default function AdminLogin() {
             const saved = sessionStorage.getItem('returnTo');
             if (saved) {
               sessionStorage.removeItem('returnTo');
-              window.location.href = saved;
+              // basename을 제거한 상대 경로로 변환하여 navigate 사용
+              const relativePath = RouteUtils.getRelativePath(saved);
+              navigate(relativePath, { replace: true });
               return;
             }
           } catch {}
-          window.location.href = ROUTES.ADMIN.DASHBOARD;
+          navigate(ROUTES.ADMIN.DASHBOARD, { replace: true });
         },
         (errorMessage) => {
           setError(errorMessage);

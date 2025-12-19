@@ -4,6 +4,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { isValidEmail } from '@iitp-dabt/common';
 import type { UserRegisterReq } from '@iitp-dabt/common';
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 import { checkEmail, registerUser } from '../../api/user';
 import CommonDialog from '../../components/CommonDialog';
 import { ROUTES } from '../../routes';
@@ -16,6 +17,7 @@ import { PAGE_SPACING } from '../../constants/spacing';
 
 export default function Register() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const userTheme = 'user' as const;
   const colors = getThemeColors(userTheme);
   
@@ -134,7 +136,7 @@ export default function Register() {
         setDialogMsg('회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.');
         setDialogOnConfirm(() => () => {
           setDialogOpen(false);
-          window.location.href = ROUTES.PUBLIC.LOGIN;
+          navigate(ROUTES.PUBLIC.LOGIN, { replace: true });
         });
         setDialogOpen(true);
       } else {
@@ -361,7 +363,7 @@ export default function Register() {
             mt: 1, 
             fontSize: '0.95rem'
           }} 
-          onClick={() => window.location.href = ROUTES.PUBLIC.LOGIN}
+          onClick={() => navigate(ROUTES.PUBLIC.LOGIN, { replace: true })}
         >
           로그인 화면으로
         </ThemedButton>

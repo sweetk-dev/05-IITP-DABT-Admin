@@ -111,7 +111,7 @@ function App() {
             
             {/* Admin Dashboard */}
             <Route path={ROUTES.ADMIN.DASHBOARD} element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-            <Route path={ROUTES.ADMIN.PROFILE} element={<AdminProtectedRoute><AdminProfile /></AdminProtectedRoute>} />
+            <Route path={ROUTES.ADMIN.PROFILE} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><AdminProfile /></Suspense></AdminProtectedRoute>} />
                     
                     {/* 사용자 관리 */}
             <Route path={ROUTES.ADMIN.USERS.LIST} element={<AdminProtectedRoute><Suspense fallback={<LoadingSpinner loading={true} />}><UserManagement /></Suspense></AdminProtectedRoute>} />

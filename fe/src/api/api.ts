@@ -2,7 +2,7 @@ import { ErrorCode } from '@iitp-dabt/common';
 import { ensureValidToken, removeTokens, getAccessToken, getRefreshToken, saveTokens } from '../store/auth';
 import { FULL_API_URLS } from '@iitp-dabt/common';
 import { getUserType, clearLoginInfo } from '../store/user';
-import { ROUTES } from '../routes';
+import { ROUTES, RouteUtils } from '../routes';
 import { API_BASE_URL, API_TIMEOUT } from '../config';
 import type { ApiResponse } from '../types/api';
 import { enhanceApiResponse } from '../utils/apiResponseHandler';
@@ -218,7 +218,9 @@ export async function apiFetch<T = any>(
           sessionStorage.setItem('returnTo', returnTo);
         } catch {}
         
-        window.location.href = redirectTo;
+        // basename을 고려한 전체 URL 생성
+        const fullUrl = RouteUtils.getFullUrl(redirectTo);
+        window.location.href = fullUrl;
         return enhanceApiResponse<T>({ 
           success: false, 
           errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',
@@ -249,11 +251,10 @@ export async function apiFetch<T = any>(
     if (e.message === 'Token refresh failed' || e.message === 'No refresh token available') {
       removeTokens();
       const userType = getUserType();
-      if (userType === 'A') {
-        window.location.href = ROUTES.ADMIN.LOGIN;
-      } else {
-        window.location.href = ROUTES.PUBLIC.LOGIN;
-      }
+      const redirectTo = (userType === 'A') ? ROUTES.ADMIN.LOGIN : ROUTES.PUBLIC.LOGIN;
+      // basename을 고려한 전체 URL 생성
+      const fullUrl = RouteUtils.getFullUrl(redirectTo);
+      window.location.href = fullUrl;
       return enhanceApiResponse<T>({ 
         success: false, 
         errorMessage: '인증이 만료되었습니다. 다시 로그인해주세요.',

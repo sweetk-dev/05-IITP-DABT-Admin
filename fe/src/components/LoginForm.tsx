@@ -1,5 +1,6 @@
 import { Box, TextField, Typography, IconButton, InputAdornment } from '@mui/material';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { isValidEmail } from '@iitp-dabt/common';
@@ -26,6 +27,7 @@ export default function LoginForm({
   defaultEmail = '',
   defaultPassword = ''
 }: LoginFormProps) {
+  const navigate = useNavigate();
   // trim 처리가 적용된 입력 필드들
   const emailOrLoginIdInput = useInputWithTrim(defaultEmail);
   const [pw, setPw] = useState(defaultPassword);
@@ -181,7 +183,7 @@ export default function LoginForm({
             mt: 1,
             fontSize: '0.95rem'
           }}
-          onClick={() => window.location.href = ROUTES.PUBLIC.REGISTER}
+          onClick={() => navigate(ROUTES.PUBLIC.REGISTER, { replace: true })}
           disabled={loading}
         >
           회원가입

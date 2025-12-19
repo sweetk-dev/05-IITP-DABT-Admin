@@ -317,6 +317,59 @@ export const RouteUtils = {
   createAdminCodeEditRoute: (id: string | number): string => {
     return RouteUtils.createDynamicRoute(ROUTES.ADMIN.CODE.EDIT, { id });
   },
+
+  /**
+   * basename을 고려한 전체 URL 생성
+   * window.location.href를 사용할 때 basename을 포함한 전체 URL을 생성
+   * @param path 상대 경로 (예: '/admin/login')
+   * @returns basename을 포함한 전체 경로 (예: '/adm/admin/login')
+   */
+  getFullUrl: (path: string): string => {
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    // path가 이미 /로 시작하는지 확인
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    
+    // baseUrl이 '/'가 아니면 무조건 basename을 앞에 추가
+    if (baseUrl !== '/') {
+      // baseUrl 끝의 / 제거 (있으면)
+      const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+      return `${base}${normalizedPath}`;
+    }
+    return normalizedPath;
+  },
+
+  /**
+   * 현재 경로에서 basename을 제거한 상대 경로 반환
+   * sessionStorage에 저장된 returnTo 값을 처리할 때 사용
+   * @param fullPath 전체 경로 (예: '/adm/admin/dashbd' 또는 'http://localhost:5173/adm/admin/dashbd')
+   * @returns basename을 제거한 상대 경로 (예: '/admin/dashbd')
+   */
+  getRelativePath: (fullPath: string): string => {
+    try {
+      let path = fullPath;
+      // 전체 URL인 경우 pathname만 추출
+      if (fullPath.startsWith('http://') || fullPath.startsWith('https://')) {
+        const url = new URL(fullPath);
+        path = url.pathname + url.search + url.hash;
+      }
+      // basename 제거
+      const baseUrl = import.meta.env.BASE_URL || '/';
+      if (baseUrl !== '/') {
+        // baseUrl 정규화 (끝의 / 제거)
+        const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+        // path가 base로 시작하면 제거
+        if (path.startsWith(base)) {
+          const relativePath = path.slice(base.length);
+          // /로 시작하도록 보장
+          return relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+        }
+      }
+      // basename이 없거나 '/'인 경우 그대로 반환 (이미 /로 시작하는지 확인)
+      return path.startsWith('/') ? path : `/${path}`;
+    } catch {
+      return fullPath;
+    }
+  },
 };
 
 /**

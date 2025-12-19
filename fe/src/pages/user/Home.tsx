@@ -513,7 +513,7 @@ export default function Home() {
                 isolation: 'isolate'
               }}
             >
-              장애인 자립생활 지원 플랫폼 Open API 센터
+              장애인 자립생활 지원 플랫폼 Open API 센터!
             </Typography>
             <Typography 
               align="center" 

@@ -32,6 +32,16 @@ export interface OpenApiCreateData {
 export interface OpenApiUpdateData {
   keyName?: string;
   keyDesc?: string;
+  /**
+   * [추가 2026-10] 활성 여부 'Y' | 'N'.
+   * 프론트(관리자 OpenApiEdit 수정 화면, OpenApiRequestDetail 승인·거절 화면)가 실제로 보내는 필드이며
+   * 공통 DTO(AdminOpenApiUpdateReq.activeYn)와 같다.
+   */
+  activeYn?: string;
+  /**
+   * @deprecated 과거 호환용('ACTIVE' 이면 활성, 그 외 비활성). 현재 프론트는 보내지 않는다.
+   * activeYn 이 함께 오면 activeYn 이 우선한다.
+   */
   status?: string;
   rejectReason?: string;
 }
@@ -153,8 +163,27 @@ export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData
       updateFields.keyDesc = updateData.keyDesc;
     }
 
-    if (updateData.status !== undefined) {
-      updateFields.activeYn = updateData.status === 'ACTIVE' ? 'Y' : 'N';
+    // [수정 2026-10] 활성 여부(승인/거절/활성/비활성) 반영
+    //  - 문제: 기존 코드는 updateData.status === 'ACTIVE' 만 보았는데, 프론트는 activeYn('Y'|'N') 을 보낸다.
+    //    그래서 관리자 화면의 승인·거절·활성·비활성 변경이 모두 무시되고 이름/설명만(그마저도 리포지토리에서 누락) 반영됐다.
+    //  - 조치: activeYn 을 우선 사용하고, activeYn 이 없을 때만 과거 status 값을 호환 처리한다.
+    //  - 현재 값과 같으면 activeYn 을 넘기지 않는다. 리포지토리(updateAuthKey)는 activeYn='Y' 를 받으면
+    //    active_at 을 현재시각으로 다시 쓰고 반려 사유를 지우므로, 이미 활성인 키의 이름만 고쳐 저장해도
+    //    '활성화 일시'가 바뀌는 부작용을 막기 위함이다.
+    //  - 결과 동작(리포지토리 updateAuthKey 와 합쳐서):
+    //      승인   (N→Y)       : active_yn='Y', active_at=현재시각, key_reject_reason=NULL
+    //      거절   (N 유지+사유): key_reject_reason=사유 (active_yn='N' 유지)
+    //      비활성 (Y→N)       : active_yn='N' (active_at 유지 → 통계상 '비활성'으로 집계)
+    //      재활성 (N→Y)       : 승인과 동일
+    const requestedActiveYn: string | undefined =
+      updateData.activeYn !== undefined
+        ? updateData.activeYn
+        : updateData.status !== undefined
+          ? (updateData.status === 'ACTIVE' ? 'Y' : 'N')
+          : undefined;
+
+    if (requestedActiveYn !== undefined && requestedActiveYn !== existingApi.activeYn) {
+      updateFields.activeYn = requestedActiveYn;
     }
 
     // rejectReason이 있으면 keyRejectReason으로 매핑
@@ -162,6 +191,8 @@ export const updateOpenApi = async (apiId: number, updateData: OpenApiUpdateData
       updateFields.keyRejectReason = (updateData as any).rejectReason;
     }
 
+    // 참고: updateOpenApiAuthKeyRepo 는 리포지토리의 updateAuthKey 이다(파일 상단 import 별칭).
+    //  [수정 2026-10] updateAuthKey 가 keyName/keyDesc 도 반영하도록 리포지토리를 보강했다.
     const updatedApi = await updateOpenApiAuthKeyRepo(apiId, updateFields);
 
     if (!updatedApi) {

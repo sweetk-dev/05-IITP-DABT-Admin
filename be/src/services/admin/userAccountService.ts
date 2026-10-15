@@ -7,6 +7,9 @@ import bcrypt from 'bcrypt';
 import { appLogger } from '../../utils/logger';
 import { ResourceError, BusinessError } from '../../utils/customErrors';
 import { openApiUserRepository } from '../../repositories/openApiUserRepository';
+// [추가 2026-10] 사용자 비활성/정지/삭제 시 그 사용자의 인증 키를 함께 비활성화하기 위해 사용
+import { deactivateAuthKeysByUserIds } from '../../repositories/openApiAuthKeyRepository';
+import sequelize from '../../models';
 import { BCRYPT_SALT_ROUNDS } from '../../constants/security';  
 import { arrayBuffer } from 'stream/consumers';
 import { UserAccountListRes, UserAccountListItem,
@@ -14,6 +17,14 @@ import { UserAccountListRes, UserAccountListItem,
  } from '@iitp-dabt/common';
 
 
+
+/**
+ * [추가 2026-10] Open API 사용자 상태가 '활성(A)'이 아닌 값으로 바뀌는 요청인지 판단
+ *  - 사용자 상태 코드: A=활성, I=비활성, S=정지 (관리자 화면 UserEdit/UserCreate 선택지 기준)
+ *  - 외부 Open API 서버는 키 소유자 상태가 'A' 인지도 확인하지만, 키 테이블의 active_yn 도 실제 상태와
+ *    맞춰 두어야 관리 화면·통계·다른 소비처에서 "사용 중인 키"로 오인되지 않는다.
+ */
+const isNonActiveUserStatus = (status?: string): boolean => status !== undefined && status !== 'A';
 
 export const userAccountService = {
   // 사용자 계정 목록 조회
@@ -159,7 +170,16 @@ export const userAccountService = {
       updateData.updatedBy = actorTag; 
       updateData.updatedAt = new Date();
 
-      await openApiUserRepository.updateUserAccount(userId, updateData);
+      // [수정 2026-10] 상태를 비활성(I)/정지(S)로 바꾸면 그 사용자의 활성 키도 같은 트랜잭션에서 active_yn='N' 으로 내린다.
+      //  - 사용자 UPDATE 와 키 비활성화 중 하나라도 실패하면 둘 다 롤백된다.
+      //  - 상태를 다시 활성(A)으로 바꿔도 키는 자동으로 켜지지 않는다(관리자가 키별로 다시 활성화).
+      await sequelize.transaction(async (transaction) => {
+        const updated = await openApiUserRepository.updateUserAccount(userId, updateData, transaction);
+        if (updated && isNonActiveUserStatus(data.status)) {
+          const deactivated = await deactivateAuthKeysByUserIds([userId], actorTag, transaction);
+          appLogger.info('사용자 상태 변경에 따른 인증 키 비활성화', { userId, status: data.status, deactivated });
+        }
+      });
     } catch (error) {
       appLogger.error('사용자 계정 수정 서비스 오류:', { error, userId, data });
       throw error;
@@ -169,7 +189,15 @@ export const userAccountService = {
   // 사용자 계정 삭제
   async deleteUserAccount(userId: number, actorTag: string) {
     try {
-      await openApiUserRepository.deleteUserAccount(userId, actorTag); 
+      // [수정 2026-10] 사용자 삭제와 그 사용자의 활성 키 비활성화(active_yn='N')를 한 트랜잭션으로 처리한다.
+      //  - 키 행 자체는 삭제하지 않는다(이력 보존). 외부 Open API 인증은 active_yn='Y' 를 요구하므로 차단된다.
+      await sequelize.transaction(async (transaction) => {
+        const deleted = await openApiUserRepository.deleteUserAccount(userId, actorTag, transaction);
+        if (deleted) {
+          const deactivated = await deactivateAuthKeysByUserIds([userId], actorTag, transaction);
+          appLogger.info('사용자 삭제에 따른 인증 키 비활성화', { userId, deactivated });
+        }
+      });
     } catch (error) {
       appLogger.error('사용자 계정 삭제 서비스 오류:', { error, userId });
       throw error;
@@ -180,7 +208,15 @@ export const userAccountService = {
   // 사용자 계정 목록 삭제
   async deleteUserAccountList(userIds: number[], actorTag: string) {  
     try {
-      const deleteCount = await openApiUserRepository.deleteUserAccountList(userIds, actorTag); 
+      // [수정 2026-10] 사용자 일괄 삭제와 해당 사용자들의 활성 키 비활성화를 한 트랜잭션으로 처리한다.
+      const deleteCount = await sequelize.transaction(async (transaction) => {
+        const count = await openApiUserRepository.deleteUserAccountList(userIds, actorTag, transaction);
+        if (count > 0) {
+          const deactivated = await deactivateAuthKeysByUserIds(userIds, actorTag, transaction);
+          appLogger.info('사용자 일괄 삭제에 따른 인증 키 비활성화', { userIds, deactivated });
+        }
+        return count;
+      });
       if (deleteCount === 0) {
         throw new ResourceError(
           ErrorCode.ACCOUNT_NOT_FOUND,
@@ -225,7 +261,15 @@ export const userAccountService = {
         updateData.note = data.reason;
       }
 
-      await openApiUserRepository.updateUserAccount(userId, updateData);
+      // [수정 2026-10] 상태를 비활성(I)/정지(S)로 바꾸면 그 사용자의 활성 키도 같은 트랜잭션에서 active_yn='N' 으로 내린다.
+      //  (계정 수정 API 와 같은 규칙. 다시 활성(A)으로 바꿔도 키는 자동으로 켜지지 않는다.)
+      await sequelize.transaction(async (transaction) => {
+        const updated = await openApiUserRepository.updateUserAccount(userId, updateData, transaction);
+        if (updated && isNonActiveUserStatus(data.status)) {
+          const deactivated = await deactivateAuthKeysByUserIds([userId], actorTag, transaction);
+          appLogger.info('사용자 상태 변경에 따른 인증 키 비활성화', { userId, status: data.status, deactivated });
+        }
+      });
     } catch (error) {
       appLogger.error('사용자 계정 상태 업데이트 서비스 오류:', { error, userId, data });
       throw error;

@@ -1,5 +1,7 @@
 # IITP DABT Admin
 
+![version](https://img.shields.io/badge/version-v1.1.0-blue)
+
 IITP DABT (Data API Business Tool) Admin 시스템입니다.
 
 ## 📋 프로젝트 개요

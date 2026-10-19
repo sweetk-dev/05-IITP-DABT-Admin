@@ -27,6 +27,7 @@ import type {
   AdminOpenApiCreateReq,
   AdminOpenApiCreateRes,
   AdminOpenApiUpdateReq,
+  AdminOpenApiUpdateParams,
   AdminOpenApiDeleteParams,
   AdminOpenApiExtendReq,
   AdminOpenApiExtendRes,
@@ -208,29 +209,47 @@ export const createOpenApiForAdmin = async (req: Request<{}, {}, AdminOpenApiCre
 };
 
 /**
- * OpenAPI 수정 (관리자용)
- * API: PUT /api/admin/open-api/:apiId
+ * OpenAPI 수정 (관리자용) — 이름/설명 수정, 승인·거절, 활성·비활성 변경을 모두 이 API 로 처리
+ * API: PUT /api/admin/openapi/keys/:keyId
  * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.OPEN_API.UPDATE}`]
+ *
+ * [수정 2026-10] 경로 파라미터 이름 불일치 수정
+ *  - 문제: 라우트 경로(API_URLS.ADMIN.OPEN_API.UPDATE = '/openapi/keys/:keyId')의 파라미터는 keyId 인데
+ *    이 핸들러는 req.params.apiId 를 읽었다. apiId 는 항상 undefined 라 모든 요청이 INVALID_PARAMETER 로 끝나
+ *    관리자 화면의 키 수정·승인·거절·활성·비활성이 전부 동작하지 않았다.
+ *  - 조치: 공통 DTO(AdminOpenApiUpdateParams.keyId)와 같은 이름으로 읽고, 삭제 핸들러와 같은 숫자 검증을 둔다.
+ *    또한 activeYn 은 'Y'/'N' 만 허용한다(그 밖의 값이 DB 에 들어가지 않도록).
+ *  - 본문의 updatedBy 는 신뢰하지 않고, 수정자는 토큰 기반 actorTag 로 기록한다(기존 동작 유지).
  */
-export const updateOpenApiForAdmin = async (req: Request<{ apiId: string }, {}, AdminOpenApiUpdateReq>, res: Response) => {
+export const updateOpenApiForAdmin = async (req: Request<AdminOpenApiUpdateParams, {}, AdminOpenApiUpdateReq>, res: Response) => {
   try {
     logApiCall('PUT', API_URLS.ADMIN.OPEN_API.UPDATE, ADMIN_API_MAPPING as any, 'OpenAPI 수정 (관리자용)');
 
-    const { apiId } = req.params;
+    const { keyId } = req.params;
     const updateData = req.body;
     const adminId = extractUserIdFromRequest(req);
     const actorTag = getActorTag(req);
-    
+
     if (!adminId) {
       return sendError(res, ErrorCode.UNAUTHORIZED);
     }
 
-    if (!apiId) {
+    if (!keyId) {
       return sendError(res, ErrorCode.INVALID_PARAMETER);
     }
 
-    await updateOpenApi(parseInt(apiId), updateData, actorTag);
-    sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_UPDATED', { adminId, keyId: apiId });
+    const parsedKeyId = parseInt(keyId);
+    if (!parsedKeyId || Number.isNaN(parsedKeyId) || parsedKeyId <= 0) {
+      return sendValidationError(res, 'keyId', '유효하지 않은 인증키 ID입니다.');
+    }
+
+    // activeYn 은 선택 필드지만, 오면 'Y' 또는 'N' 이어야 한다.
+    if (updateData && updateData.activeYn !== undefined && updateData.activeYn !== 'Y' && updateData.activeYn !== 'N') {
+      return sendValidationError(res, 'activeYn', "활성 여부(activeYn)는 'Y' 또는 'N'이어야 합니다.");
+    }
+
+    await updateOpenApi(parsedKeyId, updateData, actorTag);
+    sendSuccess(res, undefined, undefined, 'ADMIN_OPEN_API_UPDATED', { adminId, keyId: parsedKeyId });
   } catch (error) {
     appLogger.error('관리자 OpenAPI 수정 중 오류 발생', { error, adminId: extractUserIdFromRequest(req) });
     
@@ -256,7 +275,7 @@ export const updateOpenApiForAdmin = async (req: Request<{ apiId: string }, {}, 
 
 /**
  * OpenAPI 삭제 (관리자용)
- * API: DELETE /api/admin/open-api/:apiId
+ * API: DELETE /api/admin/openapi/keys/:keyId
  * 매핑: ADMIN_API_MAPPING[`DELETE ${API_URLS.ADMIN.OPEN_API.DELETE}`]
  */
 export const deleteOpenApiForAdmin = async (

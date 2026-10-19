@@ -1,5 +1,5 @@
 import { OpenApiUser, OpenApiUserCreationAttributes } from '../models/openApiUser';
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 
 export const openApiUserRepository = {
 
@@ -281,7 +281,8 @@ export const openApiUserRepository = {
     affiliation?: string;
     note?: string;
     updatedBy: string;
-  }): Promise<boolean> {
+  }, transaction?: Transaction): Promise<boolean> {
+    // [추가 2026-10] transaction(선택): 상태 변경과 키 비활성화를 한 트랜잭션으로 묶기 위해 받는다.
     const updateFields: any = {
       updatedBy: updateData.updatedBy
     };
@@ -292,6 +293,7 @@ export const openApiUserRepository = {
     if (updateData.note !== undefined) updateFields.note = updateData.note;
 
     const [affectedRows] = await OpenApiUser.update(updateFields, {
+      transaction,
       where: { 
         userId,
         delYn: 'N'
@@ -303,12 +305,14 @@ export const openApiUserRepository = {
   /**
    * 사용자 계정 삭제 (논리 삭제)
    */
-  async deleteUserAccount(userId: number, deletedBy: string): Promise<boolean> {
+  async deleteUserAccount(userId: number, deletedBy: string, transaction?: Transaction): Promise<boolean> {
+    // [추가 2026-10] transaction(선택): 사용자 삭제와 키 비활성화를 한 트랜잭션으로 묶기 위해 받는다.
     const [affectedRows] = await OpenApiUser.update({
       delYn: 'Y',
       deletedAt: new Date(),
       deletedBy
     }, {
+      transaction,
       where: { 
         userId,
         delYn: 'N'
@@ -321,12 +325,14 @@ export const openApiUserRepository = {
   /**
    * 사용자 계정 목록 삭제 (논리 삭제)
    */
-  async deleteUserAccountList(userIds: number[], deletedBy: string): Promise<number> {
+  async deleteUserAccountList(userIds: number[], deletedBy: string, transaction?: Transaction): Promise<number> {
+    // [추가 2026-10] transaction(선택): 사용자 일괄 삭제와 키 비활성화를 한 트랜잭션으로 묶기 위해 받는다.
     const [affectedCount] = await OpenApiUser.update({
       delYn: 'Y',
       deletedAt: new Date(),
       deletedBy
     }, {
+      transaction,
       where: { 
         userId: { [Op.in]: userIds },
         delYn: 'N'

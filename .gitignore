@@ -195,4 +195,8 @@ script/deploy-config.json
 # Documentation Build
 # ========================================
 docs/build/
-docs/_build/ 
+docs/_build/
+
+# Local workspace meta
+.workspace/
+WORKSPACE.md

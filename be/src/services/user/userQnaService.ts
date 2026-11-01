@@ -34,7 +34,10 @@ export const getUserQnaList = async (
       : [['createdAt' as any, 'DESC']];
 
     const where: any = { delYn: 'N' };
-    // mineOnly=true면 내 질문만(비공개 포함), 아니면 전체(공개/비공개) 노출
+    // mineOnly=true면 내 질문만(비공개 포함).
+    // 그 외에는 공개·비공개 전체를 목록에 올리되, 남이 쓴 비공개 문의는 컨트롤러에서
+    // toUserQnaItemForViewer 로 제목·본문·답변을 가린 뒤 내보낸다 (목록 API 는 비로그인도 열린다).
+    // userId 는 일반 사용자 토큰일 때만 값이 있다(비로그인·관리자 토큰은 0).
     if ((params as any).mineOnly && userId) {
       where.userId = userId;
     }
@@ -109,7 +112,7 @@ export const createUserQna = async (userId: number, createData: UserQnaCreateReq
 
 export const getUserQnaHome = async (userId: number): Promise<UserQnaHomeRes> => {
   const result = await findQnas({
-    // 홈 노출: 공개/비공개 모두 최근 5개
+    // 홈 노출: 공개/비공개 모두 최근 5개 — 남이 쓴 비공개 문의의 제목·본문은 컨트롤러에서 가린다
     where: { delYn: 'N' },
     limit: 5,
     offset: 0,

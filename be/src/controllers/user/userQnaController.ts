@@ -15,14 +15,14 @@ import {
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
-import { extractUserIdFromRequest } from '../../utils/commonUtils';
+import { extractUserIdFromRequest, extractGeneralUserIdFromRequest } from '../../utils/commonUtils';
 import { 
   getUserQnaList, 
   getUserQnaDetail, 
   createUserQna, 
   getUserQnaHome 
 } from '../../services/user/userQnaService';
-import { toUserQnaItem } from '../../mappers/qnaMapper';
+import { toUserQnaItemForViewer } from '../../mappers/qnaMapper';
 
 /**
  * 사용자 Q&A 목록 조회
@@ -32,11 +32,13 @@ import { toUserQnaItem } from '../../mappers/qnaMapper';
 export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListQuery>, res: Response) => {
   try {
     logApiCall('GET', API_URLS.USER.QNA.LIST, USER_API_MAPPING as any, '사용자 Q&A 목록 조회');
-    const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용: userId 없으면 0으로 조회
+    // 공개 접근 허용: 비로그인·관리자 토큰이면 0 (본인 글 없음)
+    const userId = extractGeneralUserIdFromRequest(req) || 0;
     const params = req.query as any;
     const domain = await getUserQnaList(userId, params);
     const result: UserQnaListRes = {
-      items: domain.qnas.map(src => ({ ...toUserQnaItem(src), isMine: Number(src.userId) === Number(userId) } as any)),
+      // 남의 비공개 문의는 제목·본문을 가린다 (toUserQnaItemForViewer)
+      items: domain.qnas.map(src => toUserQnaItemForViewer(src, userId) as any),
       total: domain.total,
       page: domain.page,
       limit: domain.limit,
@@ -66,13 +68,12 @@ export const getQnaListForUser = async (req: Request<{}, {}, {}, UserQnaListQuer
 export const getQnaHomeForUser = async (req: Request, res: Response) => {
   try {
     logApiCall('GET', API_URLS.USER.QNA.HOME, USER_API_MAPPING as any, '사용자 Q&A 홈 조회');
-    const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용
+    // 공개 접근 허용: 비로그인·관리자 토큰이면 0 (본인 글 없음)
+    const userId = extractGeneralUserIdFromRequest(req) || 0;
     const data = await getUserQnaHome(userId);
     const response: UserQnaHomeRes = {
-      qnas: (data.qnas as any[]).map((src: any) => ({
-        ...toUserQnaItem(src),
-        isMine: Number(src.userId) === Number(userId)
-      }) as any)
+      // 남의 비공개 문의는 제목·본문을 가린다 (toUserQnaItemForViewer)
+      qnas: (data.qnas as any[]).map((src: any) => toUserQnaItemForViewer(src, userId) as any)
     } as any;
     sendSuccess(res, response, undefined, 'USER_QNA_HOME_VIEW', { userId, count: response.qnas.length });
   } catch (error) {
@@ -96,13 +97,14 @@ export const getQnaHomeForUser = async (req: Request, res: Response) => {
 export const getQnaDetailForUser = async (req: Request<UserQnaDetailParams>, res: Response) => {
   try {
     logApiCall('GET', API_URLS.USER.QNA.DETAIL, USER_API_MAPPING as any, '사용자 Q&A 상세 조회');
-    const userId = extractUserIdFromRequest(req) || 0; // 공개 접근 허용
+    // 공개 접근 허용: 비로그인·관리자 토큰이면 0 — 비공개 문의는 작성자(일반 사용자 토큰)만 열람
+    const userId = extractGeneralUserIdFromRequest(req) || 0;
     const { qnaId } = req.params;
     const keyId = parseInt(qnaId);
     const skipHitHeader = (req.headers['x-skip-hit'] as string | undefined)?.toLowerCase() === 'true';
     const skipHitQuery = String((req.query as any)?.skipHit || '').toLowerCase() === 'true';
     const qna = await getUserQnaDetail(userId, keyId, skipHitHeader || skipHitQuery);
-    const result: UserQnaDetailRes = { qna: { ...toUserQnaItem(qna), isMine: Number((qna as any).userId) === Number(userId) } as any } as any;
+    const result: UserQnaDetailRes = { qna: toUserQnaItemForViewer(qna, userId) as any } as any;
 
     sendSuccess(res, result, undefined, 'USER_QNA_DETAIL_VIEW', { userId, qnaId });
   } catch (error) {

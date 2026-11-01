@@ -104,6 +104,29 @@ export function hasUserAccountEditPermission(adminRole: string | null): boolean 
 }
 
 /**
+ * OpenAPI 인증키 편집 권한 확인 (S-ADMIN, ADMIN만)
+ * - 인증키 발급/수정(활성 여부 포함)/기간연장/삭제
+ * - 인증키는 사용자 계정에 딸린 접근 자격이다. 계정을 비활성화하면 키도 함께 비활성화되는 것처럼
+ *   계정 편집과 같은 수준으로 다룬다. EDITOR, VIEWER는 조회만 가능
+ * @param adminRole 관리자 역할
+ * @returns 인증키 편집 권한 여부
+ */
+export function hasOpenApiKeyEditPermission(adminRole: string | null): boolean {
+  return hasUserAccountEditPermission(adminRole);
+}
+
+/**
+ * 공통코드 관리 권한 확인 (S-ADMIN만 가능)
+ * - 코드 관리 메뉴의 조회/생성/수정/삭제 전체 (메뉴 접근 자체가 S-ADMIN 전용, hasMenuAccess 참고)
+ * - 일반 화면의 코드 조회는 공개 조회 API(/api/code/:grpId 등)를 쓰므로 영향 없음
+ * @param adminRole 관리자 역할
+ * @returns 공통코드 관리 권한 여부
+ */
+export function hasCodeManagementPermission(adminRole: string | null): boolean {
+  return hasAccountManagementPermission(adminRole);
+}
+
+/**
  * 시스템 설정 권한 확인 (S-ADMIN만 가능)
  * - 시스템 설정 메뉴 (향후 추가 예정)
  * - 데이터베이스 설정
@@ -155,6 +178,9 @@ export function hasMenuEditPermission(adminRole: string | null, menuName: string
     
     case 'user-management':
       return hasUserAccountEditPermission(adminRole);
+    
+    case 'openapi':
+      return hasOpenApiKeyEditPermission(adminRole);
     
     case 'operator-management':
     case 'code-management':

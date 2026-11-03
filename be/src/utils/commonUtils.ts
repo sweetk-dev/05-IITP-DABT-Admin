@@ -33,6 +33,20 @@ export function extractUserIdFromRequest<T = any>(req: Request<any, any, any, T>
 }
 
 /**
+ * Request에서 일반 사용자(userType='U') ID 추출
+ * - 사용자 화면의 '본인 글' 판단에 쓴다. 관리자 토큰의 userId 는 관리자 계정 번호라
+ *   사용자 계정 번호와 겹칠 수 있으므로, 일반 사용자 토큰이 아니면 null 을 돌려준다.
+ * @param req Express Request 객체
+ * @returns 일반 사용자 ID 또는 null
+ */
+export function extractGeneralUserIdFromRequest<T = any>(req: Request<any, any, any, T>): number | null {
+  if (req.user?.userType !== USER_TYPE_GENERAL) {
+    return null;
+  }
+  return req.user?.userId || null;
+}
+
+/**
  * Request에서 사용자 타입 추출
  * @param req Express Request 객체 (모든 제네릭 타입 지원)
  * @returns 사용자 타입 또는 null

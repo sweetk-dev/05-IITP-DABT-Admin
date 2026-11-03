@@ -1,7 +1,7 @@
 import e, { Request, Response } from 'express';
 import { ErrorCode, ADMIN_API_MAPPING, API_URLS } from '@iitp-dabt/common';
 import { sendError, sendSuccess, sendValidationError, sendDatabaseError } from '../../utils/errorHandler';
-import { getAdminRole, isAdmin, getActorTag } from '../../utils/auth';
+import { getAdminRole, getActorTag, hasUserAccountReadPermission, hasUserAccountEditPermission } from '../../utils/auth';
 import { appLogger } from '../../utils/logger';
 import { logApiCall } from '../../utils/apiLogger';
 import { extractUserIdFromRequest, normalizeErrorMessage } from '../../utils/commonUtils';
@@ -27,7 +27,7 @@ import type {
 import { userAccountService } from '../../services/admin/userAccountService';
 
 /**
- * 사용자 계정 목록 조회 (일반 Admin도 접근 가능)
+ * 사용자 계정 목록 조회 (모든 관리자 역할)
  * API: GET /api/admin/user-accounts
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.USER_ACCOUNT.LIST}`]
  */
@@ -35,11 +35,11 @@ export const getUserAccountList = async (req: Request<{}, {}, {}, UserAccountLis
   let adminId: number | null;
   
   try {
-    logApiCall('GET', API_URLS.ADMIN.USER_ACCOUNT.LIST, ADMIN_API_MAPPING as any, '사용자 계정 목록 조회 (일반 Admin도 접근 가능)');
+    logApiCall('GET', API_URLS.ADMIN.USER_ACCOUNT.LIST, ADMIN_API_MAPPING as any, '사용자 계정 목록 조회');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 조회 권한 체크 (S-ADMIN, ADMIN, EDITOR, VIEWER) — 라우터의 roleGuard.userAccountRead 와 같은 기준
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
+    if (!hasUserAccountReadPermission(adminRole)) {
       return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
     }
 
@@ -90,17 +90,17 @@ export const getUserAccountList = async (req: Request<{}, {}, {}, UserAccountLis
 };
 
 /**
- * 사용자 계정 상세 조회 (일반 Admin도 접근 가능)
+ * 사용자 계정 상세 조회 (모든 관리자 역할)
  * API: GET /api/admin/user-accounts/:userId
  * 매핑: ADMIN_API_MAPPING[`GET ${API_URLS.ADMIN.USER_ACCOUNT.DETAIL}`]
  */
 export const getUserAccountDetail = async (req: Request<UserAccountDetailParams>, res: Response) => {
   try {
-    logApiCall('GET', API_URLS.ADMIN.USER_ACCOUNT.DETAIL, ADMIN_API_MAPPING as any, '사용자 계정 상세 조회 (일반 Admin도 접근 가능)');
+    logApiCall('GET', API_URLS.ADMIN.USER_ACCOUNT.DETAIL, ADMIN_API_MAPPING as any, '사용자 계정 상세 조회');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 조회 권한 체크 (S-ADMIN, ADMIN, EDITOR, VIEWER) — 라우터의 roleGuard.userAccountRead 와 같은 기준
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
+    if (!hasUserAccountReadPermission(adminRole)) {
       return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
     }
 
@@ -141,18 +141,19 @@ export const getUserAccountDetail = async (req: Request<UserAccountDetailParams>
 };
 
 /**
- * 사용자 계정 생성 (일반 Admin도 접근 가능)
+ * 사용자 계정 생성 (S-ADMIN, ADMIN)
  * API: POST /api/admin/user-accounts
  * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.USER_ACCOUNT.CREATE}`]
  */
 export const createUserAccount = async (req: Request<{}, {}, UserAccountCreateReq>, res: Response) => {
   try {
-    logApiCall('POST', API_URLS.ADMIN.USER_ACCOUNT.CREATE, ADMIN_API_MAPPING as any, '사용자 계정 생성 (일반 Admin도 접근 가능)');
+    logApiCall('POST', API_URLS.ADMIN.USER_ACCOUNT.CREATE, ADMIN_API_MAPPING as any, '사용자 계정 생성');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 편집 권한 체크 (S-ADMIN, ADMIN) — 라우터의 roleGuard.userAccountEdit 와 같은 기준
+    // 다른 사용자의 계정·비밀번호를 바꾸는 작업이라 조회 전용 역할(EDITOR, VIEWER)은 막는다
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
-      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    if (!hasUserAccountEditPermission(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, '사용자 계정 편집 권한이 필요합니다.');
     }
 
     const userData = req.body;
@@ -187,18 +188,19 @@ export const createUserAccount = async (req: Request<{}, {}, UserAccountCreateRe
 };
 
 /**
- * 사용자 계정 수정 (일반 Admin도 접근 가능)
+ * 사용자 계정 수정 (S-ADMIN, ADMIN)
  * API: PUT /api/admin/user-accounts/:userId
  * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.USER_ACCOUNT.UPDATE}`]
  */
 export const updateUserAccount = async (req: Request<UserAccountUpdateParams, {}, UserAccountUpdateReq>, res: Response) => {
   try {
-    logApiCall('PUT', API_URLS.ADMIN.USER_ACCOUNT.UPDATE, ADMIN_API_MAPPING as any, '사용자 계정 수정 (일반 Admin도 접근 가능)');
+    logApiCall('PUT', API_URLS.ADMIN.USER_ACCOUNT.UPDATE, ADMIN_API_MAPPING as any, '사용자 계정 수정');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 편집 권한 체크 (S-ADMIN, ADMIN) — 라우터의 roleGuard.userAccountEdit 와 같은 기준
+    // 다른 사용자의 계정·비밀번호를 바꾸는 작업이라 조회 전용 역할(EDITOR, VIEWER)은 막는다
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
-      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    if (!hasUserAccountEditPermission(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, '사용자 계정 편집 권한이 필요합니다.');
     }
 
 
@@ -235,18 +237,19 @@ export const updateUserAccount = async (req: Request<UserAccountUpdateParams, {}
 };
 
 /**
- * 사용자 계정 삭제 (일반 Admin도 접근 가능)
+ * 사용자 계정 삭제 (S-ADMIN, ADMIN)
  * API: DELETE /api/admin/user-accounts/:userId
  * 매핑: ADMIN_API_MAPPING[`DELETE ${API_URLS.ADMIN.USER_ACCOUNT.DELETE}`]
  */
 export const deleteUserAccount = async (req: Request<UserAccountDeleteParams>, res: Response) => {
   try {
-    logApiCall('DELETE', API_URLS.ADMIN.USER_ACCOUNT.DELETE, ADMIN_API_MAPPING as any, '사용자 계정 삭제 (일반 Admin도 접근 가능)');
+    logApiCall('DELETE', API_URLS.ADMIN.USER_ACCOUNT.DELETE, ADMIN_API_MAPPING as any, '사용자 계정 삭제');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 편집 권한 체크 (S-ADMIN, ADMIN) — 라우터의 roleGuard.userAccountEdit 와 같은 기준
+    // 다른 사용자의 계정·비밀번호를 바꾸는 작업이라 조회 전용 역할(EDITOR, VIEWER)은 막는다
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
-      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    if (!hasUserAccountEditPermission(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, '사용자 계정 편집 권한이 필요합니다.');
     }
 
     const { userId } = req.params;
@@ -281,18 +284,19 @@ export const deleteUserAccount = async (req: Request<UserAccountDeleteParams>, r
 
 
 /**
- * 사용자 계정 목록 삭제 (일반 Admin도 접근 가능)
+ * 사용자 계정 목록 삭제 (S-ADMIN, ADMIN)
  * API: POST /api/admin/accounts/user/delete
  * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE}`] 
  */
 export const deleteUserAccountList = async (req: Request<{}, {}, UserAccountListDeleteReq>, res: Response) => {
   try {
-    logApiCall('POST', API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE, ADMIN_API_MAPPING as any, '사용자 계정 목록 삭제 (일반 Admin도 접근 가능)');
+    logApiCall('POST', API_URLS.ADMIN.USER_ACCOUNT.LIST_DELETE, ADMIN_API_MAPPING as any, '사용자 계정 목록 삭제');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 편집 권한 체크 (S-ADMIN, ADMIN) — 라우터의 roleGuard.userAccountEdit 와 같은 기준
+    // 다른 사용자의 계정·비밀번호를 바꾸는 작업이라 조회 전용 역할(EDITOR, VIEWER)은 막는다
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
-      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    if (!hasUserAccountEditPermission(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, '사용자 계정 편집 권한이 필요합니다.');
     }
 
     const { userIds } = req.body;
@@ -328,18 +332,19 @@ export const deleteUserAccountList = async (req: Request<{}, {}, UserAccountList
 
 
 /**
- * 사용자 계정 비밀번호 변경 (일반 Admin도 접근 가능)
+ * 사용자 계정 비밀번호 변경 (S-ADMIN, ADMIN)
  * API: PUT /api/admin/user-accounts/:userId/password
  * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.USER_ACCOUNT.PASSWORD_CHANGE}`]
  */
 export const changeUserPassword = async (req: Request<UserAccountPasswordChangeParams, {}, UserAccountPasswordChangeReq>, res: Response) => {
   try {
-    logApiCall('PUT', API_URLS.ADMIN.USER_ACCOUNT.PASSWORD_CHANGE, ADMIN_API_MAPPING as any, '사용자 계정 비밀번호 변경 (일반 Admin도 접근 가능)');
+    logApiCall('PUT', API_URLS.ADMIN.USER_ACCOUNT.PASSWORD_CHANGE, ADMIN_API_MAPPING as any, '사용자 계정 비밀번호 변경');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 편집 권한 체크 (S-ADMIN, ADMIN) — 라우터의 roleGuard.userAccountEdit 와 같은 기준
+    // 다른 사용자의 계정·비밀번호를 바꾸는 작업이라 조회 전용 역할(EDITOR, VIEWER)은 막는다
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
-      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    if (!hasUserAccountEditPermission(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, '사용자 계정 편집 권한이 필요합니다.');
     }
 
     const { userId } = req.params;
@@ -378,18 +383,19 @@ export const changeUserPassword = async (req: Request<UserAccountPasswordChangeP
 };
 
 /**
- * 사용자 계정 상태 업데이트 (일반 Admin도 접근 가능)
+ * 사용자 계정 상태 업데이트 (S-ADMIN, ADMIN)
  * API: PUT /api/admin/user-accounts/:userId/status
  * 매핑: ADMIN_API_MAPPING[`PUT ${API_URLS.ADMIN.USER_ACCOUNT.STATUS_UPDATE}`]
  */
 export const updateUserStatus = async (req: Request<UserAccountStatusUpdateParams, {}, UserAccountStatusUpdateReq>, res: Response) => {
   try {
-    logApiCall('PUT', API_URLS.ADMIN.USER_ACCOUNT.STATUS_UPDATE, ADMIN_API_MAPPING as any, '사용자 계정 상태 업데이트 (일반 Admin도 접근 가능)');
+    logApiCall('PUT', API_URLS.ADMIN.USER_ACCOUNT.STATUS_UPDATE, ADMIN_API_MAPPING as any, '사용자 계정 상태 업데이트');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 편집 권한 체크 (S-ADMIN, ADMIN) — 라우터의 roleGuard.userAccountEdit 와 같은 기준
+    // 다른 사용자의 계정·비밀번호를 바꾸는 작업이라 조회 전용 역할(EDITOR, VIEWER)은 막는다
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
-      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    if (!hasUserAccountEditPermission(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, '사용자 계정 편집 권한이 필요합니다.');
     }
 
     const { userId } = req.params;
@@ -428,18 +434,19 @@ export const updateUserStatus = async (req: Request<UserAccountStatusUpdateParam
 };
 
 /**
- * 사용자 계정 이메일 중복 체크 (일반 Admin도 접근 가능)
+ * 사용자 계정 이메일 중복 체크 (S-ADMIN, ADMIN)
  * API: POST /api/admin/user-accounts/email/check
  * 매핑: ADMIN_API_MAPPING[`POST ${API_URLS.ADMIN.USER_ACCOUNT.CHECK_EMAIL}`]
  */
 export const checkUserEmail = async (req: Request<{}, {}, UserAccountCheckEmailReq>, res: Response) => {
   try {
-    logApiCall('POST', API_URLS.ADMIN.USER_ACCOUNT.CHECK_EMAIL, ADMIN_API_MAPPING as any, '사용자 계정 이메일 중복 체크 (일반 Admin도 접근 가능)');
+    logApiCall('POST', API_URLS.ADMIN.USER_ACCOUNT.CHECK_EMAIL, ADMIN_API_MAPPING as any, '사용자 계정 이메일 중복 체크');
 
-    // Admin 권한 체크 (일반 Admin도 접근 가능)
+    // 편집 권한 체크 (S-ADMIN, ADMIN) — 라우터의 roleGuard.userAccountEdit 와 같은 기준
+    // 다른 사용자의 계정·비밀번호를 바꾸는 작업이라 조회 전용 역할(EDITOR, VIEWER)은 막는다
     const adminRole = getAdminRole(req);
-    if (!isAdmin(adminRole)) {
-      return sendError(res, ErrorCode.FORBIDDEN, 'Admin 권한이 필요합니다.');
+    if (!hasUserAccountEditPermission(adminRole)) {
+      return sendError(res, ErrorCode.FORBIDDEN, '사용자 계정 편집 권한이 필요합니다.');
     }
 
     const emailData = req.body;
